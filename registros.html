@@ -1,0 +1,213 @@
+<!-- registros.html (Lista de Usuários) -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>M - Gerenciar Usuários</title>
+  <!-- Fonte básica -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* BODY: gradiente de fundo, cor padrão #00f0ff para textos */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background: linear-gradient(120deg, #000, #001f1f 50%, #000);
+      color: #00f0ff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER: estilo semelhante ao das outras páginas */
+    header {
+      background: linear-gradient(90deg, #111, #333);
+      border-bottom: 1px solid #00f0ff;
+      padding: 1.5rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px #00f0ff;
+    }
+
+    /* Título do header em amarelo (mesmo estilo neon) */
+    header h1 {
+      font-size: 1.6rem;
+      color: #ff0; /* Letra amarela */
+      text-align: center;
+      text-shadow: 0 0 4px #ff0;
+      animation: neonText 1.5s ease-in-out infinite alternate;
+      margin: 0;
+    }
+
+    /* Ícone para voltar ao index (seta) no canto esquerdo */
+    .btn-voltar-index {
+      position: absolute;
+      top: 50%;
+      left: 2rem;
+      transform: translateY(-50%);
+      background-color: #ff0080; /* Rosa */
+      color: #ff0; /* Amarelo */
+      border: none;
+      border-radius: 32px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-voltar-index:hover {
+      background-color: #ff4da6;
+      box-shadow: 0 0 8px #ff4da6;
+      transform: translateY(-50%) scale(1.05);
+    }
+
+    /* MAIN: espaço para listagem de usuários */
+    main {
+      flex: 1;
+      font-size: 1.25rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Título principal da página (Gerenciar Usuários) */
+    .page-title {
+      font-size: 1.8rem;
+      margin-bottom: 2rem;
+      text-shadow: 0 0 4px #00f0ff;
+      animation: neonText 1.5s ease-in-out infinite alternate;
+      color: #00f0ff;
+      text-align: center;
+    }
+
+    /* Container com a lista dos usuários */
+    .users-container {
+      width: 100%;
+    }
+
+    /* Card de cada usuário */
+    .user-item {
+      background-color: rgba(15, 15, 15, 0.8);
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 8px #00f0ff33;
+    }
+    .user-item h2 {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+      color: #00f0ff;
+      text-shadow: 0 0 3px #00f0ff;
+    }
+    .user-item p {
+      margin-bottom: 1rem;
+      color: #c5f6f6;
+      font-size: 1rem;
+    }
+
+    /* Form de deleção */
+    .delete-form {
+      display: inline;
+    }
+
+    .delete-btn {
+      background-color: #ff0080;
+      color: #ff0;
+      border: none;
+      border-radius: 32px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s, box-shadow 0.2s;
+    }
+    .delete-btn:hover {
+      background-color: #ff4da6;
+      box-shadow: 0 0 8px #ff4da6;
+    }
+
+    /* FOOTER */
+    footer {
+      background: linear-gradient(90deg, #111, #333);
+      border-top: 1px solid #00f0ff;
+      text-align: center;
+      padding: 1rem;
+      box-shadow: 0 0 10px #00f0ff;
+    }
+    footer p {
+      font-size: 1rem;
+      color: #00f0ff;
+    }
+
+    /* Animação neon */
+    @keyframes neonText {
+      0% {
+        text-shadow: 0 0 4px #00f0ff;
+      }
+      100% {
+        text-shadow: 0 0 10px #00f0ff;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Botão "Voltar" para a Página Inicial -->
+    <a href="{{ url_for('index') }}" class="btn-voltar-index" title="Voltar para Página Inicial">
+      &#x2B05; Voltar
+    </a>
+    <h1>Gerenciar Usuários</h1>
+  </header>
+
+  <main>
+    <h2 class="page-title">Usuários Registrados</h2>
+    <div class="users-container">
+      {% if usuarios and usuarios|length > 0 %}
+        {% for user in usuarios %}
+          <div class="user-item">
+            <h2>{{ user["nome"] }}</h2>
+            <p>Role: {{ user["role"] }}</p>
+            <form
+              action="{{ url_for('delete_user', user_id=user['_id_str']) }}"
+              method="POST"
+              class="delete-form"
+              onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');"
+            >
+              <button type="submit" class="delete-btn">Excluir</button>
+            </form>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>Nenhum usuário registrado.</p>
+      {% endif %}
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M - MVP</p>
+  </footer>
+</body>
+</html>

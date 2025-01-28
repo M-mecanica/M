@@ -1,0 +1,233 @@
+<!-- index.html (Página Inicial) -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>M - Página Inicial</title>
+  <!-- Fonte básica -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* BODY: fundo gradiente, texto base #00f0ff */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background: linear-gradient(120deg, #000, #001f1f 50%, #000);
+      color: #00f0ff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER: estilo coerente com as outras páginas */
+    header {
+      background: linear-gradient(90deg, #111, #333);
+      border-bottom: 1px solid #00f0ff;
+      padding: 1.5rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px #00f0ff;
+    }
+
+    /* "Problemas Não Resolvidos" - botão no canto esquerdo */
+    .btn-nao-resolvidos {
+      position: absolute;
+      top: 50%;
+      left: 2rem;
+      transform: translateY(-50%);
+      background-color: #00f0ff;
+      color: #000;
+      border: none;
+      border-radius: 32px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-nao-resolvidos:hover {
+      background-color: #0affff;
+      box-shadow: 0 0 8px #0affff;
+      transform: translateY(-50%) scale(1.05);
+    }
+
+    /* Ações do header no canto direito (logout, novo problema, etc.) */
+    .header-actions {
+      position: absolute;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .header-actions span {
+      /* texto do usuário */
+      color: #ff0; /* Neon amarela, semelhante ao "Detalhes e Solução" */
+      text-shadow: 0 0 4px #ff0;
+      font-size: 1rem;
+    }
+    .header-actions a {
+      background-color: #00f0ff;
+      color: #000;
+      border: none;
+      border-radius: 32px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-actions a:hover {
+      background-color: #0affff;
+      box-shadow: 0 0 8px #0affff;
+      transform: scale(1.05);
+    }
+
+    /* MAIN: fonte maior */
+    main {
+      flex: 1;
+      font-size: 1.25rem;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* Logo grande "M" com neon */
+    .logo-grande {
+      font-size: 10rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      color: #00f0ff;
+      text-shadow: 0 0 4px #00f0ff;
+      animation: neonText 1.5s ease-in-out infinite alternate;
+    }
+
+    /* Container do formulário de pesquisa */
+    .search-container {
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+    form {
+      display: flex;
+      width: 100%;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 1rem;
+      border: 2px solid #444;
+      border-radius: 32px;
+      background-color: #ccc;
+      font-size: 1rem;
+      color: #000;
+      text-align: center;
+      outline: none;
+    }
+    input[type="text"]::placeholder {
+      color: #666;
+    }
+
+    /* Texto de boas-vindas com efeito neon */
+    .texto-neon {
+      color: #00f0ff;
+      text-shadow: 0 0 4px #00f0ff;
+      animation: neonText 1.5s ease-in-out infinite alternate;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* FOOTER coerente com o design */
+    footer {
+      background: linear-gradient(90deg, #111, #333);
+      border-top: 1px solid #00f0ff;
+      text-align: center;
+      padding: 1rem;
+      box-shadow: 0 0 10px #00f0ff;
+    }
+    footer p {
+      font-size: 1rem;
+      color: #00f0ff;
+    }
+
+    /* Animação neon */
+    @keyframes neonText {
+      0% {
+        text-shadow: 0 0 4px #00f0ff;
+      }
+      100% {
+        text-shadow: 0 0 10px #00f0ff;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Botão de "Problemas Não Resolvidos" (na esquerda) -->
+    <a href="{{ url_for('unresolved') }}" class="btn-nao-resolvidos" title="Problemas Não Resolvidos">
+      Problemas Não Resolvidos
+    </a>
+
+    <!-- Ações no header (no canto direito) -->
+    <div class="header-actions">
+      <span>Olá, {{ session.nome }}!</span>
+      <a href="{{ url_for('logout') }}">Logout</a>
+      <a href="{{ url_for('add_problem') }}">Novo Problema</a>
+
+      <!-- Se o usuário for solucionador, exibe botão para gerenciar usuários -->
+      {% if session.role == 'solucionador' %}
+      <a href="{{ url_for('listar_usuarios') }}">Gerenciar Usuários</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <main>
+    <!-- Logo Grande com Neon -->
+    <div class="logo-grande">M</div>
+
+    <div class="search-container">
+      <form action="{{ url_for('search') }}" method="GET">
+        <input
+          type="text"
+          name="q"
+          placeholder="Pesquise um problema mecânico resolvido"
+        />
+      </form>
+    </div>
+
+    <!-- Texto de boas-vindas com efeito Neon -->
+    <p class="texto-neon">
+      Bem-vindo ao MVP do M! Aqui você pode pesquisar problemas resolvidos ou cadastrar novos.
+    </p>
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M - MVP</p>
+  </footer>
+</body>
+</html>

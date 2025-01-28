@@ -1,0 +1,432 @@
+<!-- resultados.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>M - Resultados da Pesquisa</title>
+  <!-- Fonte básica -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* BODY: gradiente de fundo, cor padrão #00f0ff para textos */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background: linear-gradient(120deg, #000, #001f1f 50%, #000);
+      color: #00f0ff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER: estilo semelhante ao do solucao.html */
+    header {
+      background: linear-gradient(90deg, #111, #333);
+      border-bottom: 1px solid #00f0ff;
+      padding: 1.5rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px #00f0ff;
+    }
+
+    /* Título do header em amarelo (mesmo estilo) */
+    header h1 {
+      font-size: 1.6rem;
+      color: #ff0;
+      text-align: center;
+      text-shadow: 0 0 4px #ff0;
+      animation: neonText 1.5s ease-in-out infinite alternate;
+      margin: 0;
+    }
+
+    /* Ícone para voltar à página inicial (no canto esquerdo) */
+    .btn-voltar-inicio {
+      position: absolute;
+      top: 50%;
+      left: 2rem;
+      transform: translateY(-50%);
+      background-color: #ff0080;
+      color: #ff0;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1rem;
+      font-size: 1.4rem; /* Deixa o ícone mais destacado */
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-voltar-inicio:hover {
+      background-color: #ff4da6;
+      box-shadow: 0 0 8px #ff4da6;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    /* MAIN: fonte e layout originais */
+    main {
+      flex: 1;
+      font-size: 1.25rem;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Título principal (Resultados da Pesquisa) */
+    h1 {
+      font-size: 1.6em; /* ~2rem final */
+      margin-bottom: 1.5rem;
+      text-align: center;
+      text-shadow: 0 0 4px #00f0ff;
+      animation: neonText 1.5s ease-in-out infinite alternate;
+      color: #00f0ff; /* Cor predominante */
+    }
+
+    /* FORM de pesquisa */
+    form.search-container {
+      display: flex;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+    form.search-container input[type="text"] {
+      flex: 1;
+      padding: 1rem;
+      border: 2px solid #444;
+      border-radius: 32px;
+      background-color: #cccccc;
+      font-size: 1rem;
+      color: #000;
+      text-align: center;
+      outline: none;
+    }
+    form.search-container input[type="text"]::placeholder {
+      color: #666;
+    }
+
+    /* Container que abriga os resultados */
+    .result-container {
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    /* Card de cada problema (com animação) */
+    .problem-item {
+      background-color: rgba(15, 15, 15, 0.8); /* fundo levemente transparente */
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      animation: fadeInUp 0.5s ease forwards;
+      opacity: 0;
+      transform: translateY(20px);
+      box-shadow: 0 0 8px #00f0ff33;
+      position: relative;
+    }
+    .problem-item:nth-child(odd) {
+      animation-delay: 0.1s;
+    }
+    .problem-item:nth-child(even) {
+      animation-delay: 0.2s;
+    }
+
+    /* Título e descrição no mesmo estilo de antes */
+    .problem-item h2 {
+      font-size: 1.6em; /* ~2rem final */
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 3px #00f0ff;
+      color: #00f0ff;
+    }
+    .problem-item p {
+      color: #c5f6f6;
+      font-size: 1rem;
+    }
+
+    /* Inputs inline (modo edição) */
+    .inline-input,
+    .inline-textarea {
+      display: none; /* Eles só aparecem no modo edição */
+      width: 100%;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      font-family: 'Roboto', sans-serif;
+      border-radius: 8px;
+      border: 1px solid #444;
+      padding: 0.5rem;
+      background-color: #ffffff;
+      color: #000;
+    }
+    .inline-textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+
+    .no-results {
+      text-align: center;
+      margin-top: 2rem;
+      color: #ccc;
+      font-size: 1.2rem;
+    }
+
+    /* Botões de ação (editar/deletar) */
+    .action-btns {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .action-btn {
+      background-color: #00f0ff;
+      color: #000;
+      border: none;
+      border-radius: 32px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      display: inline-block;
+    }
+    .action-btn:hover {
+      background-color: #0affff;
+      box-shadow: 0 0 8px #0affff;
+    }
+    .action-delete-form {
+      display: inline;
+    }
+
+    /* Botões Salvar/Cancelar (invisíveis fora do modo edição) */
+    .save-cancel-btns {
+      display: none;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Botão "Ver Solução" */
+    .ver-solucao-btn {
+      background-color: #00f0ff;
+      color: #000;
+      border: none;
+      border-radius: 32px;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      margin-top: 1rem;
+      display: inline-block;
+    }
+    .ver-solucao-btn:hover {
+      background-color: #0affff;
+      box-shadow: 0 0 8px #0affff;
+    }
+
+    /* ANIMAÇÕES */
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes neonText {
+      from { text-shadow: 0 0 4px #00f0ff; }
+      to   { text-shadow: 0 0 10px #00f0ff; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Ícone para voltar à página inicial -->
+    <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">
+      &#x2B05; <!-- Unicode left arrow -->
+    </a>
+    <h1>Resultados da Pesquisa</h1>
+  </header>
+
+  <main>
+    <!-- Campo de pesquisa para refinar ou refazer a busca -->
+    <form action="{{ url_for('search') }}" method="GET" class="search-container">
+      <input
+        type="text"
+        name="q"
+        placeholder="Pesquise um problema mecânico resolvido"
+        value="{{ termo_busca if termo_busca else '' }}"
+      />
+    </form>
+
+    <div class="result-container">
+      {% if problemas and problemas|length > 0 %}
+        {% for problema in problemas %}
+        <div class="problem-item" id="problem-{{ problema['_id_str'] }}">
+          <!-- Modo leitura -->
+          <h2 class="problem-title">{{ problema["titulo"] }}</h2>
+          <p class="problem-desc">{{ problema["descricao"] }}</p>
+
+          <!-- Modo edição (inline, inicialmente oculto) -->
+          <input
+            type="text"
+            name="titulo"
+            class="inline-input"
+            value="{{ problema['titulo'] }}"
+          />
+          <textarea
+            name="descricao"
+            class="inline-textarea"
+          >{{ problema["descricao"] }}</textarea>
+
+          <!-- Se o problema está resolvido, exibe botão para ver solução -->
+          {% if problema["resolvido"] %}
+            <a
+              href="{{ url_for('exibir_solucao', problem_id=problema['_id_str']) }}"
+              class="ver-solucao-btn"
+            >
+              Ver Solução
+            </a>
+          {% endif %}
+
+          <!-- Se o usuário tiver papel "solucionador", exibe botões de editar e deletar -->
+          {% if session.role == 'solucionador' %}
+            <div class="action-btns">
+              <!-- Botão para ativar edição inline -->
+              <button
+                type="button"
+                class="action-btn edit-btn"
+              >
+                Editar
+              </button>
+
+              <!-- Form de deleção -->
+              <form
+                action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}"
+                method="POST"
+                class="action-delete-form"
+                onsubmit="return confirm('Tem certeza que deseja deletar este problema?');"
+              >
+                <button type="submit" class="action-btn">Deletar</button>
+              </form>
+            </div>
+
+            <!-- Form para enviar alterações (hidden, mas usado via JS) -->
+            <form
+              action="{{ url_for('inline_edit_problem', problem_id=problema['_id_str']) }}"
+              method="POST"
+              class="inline-edit-form"
+            >
+              <input type="hidden" name="titulo" />
+              <input type="hidden" name="descricao" />
+            </form>
+
+            <!-- Botões de Salvar/Cancelar (aparecem no modo edição) -->
+            <div class="save-cancel-btns">
+              <button type="button" class="action-btn save-btn">Salvar</button>
+              <button type="button" class="action-btn cancel-btn">Cancelar</button>
+            </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="no-results">Nenhum resultado encontrado para "{{ termo_busca }}".</p>
+      {% endif %}
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M - MVP</p>
+  </footer>
+
+  <!-- JS Inline Edit, só se user for "solucionador" -->
+  {% if session.role == 'solucionador' %}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const problemItems = document.querySelectorAll('.problem-item');
+
+      problemItems.forEach(item => {
+        const editBtn = item.querySelector('.edit-btn');
+        const saveBtn = item.querySelector('.save-btn');
+        const cancelBtn = item.querySelector('.cancel-btn');
+
+        const titleH2 = item.querySelector('h2.problem-title');
+        const descP = item.querySelector('p.problem-desc');
+
+        const titleInput = item.querySelector('.inline-input');
+        const descTextarea = item.querySelector('.inline-textarea');
+
+        const saveCancelBtns = item.querySelector('.save-cancel-btns');
+        const deleteForm = item.querySelector('.action-delete-form');
+        const inlineEditForm = item.querySelector('.inline-edit-form');
+        if (!editBtn) return;
+
+        const hiddenTitulo = inlineEditForm.querySelector('input[name="titulo"]');
+        const hiddenDesc = inlineEditForm.querySelector('input[name="descricao"]');
+
+        // Ativar modo edição
+        editBtn.addEventListener('click', () => {
+          // Esconde os elementos de texto (h2, p)
+          titleH2.style.display = 'none';
+          descP.style.display = 'none';
+
+          // Mostra inputs para edição
+          titleInput.style.display = 'block';
+          descTextarea.style.display = 'block';
+
+          // Mostra botões de Salvar/Cancelar
+          saveCancelBtns.style.display = 'flex';
+
+          // Esconde o botão Editar e o formulário de Deleção
+          editBtn.style.display = 'none';
+          deleteForm.style.display = 'none';
+        });
+
+        // Salvar
+        saveBtn.addEventListener('click', () => {
+          // Copia valores para os inputs hidden
+          hiddenTitulo.value = titleInput.value;
+          hiddenDesc.value = descTextarea.value;
+
+          // Submete o formulário
+          inlineEditForm.submit();
+        });
+
+        // Cancelar
+        cancelBtn.addEventListener('click', () => {
+          // Reverte campos
+          titleInput.value = titleH2.textContent.trim();
+          descTextarea.value = descP.textContent.trim();
+
+          // Esconde inputs e volta o modo leitura
+          titleInput.style.display = 'none';
+          descTextarea.style.display = 'none';
+          titleH2.style.display = 'block';
+          descP.style.display = 'block';
+
+          // Esconde botões de Salvar/Cancelar, volta Editar/Deletar
+          saveCancelBtns.style.display = 'none';
+          editBtn.style.display = 'inline-block';
+          deleteForm.style.display = 'inline';
+        });
+      });
+    });
+  </script>
+  {% endif %}
+</body>
+</html>

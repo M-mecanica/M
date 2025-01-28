@@ -1,0 +1,488 @@
+<!-- solucao.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>M - Solução do Problema</title>
+  <!-- Fonte básica -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* BODY: mantém o gradiente padrão no restante da página */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background: linear-gradient(120deg, #000, #001f1f 50%, #000);
+      color: #00f0ff; /* Cor predominante no restante */
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER: cor de fundo e textos diferenciados */
+    header {
+      background: linear-gradient(90deg, #111, #333);
+      border-bottom: 1px solid #00f0ff;
+      padding: 1.5rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px #00f0ff;
+    }
+
+    /* Título do header em AMARELO */
+    header h1 {
+      font-size: 1.6rem;
+      color: #ff0; /* Letra amarela */
+      text-align: center;
+      text-shadow: 0 0 4px #ff0;
+      animation: neonText 1.5s ease-in-out infinite alternate;
+      margin: 0;
+    }
+
+    /* Ícone para voltar, estilo de botão */
+    .btn-voltar-resultados {
+      position: absolute;
+      top: 50%;
+      left: 2rem;
+      transform: translateY(-50%);
+      background-color: #ff0080; /* Fundo diferente do restante */
+      color: #ff0; /* Letra amarela */
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1rem;
+      font-size: 1.4rem; /* Maior para deixar o ícone mais visível */
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-voltar-resultados:hover {
+      background-color: #ff4da6;
+      box-shadow: 0 0 8px #ff4da6;
+      transform: translateY(-50%) scale(1.1); /* Leve zoom ao passar o mouse */
+    }
+
+    /* MAIN: fonte maior */
+    main {
+      flex: 1;
+      font-size: 1.25rem;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    h2 {
+      font-size: 1.6em; /* ~2rem final */
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 3px #00f0ff;
+      color: #00f0ff;
+    }
+    p.description {
+      margin-bottom: 2rem;
+      color: #c5f6f6;
+    }
+
+    /* Botão principal para exibir os passos da solução */
+    .show-solution-btn {
+      background-color: #00f0ff;
+      color: #000;
+      border: none;
+      border-radius: 32px;
+      padding: 0.8rem 1.5rem;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      margin: 1rem 0;
+      display: inline-block;
+    }
+    .show-solution-btn:hover {
+      background-color: #0affff;
+      box-shadow: 0 0 8px #0affff;
+    }
+
+    /* Container da solução */
+    .solution-container {
+      width: 100%;
+      margin-top: 1rem;
+      border: 1px dashed #333;
+      border-radius: 8px;
+      padding: 1rem;
+      background-color: rgba(10, 10, 10, 0.4);
+      position: relative;
+      box-shadow: 0 0 12px #00f0ff44 inset;
+    }
+    .solution-container h3 {
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 4px #00f0ff;
+      font-size: 1.4em;
+      color: #00f0ff;
+    }
+
+    /* Área dos passos (typewriter) */
+    .steps-output {
+      margin-top: 1rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      font-family: 'Courier New', monospace;
+      font-size: 1em;
+      transition: all 0.3s linear;
+      margin-bottom: 3rem;
+      min-height: 50px;
+    }
+
+    .next-step-container {
+      position: absolute;
+      bottom: 0.5rem;
+      right: 0.5rem;
+    }
+    .next-step-btn {
+      background-color: #00f0ff;
+      color: #000;
+      border: none;
+      border-radius: 32px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      display: none;
+    }
+    .next-step-btn:hover {
+      background-color: #0affff;
+      box-shadow: 0 0 8px #0affff;
+    }
+
+    /* Blocos de destaque dos passos */
+    .step-container {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-left: 4px solid #ffa500;
+      background-color: rgba(20, 20, 20, 0.3);
+      box-shadow: 0 0 6px #ffa50044 inset;
+    }
+    .step-title-block {
+      font-size: 1.6em;
+      color: #ffa500;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      text-shadow: 0 0 3px #ffa500;
+    }
+    .step-description-block {
+      font-size: 1.4em;
+      color: #0affff;
+      margin-bottom: 1rem;
+      white-space: pre-wrap;
+    }
+
+    .mini-steps-block {
+      margin-left: 1rem;
+      margin-top: 1rem;
+      border-left: 3px dotted #ffa500;
+      padding-left: 1rem;
+    }
+    .mini-step-title {
+      font-size: 1.4em;
+      color: #ffe600;
+      font-weight: bold;
+      text-shadow: 0 0 2px #ffe600;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+    .mini-step-description {
+      font-size: 1.2em;
+      color: #add8e6;
+      white-space: pre-wrap;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .mini-steps-btn {
+      background-color: #00f0ff;
+      color: #000;
+      border: none;
+      border-radius: 32px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      margin: 0.5rem 0;
+      display: inline-block;
+    }
+    .mini-steps-btn:hover {
+      background-color: #0affff;
+      box-shadow: 0 0 8px #0affff;
+    }
+
+    /* Animações */
+    @keyframes neonText {
+      from { text-shadow: 0 0 4px #ff0; }
+      to   { text-shadow: 0 0 10px #ff0; }
+    }
+    .letter-construct {
+      display: inline-block;
+      opacity: 0;
+      transform: scale(0) rotate(-10deg);
+      animation: constructAnimation 0.5s forwards;
+    }
+    @keyframes constructAnimation {
+      0% {
+        opacity: 0;
+        transform: scale(0) rotate(-10deg);
+      }
+      50% {
+        opacity: 0.5;
+        transform: scale(1.2) rotate(0deg);
+      }
+      80% {
+        transform: scale(0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Detalhes e Solução</h1>
+    <!-- Ícone (seta) para voltar -->
+    <a href="{{ url_for('search') }}" class="btn-voltar-resultados" title="Voltar">
+      &#x2B05; <!-- Unicode left arrow -->
+    </a>
+  </header>
+
+  <main>
+    <h2>{{ problema["titulo"] }}</h2>
+    <p class="description">{{ problema["descricao"] }}</p>
+
+    <!--
+      Exibe o botão Editar Solução somente se o usuário logado tiver role = "solucionador".
+      Ao clicar, direciona para a rota edit_solution.
+    -->
+    {% if session["role"] == "solucionador" %}
+      <a href="{{ url_for('edit_solution', problem_id=problema['_id']) }}"
+         class="show-solution-btn"
+         style="background-color: #FFA500; margin-bottom: 2rem;">
+        Editar Solução
+      </a>
+    {% endif %}
+
+    <!-- Container dos passos da solução -->
+    <div class="solution-container" id="solutionContainer"
+         data-steps='{{ solucao.passos | tojson if solucao.passos else "[]" }}'>
+      <h3>Solução:</h3>
+
+      <button type="button"
+              class="show-solution-btn"
+              id="btnShowSolution">
+        Mostrar Passos
+      </button>
+
+      <div class="steps-output"></div>
+
+      <div class="next-step-container">
+        <button type="button" class="next-step-btn" id="btnNextStep">
+          Próximo Passo
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M - MVP</p>
+  </footer>
+
+  <script>
+    // Função de typewriter para animação de texto progressivo
+    function typeWriter(container, text, index, callback) {
+      if (index < text.length) {
+        const span = document.createElement('span');
+        span.classList.add('letter-construct');
+        span.textContent = text.charAt(index);
+
+        container.appendChild(span);
+
+        setTimeout(() => {
+          typeWriter(container, text, index + 1, callback);
+        }, 100);
+      } else {
+        if (callback) callback();
+      }
+    }
+
+    function createStepContainer() {
+      const stepDiv = document.createElement('div');
+      stepDiv.classList.add('step-container');
+      return stepDiv;
+    }
+
+    function revealStepTitle(stepDiv, stepNumber, title, onFinish) {
+      const titleBlock = document.createElement('div');
+      titleBlock.classList.add('step-title-block');
+      stepDiv.appendChild(titleBlock);
+
+      const text = `Passo ${stepNumber}: ${title}\n`;
+      typeWriter(titleBlock, text, 0, onFinish);
+    }
+
+    function revealStepDescription(stepDiv, description, onFinish) {
+      const descBlock = document.createElement('div');
+      descBlock.classList.add('step-description-block');
+      stepDiv.appendChild(descBlock);
+
+      typeWriter(descBlock, `${description}\n`, 0, onFinish);
+    }
+
+    // Cria a área para exibir "mini passos" (sub_passos)
+    function createMiniStepsArea(stepDiv, subPassos) {
+      const miniStepsWrapper = document.createElement('div');
+      miniStepsWrapper.classList.add('mini-steps-block');
+      stepDiv.appendChild(miniStepsWrapper);
+
+      let currentIndex = 0;
+      let isVisible = false;
+
+      const showMiniBtn = document.createElement('button');
+      showMiniBtn.type = 'button';
+      showMiniBtn.classList.add('mini-steps-btn');
+      showMiniBtn.textContent = 'Mostrar 1º Mini Passo';
+
+      const hideMiniBtn = document.createElement('button');
+      hideMiniBtn.type = 'button';
+      hideMiniBtn.classList.add('mini-steps-btn');
+      hideMiniBtn.textContent = 'Ocultar Minipassos';
+      hideMiniBtn.style.display = 'none';
+
+      const miniStepsOutput = document.createElement('div');
+      miniStepsWrapper.appendChild(miniStepsOutput);
+
+      function revealMiniStep(index) {
+        if (index >= subPassos.length) {
+          showMiniBtn.style.display = 'none';
+          hideMiniBtn.style.display = 'inline-block';
+          return;
+        }
+        const sub = subPassos[index];
+
+        const subTitle = document.createElement('div');
+        subTitle.classList.add('mini-step-title');
+        miniStepsOutput.appendChild(subTitle);
+
+        const titleText = `Mini Passo ${index + 1} - ${sub.titulo}\n`;
+        typeWriter(subTitle, titleText, 0, () => {
+          const subDesc = document.createElement('div');
+          subDesc.classList.add('mini-step-description');
+          miniStepsOutput.appendChild(subDesc);
+
+          typeWriter(subDesc, `${sub.descricao}\n`, 0, () => {
+            currentIndex++;
+            if (currentIndex < subPassos.length) {
+              showMiniBtn.textContent = `Mostrar Mini Passo ${currentIndex + 1}`;
+            } else {
+              showMiniBtn.style.display = 'none';
+              hideMiniBtn.style.display = 'inline-block';
+            }
+          });
+        });
+      }
+
+      showMiniBtn.addEventListener('click', () => {
+        if (!isVisible) {
+          isVisible = true;
+        }
+        revealMiniStep(currentIndex);
+      });
+
+      hideMiniBtn.addEventListener('click', () => {
+        miniStepsOutput.innerHTML = '';
+        currentIndex = 0;
+        isVisible = false;
+        showMiniBtn.style.display = 'inline-block';
+        showMiniBtn.textContent = 'Mostrar 1º Mini Passo';
+        hideMiniBtn.style.display = 'none';
+      });
+
+      miniStepsWrapper.appendChild(showMiniBtn);
+      miniStepsWrapper.appendChild(hideMiniBtn);
+    }
+
+    function revealStep(stepsOutput, stepNumber, stepData, onFinish) {
+      const stepDiv = createStepContainer();
+      stepsOutput.appendChild(stepDiv);
+
+      revealStepTitle(stepDiv, stepNumber, stepData.titulo, () => {
+        revealStepDescription(stepDiv, stepData.descricao, () => {
+          if (stepData.sub_passos && stepData.sub_passos.length > 0) {
+            createMiniStepsArea(stepDiv, stepData.sub_passos);
+          }
+          if (onFinish) onFinish();
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const solutionContainer = document.getElementById('solutionContainer');
+      const stepsData = JSON.parse(solutionContainer.dataset.steps || '[]');
+      const stepsOutput = solutionContainer.querySelector('.steps-output');
+      const btnShowSolution = document.getElementById('btnShowSolution');
+      const btnNextStep = document.getElementById('btnNextStep');
+
+      let currentStepIndex = 0;
+      let isSolutionActive = false;
+
+      function revealCurrentStep() {
+        if (currentStepIndex >= stepsData.length) {
+          btnNextStep.style.display = 'none';
+          return;
+        }
+        const stepData = stepsData[currentStepIndex];
+        const stepNumber = currentStepIndex + 1;
+
+        revealStep(stepsOutput, stepNumber, stepData, () => {
+          if (currentStepIndex < stepsData.length - 1) {
+            btnNextStep.style.display = 'inline-block';
+          } else {
+            btnNextStep.style.display = 'none';
+          }
+        });
+      }
+
+      btnShowSolution.addEventListener('click', () => {
+        if (isSolutionActive) return;
+        isSolutionActive = true;
+        btnShowSolution.style.display = 'none';
+
+        revealCurrentStep();
+      });
+
+      btnNextStep.addEventListener('click', () => {
+        btnNextStep.style.display = 'none';
+        currentStepIndex++;
+        revealCurrentStep();
+      });
+    });
+  </script>
+</body>
+</html>

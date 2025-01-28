@@ -1,0 +1,342 @@
+<!-- resolver.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>M - Resolver Problema</title>
+  <!-- Fonte básica -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* RESET BÁSICO */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* BODY: fundo gradiente, cor #00f0ff */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background: linear-gradient(120deg, #000, #001f1f 50%, #000);
+      color: #00f0ff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER: estilo coerente com as outras páginas */
+    header {
+      background: linear-gradient(90deg, #111, #333);
+      border-bottom: 1px solid #00f0ff;
+      padding: 1.5rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center; /* Centraliza horizontalmente o conteúdo principal do header */
+      box-shadow: 0 0 10px #00f0ff;
+    }
+
+    /* Botão "Voltar" no canto esquerdo */
+    .btn-voltar-inicio {
+      position: absolute;
+      top: 50%;
+      left: 2rem;
+      transform: translateY(-50%);
+      background-color: #ff0080;
+      color: #ff0;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1rem;
+      font-size: 1.4rem; /* Deixa o ícone (seta) mais destacado */
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-voltar-inicio:hover {
+      background-color: #ff4da6;
+      box-shadow: 0 0 8px #ff4da6;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    /* TÍTULO centralizado no header, cor amarela */
+    header h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      text-shadow: 0 0 4px #ff0; /* Sombra amarela */
+      animation: neonText 1.5s ease-in-out infinite alternate;
+      color: #ff0; /* Texto em amarelo */
+      margin: 0; /* Remove espaçamento extra */
+    }
+
+    /* Animação neon para o título */
+    @keyframes neonText {
+      0% {
+        text-shadow: 0 0 4px #ff0;
+      }
+      100% {
+        text-shadow: 0 0 10px #ff0;
+      }
+    }
+
+    /* MAIN: fonte maior */
+    main {
+      flex: 1;
+      font-size: 1.25rem;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .container {
+      background-color: rgba(15, 15, 15, 0.8);
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 800px;
+      box-shadow: 0 0 8px #00f0ff33;
+    }
+
+    .container h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 3px #00f0ff;
+      color: #00f0ff;
+    }
+
+    .info-text {
+      font-size: 1rem;
+      color: #c5f6f6;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Estilos para os blocos de Passos/Sub-passos */
+    .step-block {
+      margin-bottom: 1.5rem;
+      border-left: 3px solid #00f0ff;
+      padding-left: 1rem;
+    }
+    .step-block h3 {
+      color: #0affff;
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    /* Botoes */
+    .btn {
+      background-color: #00f0ff;
+      color: #000;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s, box-shadow 0.2s;
+      margin-right: 0.5rem;
+    }
+    .btn:hover {
+      background-color: #0affff;
+      box-shadow: 0 0 8px #0affff;
+    }
+    .btn-remove {
+      background-color: #ff5b5b;
+      color: #fff;
+    }
+    .btn-remove:hover {
+      background-color: #ff7777;
+      box-shadow: 0 0 8px #ff7777;
+    }
+    .btn-finish {
+      background-color: #0f0;
+      color: #000;
+    }
+    .btn-finish:hover {
+      background-color: #5fff5f;
+      box-shadow: 0 0 8px #5fff5f;
+    }
+
+    /* FOOTER coerente com o design */
+    footer {
+      background: linear-gradient(90deg, #111, #333);
+      border-top: 1px solid #00f0ff;
+      text-align: center;
+      padding: 1rem;
+      box-shadow: 0 0 10px #00f0ff;
+    }
+    footer p {
+      font-size: 1rem;
+      color: #00f0ff;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Botão "Voltar" no canto esquerdo -->
+    <a href="{{ url_for('unresolved') }}" class="btn-voltar-inicio" title="Voltar aos Não Resolvidos">
+      &#x2B05;
+    </a>
+    <h1>Resolver Problema</h1>
+  </header>
+
+  <main>
+    <div class="container">
+      <h2>Criar/Detalhar a Solução</h2>
+      <p class="info-text">
+        Aqui você pode adicionar passos e sub-passos para a solução deste problema.
+        Ao finalizar, clique em <strong>Enviar Solução</strong> para marcar como resolvido.
+      </p>
+
+      <!-- FORM que envia o JSON com a solução -->
+      <form id="solutionForm" action="{{ url_for('resolver_problema', problem_id=problem_id) }}" method="POST">
+        <!-- Campo hidden que receberá o JSON final -->
+        <input type="hidden" name="solution_data" id="solution_data" value="">
+
+        <!-- Container onde vamos adicionar dinamicamente os passos -->
+        <div id="stepsContainer"></div>
+
+        <!-- Botão para adicionar passo -->
+        <button type="button" class="btn" id="btnAddStep">Adicionar Passo</button>
+
+        <!-- Botão de Enviar Solução -->
+        <button type="submit" class="btn btn-finish" id="btnSubmitSolution">Enviar Solução</button>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M - MVP</p>
+  </footer>
+
+  <script>
+    // Estrutura que manterá os passos e subpassos
+    let solutionData = {
+      passos: []
+    };
+
+    const stepsContainer = document.getElementById('stepsContainer');
+    const hiddenField = document.getElementById('solution_data');
+    const btnAddStep = document.getElementById('btnAddStep');
+    const form = document.getElementById('solutionForm');
+
+    // Função para renderizar toda a lista de passos e subpassos
+    function renderSteps() {
+      // Limpa a div antes de renderizar
+      stepsContainer.innerHTML = '';
+
+      solutionData.passos.forEach((step, stepIndex) => {
+        const stepBlock = document.createElement('div');
+        stepBlock.className = 'step-block';
+
+        // Título do passo
+        const stepTitle = document.createElement('h3');
+        stepTitle.textContent = `Passo ${stepIndex + 1}`;
+        stepBlock.appendChild(stepTitle);
+
+        // Textarea para descrição do passo
+        const stepDesc = document.createElement('textarea');
+        stepDesc.rows = 3;
+        stepDesc.style.width = '100%';
+        stepDesc.placeholder = 'Descreva este passo...';
+        stepDesc.value = step.descricao || '';
+        stepDesc.oninput = () => {
+          solutionData.passos[stepIndex].descricao = stepDesc.value;
+        };
+        stepBlock.appendChild(stepDesc);
+
+        // Botão para remover este passo
+        const btnRemoveStep = document.createElement('button');
+        btnRemoveStep.type = 'button';
+        btnRemoveStep.textContent = 'Remover Passo';
+        btnRemoveStep.className = 'btn btn-remove';
+        btnRemoveStep.style.marginTop = '0.5rem';
+        btnRemoveStep.onclick = () => {
+          solutionData.passos.splice(stepIndex, 1);
+          renderSteps();
+        };
+        stepBlock.appendChild(btnRemoveStep);
+
+        // Lista de subpassos
+        const subList = document.createElement('ul');
+        subList.style.listStyleType = 'none';
+        subList.style.marginTop = '1rem';
+        step.subpassos.forEach((sub, subIndex) => {
+          const subItem = document.createElement('li');
+          subItem.style.marginBottom = '0.5rem';
+
+          // Input para o subpasso
+          const subTextarea = document.createElement('textarea');
+          subTextarea.rows = 2;
+          subTextarea.style.width = '90%';
+          subTextarea.placeholder = 'Descreva o sub-passo...';
+          subTextarea.value = sub;
+          subTextarea.oninput = () => {
+            solutionData.passos[stepIndex].subpassos[subIndex] = subTextarea.value;
+          };
+
+          // Botão para remover subpasso
+          const btnRemoveSub = document.createElement('button');
+          btnRemoveSub.type = 'button';
+          btnRemoveSub.textContent = 'X';
+          btnRemoveSub.className = 'btn btn-remove';
+          btnRemoveSub.style.marginLeft = '0.5rem';
+          btnRemoveSub.onclick = () => {
+            solutionData.passos[stepIndex].subpassos.splice(subIndex, 1);
+            renderSteps();
+          };
+
+          subItem.appendChild(subTextarea);
+          subItem.appendChild(btnRemoveSub);
+          subList.appendChild(subItem);
+        });
+        stepBlock.appendChild(subList);
+
+        // Botão para adicionar subpasso
+        const btnAddSub = document.createElement('button');
+        btnAddSub.type = 'button';
+        btnAddSub.textContent = 'Adicionar Sub-passo';
+        btnAddSub.className = 'btn';
+        btnAddSub.onclick = () => {
+          solutionData.passos[stepIndex].subpassos.push('');
+          renderSteps();
+        };
+        stepBlock.appendChild(btnAddSub);
+
+        // Adiciona o bloco do passo ao container
+        stepsContainer.appendChild(stepBlock);
+      });
+    }
+
+    // Adiciona um passo vazio
+    btnAddStep.addEventListener('click', () => {
+      solutionData.passos.push({
+        descricao: '',
+        subpassos: []
+      });
+      renderSteps();
+    });
+
+    // Antes de submeter, converte 'solutionData' em JSON e põe no hidden field
+    form.addEventListener('submit', (e) => {
+      hiddenField.value = JSON.stringify(solutionData);
+    });
+
+    // Render inicial (caso já queira iniciar vazio)
+    renderSteps();
+  </script>
+</body>
+</html>
