@@ -6,8 +6,8 @@ import json
 app = Flask(__name__)
 app.secret_key = "CHAVE_SECRETA_PARA_SESSAO"  # Troque por algo seguro em produção
 
-# Conexão com MongoDB (ajuste a URI conforme seu ambiente)
-client = MongoClient("mongodb://localhost:27017/")
+
+client = MongoClient('mongodb+srv://msolucoesmecanicasinteligentes:solucao@cluster0.7ljuh.mongodb.net/')
 db = client["m_plataforma"]
 
 # Coleções utilizadas
@@ -406,10 +406,12 @@ def edit_solution(problem_id):
         except json.JSONDecodeError:
             # Caso o JSON esteja inválido, podemos mostrar um erro
             erro = "Houve um erro ao interpretar os dados. Tente novamente."
-            return render_template("edit_solution.html",
-                                   problema=problema,
-                                   solucao=problema.get("solucao", {}),
-                                   erro=erro)
+            return render_template(
+                "edit_solution.html",
+                problema=problema,
+                solucao=problema.get("solucao", {}),
+                erro=erro
+            )
 
         # Atualiza no banco de dados
         problemas_collection.update_one(
@@ -421,21 +423,20 @@ def edit_solution(problem_id):
         return redirect(url_for("exibir_solucao", problem_id=problem_id))
 
     # GET: Renderiza o formulário de edição
-    # Buscamos a solução existente (se existir)
     solucao_atual = problema.get("solucao", {})
-    # Se não houver "passos", definimos como lista vazia
     passos = solucao_atual.get("passos", [])
 
-    return render_template("edit_solution.html",
-                           problema=problema,
-                           passos=passos,
-                           erro=None)
-
+    return render_template(
+        "edit_solution.html",
+        problema=problema,
+        passos=passos,
+        erro=None
+    )
 
 ##########################################
 #         EXECUÇÃO DA APLICAÇÃO
 ##########################################
 
 if __name__ == "__main__":
-    # Em produção, use debug=False e uma SECRET_KEY robusta
-    app.run(debug=True)
+    # Em produção, use debug=False e forneça uma SECRET_KEY robusta
+    app.run(host='0.0.0.0', port=5000, debug=True)
