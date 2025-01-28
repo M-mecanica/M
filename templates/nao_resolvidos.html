@@ -1,0 +1,211 @@
+<!-- nao_resolvidos.html (Página de Problemas Não Resolvidos com Design Integrado) -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>M - Problemas Não Resolvidos</title>
+  <!-- Fonte básica -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* RESET BÁSICO */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* BODY: fundo gradiente, cor #00f0ff */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background: linear-gradient(120deg, #000, #001f1f 50%, #000);
+      color: #00f0ff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER: estilo coerente com as outras páginas */
+    header {
+      background: linear-gradient(90deg, #111, #333);
+      border-bottom: 1px solid #00f0ff;
+      padding: 1.5rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;  /* Centraliza horizontalmente o conteúdo principal do header */
+      box-shadow: 0 0 10px #00f0ff;
+    }
+
+    /* Botão "Voltar" no canto esquerdo */
+    .btn-voltar-inicio {
+      position: absolute;
+      top: 50%;
+      left: 2rem;
+      transform: translateY(-50%);
+      background-color: #ff0080;
+      color: #ff0;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1rem;
+      font-size: 1.4rem; /* Deixa o ícone (seta) mais destacado */
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-voltar-inicio:hover {
+      background-color: #ff4da6;
+      box-shadow: 0 0 8px #ff4da6;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    /* TÍTULO (Problemas Não Resolvidos) centralizado no header, cor amarela */
+    header h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      text-shadow: 0 0 4px #ff0; /* Sombra amarela */
+      animation: neonText 1.5s ease-in-out infinite alternate;
+      color: #ff0; /* Texto em amarelo */
+      margin: 0; /* Remove espaçamento extra */
+    }
+
+    /* MAIN: fonte maior */
+    main {
+      flex: 1;
+      font-size: 1.25rem;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Lista de problemas */
+    .problem-list {
+      width: 100%;
+      max-width: 600px;
+      list-style: none;
+    }
+
+    .problem-item {
+      background-color: rgba(15, 15, 15, 0.8);
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 0 8px #00f0ff33;
+    }
+
+    .problem-item h2 {
+      font-size: 1.6em; /* ~2rem final */
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 3px #00f0ff;
+      color: #00f0ff;
+    }
+
+    .problem-item p {
+      font-size: 1rem;
+      color: #c5f6f6;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Botão "Resolver" */
+    .btn-resolver {
+      background-color: #00f0ff;
+      color: #000;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s, box-shadow 0.2s;
+    }
+    .btn-resolver:hover {
+      background-color: #0affff;
+      box-shadow: 0 0 8px #0affff;
+    }
+
+    .no-results {
+      text-align: center;
+      margin-top: 2rem;
+      color: #ccc;
+      font-size: 1.2rem;
+    }
+
+    /* FOOTER coerente com o design */
+    footer {
+      background: linear-gradient(90deg, #111, #333);
+      border-top: 1px solid #00f0ff;
+      text-align: center;
+      padding: 1rem;
+      box-shadow: 0 0 10px #00f0ff;
+    }
+    footer p {
+      font-size: 1rem;
+      color: #00f0ff;
+    }
+
+    /* Animação neon para o título */
+    @keyframes neonText {
+      0% {
+        text-shadow: 0 0 4px #ff0;
+      }
+      100% {
+        text-shadow: 0 0 10px #ff0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Botão "Voltar" no canto esquerdo -->
+    <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">
+      &#x2B05; <!-- Unicode left arrow -->
+    </a>
+
+    <!-- Título centralizado no header em amarelo -->
+    <h1>Problemas Não Resolvidos</h1>
+  </header>
+
+  <main>
+    {% if problemas and problemas|length > 0 %}
+      <ul class="problem-list">
+        {% for problema in problemas %}
+        <li class="problem-item">
+          <h2>{{ problema["titulo"] }}</h2>
+          <p>{{ problema["descricao"] }}</p>
+
+          <!-- Se o usuário tem permissão de solucionador ou moderador,
+               pode acessar a rota que exibe o formulário para resolver -->
+          {% if session.role in ["solucionador", "moderador"] %}
+            <form action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}" method="GET">
+              <button type="submit" class="btn-resolver">Resolver</button>
+            </form>
+          {% else %}
+            <p><em>Faça login como Solucionador ou Moderador para resolver este problema.</em></p>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="no-results">Não há problemas não resolvidos.</p>
+    {% endif %}
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M - MVP</p>
+  </footer>
+</body>
+</html>
