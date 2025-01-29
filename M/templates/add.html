@@ -1,0 +1,182 @@
+<<!-- add.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>M - Registrar Novo Problema</title>
+  <!-- Fonte básica -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #121212;
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #1f1f1f;
+      padding: 1rem;
+      position: relative;
+    }
+
+    /* Botão para voltar à página principal */
+    .btn-home {
+      position: absolute;
+      top: 50%;
+      left: 2rem;
+      transform: translateY(-50%);
+      background-color: #f5f5f5;
+      color: #000;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    .btn-home:hover {
+      background-color: #ccc;
+    }
+
+    /* Botão para problemas não resolvidos */
+    .btn-nao-resolvidos {
+      position: absolute;
+      top: 50%;
+      right: 2rem;
+      transform: translateY(-50%);
+      background-color: #f5f5f5;
+      color: #000;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    .btn-nao-resolvidos:hover {
+      background-color: #ccc;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    label {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="text"],
+    textarea {
+      margin-bottom: 1rem;
+      padding: 0.8rem;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background-color: #ccc;
+      color: #000;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input[type="submit"] {
+      background-color: #f5f5f5;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #ccc;
+    }
+
+    .erro {
+      color: #f88;
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+
+    footer {
+      background-color: #1f1f1f;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    footer p {
+      font-size: 1rem;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Botão para voltar à home -->
+    <a href="{{ url_for('index') }}" class="btn-home">Home</a>
+
+    <!-- Botão para problemas não resolvidos -->
+    <a href="{{ url_for('unresolved') }}" class="btn-nao-resolvidos">Não Resolvidos</a>
+  </header>
+
+  <main>
+    <h1>Registrar um Novo Problema</h1>
+    {% if erro %}
+      <div class="erro">{{ erro }}</div>
+    {% endif %}
+    <form action="{{ url_for('add_problem') }}" method="POST">
+      <label for="titulo">Título do Problema</label>
+      <input type="text" id="titulo" name="titulo" required />
+
+      <label for="descricao">Descrição do Problema</label>
+      <textarea id="descricao" name="descricao" rows="5" required></textarea>
+
+      <input type="submit" value="Enviar Problema" />
+    </form>
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M - MVP</p>
+  </footer>
+</body>
+</html>
