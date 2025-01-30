@@ -6,7 +6,7 @@ import json
 app = Flask(__name__)
 app.secret_key = "CHAVE_SECRETA_PARA_SESSAO"  # Troque por algo seguro em produção
 
-
+# Conexão com o MongoDB
 client = MongoClient('mongodb+srv://msolucoesmecanicasinteligentes:solucao@cluster0.7ljuh.mongodb.net/')
 db = client["m_plataforma"]
 
@@ -245,6 +245,7 @@ def resolver_problema(problem_id):
     except json.JSONDecodeError:
         solution_data = {}
 
+    # Marca o problema como resolvido e salva a solucao
     problemas_collection.update_one(
         {"_id": ObjectId(problem_id)},
         {
@@ -298,9 +299,11 @@ def delete_problem(problem_id):
 
     problemas_collection.delete_one({"_id": ObjectId(problem_id)})
 
+    # Se estava resolvido, volta à lista de problemas resolvidos
     if problema["resolvido"]:
         return redirect(url_for("search"))
     else:
+        # Se estava não resolvido, volta à lista de não resolvidos
         return redirect(url_for("unresolved"))
 
 ##########################################
@@ -356,7 +359,6 @@ def listar_usuarios():
 
     # Busca todos os usuários
     usuarios = list(usuarios_collection.find({}))
-    # Garante que o "_id" seja string
     for u in usuarios:
         u["_id_str"] = str(u["_id"])
 

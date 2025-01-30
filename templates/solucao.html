@@ -278,7 +278,7 @@
     <p class="description">{{ problema["descricao"] }}</p>
 
     <!--
-      Exibe o botão Editar Solução somente se o usuário logado tiver role = "solucionador".
+      Exibe o botão "Editar Solução" somente se o usuário logado tiver role = "solucionador".
       Ao clicar, direciona para a rota edit_solution.
     -->
     {% if session["role"] == "solucionador" %}
@@ -290,7 +290,8 @@
     {% endif %}
 
     <!-- Container dos passos da solução -->
-    <div class="solution-container" id="solutionContainer"
+    <div class="solution-container"
+         id="solutionContainer"
          data-steps='{{ solucao.passos | tojson if solucao.passos else "[]" }}'>
       <h3>Solução:</h3>
 
@@ -434,6 +435,7 @@
 
       revealStepTitle(stepDiv, stepNumber, stepData.titulo, () => {
         revealStepDescription(stepDiv, stepData.descricao, () => {
+          // Verifica se há sub_passos
           if (stepData.sub_passos && stepData.sub_passos.length > 0) {
             createMiniStepsArea(stepDiv, stepData.sub_passos);
           }
@@ -444,6 +446,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       const solutionContainer = document.getElementById('solutionContainer');
+      // Pega os passos do atributo data-steps
       const stepsData = JSON.parse(solutionContainer.dataset.steps || '[]');
       const stepsOutput = solutionContainer.querySelector('.steps-output');
       const btnShowSolution = document.getElementById('btnShowSolution');
