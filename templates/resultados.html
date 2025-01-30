@@ -1,4 +1,4 @@
-<!-- resultados.html -->
+<!-- resultados.html (Versão com design semelhante ao index.html) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -18,162 +18,134 @@
       box-sizing: border-box;
     }
 
-    /* BODY: gradiente de fundo, cor padrão #00f0ff para textos */
+    /* BODY: mesmo fundo cinza claro e texto escuro, como no index.html */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      background: linear-gradient(120deg, #000, #001f1f 50%, #000);
-      color: #00f0ff;
+      background-color: #f0f0f0;
+      color: #333;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* HEADER: estilo semelhante ao do solucao.html */
+    /* HEADER: fundo preto, estilo moderno, como no index.html */
     header {
-      background: linear-gradient(90deg, #111, #333);
-      border-bottom: 1px solid #00f0ff;
-      padding: 1.5rem;
-      position: relative;
+      background-color: #000;
+      padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 10px #00f0ff;
+      justify-content: space-between;
     }
 
-    /* Título do header em amarelo (mesmo estilo) */
-    header h1 {
-      font-size: 1.6rem;
-      color: #ff0;
-      text-align: center;
-      text-shadow: 0 0 4px #ff0;
-      animation: neonText 1.5s ease-in-out infinite alternate;
-      margin: 0;
-    }
-
-    /* Ícone para voltar à página inicial (no canto esquerdo) */
+    /* Botão "Voltar à Página Inicial" no estilo retangular do index,
+       com hover que fica cinza mais claro */
     .btn-voltar-inicio {
-      position: absolute;
-      top: 50%;
-      left: 2rem;
-      transform: translateY(-50%);
-      background-color: #ff0080;
-      color: #ff0;
+      background-color: #000;
+      color: #fff;
       border: none;
-      border-radius: 32px;
-      padding: 0.6rem 1rem;
-      font-size: 1.4rem; /* Deixa o ícone mais destacado */
+      border-radius: 0;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
       cursor: pointer;
       text-decoration: none;
-      font-weight: bold;
-      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .btn-voltar-inicio:hover {
-      background-color: #ff4da6;
-      box-shadow: 0 0 8px #ff4da6;
-      transform: translateY(-50%) scale(1.1);
+      background-color: #333;
+      transform: scale(1.02);
     }
 
-    /* MAIN: fonte e layout originais */
+    /* Título do header em branco, sem efeitos neon */
+    header h1 {
+      color: #fff;
+      font-size: 1.4rem;
+      margin: 0 auto; /* centraliza o título */
+      text-align: center;
+    }
+
+    /* MAIN */
     main {
       flex: 1;
       font-size: 1.25rem;
       padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    /* Título principal (Resultados da Pesquisa) */
-    h1 {
-      font-size: 1.6em; /* ~2rem final */
-      margin-bottom: 1.5rem;
-      text-align: center;
-      text-shadow: 0 0 4px #00f0ff;
-      animation: neonText 1.5s ease-in-out infinite alternate;
-      color: #00f0ff; /* Cor predominante */
-    }
-
-    /* FORM de pesquisa */
-    form.search-container {
+    /* Campo de pesquisa semelhante ao index (borda arredondada e sombra) */
+    .search-container {
       display: flex;
       width: 100%;
       max-width: 600px;
       margin-bottom: 2rem;
     }
-    form.search-container input[type="text"] {
+    .search-container input[type="text"] {
       flex: 1;
-      padding: 1rem;
-      border: 2px solid #444;
+      padding: 1rem 1.5rem;
+      border: none;
       border-radius: 32px;
-      background-color: #cccccc;
+      background-color: #fff;
       font-size: 1rem;
-      color: #000;
+      color: #333;
       text-align: center;
       outline: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    form.search-container input[type="text"]::placeholder {
-      color: #666;
+    .search-container input[type="text"]::placeholder {
+      color: #aaa;
     }
 
-    /* Container que abriga os resultados */
+    /* Container que abriga todos os resultados */
     .result-container {
       width: 100%;
       margin-top: 1rem;
     }
 
-    /* Card de cada problema (com animação) */
+    /* Card de cada problema, estilo claro, parecido com o index */
     .problem-item {
-      background-color: rgba(15, 15, 15, 0.8); /* fundo levemente transparente */
-      border: 1px solid #333;
+      background-color: #fff;
       border-radius: 8px;
       padding: 1rem;
       margin-bottom: 2rem;
-      animation: fadeInUp 0.5s ease forwards;
-      opacity: 0;
-      transform: translateY(20px);
-      box-shadow: 0 0 8px #00f0ff33;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: relative;
-    }
-    .problem-item:nth-child(odd) {
-      animation-delay: 0.1s;
-    }
-    .problem-item:nth-child(even) {
-      animation-delay: 0.2s;
+      color: #333; /* texto escuro no card */
     }
 
-    /* Título e descrição no mesmo estilo de antes */
     .problem-item h2 {
-      font-size: 1.6em; /* ~2rem final */
+      font-size: 1.4rem;
       margin-bottom: 0.5rem;
-      text-shadow: 0 0 3px #00f0ff;
-      color: #00f0ff;
+      color: #000;
     }
     .problem-item p {
-      color: #c5f6f6;
-      font-size: 1rem;
+      color: #555;
+      margin-bottom: 0.5rem;
     }
 
     /* Inputs inline (modo edição) */
     .inline-input,
     .inline-textarea {
-      display: none; /* Eles só aparecem no modo edição */
+      display: none; /* só aparecem no modo edição */
       width: 100%;
       margin-top: 0.5rem;
       font-size: 1rem;
       font-family: 'Roboto', sans-serif;
       border-radius: 8px;
-      border: 1px solid #444;
+      border: 1px solid #ccc;
       padding: 0.5rem;
-      background-color: #ffffff;
-      color: #000;
+      background-color: #fff;
+      color: #333;
     }
     .inline-textarea {
       min-height: 60px;
@@ -183,32 +155,32 @@
     .no-results {
       text-align: center;
       margin-top: 2rem;
-      color: #ccc;
+      color: #666;
       font-size: 1.2rem;
     }
 
-    /* Botões de ação (editar/deletar) */
+    /* Botões de ação (Editar, Deletar, etc.) no estilo do index (retangulares e fundo #000 com texto branco) */
     .action-btns {
       margin-top: 1rem;
       display: flex;
       gap: 0.5rem;
     }
     .action-btn {
-      background-color: #00f0ff;
-      color: #000;
+      background-color: #000;
+      color: #fff;
       border: none;
-      border-radius: 32px;
+      border-radius: 0;
       padding: 0.5rem 1rem;
       font-size: 0.9rem;
       cursor: pointer;
       text-decoration: none;
-      font-weight: bold;
-      transition: background-color 0.2s, box-shadow 0.2s;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
       display: inline-block;
     }
     .action-btn:hover {
-      background-color: #0affff;
-      box-shadow: 0 0 8px #0affff;
+      background-color: #333;
+      transform: scale(1.02);
     }
     .action-delete-form {
       display: inline;
@@ -221,45 +193,46 @@
       margin-top: 0.5rem;
     }
 
-    /* Botão "Ver Solução" */
+    /* Botão "Ver Solução" no mesmo estilo (fundo #000, texto branco) */
     .ver-solucao-btn {
-      background-color: #00f0ff;
-      color: #000;
+      background-color: #000;
+      color: #fff;
       border: none;
-      border-radius: 32px;
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
+      border-radius: 0;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
       cursor: pointer;
       text-decoration: none;
-      font-weight: bold;
-      transition: background-color 0.2s, box-shadow 0.2s;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
       margin-top: 1rem;
       display: inline-block;
     }
     .ver-solucao-btn:hover {
-      background-color: #0affff;
-      box-shadow: 0 0 8px #0affff;
+      background-color: #333;
+      transform: scale(1.02);
     }
 
-    /* ANIMAÇÕES */
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    /* FOOTER similar ao index: preto, texto branco */
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
     }
-    @keyframes neonText {
-      from { text-shadow: 0 0 4px #00f0ff; }
-      to   { text-shadow: 0 0 10px #00f0ff; }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
     }
+
   </style>
 </head>
 <body>
   <header>
-    <!-- Ícone para voltar à página inicial -->
+    <!-- Botão Voltar -->
     <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">
-      &#x2B05; <!-- Unicode left arrow -->
+      &#x2B05;
     </a>
+
     <h1>Resultados da Pesquisa</h1>
   </header>
 
@@ -345,7 +318,9 @@
         </div>
         {% endfor %}
       {% else %}
-        <p class="no-results">Nenhum resultado encontrado para "{{ termo_busca }}".</p>
+        <p class="no-results">
+          Nenhum resultado encontrado para "{{ termo_busca }}".
+        </p>
       {% endif %}
     </div>
   </main>
@@ -402,7 +377,6 @@
           // Copia valores para os inputs hidden
           hiddenTitulo.value = titleInput.value;
           hiddenDesc.value = descTextarea.value;
-
           // Submete o formulário
           inlineEditForm.submit();
         });

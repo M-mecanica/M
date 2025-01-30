@@ -1,362 +1,452 @@
+<!-- edit_solution.html (Versão com design semelhante às demais páginas) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Editar Solução - {{ problema["titulo"] }}</title>
+  <!-- Fonte básica -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #222;
-      color: #eee;
+    /* Reset básico */
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
+
+    /* BODY: fundo cinza claro e texto #333 (como no index.html) */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background-color: #f0f0f0;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER: fundo preto, centralização do título, estilo retangular */
     header {
-      background: #333;
-      padding: 1rem;
+      background-color: #000;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center; /* Centraliza o título no header */
+      position: relative;
+    }
+
+    /* Título do header em branco */
+    header h1 {
+      color: #fff;
+      font-size: 1.4rem;
+      margin: 0;
       text-align: center;
     }
-    header h1 {
-      margin: 0;
-      font-size: 1.4rem;
-      color: #ffa500;
-    }
+
+    /* MAIN */
     main {
-      padding: 2rem;
+      flex: 1;
+      font-size: 1rem;
+      padding: 2rem 1rem;
+      width: 100%;
       max-width: 1000px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
     }
+
+    /* Mensagem de erro */
     .erro {
-      color: #ff4d4d;
+      color: #d00;
       margin-bottom: 1rem;
+      font-weight: bold;
     }
 
     .info {
       margin-bottom: 1rem;
-      color: #ccc;
+      color: #555;
     }
 
-    /* Botões */
+    /* Form container (opcional, para agrupar) */
+    .form-container {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Botões no estilo retangular preto com texto branco */
     .btn {
       display: inline-block;
       padding: 0.6rem 1.2rem;
       border: none;
-      background-color: #ffa500;
-      color: #000;
-      font-weight: bold;
+      background-color: #000;
+      color: #fff;
+      font-weight: 500;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 0;
       margin: 0.5rem 0;
+      transition: background-color 0.2s, transform 0.2s;
     }
     .btn:hover {
-      background-color: #ffb933;
+      background-color: #333;
+      transform: scale(1.02);
     }
+
     .btn-remove {
-      background-color: #dd3333;
+      background-color: #f44336; /* vermelho */
       margin-left: 1rem;
     }
     .btn-remove:hover {
-      background-color: #ff5555;
+      background-color: #d32f2f;
     }
 
     /* Container para cada passo */
     .step-block {
-      background: #333;
+      background-color: #f9f9f9;
       padding: 1rem;
       margin-bottom: 1rem;
       border-radius: 6px;
-      box-shadow: 0 0 3px #000;
+      border: 1px solid #ccc;
     }
     .step-block h2 {
       margin-top: 0;
-      font-size: 1.2rem;
-      color: #ffa500;
+      font-size: 1.1rem;
+      color: #333;
+      margin-bottom: 0.5rem;
     }
+
     .form-group {
       margin-bottom: 1rem;
     }
     label {
       display: block;
-      margin-bottom: 0.2rem;
-      font-weight: bold;
+      margin-bottom: 0.3rem;
+      font-weight: 500;
+      color: #555;
     }
-    input[type="text"], textarea {
+    input[type="text"],
+    textarea {
       width: 100%;
-      padding: 0.5rem;
-      border: none;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
       border-radius: 4px;
-      background: #555;
-      color: #fff;
+      background-color: #fff;
+      color: #333;
+      font-size: 1rem;
+      outline: none;
     }
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: #aaa;
+    }
+
     /* Container de subpassos */
     .subpasso-container {
-      background: #444;
+      background-color: #fff;
       padding: 0.8rem;
       margin-top: 0.5rem;
       border-radius: 4px;
+      border: 1px solid #eee;
     }
     .subpasso-block {
-      border: 1px dashed #555;
+      border: 1px dashed #ccc;
       padding: 0.5rem;
       margin-bottom: 0.5rem;
       border-radius: 4px;
+      background-color: #fafafa;
     }
     .subpasso-block h3 {
       margin-top: 0;
-      color: #0affff;
+      color: #444;
       font-size: 1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    /* Botão "Salvar Alterações" em verde */
+    .btn-save {
+      background-color: #4caf50;
+    }
+    .btn-save:hover {
+      background-color: #45a049;
+    }
+
+    /* Botão "Cancelar" em tom de cinza */
+    .btn-cancel {
+      background-color: #ccc;
+      color: #000;
+      margin-left: 1rem;
+    }
+    .btn-cancel:hover {
+      background-color: #aaa;
+    }
+
+    /* FOOTER preto, texto branco (como no index.html) */
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+      margin: 0;
     }
   </style>
 </head>
 <body>
-<header>
-  <h1>Editar Solução - {{ problema["titulo"] }}</h1>
-</header>
+  <header>
+    <h1>Editar Solução - {{ problema["titulo"] }}</h1>
+  </header>
 
-<main>
-  {% if erro %}
-    <div class="erro">{{ erro }}</div>
-  {% endif %}
+  <main>
+    {% if erro %}
+      <div class="erro">{{ erro }}</div>
+    {% endif %}
 
-  <p class="info">
-    Ajuste os passos e subpassos conforme necessário. Clique em "Salvar Alterações" ao final.
-  </p>
+    <p class="info">
+      Ajuste os passos e subpassos conforme necessário. Clique em <strong>Salvar Alterações</strong> ao final.
+    </p>
 
-  <!-- Formulário que será submetido ao servidor -->
-  <form method="POST" id="solutionForm">
+    <div class="form-container">
+      <!-- Formulário que será submetido ao servidor -->
+      <form method="POST" id="solutionForm">
+        <!-- Campo oculto onde será armazenado o JSON final da solução -->
+        <input type="hidden" id="solution_data" name="solution_data" value="" />
 
-    <!-- Campo oculto onde será armazenado o JSON final da solução -->
-    <input type="hidden" id="solution_data" name="solution_data" value="">
+        <!-- Container que segura todos os passos -->
+        <div id="stepsContainer">
+          {% for step in passos %}
+            <div class="step-block" data-step-index="{{ loop.index0 }}">
+              <h2>Passo {{ loop.index }}</h2>
 
-    <!-- Container que segura todos os passos -->
-    <div id="stepsContainer">
-      {% for step in passos %}
-        <!--
-          loop.index0 -> índice baseado em 0
-          loop.index  -> índice baseado em 1
-        -->
-        <div class="step-block" data-step-index="{{ loop.index0 }}">
-          <h2>Passo {{ loop.index }}</h2>
+              <div class="form-group">
+                <label>Título do Passo:</label>
+                <input type="text" class="step-title" value="{{ step.titulo }}">
+              </div>
 
-          <div class="form-group">
-            <label>Título do Passo:</label>
-            <input type="text" class="step-title"
-                   value="{{ step.titulo }}">
-          </div>
+              <div class="form-group">
+                <label>Descrição do Passo:</label>
+                <textarea class="step-desc">{{ step.descricao }}</textarea>
+              </div>
 
-          <div class="form-group">
-            <label>Descrição do Passo:</label>
-            <textarea class="step-desc">{{ step.descricao }}</textarea>
-          </div>
-
-          <!-- SUBPASSOS -->
-          <div class="subpasso-container">
-            <h3>Subpassos</h3>
-            <div class="subpasso-list">
-              {% for sub in step.sub_passos %}
-                <div class="subpasso-block" data-sub-index="{{ loop.index0 }}">
-                  <h3>Subpasso {{ loop.index }}</h3>
-                  <div class="form-group">
-                    <label>Título:</label>
-                    <input type="text" class="subpasso-title"
-                           value="{{ sub.titulo }}">
-                  </div>
-                  <div class="form-group">
-                    <label>Descrição:</label>
-                    <textarea class="subpasso-desc">{{ sub.descricao }}</textarea>
-                  </div>
-                  <button type="button" class="btn btn-remove remove-subpasso">
-                    Remover Subpasso
-                  </button>
+              <!-- SUBPASSOS -->
+              <div class="subpasso-container">
+                <h3>Subpassos</h3>
+                <div class="subpasso-list">
+                  {% for sub in step.sub_passos %}
+                    <div class="subpasso-block" data-sub-index="{{ loop.index0 }}">
+                      <h3>Subpasso {{ loop.index }}</h3>
+                      <div class="form-group">
+                        <label>Título:</label>
+                        <input type="text" class="subpasso-title" value="{{ sub.titulo }}">
+                      </div>
+                      <div class="form-group">
+                        <label>Descrição:</label>
+                        <textarea class="subpasso-desc">{{ sub.descricao }}</textarea>
+                      </div>
+                      <button type="button" class="btn btn-remove remove-subpasso">
+                        Remover Subpasso
+                      </button>
+                    </div>
+                  {% endfor %}
                 </div>
-              {% endfor %}
+                <button type="button" class="btn add-subpasso">Adicionar Subpasso</button>
+              </div>
+
+              <button type="button" class="btn btn-remove remove-step">Remover Passo</button>
             </div>
-            <button type="button" class="btn add-subpasso">Adicionar Subpasso</button>
-          </div>
-
-          <button type="button" class="btn btn-remove remove-step">Remover Passo</button>
+          {% endfor %}
         </div>
-      {% endfor %}
+
+        <button type="button" class="btn" id="addStepBtn" style="margin-top: 1rem;">
+          Adicionar Passo
+        </button>
+
+        <br><br>
+        <button type="submit" class="btn btn-save" style="margin-right: 1rem;">
+          Salvar Alterações
+        </button>
+        <a href="{{ url_for('exibir_solucao', problem_id=problema['_id']) }}"
+           class="btn btn-cancel">
+          Cancelar
+        </a>
+      </form>
     </div>
+  </main>
 
-    <button type="button" class="btn" id="addStepBtn" style="margin-top: 1rem;">
-      Adicionar Passo
-    </button>
+  <footer>
+    <p>© 2025 Plataforma M - MVP</p>
+  </footer>
 
-    <br><br>
-    <button type="submit" class="btn" style="background-color: #4caf50;">
-      Salvar Alterações
-    </button>
-    <a href="{{ url_for('exibir_solucao', problem_id=problema['_id']) }}"
-       class="btn" style="background-color: #ccc; color: #000;">
-      Cancelar
-    </a>
-  </form>
-</main>
+  <script>
+    // Seletores
+    const stepsContainer = document.getElementById('stepsContainer');
+    const solutionDataInput = document.getElementById('solution_data');
+    const form = document.getElementById('solutionForm');
+    const addStepBtn = document.getElementById('addStepBtn');
 
-<script>
-  // Seletores
-  const stepsContainer = document.getElementById('stepsContainer');
-  const solutionDataInput = document.getElementById('solution_data');
-  const form = document.getElementById('solutionForm');
-  const addStepBtn = document.getElementById('addStepBtn');
+    // Função para criar dinamicamente o HTML de um "step-block" novo
+    function createStepBlock(stepIndex) {
+      const stepBlock = document.createElement('div');
+      stepBlock.classList.add('step-block');
+      stepBlock.setAttribute('data-step-index', stepIndex);
 
-  // Função para criar dinamicamente o HTML de um "step-block" novo
-  function createStepBlock(stepIndex) {
-    // div principal do step
-    const stepBlock = document.createElement('div');
-    stepBlock.classList.add('step-block');
-    stepBlock.setAttribute('data-step-index', stepIndex);
-
-    stepBlock.innerHTML = `
-      <h2>Passo ${stepIndex + 1}</h2>
-      <div class="form-group">
-        <label>Título do Passo:</label>
-        <input type="text" class="step-title" placeholder="Ex: Identificar problema">
-      </div>
-      <div class="form-group">
-        <label>Descrição do Passo:</label>
-        <textarea class="step-desc" placeholder="Ex: Verificar o local com barulho"></textarea>
-      </div>
-      <div class="subpasso-container">
-        <h3>Subpassos</h3>
-        <div class="subpasso-list"></div>
-        <button type="button" class="btn add-subpasso">Adicionar Subpasso</button>
-      </div>
-      <button type="button" class="btn btn-remove remove-step">Remover Passo</button>
-    `;
-    return stepBlock;
-  }
-
-  // Função para criar dinamicamente o HTML de um "subpasso-block"
-  function createSubpassoBlock(subIndex) {
-    const subBlock = document.createElement('div');
-    subBlock.classList.add('subpasso-block');
-    subBlock.setAttribute('data-sub-index', subIndex);
-
-    subBlock.innerHTML = `
-      <h3>Subpasso ${subIndex + 1}</h3>
-      <div class="form-group">
-        <label>Título:</label>
-        <input type="text" class="subpasso-title" placeholder="Ex: Abrir tampa">
-      </div>
-      <div class="form-group">
-        <label>Descrição:</label>
-        <textarea class="subpasso-desc" placeholder="Ex: Visualizar o interior"></textarea>
-      </div>
-      <button type="button" class="btn btn-remove remove-subpasso">Remover Subpasso</button>
-    `;
-    return subBlock;
-  }
-
-  // Adiciona evento para o botão "Adicionar Passo"
-  addStepBtn.addEventListener('click', () => {
-    const stepIndex = stepsContainer.children.length; // novo índice de passo
-    const stepBlock = createStepBlock(stepIndex);
-    stepsContainer.appendChild(stepBlock);
-  });
-
-  // Delegação de eventos no container principal (para remover passo/subpasso, adicionar subpasso)
-  stepsContainer.addEventListener('click', (e) => {
-    // Remover Passo
-    if (e.target.classList.contains('remove-step')) {
-      const stepBlock = e.target.closest('.step-block');
-      if (stepBlock) {
-        stepsContainer.removeChild(stepBlock);
-        reindexSteps();
-      }
+      stepBlock.innerHTML = `
+        <h2>Passo ${stepIndex + 1}</h2>
+        <div class="form-group">
+          <label>Título do Passo:</label>
+          <input type="text" class="step-title" placeholder="Ex: Identificar problema">
+        </div>
+        <div class="form-group">
+          <label>Descrição do Passo:</label>
+          <textarea class="step-desc" placeholder="Ex: Verificar o local com barulho"></textarea>
+        </div>
+        <div class="subpasso-container">
+          <h3>Subpassos</h3>
+          <div class="subpasso-list"></div>
+          <button type="button" class="btn add-subpasso">Adicionar Subpasso</button>
+        </div>
+        <button type="button" class="btn btn-remove remove-step">Remover Passo</button>
+      `;
+      return stepBlock;
     }
 
-    // Adicionar Subpasso
-    if (e.target.classList.contains('add-subpasso')) {
-      const subpassoContainer = e.target.closest('.subpasso-container');
-      if (subpassoContainer) {
-        const subpassoList = subpassoContainer.querySelector('.subpasso-list');
-        const subIndex = subpassoList.children.length;
-        const subBlock = createSubpassoBlock(subIndex);
-        subpassoList.appendChild(subBlock);
-      }
+    // Função para criar dinamicamente o HTML de um "subpasso-block"
+    function createSubpassoBlock(subIndex) {
+      const subBlock = document.createElement('div');
+      subBlock.classList.add('subpasso-block');
+      subBlock.setAttribute('data-sub-index', subIndex);
+
+      subBlock.innerHTML = `
+        <h3>Subpasso ${subIndex + 1}</h3>
+        <div class="form-group">
+          <label>Título:</label>
+          <input type="text" class="subpasso-title" placeholder="Ex: Abrir tampa">
+        </div>
+        <div class="form-group">
+          <label>Descrição:</label>
+          <textarea class="subpasso-desc" placeholder="Ex: Visualizar o interior"></textarea>
+        </div>
+        <button type="button" class="btn btn-remove remove-subpasso">Remover Subpasso</button>
+      `;
+      return subBlock;
     }
 
-    // Remover Subpasso
-    if (e.target.classList.contains('remove-subpasso')) {
-      const subBlock = e.target.closest('.subpasso-block');
-      const subpassoList = e.target.closest('.subpasso-list');
-      if (subBlock && subpassoList) {
-        subpassoList.removeChild(subBlock);
+    // Adiciona evento para o botão "Adicionar Passo"
+    addStepBtn.addEventListener('click', () => {
+      const stepIndex = stepsContainer.children.length;
+      const stepBlock = createStepBlock(stepIndex);
+      stepsContainer.appendChild(stepBlock);
+    });
+
+    // Delegação de eventos no container principal (remover passo/subpasso, adicionar subpasso)
+    stepsContainer.addEventListener('click', (e) => {
+      // Remover Passo
+      if (e.target.classList.contains('remove-step')) {
+        const stepBlock = e.target.closest('.step-block');
+        if (stepBlock) {
+          stepsContainer.removeChild(stepBlock);
+          reindexSteps();
+        }
+      }
+
+      // Adicionar Subpasso
+      if (e.target.classList.contains('add-subpasso')) {
+        const subpassoContainer = e.target.closest('.subpasso-container');
+        if (subpassoContainer) {
+          const subpassoList = subpassoContainer.querySelector('.subpasso-list');
+          const subIndex = subpassoList.children.length;
+          const subBlock = createSubpassoBlock(subIndex);
+          subpassoList.appendChild(subBlock);
+        }
+      }
+
+      // Remover Subpasso
+      if (e.target.classList.contains('remove-subpasso')) {
+        const subBlock = e.target.closest('.subpasso-block');
+        const subpassoList = e.target.closest('.subpasso-list');
+        if (subBlock && subpassoList) {
+          subpassoList.removeChild(subBlock);
+          reindexSubpassos(subpassoList);
+        }
+      }
+    });
+
+    // Função para reindexar os passos (atualiza "Passo X" e data-step-index)
+    function reindexSteps() {
+      const stepBlocks = stepsContainer.querySelectorAll('.step-block');
+      stepBlocks.forEach((block, index) => {
+        block.setAttribute('data-step-index', index);
+        const h2 = block.querySelector('h2');
+        if (h2) {
+          h2.textContent = `Passo ${index + 1}`;
+        }
+        // Reindexa subpassos dentro do passo
+        const subpassoList = block.querySelector('.subpasso-list');
         reindexSubpassos(subpassoList);
-      }
+      });
     }
-  });
 
-  // Função para reindexar os passos (atualiza "Passo X" e data-step-index)
-  function reindexSteps() {
-    const stepBlocks = stepsContainer.querySelectorAll('.step-block');
-    stepBlocks.forEach((block, index) => {
-      block.setAttribute('data-step-index', index);
-      const h2 = block.querySelector('h2');
-      if (h2) {
-        h2.textContent = `Passo ${index + 1}`;
-      }
-      // Reindexa também subpassos dentro do passo
-      const subpassoList = block.querySelector('.subpasso-list');
-      reindexSubpassos(subpassoList);
-    });
-  }
-
-  // Função para reindexar subpassos (atualiza "Subpasso X" e data-sub-index)
-  function reindexSubpassos(subpassoList) {
-    if (!subpassoList) return;
-    const subBlocks = subpassoList.querySelectorAll('.subpasso-block');
-    subBlocks.forEach((block, index) => {
-      block.setAttribute('data-sub-index', index);
-      const h3 = block.querySelector('h3');
-      if (h3) {
-        h3.textContent = `Subpasso ${index + 1}`;
-      }
-    });
-  }
-
-  // Antes de submeter o formulário, construímos o JSON
-  form.addEventListener('submit', (e) => {
-    // Monta a estrutura { passos: [ ... ] }
-    const allSteps = [];
-    const stepBlocks = stepsContainer.querySelectorAll('.step-block');
-
-    stepBlocks.forEach((stepBlock) => {
-      const tituloStep = stepBlock.querySelector('.step-title').value.trim();
-      const descStep = stepBlock.querySelector('.step-desc').value.trim();
-
-      // Subpassos
-      const subpassoList = stepBlock.querySelector('.subpasso-list');
+    // Função para reindexar subpassos (atualiza "Subpasso X" e data-sub-index)
+    function reindexSubpassos(subpassoList) {
+      if (!subpassoList) return;
       const subBlocks = subpassoList.querySelectorAll('.subpasso-block');
-      const subPassosData = [];
+      subBlocks.forEach((block, index) => {
+        block.setAttribute('data-sub-index', index);
+        const h3 = block.querySelector('h3');
+        if (h3) {
+          h3.textContent = `Subpasso ${index + 1}`;
+        }
+      });
+    }
 
-      subBlocks.forEach((subBlock) => {
-        const tituloSub = subBlock.querySelector('.subpasso-title').value.trim();
-        const descSub = subBlock.querySelector('.subpasso-desc').value.trim();
+    // Antes de submeter o formulário, construímos o JSON
+    form.addEventListener('submit', (e) => {
+      // Monta a estrutura { passos: [ ... ] }
+      const allSteps = [];
+      const stepBlocks = stepsContainer.querySelectorAll('.step-block');
 
-        subPassosData.push({
-          titulo: tituloSub,
-          descricao: descSub
+      stepBlocks.forEach((stepBlock) => {
+        const tituloStep = stepBlock.querySelector('.step-title').value.trim();
+        const descStep = stepBlock.querySelector('.step-desc').value.trim();
+
+        // Subpassos
+        const subpassoList = stepBlock.querySelector('.subpasso-list');
+        const subBlocks = subpassoList.querySelectorAll('.subpasso-block');
+        const subPassosData = [];
+
+        subBlocks.forEach((subBlock) => {
+          const tituloSub = subBlock.querySelector('.subpasso-title').value.trim();
+          const descSub = subBlock.querySelector('.subpasso-desc').value.trim();
+
+          subPassosData.push({
+            titulo: tituloSub,
+            descricao: descSub
+          });
+        });
+
+        allSteps.push({
+          titulo: tituloStep,
+          descricao: descStep,
+          sub_passos: subPassosData
         });
       });
 
-      allSteps.push({
-        titulo: tituloStep,
-        descricao: descStep,
-        sub_passos: subPassosData
-      });
+      const finalSolution = {
+        passos: allSteps
+      };
+
+      // Convert para JSON e coloca no hidden input
+      solutionDataInput.value = JSON.stringify(finalSolution);
+      // Ao dar submit, o form enviará solution_data para o servidor
     });
-
-    const finalSolution = {
-      passos: allSteps
-    };
-
-    // Convert para JSON e coloca no hidden input
-    solutionDataInput.value = JSON.stringify(finalSolution);
-    // Ao dar submit, o form enviará solution_data para o servidor
-  });
-</script>
+  </script>
 </body>
 </html>

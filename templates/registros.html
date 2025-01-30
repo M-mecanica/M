@@ -1,4 +1,4 @@
-<!-- registros.html (Lista de Usuários) -->
+<!-- registros.html (Lista de Usuários, design semelhante às outras páginas) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -18,71 +18,65 @@
       box-sizing: border-box;
     }
 
-    /* BODY: gradiente de fundo, cor padrão #00f0ff para textos */
+    /* BODY: fundo cinza claro, texto escuro (como no index.html) */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      background: linear-gradient(120deg, #000, #001f1f 50%, #000);
-      color: #00f0ff;
+      background-color: #f0f0f0;
+      color: #333;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* HEADER: estilo semelhante ao das outras páginas */
+    /* HEADER: fundo preto, estilo retangular para o botão voltar, semelhante ao index.html */
     header {
-      background: linear-gradient(90deg, #111, #333);
-      border-bottom: 1px solid #00f0ff;
-      padding: 1.5rem;
-      position: relative;
+      background-color: #000;
+      padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 10px #00f0ff;
+      justify-content: space-between;
+      position: relative;
     }
-
-    /* Título do header em amarelo (mesmo estilo neon) */
     header h1 {
-      font-size: 1.6rem;
-      color: #ff0; /* Letra amarela */
+      color: #fff;
+      font-size: 1.4rem;
+      margin: 0 auto; /* centraliza o título */
       text-align: center;
-      text-shadow: 0 0 4px #ff0;
-      animation: neonText 1.5s ease-in-out infinite alternate;
-      margin: 0;
     }
 
-    /* Ícone para voltar ao index (seta) no canto esquerdo */
+    /* Botão Voltar (seta) no estilo do index.html */
     .btn-voltar-index {
-      position: absolute;
-      top: 50%;
-      left: 2rem;
-      transform: translateY(-50%);
-      background-color: #ff0080; /* Rosa */
-      color: #ff0; /* Amarelo */
+      background-color: #000;
+      color: #fff;
       border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.5rem;
-      font-size: 1rem;
+      border-radius: 0;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
       cursor: pointer;
       text-decoration: none;
-      font-weight: bold;
-      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
+
+      /* Para posicionar à esquerda do título */
+      position: absolute;
+      left: 2rem;
     }
     .btn-voltar-index:hover {
-      background-color: #ff4da6;
-      box-shadow: 0 0 8px #ff4da6;
-      transform: translateY(-50%) scale(1.05);
+      background-color: #333;
+      transform: scale(1.02);
     }
 
-    /* MAIN: espaço para listagem de usuários */
+    /* MAIN */
     main {
       flex: 1;
-      font-size: 1.25rem;
-      padding: 2rem;
+      font-size: 1rem;
+      padding: 2rem 1rem;
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
@@ -91,39 +85,35 @@
       align-items: center;
     }
 
-    /* Título principal da página (Gerenciar Usuários) */
     .page-title {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       margin-bottom: 2rem;
-      text-shadow: 0 0 4px #00f0ff;
-      animation: neonText 1.5s ease-in-out infinite alternate;
-      color: #00f0ff;
+      color: #000;
       text-align: center;
     }
 
-    /* Container com a lista dos usuários */
+    /* Container de usuários */
     .users-container {
       width: 100%;
     }
 
-    /* Card de cada usuário */
+    /* Card de cada usuário (fundo branco, borda leve, sombra) */
     .user-item {
-      background-color: rgba(15, 15, 15, 0.8);
-      border: 1px solid #333;
+      background-color: #fff;
+      border: 1px solid #ccc;
       border-radius: 8px;
       padding: 1rem;
       margin-bottom: 1.5rem;
-      box-shadow: 0 0 8px #00f0ff33;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .user-item h2 {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       margin-bottom: 0.5rem;
-      color: #00f0ff;
-      text-shadow: 0 0 3px #00f0ff;
+      color: #000;
     }
     .user-item p {
       margin-bottom: 1rem;
-      color: #c5f6f6;
+      color: #555;
       font-size: 1rem;
     }
 
@@ -132,44 +122,34 @@
       display: inline;
     }
 
+    /* Botão de excluir (fundo preto, texto branco), estilo retangular */
     .delete-btn {
-      background-color: #ff0080;
-      color: #ff0;
+      background-color: #000;
+      color: #fff;
       border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.5rem;
-      font-size: 1rem;
+      border-radius: 0;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
       cursor: pointer;
       text-decoration: none;
-      font-weight: bold;
-      transition: background-color 0.2s, box-shadow 0.2s;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
     }
     .delete-btn:hover {
-      background-color: #ff4da6;
-      box-shadow: 0 0 8px #ff4da6;
+      background-color: #333;
+      transform: scale(1.02);
     }
 
-    /* FOOTER */
+    /* FOOTER preto, texto branco (como no index.html) */
     footer {
-      background: linear-gradient(90deg, #111, #333);
-      border-top: 1px solid #00f0ff;
+      background-color: #000;
       text-align: center;
-      padding: 1rem;
-      box-shadow: 0 0 10px #00f0ff;
+      padding: 1rem 2rem;
     }
     footer p {
-      font-size: 1rem;
-      color: #00f0ff;
-    }
-
-    /* Animação neon */
-    @keyframes neonText {
-      0% {
-        text-shadow: 0 0 4px #00f0ff;
-      }
-      100% {
-        text-shadow: 0 0 10px #00f0ff;
-      }
+      font-size: 0.9rem;
+      color: #fff;
+      margin: 0;
     }
   </style>
 </head>

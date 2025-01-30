@@ -1,4 +1,4 @@
-<!-- solucao.html -->
+<!-- solucao.html (Versão com design semelhante às demais páginas) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -18,226 +18,229 @@
       box-sizing: border-box;
     }
 
-    /* BODY: mantém o gradiente padrão no restante da página */
+    /* BODY: fundo cinza claro, texto base #333 (como no index.html) */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      background: linear-gradient(120deg, #000, #001f1f 50%, #000);
-      color: #00f0ff; /* Cor predominante no restante */
+      background-color: #f0f0f0;
+      color: #333;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* HEADER: cor de fundo e textos diferenciados */
+    /* HEADER: fundo preto, estilo retangular para os botões, semelhante ao index.html */
     header {
-      background: linear-gradient(90deg, #111, #333);
-      border-bottom: 1px solid #00f0ff;
-      padding: 1.5rem;
-      position: relative;
+      background-color: #000;
+      padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 10px #00f0ff;
+      justify-content: space-between;
+      position: relative;
     }
-
-    /* Título do header em AMARELO */
     header h1 {
-      font-size: 1.6rem;
-      color: #ff0; /* Letra amarela */
+      color: #fff;
+      font-size: 1.4rem;
+      margin: 0 auto; /* Centraliza o título */
       text-align: center;
-      text-shadow: 0 0 4px #ff0;
-      animation: neonText 1.5s ease-in-out infinite alternate;
-      margin: 0;
     }
 
-    /* Ícone para voltar, estilo de botão */
+    /* Botão Voltar (seta) */
     .btn-voltar-resultados {
-      position: absolute;
-      top: 50%;
-      left: 2rem;
-      transform: translateY(-50%);
-      background-color: #ff0080; /* Fundo diferente do restante */
-      color: #ff0; /* Letra amarela */
+      background-color: #000;
+      color: #fff;
       border: none;
-      border-radius: 32px;
-      padding: 0.6rem 1rem;
-      font-size: 1.4rem; /* Maior para deixar o ícone mais visível */
+      border-radius: 0;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
       cursor: pointer;
       text-decoration: none;
-      font-weight: bold;
-      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
+
+      /* Para posicionar à esquerda do título */
+      position: absolute;
+      left: 2rem;
     }
     .btn-voltar-resultados:hover {
-      background-color: #ff4da6;
-      box-shadow: 0 0 8px #ff4da6;
-      transform: translateY(-50%) scale(1.1); /* Leve zoom ao passar o mouse */
+      background-color: #333;
+      transform: scale(1.02);
     }
 
-    /* MAIN: fonte maior */
+    /* MAIN */
     main {
       flex: 1;
       font-size: 1.25rem;
       padding: 2rem;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 100%;
-      margin: 0 auto;
     }
 
+    /* Título e descrição do problema */
     h2 {
-      font-size: 1.6em; /* ~2rem final */
+      font-size: 1.5rem;
       margin-bottom: 0.5rem;
-      text-shadow: 0 0 3px #00f0ff;
-      color: #00f0ff;
+      color: #000; /* cor mais escura */
     }
     p.description {
       margin-bottom: 2rem;
-      color: #c5f6f6;
+      color: #555;
+      font-size: 1rem;
     }
 
-    /* Botão principal para exibir os passos da solução */
+    /* Botão "Editar Solução" (apenas para solucionador) */
     .show-solution-btn {
-      background-color: #00f0ff;
-      color: #000;
+      background-color: #000;
+      color: #fff;
       border: none;
-      border-radius: 32px;
-      padding: 0.8rem 1.5rem;
-      font-size: 1.1em;
-      font-weight: bold;
+      border-radius: 0;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.2s, box-shadow 0.2s;
+      transition: background-color 0.2s, transform 0.2s;
       margin: 1rem 0;
       display: inline-block;
+      text-decoration: none;
     }
     .show-solution-btn:hover {
-      background-color: #0affff;
-      box-shadow: 0 0 8px #0affff;
+      background-color: #333;
+      transform: scale(1.02);
     }
 
-    /* Container da solução */
+    /* Container da solução (fundo branco, borda leve, estilo simples) */
     .solution-container {
       width: 100%;
       margin-top: 1rem;
-      border: 1px dashed #333;
+      border: 1px solid #ccc;
       border-radius: 8px;
       padding: 1rem;
-      background-color: rgba(10, 10, 10, 0.4);
+      background-color: #fff;
       position: relative;
-      box-shadow: 0 0 12px #00f0ff44 inset;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .solution-container h3 {
       margin-bottom: 0.5rem;
-      text-shadow: 0 0 4px #00f0ff;
-      font-size: 1.4em;
-      color: #00f0ff;
+      font-size: 1.2rem;
+      color: #000;
     }
 
-    /* Área dos passos (typewriter) */
+    /* Área dos passos */
     .steps-output {
       margin-top: 1rem;
       line-height: 1.6;
       white-space: pre-wrap;
       font-family: 'Courier New', monospace;
-      font-size: 1em;
-      transition: all 0.3s linear;
-      margin-bottom: 3rem;
+      font-size: 1rem;
+      margin-bottom: 2rem;
       min-height: 50px;
+      color: #333;
     }
 
     .next-step-container {
       position: absolute;
-      bottom: 0.5rem;
-      right: 0.5rem;
+      bottom: 1rem;
+      right: 1rem;
     }
     .next-step-btn {
-      background-color: #00f0ff;
-      color: #000;
+      background-color: #000;
+      color: #fff;
       border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.5rem;
-      font-size: 1.1em;
-      font-weight: bold;
+      border-radius: 0;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.2s, box-shadow 0.2s;
+      transition: background-color 0.2s, transform 0.2s;
       display: none;
+      text-decoration: none;
     }
     .next-step-btn:hover {
-      background-color: #0affff;
-      box-shadow: 0 0 8px #0affff;
+      background-color: #333;
+      transform: scale(1.02);
     }
 
     /* Blocos de destaque dos passos */
     .step-container {
       margin-bottom: 1rem;
       padding: 1rem;
-      border-left: 4px solid #ffa500;
-      background-color: rgba(20, 20, 20, 0.3);
-      box-shadow: 0 0 6px #ffa50044 inset;
+      border-left: 4px solid #888; /* destaque leve */
+      background-color: #f9f9f9;
     }
     .step-title-block {
-      font-size: 1.6em;
-      color: #ffa500;
+      font-size: 1.1rem;
+      color: #333;
       margin-bottom: 0.5rem;
       font-weight: bold;
-      text-shadow: 0 0 3px #ffa500;
     }
     .step-description-block {
-      font-size: 1.4em;
-      color: #0affff;
+      font-size: 1rem;
+      color: #555;
       margin-bottom: 1rem;
       white-space: pre-wrap;
     }
 
+    /* Minipassos */
     .mini-steps-block {
       margin-left: 1rem;
       margin-top: 1rem;
-      border-left: 3px dotted #ffa500;
+      border-left: 3px dashed #ccc;
       padding-left: 1rem;
     }
     .mini-step-title {
-      font-size: 1.4em;
-      color: #ffe600;
+      font-size: 1rem;
+      color: #444;
       font-weight: bold;
-      text-shadow: 0 0 2px #ffe600;
-      display: block;
       margin-bottom: 0.3rem;
+      display: block;
     }
     .mini-step-description {
-      font-size: 1.2em;
-      color: #add8e6;
+      font-size: 0.95rem;
+      color: #666;
       white-space: pre-wrap;
       margin-bottom: 1rem;
       display: block;
     }
     .mini-steps-btn {
-      background-color: #00f0ff;
-      color: #000;
+      background-color: #000;
+      color: #fff;
       border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.5rem;
-      font-size: 1em;
-      font-weight: bold;
+      border-radius: 0;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.2s, box-shadow 0.2s;
+      transition: background-color 0.2s, transform 0.2s;
       margin: 0.5rem 0;
       display: inline-block;
+      text-decoration: none;
     }
     .mini-steps-btn:hover {
-      background-color: #0affff;
-      box-shadow: 0 0 8px #0affff;
+      background-color: #333;
+      transform: scale(1.02);
     }
 
-    /* Animações */
-    @keyframes neonText {
-      from { text-shadow: 0 0 4px #ff0; }
-      to   { text-shadow: 0 0 10px #ff0; }
+    /* FOOTER preto, texto branco (como no index.html) */
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
     }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+    }
+
+    /* Animação simples para cada caractere (typewriter-like) */
     .letter-construct {
       display: inline-block;
       opacity: 0;
@@ -266,38 +269,36 @@
 <body>
 
   <header>
+    <!-- Título da página -->
     <h1>Detalhes e Solução</h1>
-    <!-- Ícone (seta) para voltar -->
+
+    <!-- Botão Voltar (no canto esquerdo do header) -->
     <a href="{{ url_for('search') }}" class="btn-voltar-resultados" title="Voltar">
       &#x2B05; <!-- Unicode left arrow -->
     </a>
   </header>
 
   <main>
+    <!-- Título do problema e descrição -->
     <h2>{{ problema["titulo"] }}</h2>
     <p class="description">{{ problema["descricao"] }}</p>
 
-    <!--
-      Exibe o botão "Editar Solução" somente se o usuário logado tiver role = "solucionador".
-      Ao clicar, direciona para a rota edit_solution (opcional) ou alguma rota de edição.
-    -->
+    <!-- Botão "Editar Solução" (somente para solucionador) -->
     {% if session["role"] == "solucionador" %}
       <a href="{{ url_for('edit_solution', problem_id=problema['_id']) }}"
          class="show-solution-btn"
-         style="background-color: #FFA500; margin-bottom: 2rem;">
+         style="margin-bottom: 1.5rem;">
         Editar Solução
       </a>
     {% endif %}
 
-    <!--
-      A grande diferença aqui é: o data-steps agora pega 'solucao.steps'
-      (em vez de 'solucao.passos')
-    -->
+    <!-- Container da Solução -->
     <div class="solution-container"
          id="solutionContainer"
          data-steps='{{ solucao.steps | tojson if solucao.steps else "[]" }}'>
       <h3>Solução:</h3>
 
+      <!-- Botão para iniciar animação dos passos -->
       <button type="button"
               class="show-solution-btn"
               id="btnShowSolution">
@@ -306,6 +307,7 @@
 
       <div class="steps-output"></div>
 
+      <!-- Botão "Próximo Passo" -->
       <div class="next-step-container">
         <button type="button" class="next-step-btn" id="btnNextStep">
           Próximo Passo
@@ -330,7 +332,7 @@
 
         setTimeout(() => {
           typeWriter(container, text, index + 1, callback);
-        }, 100);
+        }, 50); // Velocidade da "digitação"
       } else {
         if (callback) callback();
       }
@@ -342,9 +344,7 @@
       return stepDiv;
     }
 
-    // Em vez de "revealStepTitle(...) passoX, stepData.titulo, etc",
-    // agora usamos stepData.stepTitle e stepData.stepDescription
-
+    // Exibe título do passo
     function revealStepTitle(stepDiv, stepNumber, title, onFinish) {
       const titleBlock = document.createElement('div');
       titleBlock.classList.add('step-title-block');
@@ -354,6 +354,7 @@
       typeWriter(titleBlock, text, 0, onFinish);
     }
 
+    // Exibe descrição do passo
     function revealStepDescription(stepDiv, description, onFinish) {
       const descBlock = document.createElement('div');
       descBlock.classList.add('step-description-block');
@@ -362,7 +363,7 @@
       typeWriter(descBlock, `${description}\n`, 0, onFinish);
     }
 
-    // Para miniSteps, chamaremos "miniStepTitle" e "miniStepDescription"
+    // Minipassos
     function createMiniStepsArea(stepDiv, miniSteps) {
       const miniStepsWrapper = document.createElement('div');
       miniStepsWrapper.classList.add('mini-steps-block');
@@ -439,7 +440,6 @@
       const stepDiv = createStepContainer();
       stepsOutput.appendChild(stepDiv);
 
-      // stepData.stepTitle e stepData.stepDescription
       revealStepTitle(stepDiv, stepNumber, stepData.stepTitle, () => {
         revealStepDescription(stepDiv, stepData.stepDescription, () => {
           // Verifica se há miniSteps
@@ -453,7 +453,6 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       const solutionContainer = document.getElementById('solutionContainer');
-      // Agora lemos solucao.steps
       const stepsData = JSON.parse(solutionContainer.dataset.steps || '[]');
       const stepsOutput = solutionContainer.querySelector('.steps-output');
       const btnShowSolution = document.getElementById('btnShowSolution');
@@ -479,14 +478,15 @@
         });
       }
 
+      // Mostrar primeiros passos
       btnShowSolution.addEventListener('click', () => {
         if (isSolutionActive) return;
         isSolutionActive = true;
         btnShowSolution.style.display = 'none';
-
         revealCurrentStep();
       });
 
+      // Próximo passo
       btnNextStep.addEventListener('click', () => {
         btnNextStep.style.display = 'none';
         currentStepIndex++;

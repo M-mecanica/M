@@ -18,98 +18,92 @@
       box-sizing: border-box;
     }
 
-    /* BODY: fundo gradiente, texto base #00f0ff */
+    /* BODY: fundo cinza claro e texto base #333 */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      background: linear-gradient(120deg, #000, #001f1f 50%, #000);
-      color: #00f0ff;
+      background-color: #f0f0f0; /* Fundo cinza claro */
+      color: #333; /* Texto em tom mais escuro */
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* HEADER: estilo coerente com as outras páginas */
+    /* HEADER: fundo preto, com espaçamento interno, estilo moderno */
     header {
-      background: linear-gradient(90deg, #111, #333);
-      border-bottom: 1px solid #00f0ff;
-      padding: 1.5rem;
-      position: relative;
+      background-color: #000; /* Barra superior preta */
+      padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 10px #00f0ff;
+      justify-content: space-between;
     }
 
-    /* "Problemas Não Resolvidos" - botão no canto esquerdo */
+    /* Botão "Problemas Não Resolvidos" (à esquerda) */
     .btn-nao-resolvidos {
-      position: absolute;
-      top: 50%;
-      left: 2rem;
-      transform: translateY(-50%);
-      background-color: #00f0ff;
-      color: #000;
+      background-color: #000;
+      color: #fff;
       border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.5rem;
-      font-size: 1rem;
+      border-radius: 0;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
       cursor: pointer;
       text-decoration: none;
-      font-weight: bold;
-      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      height: 50px; /* Altura aumentada */
       display: flex;
       align-items: center;
-      justify-content: center;
     }
     .btn-nao-resolvidos:hover {
-      background-color: #0affff;
-      box-shadow: 0 0 8px #0affff;
-      transform: translateY(-50%) scale(1.05);
+      background-color: #333;
+      transform: scale(1.02);
     }
 
-    /* Ações do header no canto direito (logout, novo problema, etc.) */
+    /* Container de ações no header (lado direito) */
     .header-actions {
-      position: absolute;
-      right: 2rem;
-      top: 50%;
-      transform: translateY(-50%);
       display: flex;
       align-items: center;
-      gap: 1rem;
+      margin-left: auto; /* empurra este bloco para a direita */
     }
-    .header-actions span {
-      /* texto do usuário */
-      color: #ff0; /* Neon amarela, semelhante ao "Detalhes e Solução" */
-      text-shadow: 0 0 4px #ff0;
-      font-size: 1rem;
+
+    /* Barrinha divisória quase imperceptível */
+    .divider {
+      width: 1px;
+      height: 24px;
+      background-color: rgba(255, 255, 255, 0.2);
+      margin: 0 0.5rem;
+      align-self: center;
     }
+
+    /* Links (Novo Problema, Gerenciar Usuários, Logout)
+       - Também retangulares, mesma cor da barra, letra branca
+       - Altura aumentada para 50px */
     .header-actions a {
-      background-color: #00f0ff;
-      color: #000;
+      background-color: #000;
+      color: #fff;
       border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.5rem;
-      font-size: 1rem;
+      border-radius: 0;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
       cursor: pointer;
       text-decoration: none;
-      font-weight: bold;
-      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      height: 50px;
       display: flex;
       align-items: center;
-      justify-content: center;
     }
     .header-actions a:hover {
-      background-color: #0affff;
-      box-shadow: 0 0 8px #0affff;
-      transform: scale(1.05);
+      background-color: #333;
+      transform: scale(1.02);
     }
 
-    /* MAIN: fonte maior */
+    /* MAIN */
     main {
       flex: 1;
       font-size: 1.25rem;
-      padding: 2rem;
+      padding: 3rem 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -117,21 +111,20 @@
       text-align: center;
     }
 
-    /* Logo grande "M" com neon */
+    /* Logo grande "M" em preto (para combinar com fundo cinza claro) */
     .logo-grande {
-      font-size: 10rem;
+      font-size: 6rem;
       font-weight: 700;
       margin-bottom: 2rem;
-      color: #00f0ff;
-      text-shadow: 0 0 4px #00f0ff;
-      animation: neonText 1.5s ease-in-out infinite alternate;
+      color: #000;
+      letter-spacing: 0.05em;
     }
 
     /* Container do formulário de pesquisa */
     .search-container {
       width: 100%;
       max-width: 600px;
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
     }
     form {
       display: flex;
@@ -139,75 +132,68 @@
     }
     input[type="text"] {
       flex: 1;
-      padding: 1rem;
-      border: 2px solid #444;
+      padding: 1rem 1.5rem;
+      border: none;
       border-radius: 32px;
-      background-color: #ccc;
+      background-color: #fff;
       font-size: 1rem;
-      color: #000;
+      color: #333;
       text-align: center;
       outline: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     input[type="text"]::placeholder {
-      color: #666;
+      color: #aaa;
     }
 
-    /* Texto de boas-vindas com efeito neon */
+    /* Texto de boas-vindas */
     .texto-neon {
-      color: #00f0ff;
-      text-shadow: 0 0 4px #00f0ff;
-      animation: neonText 1.5s ease-in-out infinite alternate;
+      color: #333;
       max-width: 800px;
       margin: 0 auto;
       line-height: 1.5;
+      font-size: 1.1rem;
+      font-weight: 300;
     }
 
-    /* FOOTER coerente com o design */
+    /* FOOTER: preto, texto claro, estilo moderno */
     footer {
-      background: linear-gradient(90deg, #111, #333);
-      border-top: 1px solid #00f0ff;
+      background-color: #000;
       text-align: center;
-      padding: 1rem;
-      box-shadow: 0 0 10px #00f0ff;
+      padding: 1rem 2rem;
     }
     footer p {
-      font-size: 1rem;
-      color: #00f0ff;
-    }
-
-    /* Animação neon */
-    @keyframes neonText {
-      0% {
-        text-shadow: 0 0 4px #00f0ff;
-      }
-      100% {
-        text-shadow: 0 0 10px #00f0ff;
-      }
+      font-size: 0.9rem;
+      color: #fff;
     }
   </style>
 </head>
 <body>
   <header>
-    <!-- Botão de "Problemas Não Resolvidos" (na esquerda) -->
+    <!-- Botão de "Problemas Não Resolvidos" (à esquerda) -->
     <a href="{{ url_for('unresolved') }}" class="btn-nao-resolvidos" title="Problemas Não Resolvidos">
       Problemas Não Resolvidos
     </a>
 
-    <!-- Ações no header (no canto direito) -->
+    <!-- Ações no header (à direita) -->
     <div class="header-actions">
-      <span>Olá, {{ session.nome }}!</span>
-      <a href="{{ url_for('logout') }}">Logout</a>
+      <!-- Novo Problema -->
       <a href="{{ url_for('add_problem') }}">Novo Problema</a>
+      <div class="divider"></div>
 
-      <!-- Se o usuário for solucionador, exibe botão para gerenciar usuários -->
+      <!-- Gerenciar Usuários (apenas se for solucionador) -->
       {% if session.role == 'solucionador' %}
       <a href="{{ url_for('listar_usuarios') }}">Gerenciar Usuários</a>
+      <div class="divider"></div>
       {% endif %}
+
+      <!-- Botão de Logout no canto superior direito -->
+      <a href="{{ url_for('logout') }}">Logout</a>
     </div>
   </header>
 
   <main>
-    <!-- Logo Grande com Neon -->
+    <!-- Logo Grande -->
     <div class="logo-grande">M</div>
 
     <div class="search-container">
@@ -220,7 +206,7 @@
       </form>
     </div>
 
-    <!-- Texto de boas-vindas com efeito Neon -->
+    <!-- Texto de boas-vindas -->
     <p class="texto-neon">
       Bem-vindo ao MVP do M! Aqui você pode pesquisar problemas resolvidos ou cadastrar novos.
     </p>
