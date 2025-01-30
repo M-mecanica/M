@@ -279,7 +279,7 @@
 
     <!--
       Exibe o botão "Editar Solução" somente se o usuário logado tiver role = "solucionador".
-      Ao clicar, direciona para a rota edit_solution.
+      Ao clicar, direciona para a rota edit_solution (opcional) ou alguma rota de edição.
     -->
     {% if session["role"] == "solucionador" %}
       <a href="{{ url_for('edit_solution', problem_id=problema['_id']) }}"
@@ -289,10 +289,13 @@
       </a>
     {% endif %}
 
-    <!-- Container dos passos da solução -->
+    <!--
+      A grande diferença aqui é: o data-steps agora pega 'solucao.steps'
+      (em vez de 'solucao.passos')
+    -->
     <div class="solution-container"
          id="solutionContainer"
-         data-steps='{{ solucao.passos | tojson if solucao.passos else "[]" }}'>
+         data-steps='{{ solucao.steps | tojson if solucao.steps else "[]" }}'>
       <h3>Solução:</h3>
 
       <button type="button"
@@ -339,6 +342,9 @@
       return stepDiv;
     }
 
+    // Em vez de "revealStepTitle(...) passoX, stepData.titulo, etc",
+    // agora usamos stepData.stepTitle e stepData.stepDescription
+
     function revealStepTitle(stepDiv, stepNumber, title, onFinish) {
       const titleBlock = document.createElement('div');
       titleBlock.classList.add('step-title-block');
@@ -356,8 +362,8 @@
       typeWriter(descBlock, `${description}\n`, 0, onFinish);
     }
 
-    // Cria a área para exibir "mini passos" (sub_passos)
-    function createMiniStepsArea(stepDiv, subPassos) {
+    // Para miniSteps, chamaremos "miniStepTitle" e "miniStepDescription"
+    function createMiniStepsArea(stepDiv, miniSteps) {
       const miniStepsWrapper = document.createElement('div');
       miniStepsWrapper.classList.add('mini-steps-block');
       stepDiv.appendChild(miniStepsWrapper);
@@ -380,26 +386,26 @@
       miniStepsWrapper.appendChild(miniStepsOutput);
 
       function revealMiniStep(index) {
-        if (index >= subPassos.length) {
+        if (index >= miniSteps.length) {
           showMiniBtn.style.display = 'none';
           hideMiniBtn.style.display = 'inline-block';
           return;
         }
-        const sub = subPassos[index];
+        const sub = miniSteps[index];
 
         const subTitle = document.createElement('div');
         subTitle.classList.add('mini-step-title');
         miniStepsOutput.appendChild(subTitle);
 
-        const titleText = `Mini Passo ${index + 1} - ${sub.titulo}\n`;
+        const titleText = `Mini Passo ${index + 1} - ${sub.miniStepTitle}\n`;
         typeWriter(subTitle, titleText, 0, () => {
           const subDesc = document.createElement('div');
           subDesc.classList.add('mini-step-description');
           miniStepsOutput.appendChild(subDesc);
 
-          typeWriter(subDesc, `${sub.descricao}\n`, 0, () => {
+          typeWriter(subDesc, `${sub.miniStepDescription}\n`, 0, () => {
             currentIndex++;
-            if (currentIndex < subPassos.length) {
+            if (currentIndex < miniSteps.length) {
               showMiniBtn.textContent = `Mostrar Mini Passo ${currentIndex + 1}`;
             } else {
               showMiniBtn.style.display = 'none';
@@ -433,11 +439,12 @@
       const stepDiv = createStepContainer();
       stepsOutput.appendChild(stepDiv);
 
-      revealStepTitle(stepDiv, stepNumber, stepData.titulo, () => {
-        revealStepDescription(stepDiv, stepData.descricao, () => {
-          // Verifica se há sub_passos
-          if (stepData.sub_passos && stepData.sub_passos.length > 0) {
-            createMiniStepsArea(stepDiv, stepData.sub_passos);
+      // stepData.stepTitle e stepData.stepDescription
+      revealStepTitle(stepDiv, stepNumber, stepData.stepTitle, () => {
+        revealStepDescription(stepDiv, stepData.stepDescription, () => {
+          // Verifica se há miniSteps
+          if (stepData.miniSteps && stepData.miniSteps.length > 0) {
+            createMiniStepsArea(stepDiv, stepData.miniSteps);
           }
           if (onFinish) onFinish();
         });
@@ -446,7 +453,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       const solutionContainer = document.getElementById('solutionContainer');
-      // Pega os passos do atributo data-steps
+      // Agora lemos solucao.steps
       const stepsData = JSON.parse(solutionContainer.dataset.steps || '[]');
       const stepsOutput = solutionContainer.querySelector('.steps-output');
       const btnShowSolution = document.getElementById('btnShowSolution');

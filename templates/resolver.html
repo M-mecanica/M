@@ -278,7 +278,10 @@
         <!-- Campo hidden que receberá o JSON final -->
         <input type="hidden" name="solution_data" id="solution_data" value="" />
 
-        <!-- Container onde vamos adicionar dinamicamente os passos -->
+        <!--
+          Em vez de solutionData.passos, agora usaremos solutionData.steps,
+          e cada step terá "stepTitle", "stepDescription", e "miniSteps".
+        -->
         <div id="stepsContainer"></div>
 
         <!-- Botão para adicionar passo -->
@@ -299,11 +302,12 @@
   </footer>
 
   <script>
-    // Estrutura que manterá os passos e sub_passos
-    // NOTE: Mantemos o mesmo nome que o solucao.html espera:
-    // { passos: [ { titulo:'', descricao:'', sub_passos: [ {titulo:'', descricao:''}, ...] }, ... ] }
+    // Estrutura que manterá os passos e subpassos na forma { steps: [] }
+    // Cada step: { stepTitle: '', stepDescription: '', miniSteps: [] }
+    // Cada miniStep: { miniStepTitle: '', miniStepDescription: '' }
+
     let solutionData = {
-      passos: []
+      steps: []
     };
 
     const stepsContainer = document.getElementById('stepsContainer');
@@ -311,12 +315,11 @@
     const btnAddStep = document.getElementById('btnAddStep');
     const form = document.getElementById('solutionForm');
 
-    // Função para renderizar a lista de passos e subpassos
+    // Renderiza a lista de steps e miniSteps
     function renderSteps() {
-      // Limpa a div antes de renderizar
       stepsContainer.innerHTML = '';
 
-      solutionData.passos.forEach((step, stepIndex) => {
+      solutionData.steps.forEach((step, stepIndex) => {
         const stepBlock = document.createElement('div');
         stepBlock.className = 'step-block';
 
@@ -325,23 +328,23 @@
         stepTitleEl.textContent = `Passo ${stepIndex + 1}`;
         stepBlock.appendChild(stepTitleEl);
 
-        // Campo para o "Título" do passo
+        // Campo para o "stepTitle"
         const stepTitleInput = document.createElement('input');
         stepTitleInput.type = 'text';
         stepTitleInput.placeholder = 'Título do passo...';
-        stepTitleInput.value = step.titulo || '';
+        stepTitleInput.value = step.stepTitle || '';
         stepTitleInput.oninput = () => {
-          solutionData.passos[stepIndex].titulo = stepTitleInput.value;
+          solutionData.steps[stepIndex].stepTitle = stepTitleInput.value;
         };
         stepBlock.appendChild(stepTitleInput);
 
-        // Textarea para a "Descrição" do passo
+        // Textarea para a "stepDescription"
         const stepDesc = document.createElement('textarea');
         stepDesc.rows = 3;
         stepDesc.placeholder = 'Descrição detalhada do passo...';
-        stepDesc.value = step.descricao || '';
+        stepDesc.value = step.stepDescription || '';
         stepDesc.oninput = () => {
-          solutionData.passos[stepIndex].descricao = stepDesc.value;
+          solutionData.steps[stepIndex].stepDescription = stepDesc.value;
         };
         stepBlock.appendChild(stepDesc);
 
@@ -351,12 +354,12 @@
         btnRemoveStep.textContent = 'Remover Passo';
         btnRemoveStep.className = 'btn btn-remove';
         btnRemoveStep.onclick = () => {
-          solutionData.passos.splice(stepIndex, 1);
+          solutionData.steps.splice(stepIndex, 1);
           renderSteps();
         };
         stepBlock.appendChild(btnRemoveStep);
 
-        // Container para subpassos
+        // Container para miniSteps
         const subPassosWrapper = document.createElement('div');
         subPassosWrapper.classList.add('subpasso-block');
 
@@ -364,29 +367,28 @@
         subTitleEl.textContent = 'Sub-passos';
         subPassosWrapper.appendChild(subTitleEl);
 
-        // Renderiza cada sub_passos
-        step.sub_passos.forEach((sub, subIndex) => {
-          // Cria container para cada subpasso
+        // Renderiza cada miniStep
+        step.miniSteps.forEach((sub, subIndex) => {
           const subDiv = document.createElement('div');
           subDiv.style.marginBottom = '1rem';
 
-          // Campo para "título" do subpasso
+          // Título do miniStep
           const subTitulo = document.createElement('input');
           subTitulo.type = 'text';
           subTitulo.placeholder = `Título do Sub-passo ${subIndex + 1}...`;
-          subTitulo.value = sub.titulo || '';
+          subTitulo.value = sub.miniStepTitle || '';
           subTitulo.oninput = () => {
-            solutionData.passos[stepIndex].sub_passos[subIndex].titulo = subTitulo.value;
+            solutionData.steps[stepIndex].miniSteps[subIndex].miniStepTitle = subTitulo.value;
           };
           subDiv.appendChild(subTitulo);
 
-          // Campo para "descrição" do subpasso
+          // Descrição do miniStep
           const subDesc = document.createElement('textarea');
           subDesc.rows = 2;
           subDesc.placeholder = `Descrição do Sub-passo ${subIndex + 1}...`;
-          subDesc.value = sub.descricao || '';
+          subDesc.value = sub.miniStepDescription || '';
           subDesc.oninput = () => {
-            solutionData.passos[stepIndex].sub_passos[subIndex].descricao = subDesc.value;
+            solutionData.steps[stepIndex].miniSteps[subIndex].miniStepDescription = subDesc.value;
           };
           subDiv.appendChild(subDesc);
 
@@ -397,7 +399,7 @@
           btnRemoveSub.className = 'btn btn-remove';
           btnRemoveSub.style.marginLeft = '8px';
           btnRemoveSub.onclick = () => {
-            solutionData.passos[stepIndex].sub_passos.splice(subIndex, 1);
+            solutionData.steps[stepIndex].miniSteps.splice(subIndex, 1);
             renderSteps();
           };
           subDiv.appendChild(btnRemoveSub);
@@ -411,48 +413,47 @@
         btnAddSub.textContent = 'Adicionar Sub-passo';
         btnAddSub.className = 'btn';
         btnAddSub.onclick = () => {
-          solutionData.passos[stepIndex].sub_passos.push({
-            titulo: '',
-            descricao: ''
+          solutionData.steps[stepIndex].miniSteps.push({
+            miniStepTitle: '',
+            miniStepDescription: ''
           });
           renderSteps();
         };
         subPassosWrapper.appendChild(btnAddSub);
 
-        // Adiciona o subpassosWrapper ao passo
         stepBlock.appendChild(subPassosWrapper);
-
-        // Adiciona o bloco do passo ao container
         stepsContainer.appendChild(stepBlock);
       });
     }
 
     // Adiciona um passo vazio
     btnAddStep.addEventListener('click', () => {
-      solutionData.passos.push({
-        titulo: '',
-        descricao: '',
-        sub_passos: []
+      solutionData.steps.push({
+        stepTitle: '',
+        stepDescription: '',
+        miniSteps: []
       });
       renderSteps();
     });
 
-    // Antes de submeter, converte 'solutionData' em JSON e põe no hidden field
+    // Ao submeter, converte solutionData em JSON e põe no hidden field
     form.addEventListener('submit', () => {
       hiddenField.value = JSON.stringify(solutionData);
-      // Aqui, o valor será algo como:
+      // Exemplo final de solutionData:
       // {
-      //   "passos": [
+      //   "steps": [
       //     {
-      //       "titulo": "...",
-      //       "descricao": "...",
-      //       "sub_passos": [
-      //         {"titulo":"...", "descricao":"..."}
+      //       "stepTitle": "Verificar Bateria",
+      //       "stepDescription": "Use multímetro etc...",
+      //       "miniSteps": [
+      //         {
+      //           "miniStepTitle": "Corrosão",
+      //           "miniStepDescription": "Limpe terminais..."
+      //         }
       //       ]
       //     }
       //   ]
       // }
-      // que combina com a estrutura usada em solucao.html
     });
 
     // Render inicial (começa sem passos)
