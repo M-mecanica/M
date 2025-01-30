@@ -1,4 +1,4 @@
-<!-- resultados.html (Versão com design semelhante ao index.html) -->
+<!-- resultados.html (Versão com design semelhante ao index.html, sem sugestões de pesquisa) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -223,7 +223,6 @@
       font-size: 0.9rem;
       color: #fff;
     }
-
   </style>
 </head>
 <body>
@@ -237,13 +236,14 @@
   </header>
 
   <main>
-    <!-- Campo de pesquisa para refinar ou refazer a busca -->
+    <!-- Campo de pesquisa para refinar ou refazer a busca (sem sugestões) -->
     <form action="{{ url_for('search') }}" method="GET" class="search-container">
       <input
         type="text"
         name="q"
         placeholder="Pesquise um problema mecânico resolvido"
         value="{{ termo_busca if termo_busca else '' }}"
+        autocomplete="off"
       />
     </form>
 

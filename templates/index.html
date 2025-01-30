@@ -141,6 +141,8 @@
       text-align: center;
       outline: none;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      /* Desativa preenchimentos automáticos e sugestões anteriores */
+      autocomplete: off;
     }
     input[type="text"]::placeholder {
       color: #aaa;
@@ -202,6 +204,7 @@
           type="text"
           name="q"
           placeholder="Pesquise um problema mecânico resolvido"
+          autocomplete="off"
         />
       </form>
     </div>
