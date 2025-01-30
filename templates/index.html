@@ -99,6 +99,15 @@
       transform: scale(1.02);
     }
 
+    /* Ajuste dos ícones dentro dos botões */
+    .header-actions a svg,
+    .btn-nao-resolvidos svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor; /* Permite herdar a cor (#fff) */
+      margin-right: 0.4rem;
+    }
+
     /* MAIN */
     main {
       flex: 1;
@@ -174,23 +183,84 @@
   <header>
     <!-- Botão de "Problemas Não Resolvidos" (à esquerda) -->
     <a href="{{ url_for('unresolved') }}" class="btn-nao-resolvidos" title="Problemas Não Resolvidos">
+      <!-- Ícone (exemplo: triângulo de alerta) -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0 2.01 15h11.98a.5.5 0 0 0
+                 .442-.934l-6.45-12.5zM8 5c.28 0 .5.22.5.5V9a.5.5 0
+                 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0 6a.75.75 0 1 1
+                 0 1.5A.75.75 0 0 1 8 11z"></path>
+      </svg>
       Problemas Não Resolvidos
     </a>
 
     <!-- Ações no header (à direita) -->
     <div class="header-actions">
       <!-- Novo Problema -->
-      <a href="{{ url_for('add_problem') }}">Novo Problema</a>
+      <a href="{{ url_for('add_problem') }}">
+        <!-- Ícone (exemplo: ícone de "mais") -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
+                   1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
+                   0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+        </svg>
+        Novo Problema
+      </a>
       <div class="divider"></div>
 
       <!-- Gerenciar Usuários (apenas se for solucionador) -->
       {% if session.role == 'solucionador' %}
-      <a href="{{ url_for('listar_usuarios') }}">Gerenciar Usuários</a>
+      <a href="{{ url_for('listar_usuarios') }}">
+        <!-- Ícone (exemplo: ícone de "pessoas") -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M13 7a3 3 0 1 0-6 0 3 3 0 0 0
+                   6 0zm-1.5 0a1.5 1.5 0 1
+                   1-3 0 1.5 1.5 0 0 1 3 0zM6 8c0
+                   1.105-.672 2-1.5 2S3 9.105 3 8s.672-2
+                   1.5-2S6 6.895 6 8zm-1.5
+                   1a2.49 2.49 0 0 0
+                   1-.2 3.006 3.006 0 0 1
+                   2.25 2.9.5.5 0 0 1-1
+                   0 2.001 2.001 0 0
+                   0-4 0 .5.5 0 0
+                   1-1 0 3.006 3.006 0 0
+                   1 2.25-2.9c.306.127.641.2
+                   1 .2zm6.5 3c-.273 0-.535-.03-.789-.086a2.001
+                   2.001 0 0 0-3.422 0A3.105 3.105
+                   0 0 1 8 12a3.106 3.106 0 0
+                   1-1.289-.273.5.5 0 0
+                   1 .578-.816 2.001 2.001
+                   0 0 0 3.422 0 .5.5 0 0
+                   1 .578.816A3.106 3.106 0 0 1 11 12c.54 0
+                   1.064-.138 1.289-.273a.5.5 0 0 1
+                   .578.816c-.254.057-.516.086-.789.086z"/>
+        </svg>
+        Gerenciar Usuários
+      </a>
       <div class="divider"></div>
       {% endif %}
 
       <!-- Botão de Logout no canto superior direito -->
-      <a href="{{ url_for('logout') }}">Logout</a>
+      <a href="{{ url_for('logout') }}">
+        <!-- Ícone (exemplo: ícone de "sair") -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M9.828 4a.5.5 0 0 1 .354.146l3
+                   3a.5.5 0 0 1 0 .708l-3
+                   3A.5.5 0 0 1 9 10.5V9H5.5a.5.5
+                   0 0 1 0-1H9V5.5a.5.5 0 0
+                   1 .5-.5h.328z"/>
+          <path d="M13 14.5a.5.5 0 0
+                   1-.5.5h-5a2 2 0 0
+                   1-2-2v-1a.5.5 0 0
+                   1 1 0v1a1 1 0 0
+                   0 1 1h5a.5.5 0 0
+                   1 .5.5zm-7-11v-1a2 2 0 0
+                   1 2-2h5a.5.5 0 0
+                   1 0 1h-5a1 1 0 0
+                   0-1 1v1a.5.5 0 0
+                   1-1 0z"/>
+        </svg>
+        Logout
+      </a>
     </div>
   </header>
 
