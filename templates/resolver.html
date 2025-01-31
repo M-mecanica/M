@@ -1,4 +1,4 @@
-<!-- resolver.html (Versão com design semelhante às demais páginas) -->
+<!-- resolver.html (Versão com design semelhante às demais páginas, com maior destaque de fonte e largura nos campos de título e descrição) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -63,8 +63,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-
-      /* Para posicionar à esquerda do título */
       position: absolute;
       left: 2rem;
     }
@@ -79,7 +77,7 @@
       font-size: 1rem;
       padding: 2rem 1rem;
       width: 100%;
-      max-width: 900px;
+      max-width: 1200px; /* Aumentamos aqui a largura máxima do container geral */
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -92,10 +90,12 @@
       border-radius: 8px;
       padding: 1.5rem;
       width: 100%;
+      max-width: 1200px; /* Aumentamos aqui a largura máxima do container */
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      margin: 0 auto;
     }
 
     .container h2 {
@@ -121,11 +121,12 @@
       background: #f9f9f9;
       border-radius: 4px;
       position: relative;
+      font-size: 1.1rem; /* Aumenta a fonte geral do bloco do Passo */
     }
     .step-block h3 {
-      color: #333;
+      color: #000;
       margin-bottom: 0.5rem;
-      font-size: 1.1rem;
+      font-size: 1.4rem; /* Destaca o título "Passo x" */
       font-weight: 700;
     }
 
@@ -134,20 +135,19 @@
       border-left: 3px dashed #ccc;
       padding-left: 1rem;
       margin-top: 1rem;
+      font-size: 1rem;
     }
     .subpasso-block h4 {
       color: #444;
       margin-bottom: 0.3rem;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
     }
 
     /* Inputs e textareas: borda levemente arredondada, sombra leve */
     input[type="text"],
     textarea {
-      width: 100%;
       font-family: 'Roboto', sans-serif;
-      font-size: 1rem;
       background-color: #fff;
       color: #333;
       border: 1px solid #ccc;
@@ -157,11 +157,31 @@
       transition: border-color 0.2s, box-shadow 0.2s;
       margin-bottom: 0.75rem;
       resize: vertical;
+      width: 100%;
     }
     input[type="text"]:focus,
     textarea:focus {
       border-color: #aaa;
       box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Tamanhos diferenciados para os campos de título (Passos e Sub-passos) */
+    .input-step-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      width: 95% !important;
+    }
+    .input-substep-title {
+      font-size: 1.2rem;
+      font-weight: 500;
+      width: 90% !important;
+    }
+
+    /* Aumenta a largura do campo onde ficam as descrições (informações). */
+    .textarea-step-description,
+    .textarea-substep-description {
+      width: 95% !important;
+      font-size: 1rem;
     }
 
     /* Botões (Adicionar, Remover, etc.) no estilo retangular preto com texto branco */
@@ -264,7 +284,17 @@
 
   <script>
     // Estrutura que manterá os passos e subpassos:
-    // solutionData = { steps: [ { stepTitle, stepDescription, miniSteps: [{ miniStepTitle, miniStepDescription }] } ] }
+    // solutionData = {
+    //   steps: [
+    //     {
+    //       stepTitle: "",
+    //       stepDescription: "",
+    //       miniSteps: [
+    //         { miniStepTitle: "", miniStepDescription: "" }
+    //       ]
+    //     }
+    //   ]
+    // }
 
     let solutionData = {
       steps: []
@@ -291,6 +321,7 @@
         // Input do título do passo
         const stepTitleInput = document.createElement('input');
         stepTitleInput.type = 'text';
+        stepTitleInput.className = 'input-step-title';
         stepTitleInput.placeholder = 'Título do passo...';
         stepTitleInput.value = step.stepTitle || '';
         stepTitleInput.oninput = () => {
@@ -298,9 +329,10 @@
         };
         stepBlock.appendChild(stepTitleInput);
 
-        // Textarea para a descrição do passo
+        // Textarea para a descrição do passo (mais linhas)
         const stepDesc = document.createElement('textarea');
-        stepDesc.rows = 3;
+        stepDesc.rows = 6; // aumente conforme a necessidade
+        stepDesc.className = 'textarea-step-description';
         stepDesc.placeholder = 'Descrição detalhada do passo...';
         stepDesc.value = step.stepDescription || '';
         stepDesc.oninput = () => {
@@ -335,6 +367,7 @@
           // Título do miniStep
           const subTitulo = document.createElement('input');
           subTitulo.type = 'text';
+          subTitulo.className = 'input-substep-title';
           subTitulo.placeholder = `Título do Sub-passo ${subIndex + 1}...`;
           subTitulo.value = sub.miniStepTitle || '';
           subTitulo.oninput = () => {
@@ -342,9 +375,10 @@
           };
           subDiv.appendChild(subTitulo);
 
-          // Descrição do miniStep
+          // Descrição do miniStep (mais linhas)
           const subDesc = document.createElement('textarea');
-          subDesc.rows = 2;
+          subDesc.rows = 4; // aumente conforme a necessidade
+          subDesc.className = 'textarea-substep-description';
           subDesc.placeholder = `Descrição do Sub-passo ${subIndex + 1}...`;
           subDesc.value = sub.miniStepDescription || '';
           subDesc.oninput = () => {

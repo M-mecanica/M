@@ -69,13 +69,13 @@
       transform: scale(1.02);
     }
 
-    /* MAIN */
+    /* MAIN: centralizado, com largura máxima de 1200px, como no outro container */
     main {
       flex: 1;
       font-size: 1rem;
       padding: 2rem 1rem;
       width: 100%;
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -88,7 +88,7 @@
       list-style: none;
       margin: 0;
       padding: 0;
-      max-width: 600px;
+      /* Removemos o max-width anterior e deixamos 100% do main */
     }
     .problem-item {
       background-color: #fff;
@@ -108,7 +108,7 @@
       color: #555;
     }
 
-    /* Botão "Resolver" no estilo retangular preto com texto branco */
+    /* Botões no estilo retangular preto com texto branco */
     .btn-resolver {
       background-color: #000;
       color: #fff;
@@ -163,13 +163,20 @@
           <p>{{ problema["descricao"] }}</p>
 
           <!-- Se o usuário tem permissão de solucionador ou mecânico,
-               pode acessar a rota que exibe o formulário para resolver -->
+               pode acessar o formulário para resolver -->
           {% if session.role in ["solucionador", "mecanico"] %}
-            <form action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}" method="GET">
+            <form action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}" method="GET" style="display: inline;">
               <button type="submit" class="btn-resolver">Resolver</button>
             </form>
           {% else %}
             <p><em>Faça login como Solucionador ou Mecânico para resolver este problema.</em></p>
+          {% endif %}
+
+          <!-- Botão para remover problema (somente solucionador) -->
+          {% if session.role == "solucionador" %}
+            <form action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}" method="POST" style="display: inline;">
+              <button type="submit" class="btn-resolver">Remover</button>
+            </form>
           {% endif %}
         </li>
         {% endfor %}
