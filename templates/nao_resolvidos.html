@@ -9,6 +9,9 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
+  <!-- Importante para a responsividade em dispositivos móveis -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     /* Reset básico */
     * {
@@ -88,7 +91,6 @@
       list-style: none;
       margin: 0;
       padding: 0;
-      /* Removemos o max-width anterior e deixamos 100% do main */
     }
     .problem-item {
       background-color: #fff;
@@ -142,6 +144,37 @@
       font-size: 0.9rem;
       color: #fff;
       margin: 0;
+    }
+
+    /*----------------------------------------------
+      VERSÃO MOBILE (não altera a versão desktop)
+      Define estilos específicos para telas menores
+    ----------------------------------------------*/
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      header h1 {
+        font-size: 1.2rem;
+      }
+      .btn-voltar-inicio {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        left: 1rem;
+      }
+      main {
+        padding: 1rem 1rem;
+      }
+      .problem-item {
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      .problem-item h2 {
+        font-size: 1.1rem;
+      }
+      .no-results {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>

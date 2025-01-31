@@ -1,4 +1,3 @@
-<!-- registros.html (Lista de Usuários, design semelhante às outras páginas) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -10,6 +9,9 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
+  <!-- Meta para responsividade em dispositivos móveis -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     /* Reset básico */
     * {
@@ -46,7 +48,7 @@
       text-align: center;
     }
 
-    /* Botão Voltar (seta) no estilo do index.html */
+    /* Botão Voltar (apenas seta) no estilo do index.html */
     .btn-voltar-index {
       background-color: #000;
       color: #fff;
@@ -151,13 +153,55 @@
       color: #fff;
       margin: 0;
     }
+
+    /*----------------------------------------------
+      VERSÃO MOBILE (não altera a versão desktop)
+      Define estilos específicos para telas menores
+    ----------------------------------------------*/
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      header h1 {
+        font-size: 1.2rem;
+      }
+      .btn-voltar-index {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        left: 1rem;
+      }
+      main {
+        padding: 1rem;
+        max-width: 100%;
+      }
+      .page-title {
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+      }
+      .user-item {
+        padding: 0.8rem;
+        margin-bottom: 1rem;
+      }
+      .user-item h2 {
+        font-size: 1.1rem;
+        margin-bottom: 0.3rem;
+      }
+      .user-item p {
+        font-size: 0.9rem;
+        margin-bottom: 0.8rem;
+      }
+      .delete-btn {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+      }
+    }
   </style>
 </head>
 <body>
   <header>
-    <!-- Botão "Voltar" para a Página Inicial -->
+    <!-- Botão "Voltar" (apenas a seta) para a Página Inicial -->
     <a href="{{ url_for('index') }}" class="btn-voltar-index" title="Voltar para Página Inicial">
-      &#x2B05; Voltar
+      &#x2B05;
     </a>
     <h1>Gerenciar Usuários</h1>
   </header>
