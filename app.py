@@ -425,7 +425,7 @@ def edit_solution(problem_id):
 
     # GET: Renderiza o formulário de edição
     solucao_atual = problema.get("solucao", {})
-    passos = solucao_atual.get("passos", [])
+    passos = solucao_atual.get("steps", [])
 
     return render_template(
         "edit_solution.html",

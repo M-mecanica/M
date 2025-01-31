@@ -1,4 +1,3 @@
-<!-- edit_solution.html (Versão com design semelhante às demais páginas) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -38,6 +37,30 @@
       align-items: center;
       justify-content: center; /* Centraliza o título no header */
       position: relative;
+    }
+
+    /* Botão Voltar no mesmo estilo do solucao.html */
+    .btn-voltar-resultados {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 0;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      left: 2rem;
+    }
+    .btn-voltar-resultados:hover {
+      background-color: #333;
+      transform: scale(1.02);
     }
 
     /* Título do header em branco */
@@ -202,6 +225,13 @@
 </head>
 <body>
   <header>
+    <!-- Botão Voltar (igual ao da página solucao.html) -->
+    <a href="{{ url_for('exibir_solucao', problem_id=problema['_id']) }}"
+       class="btn-voltar-resultados"
+       title="Voltar">
+      &#x2B05;
+    </a>
+
     <h1>Editar Solução - {{ problema["titulo"] }}</h1>
   </header>
 
@@ -228,28 +258,36 @@
 
               <div class="form-group">
                 <label>Título do Passo:</label>
-                <input type="text" class="step-title" value="{{ step.titulo }}">
+                <!-- Aqui usamos step.stepTitle para preencher o valor atual -->
+                <input type="text"
+                       class="step-title"
+                       value="{{ step.stepTitle|default('') }}">
               </div>
 
               <div class="form-group">
                 <label>Descrição do Passo:</label>
-                <textarea class="step-desc">{{ step.descricao }}</textarea>
+                <!-- Aqui usamos step.stepDescription para preencher o valor atual -->
+                <textarea class="step-desc">{{ step.stepDescription|default('') }}</textarea>
               </div>
 
-              <!-- SUBPASSOS -->
+              <!-- SUBPASSOS (miniSteps) -->
               <div class="subpasso-container">
                 <h3>Subpassos</h3>
                 <div class="subpasso-list">
-                  {% for sub in step.sub_passos %}
+                  {% for sub in step.miniSteps %}
                     <div class="subpasso-block" data-sub-index="{{ loop.index0 }}">
                       <h3>Subpasso {{ loop.index }}</h3>
                       <div class="form-group">
                         <label>Título:</label>
-                        <input type="text" class="subpasso-title" value="{{ sub.titulo }}">
+                        <!-- Aqui usamos sub.miniStepTitle para preencher o valor atual -->
+                        <input type="text"
+                               class="subpasso-title"
+                               value="{{ sub.miniStepTitle|default('') }}">
                       </div>
                       <div class="form-group">
                         <label>Descrição:</label>
-                        <textarea class="subpasso-desc">{{ sub.descricao }}</textarea>
+                        <!-- Aqui usamos sub.miniStepDescription para preencher o valor atual -->
+                        <textarea class="subpasso-desc">{{ sub.miniStepDescription|default('') }}</textarea>
                       </div>
                       <button type="button" class="btn btn-remove remove-subpasso">
                         Remover Subpasso
@@ -409,7 +447,7 @@
 
     // Antes de submeter o formulário, construímos o JSON
     form.addEventListener('submit', (e) => {
-      // Monta a estrutura { passos: [ ... ] }
+      // Monta a estrutura { steps: [ ... ] }
       const allSteps = [];
       const stepBlocks = stepsContainer.querySelectorAll('.step-block');
 
@@ -427,20 +465,20 @@
           const descSub = subBlock.querySelector('.subpasso-desc').value.trim();
 
           subPassosData.push({
-            titulo: tituloSub,
-            descricao: descSub
+            miniStepTitle: tituloSub,
+            miniStepDescription: descSub
           });
         });
 
         allSteps.push({
-          titulo: tituloStep,
-          descricao: descStep,
-          sub_passos: subPassosData
+          stepTitle: tituloStep,
+          stepDescription: descStep,
+          miniSteps: subPassosData
         });
       });
 
       const finalSolution = {
-        passos: allSteps
+        steps: allSteps
       };
 
       // Convert para JSON e coloca no hidden input
