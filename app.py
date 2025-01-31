@@ -214,11 +214,12 @@ def resolver_form(problem_id):
     """
     Exibe o formulário 'resolver.html' para o usuário inserir
     passos e sub-passos da solução.
-    Somente 'solucionador' pode acessar.
+    Somente 'solucionador' OU 'mecanico' pode acessar.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
-    if not user_has_role(["solucionador"]):
+    # Verificação de permissão para 'solucionador' ou 'mecanico'
+    if not user_has_role(["solucionador", "mecanico"]):
         return "Acesso negado. Você não tem permissão para resolver problemas.", 403
 
     return render_template("resolver.html", problem_id=problem_id)
@@ -232,11 +233,11 @@ def resolver_problema(problem_id):
     """
     Recebe a estrutura (JSON) de passos e sub-passos,
     e marca o problema como resolvido no banco.
-    Somente 'solucionador' pode fazer isso.
+    Somente 'solucionador' OU 'mecanico' pode fazer isso.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
-    if not user_has_role(["solucionador"]):
+    if not user_has_role(["solucionador", "mecanico"]):
         return "Acesso negado. Você não tem permissão para resolver problemas.", 403
 
     solution_json = request.form.get("solution_data", "")
@@ -384,8 +385,7 @@ def delete_user(user_id):
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
     """
-    Permite que o solucionador edite a solução de um problema já resolvido,
-    mas de forma gráfica, sem exibir JSON cru.
+    Permite que o solucionador edite a solução de um problema já resolvido.
     """
     # Verifica login
     if not user_is_logged_in():
@@ -401,12 +401,11 @@ def edit_solution(problem_id):
         return "Este problema ainda não foi marcado como resolvido.", 400
 
     if request.method == "POST":
-        # Aqui, recebemos o JSON gerado pelo JavaScript
+        # Recebe o JSON gerado pelo JavaScript
         new_solution_json = request.form.get("solution_data", "").strip()
         try:
             new_solution_data = json.loads(new_solution_json)
         except json.JSONDecodeError:
-            # Caso o JSON esteja inválido, podemos mostrar um erro
             erro = "Houve um erro ao interpretar os dados. Tente novamente."
             return render_template(
                 "edit_solution.html",

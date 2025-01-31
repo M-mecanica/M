@@ -1,4 +1,3 @@
-<!-- nao_resolvidos.html (Página de Problemas Não Resolvidos com design semelhante ao index) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -163,14 +162,14 @@
           <h2>{{ problema["titulo"] }}</h2>
           <p>{{ problema["descricao"] }}</p>
 
-          <!-- Se o usuário tem permissão de solucionador ou moderador,
+          <!-- Se o usuário tem permissão de solucionador ou mecânico,
                pode acessar a rota que exibe o formulário para resolver -->
-          {% if session.role in ["solucionador", "moderador"] %}
+          {% if session.role in ["solucionador", "mecanico"] %}
             <form action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}" method="GET">
               <button type="submit" class="btn-resolver">Resolver</button>
             </form>
           {% else %}
-            <p><em>Faça login como Solucionador ou Moderador para resolver este problema.</em></p>
+            <p><em>Faça login como Solucionador ou Mecânico para resolver este problema.</em></p>
           {% endif %}
         </li>
         {% endfor %}
