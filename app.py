@@ -189,7 +189,12 @@ def register():
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
         senha = request.form.get("senha", "").strip()
-        role = request.form.get("role", "comum").strip()
+        # Excluímos o campo "role" caso não queira mais que o user escolha
+        role = "comum"  # Ou outro default
+
+        # Campos adicionais (WhatsApp e Máquinas), se você deseja salvá-los
+        whatsapp = request.form.get("whatsapp", "").strip()
+        maquinas = request.form.get("maquinas", "").strip()
 
         # Verifica se usuário já existe
         if usuarios_collection.find_one({"nome": nome}):
@@ -199,7 +204,9 @@ def register():
         novo_usuario = {
             "nome": nome,
             "senha": senha,  # Em produção: use hash/criptografia
-            "role": role
+            "role": role,
+            "whatsapp": whatsapp,
+            "maquinas": maquinas
         }
         usuarios_collection.insert_one(novo_usuario)
         return redirect(url_for("login"))
@@ -392,6 +399,31 @@ def inline_edit_problem(problem_id):
     )
     return redirect(url_for("search"))
 
+##############################################################################
+#            ROTA PARA EDITAR FUNÇÃO DO USUÁRIO (SOLUCIONADOR)
+##############################################################################
+@app.route("/edit_user_role/<user_id>", methods=["POST"])
+def edit_user_role(user_id):
+    """
+    Permite que um 'solucionador' altere a função (role) de um usuário.
+    """
+    if not user_is_logged_in():
+        return redirect(url_for("login"))
+    if not user_has_role(["solucionador"]):
+        return "Acesso negado.", 403
+
+    novo_role = request.form.get("role", "comum").strip()
+
+    usuarios_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"role": novo_role}}
+    )
+
+    return redirect(url_for("listar_usuarios"))
+
+##############################################################################
+#                ROTAS PARA LISTAR/DELETAR USUÁRIOS
+##############################################################################
 @app.route("/usuarios", methods=["GET"])
 def listar_usuarios():
     """
@@ -421,6 +453,9 @@ def delete_user(user_id):
     usuarios_collection.delete_one({"_id": ObjectId(user_id)})
     return redirect(url_for("listar_usuarios"))
 
+##############################################################################
+#                ROTA PARA EDIÇÃO DE SOLUÇÃO (APENAS SOLUCIONADOR)
+##############################################################################
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
     """
@@ -484,7 +519,7 @@ def edit_solution(problem_id):
     )
 
 ##############################################################################
-#    ROTA PARA PESQUISAR PEÇAS (ITEM_SEARCH.HTML) - APENAS CARREGA TELA
+#     ROTA PARA PESQUISAR PEÇAS (ITEM_SEARCH.HTML) - APENAS CARREGA TELA
 ##############################################################################
 
 @app.route("/item_search", methods=["GET"])
@@ -492,14 +527,14 @@ def item_search():
     """
     Exibe a página de pesquisa de itens (integra com DB MachineZONE).
     Utiliza o template 'item_search.html', onde foi ajustado o botão de voltar
-    para usar 'url_for("index")' em vez de 'index.html'.
+    para usar 'url_for("index")'.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
     return render_template("item_search.html")
 
 ##############################################################################
-#       ROTA /load_items - BUSCA NO BANCO MZ (MachineZONE) E RETORNA JSON
+#         ROTA /load_items - BUSCA NO BANCO MZ (MachineZONE) E RETORNA JSON
 ##############################################################################
 
 ITEMS_PER_PAGE = 20  # Quantidade de itens por página
@@ -515,7 +550,6 @@ def load_items():
     Retorna JSON: { items: [...], has_more: bool, total_items: int }
     """
     if not user_is_logged_in():
-        # Caso queira bloquear pesquisa para não logados. Senão, retire esta checagem.
         return jsonify({"success": False, "message": "Não autorizado"}), 403
 
     search_query = request.args.get('search', '').strip()
@@ -540,7 +574,6 @@ def load_items():
                 'stock_mz': item.get('stock_mz', 0),
                 'stock_eld': item.get('stock_eld', 0),
                 'price': float(item.get('price', 0.0)),
-                # Sem destaque => 'is_highlighted' = 0
                 'is_highlighted': 0
             })
         return jsonify({
@@ -636,14 +669,14 @@ def load_items():
     })
 
 ##############################################################################
-#            (Opcional) ROTAS DE HIGHLIGHT / UNHIGHLIGHT (MZ)
+#        (Opcional) ROTAS DE HIGHLIGHT / UNHIGHLIGHT (MZ) - Exemplo
 ##############################################################################
 
 @app.route("/highlight_item", methods=["POST"])
 def highlight_item():
     """
     Marca a 'matching_phrases' no item do DB MZ, usando a frase de busca.
-    Deixamos caso queira "demarcar" manualmente, mas aqui não há botões front-end.
+    Exemplo de rota extra.
     """
     if not user_is_logged_in():
         return jsonify({'success': False, 'message': 'Não autorizado'}), 403
@@ -679,6 +712,7 @@ def highlight_item():
 def unhighlight_item():
     """
     Remove a 'matching_phrases' do item do DB MZ, usando a frase de busca.
+    Exemplo de rota extra.
     """
     if not user_is_logged_in():
         return jsonify({'success': False, 'message': 'Não autorizado'}), 403

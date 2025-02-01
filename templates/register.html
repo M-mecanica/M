@@ -63,7 +63,7 @@
 
     input[type="text"],
     input[type="password"],
-    select {
+    textarea {
       margin-bottom: 1rem;
       padding: 0.8rem;
       border: 2px solid #444;
@@ -72,6 +72,12 @@
       color: #000;
       font-size: 1rem;
       outline: none;
+    }
+
+    /* Ajusta a altura do textarea para algumas linhas */
+    textarea {
+      min-height: 80px;
+      resize: vertical;
     }
 
     input[type="submit"] {
@@ -109,6 +115,16 @@
       font-weight: bold;
     }
 
+    /* Aviso informativo (ex.: sobre utilidade do WhatsApp e Máquinas) */
+    .info-optional-fields {
+      background-color: #1f1f1f;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
     footer {
       background-color: #1f1f1f;
       text-align: center;
@@ -137,7 +153,7 @@
 
       input[type="text"],
       input[type="password"],
-      select {
+      textarea {
         font-size: 1rem;
         padding: 0.6rem;
       }
@@ -150,6 +166,10 @@
       footer p {
         font-size: 0.9rem;
       }
+
+      .info-optional-fields {
+        font-size: 0.85rem;
+      }
     }
   </style>
 </head>
@@ -158,9 +178,20 @@
 
   <main>
     <h1>Registrar Novo Usuário</h1>
+
+    <!-- Se existir alguma mensagem de erro, exibe aqui -->
     {% if erro %}
       <div class="erro">{{ erro }}</div>
     {% endif %}
+
+    <!-- Mensagem explicativa sobre os campos opcionais -->
+    <div class="info-optional-fields">
+      <p>
+        O número de WhatsApp e as máquinas que você possui são opcionais,
+        mas podem ajudar na pesquisa de itens e na hora de resolver problemas mecânicos.
+      </p>
+    </div>
+
     <form action="{{ url_for('register') }}" method="POST">
       <label for="nome">Nome de Usuário</label>
       <input type="text" id="nome" name="nome" required />
@@ -168,15 +199,28 @@
       <label for="senha">Senha</label>
       <input type="password" id="senha" name="senha" required />
 
-      <label for="role">Função de Usuário</label>
-      <select id="role" name="role">
-        <option value="comum">Usuário Comum</option>
-        <option value="mecanico">Mecânico</option>
-        <option value="solucionador">Solucionador</option>
-      </select>
+      <!-- Campo WhatsApp (opcional) -->
+      <label for="whatsapp">WhatsApp (Opcional)</label>
+      <input
+        type="text"
+        id="whatsapp"
+        name="whatsapp"
+        placeholder="(99) 99999-9999"
+        pattern="^\(\d{2}\)\s?\d{5}-\d{4}$"
+        title="Formato esperado: (99) 99999-9999"
+      />
+
+      <!-- Campo para Máquinas que o usuário possui (opcional) -->
+      <label for="maquinas">Máquinas que Possui (Opcional)</label>
+      <textarea
+        id="maquinas"
+        name="maquinas"
+        placeholder="Exemplos: Trator John Deere modelo X, Colheitadeira New Holland..."
+      ></textarea>
 
       <input type="submit" value="Registrar" />
     </form>
+
     <div class="links-auth">
       <a href="{{ url_for('login') }}">Login</a>
     </div>
