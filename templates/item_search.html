@@ -89,21 +89,21 @@
     }
 
     /* =========================================================================
-       CAMPO DE PESQUISA (DESKTOP)
+       CAMPO DE PESQUISA (DESKTOP) - ALTURA E FONTES AUMENTADAS
        ========================================================================= */
     .search-container {
       display: flex;
       width: 100%;
-      max-width: 800px; /* Largura maior para acomodar mais texto */
+      max-width: 800px;
       margin-bottom: 2rem;
     }
     .search-container input[type="text"] {
       flex: 1;
-      padding: 1rem 1.5rem;
+      padding: 1.2rem 1.8rem; /* Aumenta a altura do campo de busca */
       border: none;
       border-radius: 32px;
       background-color: #fff;
-      font-size: 1rem;
+      font-size: 1.2rem; /* Aumenta o tamanho da fonte no campo de busca */
       color: #333;
       text-align: center;
       outline: none;
@@ -137,14 +137,14 @@
       padding: 0;
     }
     .results li {
-      /* Altera para "flex" para podermos alinhar botão à direita */
       display: flex;
       align-items: center;
       justify-content: space-between;
 
       background-color: #fff;
       border-radius: 8px;
-      padding: 1rem;
+      /* Aumenta o espaçamento interno (altura do container) */
+      padding: 1.5rem;
       margin-bottom: 1.5rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: relative;
@@ -165,41 +165,32 @@
     /* Destaque quando data-highlighted="1" */
     .results li[data-highlighted="1"] {
       border-left: 5px solid green;
-      padding-left: calc(1rem - 5px);
+      padding-left: calc(1.5rem - 5px);
     }
 
-    /* Container que agrupa o título e detalhes do item à esquerda */
+    /* Container que agrupa o título (ou descrição) do item */
     .item-info {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
+    /* Aumenta o tamanho da fonte da descrição */
     .item-info strong {
-      font-size: 1rem;
+      font-size: 1.1rem;
       color: #000;
     }
 
-    /* Deixa os dados de estoque/preço lado a lado */
-    .details {
-      display: flex;
-      gap: 1rem; /* Espaçamento horizontal */
-    }
-    .details span {
-      font-size: 0.95rem;
-      color: #555;
-    }
-
     /* =========================================================================
-       BOTÃO WHATSAPP (lado direito do card) (DESKTOP)
+       BOTÃO WHATSAPP (lado direito do card) (DESKTOP) - TAMANHO AUMENTADO
        ========================================================================= */
     .whatsapp-btn {
-      margin-left: 1rem;   /* Espaço à esquerda para separar do conteúdo */
-      padding: 0.5rem 1rem;
-      background-color: #25D366; /* cor do WhatsApp */
+      margin-left: 1rem;
+      padding: 0.7rem 1.4rem; /* Aumenta a área de clique do botão */
+      background-color: #25D366;
       color: #fff;
       border: none;
       border-radius: 4px;
-      font-size: 0.9rem;
+      font-size: 1rem; /* Aumenta o tamanho da fonte do botão */
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
@@ -257,7 +248,7 @@
       }
       .search-container input[type="text"] {
         padding: 0.8rem;
-        font-size: 0.9rem;
+        font-size: 1rem; /* Mantém um bom tamanho no mobile */
       }
       .results li {
         flex-direction: column; /* Empilha conteúdo e botão no modo mobile */
@@ -269,10 +260,6 @@
       #itemCount {
         font-size: 0.95rem;
       }
-      .details {
-        flex-direction: column; /* Empilha estoque/preço no mobile */
-        gap: 0.3rem;
-      }
     }
   </style>
 </head>
@@ -281,7 +268,7 @@
   <!-- Cabeçalho com botão de voltar e título -->
   <header>
     <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">&#x2B05;</a>
-    <h1>Pesquisa de Itens (MZ)</h1>
+    <h1>Pesquisa de Itens</h1>
   </header>
 
   <!-- Conteúdo principal -->
@@ -350,15 +337,10 @@
               listItem.setAttribute('data-id', item._id);
               listItem.setAttribute('data-highlighted', item.is_highlighted ? '1' : '0');
 
-              // HTML interno: descrição e detalhes ficam à esquerda, botão WA à direita
+              // HTML interno: apenas a descrição e o botão de contato
               listItem.innerHTML = `
                 <div class="item-info">
                   <strong>${item.description}</strong>
-                  <div class="details">
-                    <span>Estoque MZ: ${item.stock_mz}</span>
-                    <span>Estoque ELD: ${item.stock_eld}</span>
-                    <span>Preço: R$ ${item.price.toFixed(2)}</span>
-                  </div>
                 </div>
                 <button class="whatsapp-btn" onclick="openWhatsApp('${item.description}')">
                   Contato MZ
