@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>M - Pesquisa de Itens (MZ)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonte básica (opcional) -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* =========================================================================
+       RESET BÁSICO
+       ========================================================================= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* =========================================================================
+       BODY / FONTES / CORES GERAIS
+       ========================================================================= */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background-color: #f0f0f0;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* =========================================================================
+       HEADER PRETO COM BOTÃO "VOLTAR"
+       ========================================================================= */
+    header {
+      background-color: #000;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    /* Botão "Voltar" estilo retangular, com hover */
+    .btn-voltar-inicio {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 0;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-voltar-inicio:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+    header h1 {
+      color: #fff;
+      font-size: 1.4rem;
+      margin: 0 auto; /* centraliza o título */
+      text-align: center;
+    }
+
+    /* =========================================================================
+       MAIN: CONTAINER GERAL DOS ELEMENTOS
+       ========================================================================= */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* =========================================================================
+       CAMPO DE PESQUISA
+       ========================================================================= */
+    .search-container {
+      display: flex;
+      width: 100%;
+      max-width: 800px; /* Largura maior do que antes */
+      margin-bottom: 2rem;
+    }
+    .search-container input[type="text"] {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: 32px;
+      background-color: #fff;
+      font-size: 1rem;
+      color: #333;
+      text-align: center;
+      outline: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .search-container input[type="text"]::placeholder {
+      color: #aaa;
+    }
+
+    /* =========================================================================
+       CONTADOR DE RESULTADOS
+       ========================================================================= */
+    #itemCount {
+      font-size: 1rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #555;
+    }
+
+    /* =========================================================================
+       LISTA E ITENS DE RESULTADO (cards no estilo do resultados.html)
+       ========================================================================= */
+    .result-container {
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 1rem;
+    }
+    .results {
+      list-style: none;
+      padding: 0;
+    }
+
+    .results li {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      /* ANIMAÇÃO DE ENTRADA (fade-in) */
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeIn 0.5s forwards;
+    }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* Destaque quando data-highlighted="1" */
+    .results li[data-highlighted="1"] {
+      border-left: 5px solid green;
+      padding-left: calc(1rem - 5px);
+    }
+    /* Título e detalhes de cada item */
+    .results li strong {
+      font-size: 1rem;
+      color: #000;
+    }
+    .details span {
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    /* =========================================================================
+       LOADING
+       ========================================================================= */
+    .loading {
+      text-align: center;
+      margin: 2rem 0;
+      font-size: 1rem;
+      color: #666;
+    }
+
+    /* =========================================================================
+       RODAPÉ
+       ========================================================================= */
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+    }
+
+    /* =========================================================================
+       MEDIA QUERIES (versão responsiva)
+       ========================================================================= */
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      header h1 {
+        font-size: 1.2rem;
+      }
+      .btn-voltar-inicio {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+      main {
+        padding: 1rem;
+      }
+      .search-container {
+        max-width: 100%;
+        margin-bottom: 1.5rem;
+      }
+      .search-container input[type="text"] {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+      }
+      .results li {
+        margin-bottom: 1rem;
+      }
+      .results li strong {
+        font-size: 1rem;
+      }
+      .details span {
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Cabeçalho com botão de voltar e título -->
+  <header>
+    <!-- Substitua 'index.html' pelo url_for('index') -->
+    <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">&#x2B05;</a>
+    <h1>Pesquisa de Itens (MZ)</h1>
+  </header>
+
+  <!-- Conteúdo principal -->
+  <main>
+    <!-- Barra de busca -->
+    <form class="search-container" onsubmit="startSearch(); return false;">
+      <input
+        type="text"
+        id="searchInput"
+        name="search"
+        placeholder="Digite para pesquisar itens..."
+        autocomplete="off"
+        autofocus
+      />
+    </form>
+
+    <!-- Contador de resultados -->
+    <div id="itemCount"></div>
+
+    <!-- Lista de resultados -->
+    <div class="result-container">
+      <ul id="results" class="results"></ul>
+    </div>
+
+    <!-- Loading (spinner ou texto) -->
+    <div id="loading" class="loading" style="display: none;">
+      Carregando...
+    </div>
+  </main>
+
+  <!-- Rodapé -->
+  <footer>
+    <p>© 2025 Plataforma M - Integração MZ</p>
+  </footer>
+
+  <!-- Scripts de busca e scroll infinito -->
+  <script>
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMoreItems = true;
+
+    /*
+      1) Carrega itens da base MZ (rota /load_items) via AJAX, página p.
+    */
+    function loadItemsPage(p) {
+      return new Promise((resolve, reject) => {
+        const searchQuery = document.getElementById('searchInput').value.trim();
+        fetch(`/load_items?page=${p}&search=${encodeURIComponent(searchQuery)}`)
+          .then(response => response.json())
+          .then(data => {
+            // Se for a primeira página, limpamos e atualizamos o contador
+            if (p === 1) {
+              document.getElementById('itemCount').textContent =
+                `Itens encontrados: ${data.total_items}`;
+              document.getElementById('results').innerHTML = '';
+            }
+
+            const resultsList = document.getElementById('results');
+
+            data.items.forEach(item => {
+              const listItem = document.createElement('li');
+              // Se no back-end marcamos "is_phrase_match" => item.is_highlighted = true
+              listItem.setAttribute('data-id', item._id);
+              listItem.setAttribute('data-highlighted', item.is_highlighted ? '1' : '0');
+
+              listItem.innerHTML = `
+                <strong>${item.description}</strong>
+                <div class="details">
+                  <span>Estoque MZ: ${item.stock_mz}</span>
+                  <span>Estoque ELD: ${item.stock_eld}</span>
+                  <span>Preço: R$ ${item.price.toFixed(2)}</span>
+                </div>
+              `;
+
+              resultsList.appendChild(listItem);
+            });
+
+            if (!data.has_more) {
+              hasMoreItems = false;
+            }
+            resolve();
+          })
+          .catch(error => {
+            console.error('Erro:', error);
+            reject(error);
+          });
+      });
+    }
+
+    /*
+      2) Carregar mais itens ao rolar até perto do fim (scroll infinito).
+    */
+    function loadMoreItems() {
+      if (isLoading || !hasMoreItems) return;
+      isLoading = true;
+      document.getElementById('loading').style.display = 'block';
+
+      loadItemsPage(currentPage)
+        .then(() => {
+          currentPage += 1;
+          isLoading = false;
+          document.getElementById('loading').style.display = 'none';
+        })
+        .catch(() => {
+          isLoading = false;
+          document.getElementById('loading').style.display = 'none';
+        });
+    }
+    window.addEventListener('scroll', () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50) {
+        loadMoreItems();
+      }
+    });
+
+    /*
+      3) Ao dar ENTER no campo de busca, inicia a pesquisa
+         (resetando para página 1, etc).
+    */
+    function startSearch() {
+      currentPage = 1;
+      hasMoreItems = true;
+      isLoading = false;
+      document.getElementById('itemCount').textContent = '';
+      document.getElementById('results').innerHTML = '';
+      loadMoreItems();
+    }
+
+    /*
+      4) Quando a página carrega, carregamos a primeira página (p=1).
+    */
+    window.onload = function() {
+      loadMoreItems();
+    };
+  </script>
+</body>
+</html>

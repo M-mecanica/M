@@ -20,7 +20,7 @@
       box-sizing: border-box;
     }
 
-    /* BODY: fundo cinza claro e texto #333 (como no index.html) */
+    /* BODY: fundo cinza claro e texto #333 */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -32,17 +32,15 @@
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto, estilo retangular, mantendo apenas o texto "Editar Solução" */
+    /* HEADER */
     header {
       background-color: #000;
       padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: center; /* Centraliza o título no header */
+      justify-content: center;
       position: relative;
     }
-
-    /* Botão Voltar no mesmo estilo do solucao.html */
     .btn-voltar-resultados {
       background-color: #000;
       color: #fff;
@@ -65,8 +63,6 @@
       background-color: #333;
       transform: scale(1.02);
     }
-
-    /* Título do header em branco (sem o nome do problema) */
     header h1 {
       color: #fff;
       font-size: 1.4rem;
@@ -85,28 +81,21 @@
       display: flex;
       flex-direction: column;
     }
-
-    /* Título do problema (agora centralizado abaixo do header) */
     .problem-title {
       text-align: center;
       font-size: 1.4rem;
       margin-bottom: 1rem;
       font-weight: 600;
     }
-
-    /* Mensagem de erro */
     .erro {
       color: #d00;
       margin-bottom: 1rem;
       font-weight: bold;
     }
-
     .info {
       margin-bottom: 1rem;
       color: #555;
     }
-
-    /* Form container (opcional, para agrupar) */
     .form-container {
       background-color: #fff;
       border: 1px solid #ccc;
@@ -114,8 +103,6 @@
       padding: 1.5rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-
-    /* Botões no estilo retangular preto com texto branco */
     .btn {
       display: inline-block;
       padding: 0.6rem 1.2rem;
@@ -132,16 +119,13 @@
       background-color: #333;
       transform: scale(1.02);
     }
-
     .btn-remove {
-      background-color: #f44336; /* vermelho */
+      background-color: #f44336;
       margin-left: 1rem;
     }
     .btn-remove:hover {
       background-color: #d32f2f;
     }
-
-    /* Container para cada passo */
     .step-block {
       background-color: #f9f9f9;
       padding: 1rem;
@@ -155,7 +139,6 @@
       color: #333;
       margin-bottom: 0.5rem;
     }
-
     .form-group {
       margin-bottom: 1rem;
     }
@@ -180,8 +163,6 @@
     textarea:focus {
       border-color: #aaa;
     }
-
-    /* Container de subpassos */
     .subpasso-container {
       background-color: #fff;
       padding: 0.8rem;
@@ -202,16 +183,12 @@
       font-size: 1rem;
       margin-bottom: 0.3rem;
     }
-
-    /* Botão "Salvar Alterações" em verde */
     .btn-save {
       background-color: #4caf50;
     }
     .btn-save:hover {
       background-color: #45a049;
     }
-
-    /* Botão "Cancelar" em tom de cinza */
     .btn-cancel {
       background-color: #ccc;
       color: #000;
@@ -220,8 +197,6 @@
     .btn-cancel:hover {
       background-color: #aaa;
     }
-
-    /* FOOTER preto, texto branco (como no index.html) */
     footer {
       background-color: #000;
       text-align: center;
@@ -232,11 +207,6 @@
       color: #fff;
       margin: 0;
     }
-
-    /*----------------------------------------------
-      VERSÃO MOBILE (não altera a versão desktop)
-      Define estilos específicos para telas menores
-    ----------------------------------------------*/
     @media (max-width: 768px) {
       header {
         padding: 1rem;
@@ -297,13 +267,10 @@
        title="Voltar">
       &#x2B05;
     </a>
-
-    <!-- Título principal do header (sem o nome do problema) -->
     <h1>Editar Solução</h1>
   </header>
 
   <main>
-    <!-- Título do problema abaixo do header, centralizado -->
     <h2 class="problem-title">{{ problema["titulo"] }}</h2>
 
     {% if erro %}
@@ -312,52 +279,73 @@
 
     <p class="info">
       Ajuste os passos e subpassos conforme necessário. Clique em <strong>Salvar Alterações</strong> ao final.
+      <br>Você também pode enviar uma imagem para cada passo e cada subpasso, logo após o campo de descrição.
     </p>
 
     <div class="form-container">
-      <!-- Formulário que será submetido ao servidor -->
-      <form method="POST" id="solutionForm">
-        <!-- Campo oculto onde será armazenado o JSON final da solução -->
+      <!-- Important: multipart/form-data para upload de imagens -->
+      <form method="POST" id="solutionForm" enctype="multipart/form-data">
         <input type="hidden" id="solution_data" name="solution_data" value="" />
 
-        <!-- Container que segura todos os passos -->
         <div id="stepsContainer">
           {% for step in passos %}
-            <div class="step-block" data-step-index="{{ loop.index0 }}">
-              <h2>Passo {{ loop.index }}</h2>
+            {% set stepIndex = loop.index0 %}
+            <div class="step-block" data-step-index="{{ stepIndex }}">
+              <h2>Passo {{ stepIndex + 1 }}</h2>
 
               <div class="form-group">
                 <label>Título do Passo:</label>
-                <!-- Aqui usamos step.stepTitle para preencher o valor atual -->
-                <input type="text"
-                       class="step-title"
-                       value="{{ step.stepTitle|default('') }}">
+                <input type="text" class="step-title" value="{{ step.stepTitle|default('') }}">
               </div>
 
               <div class="form-group">
                 <label>Descrição do Passo:</label>
-                <!-- Aqui usamos step.stepDescription para preencher o valor atual -->
                 <textarea class="step-desc">{{ step.stepDescription|default('') }}</textarea>
               </div>
 
-              <!-- SUBPASSOS (miniSteps) -->
+              <!-- Imagem do Passo -->
+              <div class="form-group">
+                <label>Imagem do Passo (opcional):</label>
+                <input type="file"
+                       name="stepImage_{{ stepIndex }}"
+                       accept="image/*">
+                {% if step.stepImage %}
+                  <p style="margin-top: 4px;">Imagem atual:</p>
+                  <img src="{{ url_for('static', filename=step.stepImage.split('static/')|last) }}"
+                       alt="Imagem do Passo"
+                       style="max-width: 200px; display: block; margin-top: 4px;">
+                {% endif %}
+              </div>
+
+              <!-- SUBPASSOS -->
               <div class="subpasso-container">
                 <h3>Subpassos</h3>
                 <div class="subpasso-list">
                   {% for sub in step.miniSteps %}
-                    <div class="subpasso-block" data-sub-index="{{ loop.index0 }}">
-                      <h3>Subpasso {{ loop.index }}</h3>
+                    {% set subIndex = loop.index0 %}
+                    <div class="subpasso-block" data-sub-index="{{ subIndex }}">
+                      <h3>Subpasso {{ subIndex + 1 }}</h3>
                       <div class="form-group">
                         <label>Título:</label>
-                        <!-- Aqui usamos sub.miniStepTitle para preencher o valor atual -->
                         <input type="text"
                                class="subpasso-title"
                                value="{{ sub.miniStepTitle|default('') }}">
                       </div>
                       <div class="form-group">
                         <label>Descrição:</label>
-                        <!-- Aqui usamos sub.miniStepDescription para preencher o valor atual -->
                         <textarea class="subpasso-desc">{{ sub.miniStepDescription|default('') }}</textarea>
+                      </div>
+                      <div class="form-group">
+                        <label>Imagem do Subpasso (opcional):</label>
+                        <input type="file"
+                               name="subStepImage_{{ stepIndex }}_{{ subIndex }}"
+                               accept="image/*">
+                        {% if sub.subStepImage %}
+                          <p style="margin-top: 4px;">Imagem atual:</p>
+                          <img src="{{ url_for('static', filename=sub.subStepImage.split('static/')|last) }}"
+                               alt="Imagem do Subpasso"
+                               style="max-width: 200px; display: block; margin-top: 4px;">
+                        {% endif %}
                       </div>
                       <button type="button" class="btn btn-remove remove-subpasso">
                         Remover Subpasso
@@ -394,13 +382,12 @@
   </footer>
 
   <script>
-    // Seletores
     const stepsContainer = document.getElementById('stepsContainer');
     const solutionDataInput = document.getElementById('solution_data');
     const form = document.getElementById('solutionForm');
     const addStepBtn = document.getElementById('addStepBtn');
 
-    // Função para criar dinamicamente o HTML de um "step-block" novo
+    // Cria dinamicamente um passo
     function createStepBlock(stepIndex) {
       const stepBlock = document.createElement('div');
       stepBlock.classList.add('step-block');
@@ -416,6 +403,10 @@
           <label>Descrição do Passo:</label>
           <textarea class="step-desc" placeholder="Ex: Verificar o local com barulho"></textarea>
         </div>
+        <div class="form-group">
+          <label>Imagem do Passo (opcional):</label>
+          <input type="file" name="stepImage_${stepIndex}" accept="image/*">
+        </div>
         <div class="subpasso-container">
           <h3>Subpassos</h3>
           <div class="subpasso-list"></div>
@@ -426,8 +417,8 @@
       return stepBlock;
     }
 
-    // Função para criar dinamicamente o HTML de um "subpasso-block"
-    function createSubpassoBlock(subIndex) {
+    // Cria dinamicamente um subpasso
+    function createSubpassoBlock(stepIndex, subIndex) {
       const subBlock = document.createElement('div');
       subBlock.classList.add('subpasso-block');
       subBlock.setAttribute('data-sub-index', subIndex);
@@ -442,19 +433,23 @@
           <label>Descrição:</label>
           <textarea class="subpasso-desc" placeholder="Ex: Visualizar o interior"></textarea>
         </div>
+        <div class="form-group">
+          <label>Imagem do Subpasso (opcional):</label>
+          <input type="file" name="subStepImage_${stepIndex}_${subIndex}" accept="image/*">
+        </div>
         <button type="button" class="btn btn-remove remove-subpasso">Remover Subpasso</button>
       `;
       return subBlock;
     }
 
-    // Adiciona evento para o botão "Adicionar Passo"
+    // Botão "Adicionar Passo"
     addStepBtn.addEventListener('click', () => {
       const stepIndex = stepsContainer.children.length;
       const stepBlock = createStepBlock(stepIndex);
       stepsContainer.appendChild(stepBlock);
     });
 
-    // Delegação de eventos no container principal (remover passo/subpasso, adicionar subpasso)
+    // Delegação de eventos para remover passos/subpassos e adicionar subpassos
     stepsContainer.addEventListener('click', (e) => {
       // Remover Passo
       if (e.target.classList.contains('remove-step')) {
@@ -467,13 +462,12 @@
 
       // Adicionar Subpasso
       if (e.target.classList.contains('add-subpasso')) {
-        const subpassoContainer = e.target.closest('.subpasso-container');
-        if (subpassoContainer) {
-          const subpassoList = subpassoContainer.querySelector('.subpasso-list');
-          const subIndex = subpassoList.children.length;
-          const subBlock = createSubpassoBlock(subIndex);
-          subpassoList.appendChild(subBlock);
-        }
+        const stepBlock = e.target.closest('.step-block');
+        const stepIndex = parseInt(stepBlock.getAttribute('data-step-index'));
+        const subpassoList = stepBlock.querySelector('.subpasso-list');
+        const subIndex = subpassoList.children.length;
+        const subBlock = createSubpassoBlock(stepIndex, subIndex);
+        subpassoList.appendChild(subBlock);
       }
 
       // Remover Subpasso
@@ -482,12 +476,12 @@
         const subpassoList = e.target.closest('.subpasso-list');
         if (subBlock && subpassoList) {
           subpassoList.removeChild(subBlock);
-          reindexSubpassos(subpassoList);
+          reindexSubpassos(subpassoList, parseInt(stepBlock.getAttribute('data-step-index')));
         }
       }
     });
 
-    // Função para reindexar os passos (atualiza "Passo X" e data-step-index)
+    // Reindexa passos
     function reindexSteps() {
       const stepBlocks = stepsContainer.querySelectorAll('.step-block');
       stepBlocks.forEach((block, index) => {
@@ -496,14 +490,19 @@
         if (h2) {
           h2.textContent = `Passo ${index + 1}`;
         }
-        // Reindexa subpassos dentro do passo
+        // Atualiza name do input file do passo
+        const stepFileInput = block.querySelector(`input[type="file"][name^="stepImage_"]`);
+        if (stepFileInput) {
+          stepFileInput.name = `stepImage_${index}`;
+        }
+        // Subpassos
         const subpassoList = block.querySelector('.subpasso-list');
-        reindexSubpassos(subpassoList);
+        reindexSubpassos(subpassoList, index);
       });
     }
 
-    // Função para reindexar subpassos (atualiza "Subpasso X" e data-sub-index)
-    function reindexSubpassos(subpassoList) {
+    // Reindexa subpassos
+    function reindexSubpassos(subpassoList, stepIndex) {
       if (!subpassoList) return;
       const subBlocks = subpassoList.querySelectorAll('.subpasso-block');
       subBlocks.forEach((block, index) => {
@@ -512,12 +511,16 @@
         if (h3) {
           h3.textContent = `Subpasso ${index + 1}`;
         }
+        // Atualiza nome do input file
+        const fileInput = block.querySelector(`input[type="file"][name^="subStepImage_"]`);
+        if (fileInput) {
+          fileInput.name = `subStepImage_${stepIndex}_${index}`;
+        }
       });
     }
 
-    // Antes de submeter o formulário, construímos o JSON
-    form.addEventListener('submit', (e) => {
-      // Monta a estrutura { steps: [ ... ] }
+    // Antes de submeter o formulário, criamos o JSON
+    form.addEventListener('submit', () => {
       const allSteps = [];
       const stepBlocks = stepsContainer.querySelectorAll('.step-block');
 
@@ -537,6 +540,7 @@
           subPassosData.push({
             miniStepTitle: tituloSub,
             miniStepDescription: descSub
+            // subStepImage fica a cargo do back-end
           });
         });
 
@@ -544,16 +548,14 @@
           stepTitle: tituloStep,
           stepDescription: descStep,
           miniSteps: subPassosData
+          // stepImage também fica no back-end
         });
       });
 
       const finalSolution = {
         steps: allSteps
       };
-
-      // Convert para JSON e coloca no hidden input
       solutionDataInput.value = JSON.stringify(finalSolution);
-      // Ao dar submit, o form enviará solution_data para o servidor
     });
   </script>
 </body>

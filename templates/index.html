@@ -111,6 +111,37 @@
       margin-right: 0.4rem;
     }
 
+    /* =========================
+       BOTÃO "PESQUISAR PEÇA"
+       ========================= */
+    /* Container para posicionar o botão próximo ao topo, logo abaixo do header */
+    .pesquisar-peca-container {
+      display: flex;
+      justify-content: center;
+      padding: 1rem 2rem; /* espaço abaixo do header */
+      background-color: #f0f0f0; /* mesmo fundo do body para ficar "encostado" */
+    }
+
+    /* Botão maior e destacado */
+    .btn-pesquisar-peca {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 1rem 2rem;       /* Maior espaçamento */
+      font-size: 1.2rem;        /* Fonte maior */
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+    }
+    .btn-pesquisar-peca:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+
     /* MAIN */
     main {
       flex: 1;
@@ -373,6 +404,13 @@
       </a>
     </div>
   </header>
+
+  <!-- BOTÃO PESQUISAR PEÇA (GRANDE) LOGO APÓS O HEADER -->
+  <div class="pesquisar-peca-container">
+    <a href="{{ url_for('item_search') }}" class="btn-pesquisar-peca">
+      Pesquisar Peça
+    </a>
+  </div>
 
   <!-- Barra Lateral Mobile (inicialmente oculta) -->
   <div class="mobile-sidebar" id="mobileSidebar">
