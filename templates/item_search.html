@@ -268,7 +268,7 @@
   <!-- Cabeçalho com botão de voltar e título -->
   <header>
     <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">&#x2B05;</a>
-    <h1>Pesquisa de Itens</h1>
+    <h1>Pesquisa de Itens (MZ)</h1>
   </header>
 
   <!-- Conteúdo principal -->
@@ -363,10 +363,11 @@
     }
 
     /*
-      Função para abrir o WhatsApp com mensagem prévia sobre o item.
+      Função para abrir o WhatsApp com a mensagem:
+      "Olá MZ, vocês tem o item disponível?"
     */
     function openWhatsApp(itemDescription) {
-      const text = `Olá MZ, gostaria de mais informações sobre: ${itemDescription}`;
+      const text = `Olá MZ, vocês tem o ${itemDescription} disponível?`;
       const encodedText = encodeURIComponent(text);
       window.open(`https://wa.me/${MZ_WHATSAPP}?text=${encodedText}`, '_blank');
     }
