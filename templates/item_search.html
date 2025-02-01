@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Pesquisa de Itens (MZ)</title>
+  <!-- Responsividade em dispositivos móveis -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Fonte básica (opcional) -->
@@ -23,7 +24,7 @@
     }
 
     /* =========================================================================
-       BODY / FONTES / CORES GERAIS
+       BODY / FONTES / CORES GERAIS (DESKTOP)
        ========================================================================= */
     body {
       font-family: 'Roboto', sans-serif;
@@ -37,7 +38,7 @@
     }
 
     /* =========================================================================
-       HEADER PRETO COM BOTÃO "VOLTAR"
+       HEADER PRETO COM BOTÃO "VOLTAR" (DESKTOP)
        ========================================================================= */
     header {
       background-color: #000;
@@ -74,7 +75,7 @@
     }
 
     /* =========================================================================
-       MAIN: CONTAINER GERAL DOS ELEMENTOS
+       MAIN: CONTAINER GERAL DOS ELEMENTOS (DESKTOP)
        ========================================================================= */
     main {
       flex: 1;
@@ -88,12 +89,12 @@
     }
 
     /* =========================================================================
-       CAMPO DE PESQUISA
+       CAMPO DE PESQUISA (DESKTOP)
        ========================================================================= */
     .search-container {
       display: flex;
       width: 100%;
-      max-width: 800px; /* Largura maior do que antes */
+      max-width: 800px; /* Largura maior para acomodar mais texto */
       margin-bottom: 2rem;
     }
     .search-container input[type="text"] {
@@ -113,7 +114,7 @@
     }
 
     /* =========================================================================
-       CONTADOR DE RESULTADOS
+       CONTADOR DE RESULTADOS (DESKTOP)
        ========================================================================= */
     #itemCount {
       font-size: 1rem;
@@ -124,7 +125,7 @@
     }
 
     /* =========================================================================
-       LISTA E ITENS DE RESULTADO (cards no estilo do resultados.html)
+       LISTA E ITENS DE RESULTADO (DESKTOP)
        ========================================================================= */
     .result-container {
       width: 100%;
@@ -135,8 +136,12 @@
       list-style: none;
       padding: 0;
     }
-
     .results li {
+      /* Altera para "flex" para podermos alinhar botão à direita */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
       background-color: #fff;
       border-radius: 8px;
       padding: 1rem;
@@ -144,9 +149,6 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: relative;
       color: #333;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
 
       /* ANIMAÇÃO DE ENTRADA (fade-in) */
       opacity: 0;
@@ -159,15 +161,28 @@
         transform: translateY(0);
       }
     }
+
     /* Destaque quando data-highlighted="1" */
     .results li[data-highlighted="1"] {
       border-left: 5px solid green;
       padding-left: calc(1rem - 5px);
     }
-    /* Título e detalhes de cada item */
-    .results li strong {
+
+    /* Container que agrupa o título e detalhes do item à esquerda */
+    .item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .item-info strong {
       font-size: 1rem;
       color: #000;
+    }
+
+    /* Deixa os dados de estoque/preço lado a lado */
+    .details {
+      display: flex;
+      gap: 1rem; /* Espaçamento horizontal */
     }
     .details span {
       font-size: 0.95rem;
@@ -175,7 +190,29 @@
     }
 
     /* =========================================================================
-       LOADING
+       BOTÃO WHATSAPP (lado direito do card) (DESKTOP)
+       ========================================================================= */
+    .whatsapp-btn {
+      margin-left: 1rem;   /* Espaço à esquerda para separar do conteúdo */
+      padding: 0.5rem 1rem;
+      background-color: #25D366; /* cor do WhatsApp */
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      width: fit-content;
+    }
+    .whatsapp-btn:hover {
+      background-color: #20b955;
+      transform: scale(1.02);
+    }
+
+    /* =========================================================================
+       LOADING (DESKTOP)
        ========================================================================= */
     .loading {
       text-align: center;
@@ -185,7 +222,7 @@
     }
 
     /* =========================================================================
-       RODAPÉ
+       RODAPÉ (DESKTOP)
        ========================================================================= */
     footer {
       background-color: #000;
@@ -198,7 +235,7 @@
     }
 
     /* =========================================================================
-       MEDIA QUERIES (versão responsiva)
+       MEDIA QUERIES (VERSÃO MOBILE)
        ========================================================================= */
     @media (max-width: 768px) {
       header {
@@ -223,13 +260,18 @@
         font-size: 0.9rem;
       }
       .results li {
-        margin-bottom: 1rem;
+        flex-direction: column; /* Empilha conteúdo e botão no modo mobile */
+        align-items: flex-start;
       }
-      .results li strong {
-        font-size: 1rem;
+      .whatsapp-btn {
+        margin-top: 1rem; /* Para ficar abaixo do texto no modo mobile */
       }
-      .details span {
-        font-size: 0.85rem;
+      #itemCount {
+        font-size: 0.95rem;
+      }
+      .details {
+        flex-direction: column; /* Empilha estoque/preço no mobile */
+        gap: 0.3rem;
       }
     }
   </style>
@@ -238,7 +280,6 @@
 <body>
   <!-- Cabeçalho com botão de voltar e título -->
   <header>
-    <!-- Substitua 'index.html' pelo url_for('index') -->
     <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">&#x2B05;</a>
     <h1>Pesquisa de Itens (MZ)</h1>
   </header>
@@ -276,11 +317,14 @@
     <p>© 2025 Plataforma M - Integração MZ</p>
   </footer>
 
-  <!-- Scripts de busca e scroll infinito -->
+  <!-- Scripts de busca, scroll infinito e função WhatsApp -->
   <script>
     let currentPage = 1;
     let isLoading = false;
     let hasMoreItems = true;
+
+    // Número de WhatsApp da MZ
+    const MZ_WHATSAPP = "5543996436367";
 
     /*
       1) Carrega itens da base MZ (rota /load_items) via AJAX, página p.
@@ -291,8 +335,8 @@
         fetch(`/load_items?page=${p}&search=${encodeURIComponent(searchQuery)}`)
           .then(response => response.json())
           .then(data => {
-            // Se for a primeira página, limpamos e atualizamos o contador
             if (p === 1) {
+              // Se for a primeira página, limpamos e atualizamos o contador
               document.getElementById('itemCount').textContent =
                 `Itens encontrados: ${data.total_items}`;
               document.getElementById('results').innerHTML = '';
@@ -302,17 +346,23 @@
 
             data.items.forEach(item => {
               const listItem = document.createElement('li');
-              // Se no back-end marcamos "is_phrase_match" => item.is_highlighted = true
+              // Se no back-end marcamos "is_phrase_match" => item.is_highlighted
               listItem.setAttribute('data-id', item._id);
               listItem.setAttribute('data-highlighted', item.is_highlighted ? '1' : '0');
 
+              // HTML interno: descrição e detalhes ficam à esquerda, botão WA à direita
               listItem.innerHTML = `
-                <strong>${item.description}</strong>
-                <div class="details">
-                  <span>Estoque MZ: ${item.stock_mz}</span>
-                  <span>Estoque ELD: ${item.stock_eld}</span>
-                  <span>Preço: R$ ${item.price.toFixed(2)}</span>
+                <div class="item-info">
+                  <strong>${item.description}</strong>
+                  <div class="details">
+                    <span>Estoque MZ: ${item.stock_mz}</span>
+                    <span>Estoque ELD: ${item.stock_eld}</span>
+                    <span>Preço: R$ ${item.price.toFixed(2)}</span>
+                  </div>
                 </div>
+                <button class="whatsapp-btn" onclick="openWhatsApp('${item.description}')">
+                  Contato MZ
+                </button>
               `;
 
               resultsList.appendChild(listItem);
@@ -328,6 +378,15 @@
             reject(error);
           });
       });
+    }
+
+    /*
+      Função para abrir o WhatsApp com mensagem prévia sobre o item.
+    */
+    function openWhatsApp(itemDescription) {
+      const text = `Olá MZ, gostaria de mais informações sobre: ${itemDescription}`;
+      const encodedText = encodeURIComponent(text);
+      window.open(`https://wa.me/${MZ_WHATSAPP}?text=${encodedText}`, '_blank');
     }
 
     /*
