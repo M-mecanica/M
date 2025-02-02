@@ -97,15 +97,26 @@
     }
 
     .links-auth {
-      margin-top: 1rem;
+      margin-top: 2rem; /* Aumenta o espaço acima do botão */
       text-align: center;
     }
 
-    .links-auth a {
-      color: #f5f5f5;
-      text-decoration: underline;
-      margin: 0 0.5rem;
+    /* Botão "Cadastrar-se" */
+    .btn-cadastro {
+      display: inline-block;
+      background-color: #ffffff; /* Botão branco */
+      color: #000;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
       font-weight: bold;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-cadastro:hover {
+      background-color: #ccc; /* Efeito hover */
     }
 
     footer {
@@ -145,6 +156,11 @@
         padding: 0.6rem;
       }
 
+      .btn-cadastro {
+        font-size: 1rem;
+        padding: 0.6rem 1rem;
+      }
+
       footer p {
         font-size: 0.9rem;
       }
@@ -168,14 +184,14 @@
 
       <input type="submit" value="Entrar" />
     </form>
-    <div class="links-auth">
-      <a href="{{ url_for('register') }}">Registrar-se</a>
 
+    <div class="links-auth">
+      <a href="{{ url_for('register') }}" class="btn-cadastro">Cadastrar-se</a>
     </div>
   </main>
 
   <footer>
-    <p>© 2025 Plataforma M - MVP</p>
+    <p>© 2025 Plataforma M</p>
   </footer>
 </body>
 </html>

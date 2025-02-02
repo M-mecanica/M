@@ -108,21 +108,34 @@
       text-align: center;
     }
 
-    .links-auth a {
-      color: #f5f5f5;
-      text-decoration: underline;
-      margin: 0 0.5rem;
+    /* Botão de estilo branco para "Login" */
+    .btn-login {
+      display: inline-block;
+      background-color: #ffffff;
+      color: #000;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
       font-weight: bold;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-login:hover {
+      background-color: #ccc;
     }
 
     /* Aviso informativo (ex.: sobre utilidade do WhatsApp e Máquinas) */
     .info-optional-fields {
-      background-color: #1f1f1f;
+      background-color: #ffe347; /* Cor de destaque */
       padding: 1rem;
       border-radius: 8px;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-      color: #aaa;
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+      color: #000;
+      box-shadow: 0 0 8px rgba(255, 227, 71, 0.5); /* Sombra para destaque */
+      text-align: center; /* Centralizar o texto */
     }
 
     footer {
@@ -163,12 +176,18 @@
         padding: 0.6rem;
       }
 
+      .btn-login {
+        font-size: 1rem;
+        padding: 0.6rem 1rem;
+      }
+
       footer p {
         font-size: 0.9rem;
       }
 
       .info-optional-fields {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
       }
     }
   </style>
@@ -222,12 +241,12 @@
     </form>
 
     <div class="links-auth">
-      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('login') }}" class="btn-login">Login</a>
     </div>
   </main>
 
   <footer>
-    <p>© 2025 Plataforma M - MVP</p>
+    <p>© 2025 Plataforma M</p>
   </footer>
 </body>
 </html>
