@@ -1,18 +1,4 @@
-# app.py
-
-"""
-Aplicação Flask unificada que utiliza DOIS bancos de dados MongoDB:
-1) 'm_plataforma' (M) - Para cadastro/resolução de problemas mecânicos
-2) 'MachineZONE' (MZ) - Para pesquisa de itens (rolamentos, etc.)
-
-- Login/Logout e gerenciamento de usuários (coleção 'usuarios') ficam no DB 'm_plataforma'.
-- Pesquisa de itens (/load_items) e lógica associada usam o DB 'MachineZONE'.
-
-Obs.: Ajuste credenciais de conexão e secret_key conforme sua necessidade.
-"""
-
 import os
-import uuid
 import json
 import re
 import unicodedata
@@ -20,11 +6,14 @@ import datetime
 
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, session, jsonify
+    url_for, session, jsonify, make_response
 )
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from werkzeug.utils import secure_filename
+
+# -------------- IMPORTANDO GRIDFS --------------
+import gridfs
 
 ##############################################################################
 #                           CONFIGURAÇÕES FLASK
@@ -32,10 +21,6 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = "CHAVE_SECRETA_PARA_SESSAO"  # Troque por algo seguro em produção
-
-# Pasta de upload de imagens (caso precise para soluções de problemas)
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 ##############################################################################
 #                CONEXÕES COM DOIS BANCOS DE DADOS MONGODB
@@ -50,6 +35,9 @@ db_m = client_m["m_plataforma"]
 # Coleções do M
 problemas_collection = db_m["problemas"]
 usuarios_collection = db_m["usuarios"]
+
+# GridFS para armazenar as imagens no DB "m_plataforma"
+fs_m = gridfs.GridFS(db_m)
 
 # ------------------------ DB do MZ (MachineZONE) ----------------------------
 client_mz = MongoClient(
@@ -80,20 +68,29 @@ def user_has_role(roles_permitidos):
 
 def save_image_if_exists(file_obj):
     """
-    Recebe um objeto FileStorage (upload de imagem) e salva em 'static/uploads',
-    retornando o caminho relativo para uso. Retorna None se não houver arquivo.
+    Salva o arquivo em GridFS e retorna o ID (string) do arquivo.
+    Retorna None se não houver arquivo ou se estiver vazio.
     """
     if not file_obj or file_obj.filename.strip() == "":
         return None
 
+    # Lê todo o conteúdo do arquivo
+    file_data = file_obj.read()
+    if not file_data:
+        return None
+
+    # Pega o content_type do arquivo (e.g. image/jpeg, image/png)
+    content_type = file_obj.content_type
+    # Nome seguro para armazenar metadados no GridFS
     filename = secure_filename(file_obj.filename)
-    ext = os.path.splitext(filename)[1]
-    unique_name = f"{uuid.uuid4()}{ext}"
 
-    save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
-    file_obj.save(save_path)
-
-    return os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+    # Armazena no GridFS
+    stored_id = fs_m.put(
+        file_data,
+        filename=filename,
+        contentType=content_type
+    )
+    return str(stored_id)
 
 ##############################################################################
 #           FUNÇÕES DE NORMALIZAÇÃO E AVALIAÇÃO (PARA BUSCA MZ)
@@ -189,8 +186,8 @@ def register():
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
         senha = request.form.get("senha", "").strip()
-        # Excluímos o campo "role" caso não queira mais que o user escolha
-        role = "comum"  # Ou outro default
+        # Defina um role padrão, se preferir
+        role = "comum"
 
         # Campos adicionais (WhatsApp e Máquinas), se você deseja salvá-los
         whatsapp = request.form.get("whatsapp", "").strip()
@@ -460,7 +457,11 @@ def delete_user(user_id):
 def edit_solution(problem_id):
     """
     Edição da solução de um problema já resolvido (somente 'solucionador'),
-    podendo incluir upload de imagens.
+    incluindo:
+      - Upload de imagens via GridFS
+      - Manutenção da imagem se não houver upload
+      - Possibilidade de remover explicitamente a imagem
+      - Pré-visualização imediata (via JS) ao selecionar uma nova imagem
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -486,22 +487,83 @@ def edit_solution(problem_id):
                 erro=erro
             )
 
-        # Faz upload de imagens (se existirem) para cada passo e subpasso
-        steps = new_solution_data.get("steps", [])
-        for i, step in enumerate(steps):
-            step_file_key = f"stepImage_{i}"
-            step_image_file = request.files.get(step_file_key)
-            saved_path = save_image_if_exists(step_image_file)
-            if saved_path:
-                step["stepImage"] = saved_path
+        # SOLUÇÃO ANTIGA (para manter as imagens existentes se não forem alteradas)
+        old_solution_data = problema.get("solucao", {})
+        old_steps = old_solution_data.get("steps", [])
 
+        # Novos steps vindos do formulário
+        steps = new_solution_data.get("steps", [])
+
+        for i, step in enumerate(steps):
+            # 1) Verifica se o usuário marcou para deletar a imagem existente
+            delete_step = request.form.get(f"deleteExistingStepImage_{i}", "false") == "true"
+
+            # 2) Tenta carregar uma nova imagem do passo
+            step_image_file = request.files.get(f"stepImage_{i}")
+            new_file_id = save_image_if_exists(step_image_file)
+
+            # Obter a imagem antiga (se existir) e ainda estivermos dentro do range
+            old_file_id = None
+            if i < len(old_steps):
+                old_file_id = old_steps[i].get("stepImage")
+
+            if delete_step:
+                # Se foi marcado para deletar a antiga e não há arquivo novo,
+                # remove a imagem do banco (GridFS) caso exista
+                if old_file_id:
+                    try:
+                        fs_m.delete(ObjectId(old_file_id))
+                    except:
+                        pass
+                step["stepImage"] = None
+
+            elif new_file_id:
+                # Se tem uma nova imagem, substituir a antiga
+                # Deletar a antiga do GridFS
+                if old_file_id:
+                    try:
+                        fs_m.delete(ObjectId(old_file_id))
+                    except:
+                        pass
+                step["stepImage"] = new_file_id
+
+            else:
+                # Nem deletou a imagem, nem enviou uma nova:
+                # MANTÉM a antiga (se existir)
+                step["stepImage"] = old_file_id
+
+            # Agora lidamos com os subpassos
             miniSteps = step.get("miniSteps", [])
+            old_miniSteps = []
+            if i < len(old_steps):
+                old_miniSteps = old_steps[i].get("miniSteps", [])
+
             for j, substep in enumerate(miniSteps):
-                substep_file_key = f"subStepImage_{i}_{j}"
-                substep_image_file = request.files.get(substep_file_key)
-                saved_sub_path = save_image_if_exists(substep_image_file)
-                if saved_sub_path:
-                    substep["subStepImage"] = saved_sub_path
+                delete_sub = request.form.get(f"deleteExistingSubStepImage_{i}_{j}", "false") == "true"
+
+                substep_file = request.files.get(f"subStepImage_{i}_{j}")
+                new_sub_file_id = save_image_if_exists(substep_file)
+
+                old_sub_file_id = None
+                if j < len(old_miniSteps):
+                    old_sub_file_id = old_miniSteps[j].get("subStepImage")
+
+                if delete_sub:
+                    if old_sub_file_id:
+                        try:
+                            fs_m.delete(ObjectId(old_sub_file_id))
+                        except:
+                            pass
+                    substep["subStepImage"] = None
+                elif new_sub_file_id:
+                    if old_sub_file_id:
+                        try:
+                            fs_m.delete(ObjectId(old_sub_file_id))
+                        except:
+                            pass
+                    substep["subStepImage"] = new_sub_file_id
+                else:
+                    substep["subStepImage"] = old_sub_file_id
 
         # Atualiza a solução no banco
         problemas_collection.update_one(
@@ -526,8 +588,7 @@ def edit_solution(problem_id):
 def item_search():
     """
     Exibe a página de pesquisa de itens (integra com DB MachineZONE).
-    Utiliza o template 'item_search.html', onde foi ajustado o botão de voltar
-    para usar 'url_for("index")'.
+    Utiliza o template 'item_search.html'.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -563,7 +624,7 @@ def load_items():
                                        .sort('description', 1)
 
         all_items = list(items_cursor)
-        paged_items = all_items[skip_items : skip_items + ITEMS_PER_PAGE]
+        paged_items = all_items[skip_items: skip_items + ITEMS_PER_PAGE]
         has_more = (len(paged_items) == ITEMS_PER_PAGE)
 
         items_list = []
@@ -647,7 +708,7 @@ def load_items():
     )
 
     # Paginação
-    paged_items = items[skip_items : skip_items + ITEMS_PER_PAGE]
+    paged_items = items[skip_items: skip_items + ITEMS_PER_PAGE]
     has_more = (len(paged_items) == ITEMS_PER_PAGE)
 
     # Monta retorno
@@ -730,6 +791,25 @@ def unhighlight_item():
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+##############################################################################
+#            ROTA PARA SERVIR IMAGENS DIRETAMENTE DO GRIDFS
+##############################################################################
+
+@app.route("/gridfs_image/<file_id>", methods=["GET"])
+def gridfs_image(file_id):
+    """
+    Retorna a imagem armazenada no GridFS pelo seu ID.
+    """
+    try:
+        gridout = fs_m.get(ObjectId(file_id))
+        image_data = gridout.read()
+        content_type = gridout.contentType or "image/jpeg"
+        response = make_response(image_data)
+        response.headers.set('Content-Type', content_type)
+        return response
+    except:
+        return "Imagem não encontrada ou inválida.", 404
 
 ##############################################################################
 #                              EXECUTAR APP

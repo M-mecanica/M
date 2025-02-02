@@ -79,7 +79,7 @@
       font-size: 1.25rem;
       padding: 2rem;
       width: 100%;
-      max-width: 1200px; /* Aumentado para deixar mais espaço */
+      max-width: 1200px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -149,9 +149,9 @@
       font-family: 'Courier New', monospace;
       font-size: 1.05rem;
       margin-bottom: 2.5rem;
-      min-height: 80px; /* Aumentado */
+      min-height: 80px;
       color: #333;
-      max-width: 1100px; /* Aumentado para melhor aproveitamento */
+      max-width: 1100px;
       margin-left: auto;
       margin-right: auto;
     }
@@ -183,7 +183,7 @@
     .step-container {
       margin-bottom: 2rem;
       padding: 1rem 1rem 2rem;
-      border-left: 4px solid #000; /* Barrinha lateral preta */
+      border-left: 4px solid #000;
       background-color: #fafafa;
       transition: background-color 0.2s ease-in-out;
       max-width: 1100px;
@@ -192,7 +192,7 @@
     }
     .step-title-block {
       font-size: 1.4rem;
-      color: #000; /* Título do passo em preto */
+      color: #000;
       margin-bottom: 0.8rem;
       font-weight: bold;
     }
@@ -306,9 +306,6 @@
       }
     }
 
-    /*----------------------------------------------
-      VERSÃO MOBILE
-    ----------------------------------------------*/
     @media (max-width: 768px) {
       header {
         padding: 1rem;
@@ -347,10 +344,6 @@
       .steps-output {
         font-size: 0.95rem;
         margin-bottom: 1.5rem;
-      }
-      .next-step-container {
-        bottom: 1rem;
-        right: 1rem;
       }
       .next-step-btn {
         font-size: 0.9rem;
@@ -396,7 +389,7 @@
 
     <!-- Botão Voltar (no canto esquerdo do header) -->
     <a href="{{ url_for('search') }}" class="btn-voltar-resultados" title="Voltar">
-      &#x2B05; <!-- Unicode left arrow -->
+      &#x2B05;
     </a>
   </header>
 
@@ -478,20 +471,20 @@
     }
 
     // Exibe a descrição do passo + imagem (se existir)
-    function revealStepDescription(stepDiv, description, imagePath, onFinish) {
+    function revealStepDescription(stepDiv, description, imageId, onFinish) {
       const descBlock = document.createElement('div');
       descBlock.classList.add('step-description-block');
       stepDiv.appendChild(descBlock);
 
       // Animação de texto
       typeWriter(descBlock, `${description}\n`, 0, () => {
-        // Se tiver imagem do passo, insere logo após a descrição
-        if (imagePath && imagePath.trim() !== "") {
+        // Se tiver ID de imagem do passo, insere logo após a descrição
+        if (imageId && imageId.trim() !== "") {
           const imageContainer = document.createElement('div');
           imageContainer.classList.add('step-image-block');
           const imgEl = document.createElement('img');
-          // Monta src para a imagem (path armazenado no BD)
-          imgEl.src = "/" + imagePath.replace(/^\/?/, ""); // remove eventual / inicial duplicado
+          // Rota para servir a imagem do GridFS
+          imgEl.src = `/gridfs_image/${imageId}`;
           imgEl.alt = "Imagem do Passo";
           imageContainer.appendChild(imgEl);
           stepDiv.appendChild(imageContainer);
@@ -534,7 +527,6 @@
         subTitle.classList.add('mini-step-title');
         miniStepsOutput.appendChild(subTitle);
 
-        // Inicia animação do título
         const titleText = `Mini Passo ${index + 1} - ${sub.miniStepTitle}\n`;
         typeWriter(subTitle, titleText, 0, () => {
           // Descrição
@@ -548,7 +540,7 @@
               const subImgContainer = document.createElement('div');
               subImgContainer.classList.add('mini-step-image-block');
               const subImgEl = document.createElement('img');
-              subImgEl.src = "/" + sub.subStepImage.replace(/^\/?/, "");
+              subImgEl.src = `/gridfs_image/${sub.subStepImage}`;
               subImgEl.alt = "Imagem do Subpasso";
               subImgContainer.appendChild(subImgEl);
               miniStepsOutput.appendChild(subImgContainer);
@@ -586,8 +578,8 @@
       stepsOutput.appendChild(stepDiv);
 
       revealStepTitle(stepDiv, stepNumber, stepData.stepTitle, () => {
-        const stepImgPath = stepData.stepImage || ""; // se existir
-        revealStepDescription(stepDiv, stepData.stepDescription, stepImgPath, () => {
+        const stepImageId = stepData.stepImage || "";
+        revealStepDescription(stepDiv, stepData.stepDescription, stepImageId, () => {
           // Verifica se há miniSteps
           if (stepData.miniSteps && stepData.miniSteps.length > 0) {
             createMiniStepsArea(stepDiv, stepData.miniSteps);

@@ -207,6 +207,16 @@
       color: #fff;
       margin: 0;
     }
+
+    /* Preview da nova imagem */
+    .new-file-preview img {
+      max-width: 200px;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      display: block;
+    }
+
     @media (max-width: 768px) {
       header {
         padding: 1rem;
@@ -279,11 +289,12 @@
 
     <p class="info">
       Ajuste os passos e subpassos conforme necessário. Clique em <strong>Salvar Alterações</strong> ao final.
-      <br>Você também pode enviar uma imagem para cada passo e cada subpasso, logo após o campo de descrição.
+      <br>Você também pode enviar uma nova imagem para cada passo/subpasso, além de remover uma imagem existente.
+      <br>Ao selecionar um arquivo, verá uma pré-visualização abaixo.
     </p>
 
     <div class="form-container">
-      <!-- Important: multipart/form-data para upload de imagens -->
+      <!-- Importante: multipart/form-data para upload de imagens -->
       <form method="POST" id="solutionForm" enctype="multipart/form-data">
         <input type="hidden" id="solution_data" name="solution_data" value="" />
 
@@ -308,12 +319,29 @@
                 <label>Imagem do Passo (opcional):</label>
                 <input type="file"
                        name="stepImage_{{ stepIndex }}"
-                       accept="image/*">
+                       accept="image/*"
+                       class="file-input">
+
+                <!-- Container de pré-visualização (nova imagem) -->
+                <div class="new-file-preview"></div>
+
                 {% if step.stepImage %}
-                  <p style="margin-top: 4px;">Imagem atual:</p>
-                  <img src="{{ url_for('static', filename=step.stepImage.split('static/')|last) }}"
-                       alt="Imagem do Passo"
-                       style="max-width: 200px; display: block; margin-top: 4px;">
+                  <div style="margin-top: 8px; border: 1px solid #eee; padding: 8px;">
+                    <p style="margin-bottom: 4px;">Imagem atual:</p>
+                    <img src="{{ url_for('gridfs_image', file_id=step.stepImage) }}"
+                         alt="Imagem do Passo"
+                         style="max-width: 200px; display: block; margin-bottom: 8px;">
+                    <!-- Botão para deletar a imagem existente -->
+                    <button type="button"
+                            class="btn btn-remove delete-image-btn"
+                            data-target="StepImage_{{ stepIndex }}">
+                      Deletar Imagem
+                    </button>
+                    <!-- Campo hidden para identificar se o usuário deseja remover essa imagem -->
+                    <input type="hidden"
+                           name="deleteExistingStepImage_{{ stepIndex }}"
+                           value="false">
+                  </div>
                 {% endif %}
               </div>
 
@@ -339,12 +367,29 @@
                         <label>Imagem do Subpasso (opcional):</label>
                         <input type="file"
                                name="subStepImage_{{ stepIndex }}_{{ subIndex }}"
-                               accept="image/*">
+                               accept="image/*"
+                               class="file-input">
+
+                        <!-- Container de pré-visualização (nova imagem) -->
+                        <div class="new-file-preview"></div>
+
                         {% if sub.subStepImage %}
-                          <p style="margin-top: 4px;">Imagem atual:</p>
-                          <img src="{{ url_for('static', filename=sub.subStepImage.split('static/')|last) }}"
-                               alt="Imagem do Subpasso"
-                               style="max-width: 200px; display: block; margin-top: 4px;">
+                          <div style="margin-top: 8px; border: 1px solid #eee; padding: 8px;">
+                            <p style="margin-bottom: 4px;">Imagem atual:</p>
+                            <img src="{{ url_for('gridfs_image', file_id=sub.subStepImage) }}"
+                                 alt="Imagem do Subpasso"
+                                 style="max-width: 200px; display: block; margin-bottom: 8px;">
+                            <!-- Botão para deletar a imagem existente -->
+                            <button type="button"
+                                    class="btn btn-remove delete-image-btn"
+                                    data-target="SubStepImage_{{ stepIndex }}_{{ subIndex }}">
+                              Deletar Imagem
+                            </button>
+                            <!-- Hidden para excluir imagem existente -->
+                            <input type="hidden"
+                                   name="deleteExistingSubStepImage_{{ stepIndex }}_{{ subIndex }}"
+                                   value="false">
+                          </div>
                         {% endif %}
                       </div>
                       <button type="button" class="btn btn-remove remove-subpasso">
@@ -405,7 +450,8 @@
         </div>
         <div class="form-group">
           <label>Imagem do Passo (opcional):</label>
-          <input type="file" name="stepImage_${stepIndex}" accept="image/*">
+          <input type="file" name="stepImage_${stepIndex}" accept="image/*" class="file-input">
+          <div class="new-file-preview"></div>
         </div>
         <div class="subpasso-container">
           <h3>Subpassos</h3>
@@ -435,7 +481,8 @@
         </div>
         <div class="form-group">
           <label>Imagem do Subpasso (opcional):</label>
-          <input type="file" name="subStepImage_${stepIndex}_${subIndex}" accept="image/*">
+          <input type="file" name="subStepImage_${stepIndex}_${subIndex}" accept="image/*" class="file-input">
+          <div class="new-file-preview"></div>
         </div>
         <button type="button" class="btn btn-remove remove-subpasso">Remover Subpasso</button>
       `;
@@ -473,8 +520,9 @@
       // Remover Subpasso
       if (e.target.classList.contains('remove-subpasso')) {
         const subBlock = e.target.closest('.subpasso-block');
-        const subpassoList = e.target.closest('.subpasso-list');
-        if (subBlock && subpassoList) {
+        const stepBlock = e.target.closest('.step-block');
+        if (subBlock && stepBlock) {
+          const subpassoList = stepBlock.querySelector('.subpasso-list');
           subpassoList.removeChild(subBlock);
           reindexSubpassos(subpassoList, parseInt(stepBlock.getAttribute('data-step-index')));
         }
@@ -556,6 +604,67 @@
         steps: allSteps
       };
       solutionDataInput.value = JSON.stringify(finalSolution);
+    });
+
+    // Pré-visualização imediata ao selecionar uma nova imagem
+    document.addEventListener('change', function(e) {
+      if (e.target && e.target.classList.contains('file-input')) {
+        const file = e.target.files[0];
+        const previewDiv = e.target.parentNode.querySelector('.new-file-preview');
+        if (!previewDiv) return;
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            previewDiv.innerHTML = `<img src="${evt.target.result}" alt="Pré-visualização">`;
+          };
+          reader.readAsDataURL(file);
+        } else {
+          // Se o usuário removeu o arquivo
+          previewDiv.innerHTML = '';
+        }
+      }
+    });
+
+    // Botão de deletar imagem existente (marca o hidden para "true")
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.classList.contains('delete-image-btn')) {
+        e.preventDefault();
+        const targetAttr = e.target.dataset.target;
+        // targetAttr pode ser "StepImage_i" ou "SubStepImage_i_j"
+        // Vamos mapear isso para o input hidden "deleteExistingStepImage_i" ou "deleteExistingSubStepImage_i_j"
+        let prefix = "";
+        let stepIndex = null;
+        let subIndex = null;
+
+        if (targetAttr.startsWith("StepImage_")) {
+          // Ex: "StepImage_2" => stepIndex = 2
+          prefix = "deleteExistingStepImage_";
+          stepIndex = targetAttr.split("_")[1];
+        } else if (targetAttr.startsWith("SubStepImage_")) {
+          // Ex: "SubStepImage_2_1" => stepIndex = 2, subIndex = 1
+          prefix = "deleteExistingSubStepImage_";
+          const parts = targetAttr.split("_");
+          stepIndex = parts[1];
+          subIndex = parts[2];
+        }
+
+        let hiddenInputName = prefix + stepIndex;
+        if (subIndex !== null) {
+          hiddenInputName += `_${subIndex}`;
+        }
+
+        // Seleciona o input hidden e define como true
+        const hiddenInput = document.querySelector(`input[name="${hiddenInputName}"]`);
+        if (hiddenInput) {
+          hiddenInput.value = "true";
+        }
+
+        // Remove a visualização da imagem atual do DOM
+        const parentContainer = e.target.closest('div');
+        if (parentContainer) {
+          parentContainer.innerHTML = '<p style="color:red;">Imagem marcada para exclusão.</p>';
+        }
+      }
     });
   </script>
 </body>
