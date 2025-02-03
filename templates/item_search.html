@@ -38,7 +38,7 @@
     }
 
     /* =========================================================================
-       HEADER PRETO COM BOTÃO "VOLTAR" (DESKTOP)
+       HEADER PRETO COM BOTÕES (DESKTOP)
        ========================================================================= */
     header {
       background-color: #000;
@@ -46,6 +46,7 @@
       display: flex;
       align-items: center;
       justify-content: flex-start;
+      position: relative;
     }
     /* Botão "Voltar" estilo retangular, com hover */
     .btn-voltar-inicio {
@@ -73,6 +74,10 @@
       margin: 0 auto; /* centraliza o título */
       text-align: center;
     }
+
+    /* =========================================================================
+       REMOVIDO: Botão "Histórico de Pesquisas" e suas regras
+       ========================================================================= */
 
     /* =========================================================================
        MAIN: CONTAINER GERAL DOS ELEMENTOS (DESKTOP)
@@ -140,7 +145,6 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-
       background-color: #fff;
       border-radius: 8px;
       /* Aumenta o espaçamento interno (altura do container) */
@@ -265,7 +269,7 @@
 </head>
 
 <body>
-  <!-- Cabeçalho com botão de voltar e título -->
+  <!-- Cabeçalho com botão de voltar, título (botão histórico removido) -->
   <header>
     <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">&#x2B05;</a>
     <h1>Pesquisa de Itens</h1>
@@ -367,7 +371,7 @@
       "Olá MZ, vocês tem o item disponível?"
     */
     function openWhatsApp(itemDescription) {
-      const text = `Olá MZ, vocês tem o ${itemDescription} disponível?`;
+      const text = `Olá MZ, vocês têm o ${itemDescription} disponível?`;
       const encodedText = encodeURIComponent(text);
       window.open(`https://wa.me/${MZ_WHATSAPP}?text=${encodedText}`, '_blank');
     }

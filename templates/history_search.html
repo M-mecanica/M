@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>M - Histórico de Pesquisas</title>
+  <!-- Fonte básica -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <!-- Meta para responsividade em dispositivos móveis -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* BODY: fundo cinza claro, texto escuro */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background-color: #f0f0f0;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER: fundo preto, estilo retangular para o botão voltar */
+    header {
+      background-color: #000;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+    }
+    header h1 {
+      color: #fff;
+      font-size: 1.4rem;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    /* Botão Voltar (apenas seta) */
+    .btn-voltar-index {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 0;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-voltar-index:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+
+    /* MAIN */
+    main {
+      flex: 1;
+      font-size: 1rem;
+      padding: 2rem 1rem;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .page-title {
+      font-size: 1.6rem;
+      margin-bottom: 2rem;
+      color: #000;
+      text-align: center;
+    }
+
+    /* Container do histórico */
+    .history-container {
+      width: 100%;
+    }
+
+    .search-record {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .search-record p {
+      margin-bottom: 0.5rem;
+      color: #555;
+      font-size: 1rem;
+      line-height: 1.3rem;
+    }
+
+    /* FOOTER preto, texto branco */
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+      margin: 0;
+    }
+
+    /*----------------------------------------------
+      VERSÃO MOBILE
+    ----------------------------------------------*/
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      header h1 {
+        font-size: 1.2rem;
+      }
+      .btn-voltar-index {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+      main {
+        padding: 1rem;
+        max-width: 100%;
+      }
+      .page-title {
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+      }
+      .search-record {
+        padding: 0.8rem;
+        margin-bottom: 1rem;
+      }
+      .search-record p {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Botão "Voltar" para a Página de Usuários ou Index -->
+    <a href="{{ url_for('listar_usuarios') }}" class="btn-voltar-index" title="Voltar">&#x2B05;</a>
+    <h1>Histórico de Pesquisas</h1>
+  </header>
+
+  <main>
+    <h2 class="page-title">Consultas Realizadas</h2>
+    <div class="history-container">
+      {% if history and history|length > 0 %}
+        {% for record in history %}
+          <div class="search-record">
+            <p><strong>Usuário:</strong> {{ record.user_name }}</p>
+            <p><strong>Busca:</strong> {{ record.query }}</p>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>Nenhum histórico de pesquisa encontrado.</p>
+      {% endif %}
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M</p>
+  </footer>
+</body>
+</html>

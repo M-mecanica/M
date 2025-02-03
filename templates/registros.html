@@ -3,24 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Gerenciar Usuários</title>
-  <!-- Fonte básica -->
+  <!-- Responsividade em dispositivos móveis -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonte básica (opcional) -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
-  <!-- Meta para responsividade em dispositivos móveis -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* Reset básico */
+    /* =========================================================================
+       RESET BÁSICO
+       ========================================================================= */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    /* BODY: fundo cinza claro, texto escuro */
+    /* =========================================================================
+       BODY / FONTES / CORES GERAIS
+       ========================================================================= */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -32,23 +37,24 @@
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto, estilo retangular para o botão voltar */
+    /* =========================================================================
+       HEADER PRETO COM BOTÕES
+       ========================================================================= */
     header {
       background-color: #000;
       padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       position: relative;
     }
     header h1 {
       color: #fff;
       font-size: 1.4rem;
-      margin: 0 auto;
-      text-align: center;
+      margin: 0;
     }
 
-    /* Botão Voltar (apenas seta) */
+    /* Botão "Voltar" retangular, com hover */
     .btn-voltar-index {
       background-color: #000;
       color: #fff;
@@ -72,19 +78,39 @@
       transform: scale(1.02);
     }
 
-    /* MAIN */
+    /* Botão "Histórico de Pesquisas" (somente se solucionador) */
+    .btn-history-search {
+      position: absolute;
+      right: 2rem;
+      background-color: #444;
+      color: #fff;
+      border: none;
+      border-radius: 0;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .btn-history-search:hover {
+      background-color: #666;
+      transform: scale(1.02);
+    }
+
+    /* =========================================================================
+       MAIN / CONTEÚDO PRINCIPAL
+       ========================================================================= */
     main {
       flex: 1;
-      font-size: 1rem;
-      padding: 2rem 1rem;
       width: 100%;
-      max-width: 900px;
+      max-width: 1200px;   /* A mesma largura do item_search.html */
       margin: 0 auto;
+      padding: 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-
     .page-title {
       font-size: 1.6rem;
       margin-bottom: 2rem;
@@ -92,12 +118,38 @@
       text-align: center;
     }
 
-    /* Container de usuários */
-    .users-container {
+    /* =========================================================================
+       BARRA DE PESQUISA (MESMO DESIGN DO item_search.html)
+       ========================================================================= */
+    .search-container {
+      display: flex;
       width: 100%;
+      max-width: 800px;
+      margin-bottom: 2rem;
+    }
+    .search-container input[type="text"] {
+      flex: 1;
+      padding: 1.2rem 1.8rem;
+      border: none;
+      border-radius: 32px;
+      background-color: #fff;
+      font-size: 1.2rem;
+      color: #333;
+      text-align: center;
+      outline: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .search-container input[type="text"]::placeholder {
+      color: #aaa;
     }
 
-    /* Card de cada usuário */
+    /* =========================================================================
+       LISTAGEM DE USUÁRIOS
+       ========================================================================= */
+    .users-container {
+      width: 100%;
+      max-width: 1200px; /* Para manter alinhado à mesma largura do main */
+    }
     .user-item {
       background-color: #fff;
       border: 1px solid #ccc;
@@ -118,12 +170,11 @@
       line-height: 1.3rem;
     }
 
-    /* Form de deleção */
+    /* Form de deleção (excluir usuário) */
     .delete-form {
       display: inline;
       margin-right: 1rem;
     }
-
     /* Botões de ação (excluir, alterar função) */
     .delete-btn,
     .role-btn {
@@ -145,7 +196,7 @@
       transform: scale(1.02);
     }
 
-    /* Formulário de alteração de função */
+    /* Formulário de alteração de função do usuário */
     .role-form {
       display: inline-block;
       margin-top: 0.5rem;
@@ -156,7 +207,9 @@
       margin-right: 0.5rem;
     }
 
-    /* FOOTER preto, texto branco */
+    /* =========================================================================
+       FOOTER
+       ========================================================================= */
     footer {
       background-color: #000;
       text-align: center;
@@ -168,9 +221,9 @@
       margin: 0;
     }
 
-    /*----------------------------------------------
-      VERSÃO MOBILE
-    ----------------------------------------------*/
+    /* =========================================================================
+       MEDIA QUERY (VERSÃO MOBILE)
+       ========================================================================= */
     @media (max-width: 768px) {
       header {
         padding: 1rem;
@@ -183,13 +236,25 @@
         font-size: 0.8rem;
         left: 1rem;
       }
+      .btn-history-search {
+        right: 1rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
       main {
         padding: 1rem;
-        max-width: 100%;
       }
       .page-title {
         font-size: 1.4rem;
         margin-bottom: 1.5rem;
+      }
+      .search-container {
+        max-width: 100%;
+        margin-bottom: 1.5rem;
+      }
+      .search-container input[type="text"] {
+        padding: 0.8rem;
+        font-size: 1rem;
       }
       .user-item {
         padding: 0.8rem;
@@ -213,6 +278,7 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <!-- Botão "Voltar" para a Página Inicial -->
@@ -220,10 +286,35 @@
       &#x2B05;
     </a>
     <h1>Gerenciar Usuários</h1>
+
+    <!-- Botão "Histórico" apenas se for "solucionador" -->
+    {% if session.role == 'solucionador' %}
+      <a
+        href="{{ url_for('history_search') }}"
+        class="btn-history-search"
+        title="Histórico de Pesquisas"
+      >
+        Histórico
+      </a>
+    {% endif %}
   </header>
 
   <main>
     <h2 class="page-title">Usuários Registrados</h2>
+
+    <!-- Barra de pesquisa com mesmo layout do item_search.html -->
+    <form class="search-container" method="GET" action="{{ url_for('listar_usuarios') }}">
+      <input
+        type="text"
+        name="q"
+        placeholder="Pesquisar (nome, WhatsApp, máquinas)..."
+        value="{{ search_query|default('') }}"
+        autocomplete="off"
+        autofocus
+      />
+    </form>
+
+    <!-- Listagem de usuários -->
     <div class="users-container">
       {% if usuarios and usuarios|length > 0 %}
         {% for user in usuarios %}
@@ -231,7 +322,7 @@
             <!-- Nome do usuário -->
             <h2>{{ user["nome"] }}</h2>
 
-            <!-- WhatsApp (se existir, senão mostra "Não informado") -->
+            <!-- WhatsApp -->
             <p>WhatsApp:
               {% if user.whatsapp %}
                 {{ user.whatsapp }}
@@ -240,7 +331,7 @@
               {% endif %}
             </p>
 
-            <!-- Máquinas (se existir, senão mostra "Não informado") -->
+            <!-- Máquinas -->
             <p>Máquinas:
               {% if user.maquinas %}
                 {{ user.maquinas }}
@@ -249,24 +340,28 @@
               {% endif %}
             </p>
 
-            <!-- Função (role) do usuário -->
+            <!-- Função (role) -->
             {% if session.role == 'solucionador' %}
               <p>Função atual: {{ user["role"] }}</p>
-              <!-- Formulário para alterar a função -->
-              <form class="role-form"
-                    action="{{ url_for('edit_user_role', user_id=user['_id_str']) }}"
-                    method="POST">
+              <form
+                class="role-form"
+                action="{{ url_for('edit_user_role', user_id=user['_id_str']) }}"
+                method="POST"
+              >
                 <select name="role">
                   <option value="comum"
-                    {% if user["role"] == 'comum' %} selected {% endif %}>
+                    {% if user["role"] == 'comum' %} selected {% endif %}
+                  >
                     Usuário Comum
                   </option>
                   <option value="mecanico"
-                    {% if user["role"] == 'mecanico' %} selected {% endif %}>
+                    {% if user["role"] == 'mecanico' %} selected {% endif %}
+                  >
                     Mecânico
                   </option>
                   <option value="solucionador"
-                    {% if user["role"] == 'solucionador' %} selected {% endif %}>
+                    {% if user["role"] == 'solucionador' %} selected {% endif %}
+                  >
                     Solucionador
                   </option>
                 </select>
@@ -276,7 +371,7 @@
               <p>Função: {{ user["role"] }}</p>
             {% endif %}
 
-            <!-- Botão excluir (só o solucionador pode ver) -->
+            <!-- Botão Excluir (apenas solucionador) -->
             {% if session.role == 'solucionador' %}
               <form
                 action="{{ url_for('delete_user', user_id=user['_id_str']) }}"
@@ -290,7 +385,7 @@
           </div>
         {% endfor %}
       {% else %}
-        <p>Nenhum usuário registrado.</p>
+        <p>Nenhum usuário encontrado.</p>
       {% endif %}
     </div>
   </main>

@@ -1,3 +1,4 @@
+<!-- resultados.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -19,7 +20,7 @@
       box-sizing: border-box;
     }
 
-    /* BODY: mesmo fundo cinza claro e texto escuro, como no index.html */
+    /* BODY */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -31,7 +32,7 @@
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto, estilo moderno, como no index.html */
+    /* HEADER */
     header {
       background-color: #000;
       padding: 1rem 2rem;
@@ -40,8 +41,6 @@
       justify-content: space-between;
     }
 
-    /* Botão "Voltar à Página Inicial" no estilo retangular do index,
-       com hover que fica cinza mais claro */
     .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
@@ -63,15 +62,14 @@
       transform: scale(1.02);
     }
 
-    /* Título do header em branco, sem efeitos neon */
     header h1 {
       color: #fff;
       font-size: 1.4rem;
-      margin: 0 auto; /* centraliza o título */
+      margin: 0 auto;
       text-align: center;
     }
 
-    /* MAIN: ajuste para ficar com a mesma largura de container das outras páginas (ex: 1200px) */
+    /* MAIN */
     main {
       flex: 1;
       font-size: 1.25rem;
@@ -84,7 +82,6 @@
       align-items: center;
     }
 
-    /* Campo de pesquisa semelhante ao index (borda arredondada e sombra) */
     .search-container {
       display: flex;
       width: 100%;
@@ -107,50 +104,34 @@
       color: #aaa;
     }
 
-    /* Container que abriga todos os resultados */
     .result-container {
       width: 100%;
       margin-top: 1rem;
     }
 
-    /* Card de cada problema, estilo claro, parecido com o index */
     .problem-item {
       background-color: #fff;
       border-radius: 8px;
       padding: 1rem;
       margin-bottom: 2rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: relative;
-      color: #333; /* texto escuro no card */
+      position: relative; /* Para posicionar os botões via position: absolute */
+      color: #333;
+      /* Espaço extra no rodapé do container para acomodar os botões */
+      padding-bottom: 3.5rem;
     }
 
+    /* Centraliza o título (h2) e a descrição (p) */
     .problem-item h2 {
       font-size: 1.4rem;
       margin-bottom: 0.5rem;
       color: #000;
+      text-align: center;
     }
     .problem-item p {
       color: #555;
       margin-bottom: 0.5rem;
-    }
-
-    /* Inputs inline (modo edição) */
-    .inline-input,
-    .inline-textarea {
-      display: none; /* só aparecem no modo edição */
-      width: 100%;
-      margin-top: 0.5rem;
-      font-size: 1rem;
-      font-family: 'Roboto', sans-serif;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      padding: 0.5rem;
-      background-color: #fff;
-      color: #333;
-    }
-    .inline-textarea {
-      min-height: 60px;
-      resize: vertical;
+      text-align: center;
     }
 
     .no-results {
@@ -160,9 +141,34 @@
       font-size: 1.2rem;
     }
 
-    /* Botões de ação (Editar, Deletar, etc.) no estilo do index (retangulares e fundo #000 com texto branco) */
+    /* Botão "Ver Solução" centralizado na parte inferior */
+    .ver-solucao-btn {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 0;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      /* Transição simples, sem scale */
+      transition: background-color 0.2s;
+
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .ver-solucao-btn:hover {
+      background-color: #333;
+    }
+
+    /* Botões "Editar" e "Deletar" no canto inferior direito */
     .action-btns {
-      margin-top: 1rem;
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
       display: flex;
       gap: 0.5rem;
     }
@@ -177,7 +183,6 @@
       text-decoration: none;
       font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
-      display: inline-block;
     }
     .action-btn:hover {
       background-color: #333;
@@ -187,34 +192,6 @@
       display: inline;
     }
 
-    /* Botões Salvar/Cancelar (invisíveis fora do modo edição) */
-    .save-cancel-btns {
-      display: none;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-
-    /* Botão "Ver Solução" no mesmo estilo (fundo #000, texto branco) */
-    .ver-solucao-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 0;
-      padding: 0.6rem 1.2rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      margin-top: 1rem;
-      display: inline-block;
-    }
-    .ver-solucao-btn:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
-    /* FOOTER similar ao index: preto, texto branco */
     footer {
       background-color: #000;
       text-align: center;
@@ -225,10 +202,6 @@
       color: #fff;
     }
 
-    /*----------------------------------------------
-      VERSÃO MOBILE (não altera a versão desktop)
-      Define estilos específicos para telas menores
-    ----------------------------------------------*/
     @media (max-width: 768px) {
       header {
         padding: 1rem;
@@ -254,6 +227,8 @@
       }
       .problem-item {
         margin-bottom: 1.5rem;
+        /* Ajuste para telas menores */
+        padding-bottom: 4.5rem;
       }
       .problem-item h2 {
         font-size: 1.2rem;
@@ -273,21 +248,18 @@
 </head>
 <body>
   <header>
-    <!-- Botão Voltar -->
     <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">
       &#x2B05;
     </a>
-
     <h1>Resultados da Pesquisa</h1>
   </header>
 
   <main>
-    <!-- Campo de pesquisa para refinar ou refazer a busca (sem sugestões) -->
     <form action="{{ url_for('search') }}" method="GET" class="search-container">
       <input
         type="text"
         name="q"
-        placeholder="Pesquise um problema mecânico resolvido"
+        placeholder="Pesquise por título ou tags (AND)"
         value="{{ termo_busca if termo_busca else '' }}"
         autocomplete="off"
       />
@@ -296,24 +268,10 @@
     <div class="result-container">
       {% if problemas and problemas|length > 0 %}
         {% for problema in problemas %}
-        <div class="problem-item" id="problem-{{ problema['_id_str'] }}">
-          <!-- Modo leitura -->
-          <h2 class="problem-title">{{ problema["titulo"] }}</h2>
-          <p class="problem-desc">{{ problema["descricao"] }}</p>
+        <div class="problem-item">
+          <h2>{{ problema["titulo"] }}</h2>
+          <p>{{ problema["descricao"] }}</p>
 
-          <!-- Modo edição (inline, inicialmente oculto) -->
-          <input
-            type="text"
-            name="titulo"
-            class="inline-input"
-            value="{{ problema['titulo'] }}"
-          />
-          <textarea
-            name="descricao"
-            class="inline-textarea"
-          >{{ problema["descricao"] }}</textarea>
-
-          <!-- Se o problema está resolvido, exibe botão para ver solução -->
           {% if problema["resolvido"] %}
             <a
               href="{{ url_for('exibir_solucao', problem_id=problema['_id_str']) }}"
@@ -323,18 +281,14 @@
             </a>
           {% endif %}
 
-          <!-- Se o usuário tiver papel "solucionador", exibe botões de editar e deletar -->
           {% if session.role == 'solucionador' %}
             <div class="action-btns">
-              <!-- Botão para ativar edição inline -->
-              <button
-                type="button"
-                class="action-btn edit-btn"
+              <a
+                href="{{ url_for('edit_problem', problem_id=problema['_id_str']) }}"
+                class="action-btn"
               >
                 Editar
-              </button>
-
-              <!-- Form de deleção -->
+              </a>
               <form
                 action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}"
                 method="POST"
@@ -343,22 +297,6 @@
               >
                 <button type="submit" class="action-btn">Deletar</button>
               </form>
-            </div>
-
-            <!-- Form para enviar alterações (hidden, mas usado via JS) -->
-            <form
-              action="{{ url_for('inline_edit_problem', problem_id=problema['_id_str']) }}"
-              method="POST"
-              class="inline-edit-form"
-            >
-              <input type="hidden" name="titulo" />
-              <input type="hidden" name="descricao" />
-            </form>
-
-            <!-- Botões de Salvar/Cancelar (aparecem no modo edição) -->
-            <div class="save-cancel-btns">
-              <button type="button" class="action-btn save-btn">Salvar</button>
-              <button type="button" class="action-btn cancel-btn">Cancelar</button>
             </div>
           {% endif %}
         </div>
@@ -374,79 +312,5 @@
   <footer>
     <p>© 2025 Plataforma M - MVP</p>
   </footer>
-
-  <!-- JS Inline Edit, só se user for "solucionador" -->
-  {% if session.role == 'solucionador' %}
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const problemItems = document.querySelectorAll('.problem-item');
-
-      problemItems.forEach(item => {
-        const editBtn = item.querySelector('.edit-btn');
-        const saveBtn = item.querySelector('.save-btn');
-        const cancelBtn = item.querySelector('.cancel-btn');
-
-        const titleH2 = item.querySelector('h2.problem-title');
-        const descP = item.querySelector('p.problem-desc');
-
-        const titleInput = item.querySelector('.inline-input');
-        const descTextarea = item.querySelector('.inline-textarea');
-
-        const saveCancelBtns = item.querySelector('.save-cancel-btns');
-        const deleteForm = item.querySelector('.action-delete-form');
-        const inlineEditForm = item.querySelector('.inline-edit-form');
-        if (!editBtn) return;
-
-        const hiddenTitulo = inlineEditForm.querySelector('input[name="titulo"]');
-        const hiddenDesc = inlineEditForm.querySelector('input[name="descricao"]');
-
-        // Ativar modo edição
-        editBtn.addEventListener('click', () => {
-          // Esconde os elementos de texto (h2, p)
-          titleH2.style.display = 'none';
-          descP.style.display = 'none';
-
-          // Mostra inputs para edição
-          titleInput.style.display = 'block';
-          descTextarea.style.display = 'block';
-
-          // Mostra botões de Salvar/Cancelar
-          saveCancelBtns.style.display = 'flex';
-
-          // Esconde o botão Editar e o formulário de Deleção
-          editBtn.style.display = 'none';
-          deleteForm.style.display = 'none';
-        });
-
-        // Salvar
-        saveBtn.addEventListener('click', () => {
-          // Copia valores para os inputs hidden
-          hiddenTitulo.value = titleInput.value;
-          hiddenDesc.value = descTextarea.value;
-          // Submete o formulário
-          inlineEditForm.submit();
-        });
-
-        // Cancelar
-        cancelBtn.addEventListener('click', () => {
-          // Reverte campos
-          titleInput.value = titleH2.textContent.trim();
-          descTextarea.value = descP.textContent.trim();
-
-          // Esconde inputs e volta ao modo leitura
-          titleInput.style.display = 'none';
-          descTextarea.style.display = 'none';
-          titleH2.style.display = 'block';
-          descP.style.display = 'block';
-
-          // Esconde botões de Salvar/Cancelar, volta Editar/Deletar
-          saveCancelBtns.style.display = 'none';
-          editBtn.style.display = 'inline-block';
-          deleteForm.style.display = 'inline';
-        });
-      });
-    });
-  </script>
-  {% endif %}
 </body>
 </html>

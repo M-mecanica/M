@@ -2,7 +2,6 @@ import os
 import json
 import re
 import unicodedata
-import datetime
 
 from flask import (
     Flask, render_template, request, redirect,
@@ -11,8 +10,6 @@ from flask import (
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from werkzeug.utils import secure_filename
-
-# -------------- IMPORTANDO GRIDFS --------------
 import gridfs
 
 ##############################################################################
@@ -39,6 +36,9 @@ usuarios_collection = db_m["usuarios"]
 # GridFS para armazenar as imagens no DB "m_plataforma"
 fs_m = gridfs.GridFS(db_m)
 
+# Coleção para histórico de buscas
+history_collection = db_m["search_history"]
+
 # ------------------------ DB do MZ (MachineZONE) ----------------------------
 client_mz = MongoClient(
     "mongodb+srv://adaltonmuzilomendes:rolamento@cluster0.atmeh.mongodb.net/"
@@ -47,7 +47,6 @@ db_mz = client_mz["MachineZONE"]
 
 # Coleção principal de itens no MZ
 itens_collection = db_mz["itens"]
-# (Se precisar, inclua demais coleções como suppliers, customers, etc.)
 
 ##############################################################################
 #                    FUNÇÕES AUXILIARES (UPLOAD, LOGIN ETC.)
@@ -60,7 +59,6 @@ def user_is_logged_in():
 def user_has_role(roles_permitidos):
     """
     Verifica se o usuário logado possui um dos papéis em 'roles_permitidos'.
-    Ex.: user_has_role(['solucionador', 'mecanico']).
     """
     if not user_is_logged_in():
         return False
@@ -74,17 +72,13 @@ def save_image_if_exists(file_obj):
     if not file_obj or file_obj.filename.strip() == "":
         return None
 
-    # Lê todo o conteúdo do arquivo
     file_data = file_obj.read()
     if not file_data:
         return None
 
-    # Pega o content_type do arquivo (e.g. image/jpeg, image/png)
     content_type = file_obj.content_type
-    # Nome seguro para armazenar metadados no GridFS
     filename = secure_filename(file_obj.filename)
 
-    # Armazena no GridFS
     stored_id = fs_m.put(
         file_data,
         filename=filename,
@@ -98,7 +92,7 @@ def save_image_if_exists(file_obj):
 
 def normalize_string(s):
     """
-    Remove acentos e deixa tudo minúsculo.
+    Remove acentos e deixa tudo em minúsculo, sem espaços repetidos.
     Ex.: 'Rolamento grande' -> 'rolamento grande'
     """
     normalized = ''.join(
@@ -142,8 +136,7 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
 @app.route("/")
 def root():
     """
-    Ao acessar a rota raiz, se o usuário estiver logado, vai para /index.
-    Caso contrário, vai para /login.
+    Se o usuário estiver logado, vai para /index, senão para /login.
     """
     if user_is_logged_in():
         return redirect(url_for("index"))
@@ -160,7 +153,6 @@ def login():
 
         usuario = usuarios_collection.find_one({"nome": nome, "senha": senha})
         if usuario:
-            # Define dados de sessão
             session["user_id"] = str(usuario["_id"])
             session["nome"] = usuario["nome"]
             session["role"] = usuario["role"]
@@ -168,8 +160,6 @@ def login():
         else:
             erro = "Usuário ou senha inválidos."
             return render_template("login.html", erro=erro)
-
-    # GET
     return render_template("login.html", erro=None)
 
 @app.route("/logout")
@@ -186,10 +176,7 @@ def register():
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
         senha = request.form.get("senha", "").strip()
-        # Defina um role padrão, se preferir
         role = "comum"
-
-        # Campos adicionais (WhatsApp e Máquinas), se você deseja salvá-los
         whatsapp = request.form.get("whatsapp", "").strip()
         maquinas = request.form.get("maquinas", "").strip()
 
@@ -200,7 +187,7 @@ def register():
 
         novo_usuario = {
             "nome": nome,
-            "senha": senha,  # Em produção: use hash/criptografia
+            "senha": senha,
             "role": role,
             "whatsapp": whatsapp,
             "maquinas": maquinas
@@ -226,16 +213,27 @@ def index():
 @app.route("/search", methods=["GET"])
 def search():
     """
-    Pesquisa problemas resolvidos com base num termo (q). Se vazio, mostra todos resolvidos.
+    Pesquisa problemas resolvidos com base em 'q'.
+    - Busca no 'titulo' (por regex case-insensitive) E/OU
+    - Busca nas 'tags' (já normalizadas) por tokens (AND).
+    Se 'q' estiver vazio, mostra todos os problemas resolvidos.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
 
     termo_busca = request.args.get("q", "").strip()
+
     if termo_busca:
+        # Normaliza o termo de busca para comparar com as tags normalizadas
+        termo_busca_normalized = normalize_string(termo_busca)
+        tokens = [t for t in termo_busca_normalized.split() if t]
+
         query = {
-            "titulo": {"$regex": termo_busca, "$options": "i"},
-            "resolvido": True
+            "resolvido": True,
+            "$or": [
+                {"titulo": {"$regex": termo_busca, "$options": "i"}},  # busca pelo título original
+                {"tags": {"$all": tokens}}  # busca pelas tags normalizadas
+            ]
         }
     else:
         query = {"resolvido": True}
@@ -253,7 +251,8 @@ def search():
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
     """
-    Cadastra novo problema (não resolvido).
+    Cadastra novo problema (não resolvido), com possibilidade de adicionar tags
+    separadas por espaço. O título também entra como tags normalizadas.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -262,11 +261,25 @@ def add_problem():
         titulo = request.form.get("titulo", "").strip()
         descricao = request.form.get("descricao", "").strip()
 
+        # Normaliza e quebra o título para virar parte das tags
+        titulo_normalized = normalize_string(titulo)
+        titulo_tokens = titulo_normalized.split()
+
+        # Normaliza também as tags fornecidas
+        tags_str = request.form.get("tags", "").strip()
+        user_tags_raw = tags_str.split()
+        user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
+
+        # Unifica tudo em uma única lista, removendo duplicados
+        all_tags = list(set(titulo_tokens + user_tags_normalized))
+
         if titulo and descricao:
             problema = {
                 "titulo": titulo,
                 "descricao": descricao,
-                "resolvido": False
+                "resolvido": False,
+                # Armazena as tags normalizadas (título + as informadas)
+                "tags": all_tags
             }
             problemas_collection.insert_one(problema)
             return redirect(url_for("unresolved"))
@@ -277,7 +290,7 @@ def add_problem():
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
     """
-    Lista problemas que ainda não foram marcados como resolvidos.
+    Lista problemas que ainda não foram resolvidos.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -292,7 +305,7 @@ def unresolved():
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
     """
-    Exibe formulário para resolver um problema (somente roles 'solucionador' ou 'mecanico').
+    Exibe formulário para resolver um problema (roles 'solucionador' ou 'mecanico').
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -331,7 +344,7 @@ def resolver_problema(problem_id):
 @app.route("/solucao/<problem_id>", methods=["GET"])
 def exibir_solucao(problem_id):
     """
-    Exibe a página 'solucao.html' com a solução do problema (se resolvido).
+    Exibe a página 'solucao.html' com a solução (se resolvido).
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -348,7 +361,7 @@ def exibir_solucao(problem_id):
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
     """
-    Deleta um problema (somente 'solucionador' pode).
+    Deleta um problema (somente 'solucionador').
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -366,39 +379,66 @@ def delete_problem(problem_id):
     else:
         return redirect(url_for("unresolved"))
 
-@app.route("/inline_edit/<problem_id>", methods=["POST"])
-def inline_edit_problem(problem_id):
+##############################################################################
+#            NOVA ROTA PARA EDITAR PROBLEMA EM UMA PÁGINA SEPARADA
+##############################################################################
+
+@app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
+def edit_problem(problem_id):
     """
-    Edição rápida de título e descrição (somente 'solucionador').
+    Exibe um formulário (GET) para editar título/descrição/tags de um problema,
+    e salva as alterações no banco (POST). Somente 'solucionador'.
+    O título também é convertido em tags normalizadas.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
-    titulo_novo = request.form.get("titulo", "").strip()
-    descricao_nova = request.form.get("descricao", "").strip()
-
-    if not titulo_novo or not descricao_nova:
-        return redirect(url_for("search"))
-
-    if not problemas_collection.find_one({"_id": ObjectId(problem_id)}):
+    problema = problemas_collection.find_one({"_id": ObjectId(problem_id)})
+    if not problema:
         return "Problema não encontrado.", 404
 
-    problemas_collection.update_one(
-        {"_id": ObjectId(problem_id)},
-        {
-            "$set": {
-                "titulo": titulo_novo,
-                "descricao": descricao_nova
+    if request.method == "POST":
+        titulo_novo = request.form.get("titulo", "").strip()
+        descricao_nova = request.form.get("descricao", "").strip()
+
+        # Normaliza e quebra o título para virar parte das tags
+        titulo_normalized = normalize_string(titulo_novo)
+        titulo_tokens = titulo_normalized.split()
+
+        # Normaliza também as tags informadas
+        tags_str = request.form.get("tags", "").strip()
+        user_tags_raw = tags_str.split()
+        user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
+
+        # Unifica: título + tags
+        all_tags = list(set(titulo_tokens + user_tags_normalized))
+
+        if not titulo_novo or not descricao_nova:
+            erro = "Preencha todos os campos de título e descrição."
+            return render_template("edit_problem.html", problema=problema, erro=erro)
+
+        # Atualiza no banco
+        problemas_collection.update_one(
+            {"_id": ObjectId(problem_id)},
+            {
+                "$set": {
+                    "titulo": titulo_novo,
+                    "descricao": descricao_nova,
+                    "tags": all_tags
+                }
             }
-        }
-    )
-    return redirect(url_for("search"))
+        )
+        return redirect(url_for("search"))
+
+    # GET - exibe o formulário
+    return render_template("edit_problem.html", problema=problema, erro=None)
 
 ##############################################################################
 #            ROTA PARA EDITAR FUNÇÃO DO USUÁRIO (SOLUCIONADOR)
 ##############################################################################
+
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
     """
@@ -410,32 +450,47 @@ def edit_user_role(user_id):
         return "Acesso negado.", 403
 
     novo_role = request.form.get("role", "comum").strip()
-
     usuarios_collection.update_one(
         {"_id": ObjectId(user_id)},
         {"$set": {"role": novo_role}}
     )
-
     return redirect(url_for("listar_usuarios"))
 
 ##############################################################################
 #                ROTAS PARA LISTAR/DELETAR USUÁRIOS
 ##############################################################################
+
 @app.route("/usuarios", methods=["GET"])
 def listar_usuarios():
     """
     Lista todos os usuários (somente 'solucionador').
+    Agora com sistema de pesquisa por nome, whatsapp ou máquinas.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
-    usuarios = list(usuarios_collection.find({}))
+    # Captura o termo de pesquisa
+    search_query = request.args.get("q", "").strip()
+
+    # Monta o filtro para MongoDB
+    if search_query:
+        query = {
+            "$or": [
+                {"nome": {"$regex": search_query, "$options": "i"}},
+                {"whatsapp": {"$regex": search_query, "$options": "i"}},
+                {"maquinas": {"$regex": search_query, "$options": "i"}},
+            ]
+        }
+    else:
+        query = {}
+
+    usuarios = list(usuarios_collection.find(query))
     for u in usuarios:
         u["_id_str"] = str(u["_id"])
 
-    return render_template("registros.html", usuarios=usuarios)
+    return render_template("registros.html", usuarios=usuarios, search_query=search_query)
 
 @app.route("/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id):
@@ -453,15 +508,12 @@ def delete_user(user_id):
 ##############################################################################
 #                ROTA PARA EDIÇÃO DE SOLUÇÃO (APENAS SOLUCIONADOR)
 ##############################################################################
+
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
     """
     Edição da solução de um problema já resolvido (somente 'solucionador'),
-    incluindo:
-      - Upload de imagens via GridFS
-      - Manutenção da imagem se não houver upload
-      - Possibilidade de remover explicitamente a imagem
-      - Pré-visualização imediata (via JS) ao selecionar uma nova imagem
+    incluindo upload/manutenção de imagens em GridFS.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -487,29 +539,20 @@ def edit_solution(problem_id):
                 erro=erro
             )
 
-        # SOLUÇÃO ANTIGA (para manter as imagens existentes se não forem alteradas)
         old_solution_data = problema.get("solucao", {})
         old_steps = old_solution_data.get("steps", [])
-
-        # Novos steps vindos do formulário
         steps = new_solution_data.get("steps", [])
 
         for i, step in enumerate(steps):
-            # 1) Verifica se o usuário marcou para deletar a imagem existente
             delete_step = request.form.get(f"deleteExistingStepImage_{i}", "false") == "true"
-
-            # 2) Tenta carregar uma nova imagem do passo
             step_image_file = request.files.get(f"stepImage_{i}")
             new_file_id = save_image_if_exists(step_image_file)
 
-            # Obter a imagem antiga (se existir) e ainda estivermos dentro do range
             old_file_id = None
             if i < len(old_steps):
                 old_file_id = old_steps[i].get("stepImage")
 
             if delete_step:
-                # Se foi marcado para deletar a antiga e não há arquivo novo,
-                # remove a imagem do banco (GridFS) caso exista
                 if old_file_id:
                     try:
                         fs_m.delete(ObjectId(old_file_id))
@@ -518,21 +561,16 @@ def edit_solution(problem_id):
                 step["stepImage"] = None
 
             elif new_file_id:
-                # Se tem uma nova imagem, substituir a antiga
-                # Deletar a antiga do GridFS
                 if old_file_id:
                     try:
                         fs_m.delete(ObjectId(old_file_id))
                     except:
                         pass
                 step["stepImage"] = new_file_id
-
             else:
-                # Nem deletou a imagem, nem enviou uma nova:
-                # MANTÉM a antiga (se existir)
                 step["stepImage"] = old_file_id
 
-            # Agora lidamos com os subpassos
+            # Subpassos
             miniSteps = step.get("miniSteps", [])
             old_miniSteps = []
             if i < len(old_steps):
@@ -540,7 +578,6 @@ def edit_solution(problem_id):
 
             for j, substep in enumerate(miniSteps):
                 delete_sub = request.form.get(f"deleteExistingSubStepImage_{i}_{j}", "false") == "true"
-
                 substep_file = request.files.get(f"subStepImage_{i}_{j}")
                 new_sub_file_id = save_image_if_exists(substep_file)
 
@@ -565,7 +602,6 @@ def edit_solution(problem_id):
                 else:
                     substep["subStepImage"] = old_sub_file_id
 
-        # Atualiza a solução no banco
         problemas_collection.update_one(
             {"_id": ObjectId(problem_id)},
             {"$set": {"solucao": new_solution_data}}
@@ -581,14 +617,13 @@ def edit_solution(problem_id):
     )
 
 ##############################################################################
-#     ROTA PARA PESQUISAR PEÇAS (ITEM_SEARCH.HTML) - APENAS CARREGA TELA
+#        ROTA PARA PESQUISAR PEÇAS (ITEM_SEARCH.HTML) - APENAS CARREGA TELA
 ##############################################################################
 
 @app.route("/item_search", methods=["GET"])
 def item_search():
     """
-    Exibe a página de pesquisa de itens (integra com DB MachineZONE).
-    Utiliza o template 'item_search.html'.
+    Exibe a página de pesquisa de itens (DB MachineZONE).
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -598,17 +633,13 @@ def item_search():
 #         ROTA /load_items - BUSCA NO BANCO MZ (MachineZONE) E RETORNA JSON
 ##############################################################################
 
-ITEMS_PER_PAGE = 20  # Quantidade de itens por página
+ITEMS_PER_PAGE = 20
 
 @app.route("/load_items", methods=["GET"])
 def load_items():
     """
-    Carrega itens via AJAX do banco 'MachineZONE'.
-    Ordenação:
-      1) is_phrase_match (desc)
-      2) maior sub-frase (desc)
-      3) description (asc)
-    Retorna JSON: { items: [...], has_more: bool, total_items: int }
+    Carrega itens via AJAX do banco MachineZONE, com possibilidade de busca.
+    Armazena a pesquisa do usuário em 'history_collection', caso exista busca.
     """
     if not user_is_logged_in():
         return jsonify({"success": False, "message": "Não autorizado"}), 403
@@ -617,7 +648,15 @@ def load_items():
     page = int(request.args.get('page', 1))
     skip_items = (page - 1) * ITEMS_PER_PAGE
 
-    # Se não há busca, carrega tudo (ordenado por description)
+    # Armazena a busca se não estiver vazia
+    if search_query:
+        history_collection.insert_one({
+            "user_id": session["user_id"],
+            "user_name": session["nome"],
+            "query": search_query
+        })
+
+    # Se não há busca, carrega tudo ordenado por description
     if not search_query:
         total_items = itens_collection.count_documents({})
         items_cursor = itens_collection.find({}, collation={'locale': 'pt', 'strength': 1}) \
@@ -647,7 +686,6 @@ def load_items():
     normalized_search_phrase = normalize_string(search_query)
     search_tokens = re.findall(r'[^\s]+', normalized_search_phrase)
 
-    # is_phrase_match
     phrase_match_cond = {
         '$cond': [
             {
@@ -677,7 +715,7 @@ def load_items():
         }
     ]
 
-    # Faz contagem
+    # Contagem total
     count_pipeline = pipeline_base + [{'$count': 'total'}]
     count_result = list(itens_collection.aggregate(
         count_pipeline,
@@ -691,7 +729,7 @@ def load_items():
         collation={'locale': 'pt', 'strength': 1}
     ))
 
-    # Computa largest_sub_phrase_length
+    # Computa maior sub-frase
     for item in items:
         item['largest_sub_phrase_length'] = compute_largest_sub_phrase_length(
             search_tokens,
@@ -711,7 +749,6 @@ def load_items():
     paged_items = items[skip_items: skip_items + ITEMS_PER_PAGE]
     has_more = (len(paged_items) == ITEMS_PER_PAGE)
 
-    # Monta retorno
     items_list = []
     for item in paged_items:
         items_list.append({
@@ -728,69 +765,6 @@ def load_items():
         'has_more': has_more,
         'total_items': total_items
     })
-
-##############################################################################
-#        (Opcional) ROTAS DE HIGHLIGHT / UNHIGHLIGHT (MZ) - Exemplo
-##############################################################################
-
-@app.route("/highlight_item", methods=["POST"])
-def highlight_item():
-    """
-    Marca a 'matching_phrases' no item do DB MZ, usando a frase de busca.
-    Exemplo de rota extra.
-    """
-    if not user_is_logged_in():
-        return jsonify({'success': False, 'message': 'Não autorizado'}), 403
-
-    data = request.get_json()
-    item_id = data.get('item_id')
-    search_phrase = data.get('search_phrase', '').strip()
-
-    if not search_phrase:
-        return jsonify({'success': False, 'message': 'Frase vazia'}), 400
-    try:
-        normalized = normalize_string(search_phrase)
-        itens_collection.update_one(
-            {'_id': ObjectId(item_id)},
-            {'$addToSet': {'matching_phrases': normalized}}
-        )
-        # Opcionalmente atualiza as 'tags' com tokens da frase
-        item = itens_collection.find_one({'_id': ObjectId(item_id)})
-        if item:
-            current_tags = set(item.get('tags', []))
-            words = normalized.split()
-            for w in words:
-                current_tags.add(w)
-            itens_collection.update_one(
-                {'_id': ObjectId(item_id)},
-                {'$set': {'tags': sorted(current_tags)}}
-            )
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-@app.route("/unhighlight_item", methods=["POST"])
-def unhighlight_item():
-    """
-    Remove a 'matching_phrases' do item do DB MZ, usando a frase de busca.
-    Exemplo de rota extra.
-    """
-    if not user_is_logged_in():
-        return jsonify({'success': False, 'message': 'Não autorizado'}), 403
-
-    data = request.get_json()
-    item_id = data.get('item_id')
-    search_phrase = data.get('search_phrase', '').strip()
-
-    try:
-        normalized = normalize_string(search_phrase)
-        itens_collection.update_one(
-            {'_id': ObjectId(item_id)},
-            {'$pull': {'matching_phrases': normalized}}
-        )
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
 
 ##############################################################################
 #            ROTA PARA SERVIR IMAGENS DIRETAMENTE DO GRIDFS
@@ -812,9 +786,26 @@ def gridfs_image(file_id):
         return "Imagem não encontrada ou inválida.", 404
 
 ##############################################################################
+#            ROTA PARA EXIBIR HISTÓRICO DE PESQUISAS (SOLUCIONADOR)
+##############################################################################
+
+@app.route("/history_search", methods=["GET"])
+def history_search():
+    """
+    Mostra o histórico de pesquisas de todos os usuários.
+    Somente 'solucionador' tem acesso.
+    """
+    if not user_is_logged_in():
+        return redirect(url_for("login"))
+    if not user_has_role(["solucionador"]):
+        return "Acesso negado.", 403
+
+    all_history = list(history_collection.find({}))
+    return render_template("history_search.html", history=all_history)
+
+##############################################################################
 #                              EXECUTAR APP
 ##############################################################################
 
 if __name__ == "__main__":
-    # Em produção, use debug=False e forneça SECRET_KEY robusta no servidor
     app.run(host="0.0.0.0", port=5000, debug=True)

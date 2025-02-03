@@ -54,6 +54,8 @@
       flex-direction: column;
       width: 100%;
       max-width: 400px;
+      /* Desativa auto-preenchimento nos campos do formulário */
+      autocomplete: off;
     }
 
     label {
@@ -72,6 +74,8 @@
       color: #000;
       font-size: 1rem;
       outline: none;
+      /* Desativa auto-preenchimento / sugestões em cada campo também */
+      autocomplete: off;
     }
 
     /* Ajusta a altura do textarea para algumas linhas */
@@ -126,18 +130,6 @@
       background-color: #ccc;
     }
 
-    /* Aviso informativo (ex.: sobre utilidade do WhatsApp e Máquinas) */
-    .info-optional-fields {
-      background-color: #ffe347; /* Cor de destaque */
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
-      font-size: 1rem;
-      color: #000;
-      box-shadow: 0 0 8px rgba(255, 227, 71, 0.5); /* Sombra para destaque */
-      text-align: center; /* Centralizar o texto */
-    }
-
     footer {
       background-color: #1f1f1f;
       text-align: center;
@@ -184,11 +176,6 @@
       footer p {
         font-size: 0.9rem;
       }
-
-      .info-optional-fields {
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-      }
     }
   </style>
 </head>
@@ -203,20 +190,12 @@
       <div class="erro">{{ erro }}</div>
     {% endif %}
 
-    <!-- Mensagem explicativa sobre os campos opcionais -->
-    <div class="info-optional-fields">
-      <p>
-        O número de WhatsApp e as máquinas que você possui são opcionais,
-        mas podem ajudar na pesquisa de itens e na hora de resolver problemas mecânicos.
-      </p>
-    </div>
-
-    <form action="{{ url_for('register') }}" method="POST">
+    <form action="{{ url_for('register') }}" method="POST" autocomplete="off">
       <label for="nome">Nome de Usuário</label>
-      <input type="text" id="nome" name="nome" required />
+      <input type="text" id="nome" name="nome" required autocomplete="off" />
 
       <label for="senha">Senha</label>
-      <input type="password" id="senha" name="senha" required />
+      <input type="password" id="senha" name="senha" required autocomplete="off" />
 
       <!-- Campo WhatsApp (opcional) -->
       <label for="whatsapp">WhatsApp (Opcional)</label>
@@ -227,6 +206,7 @@
         placeholder="(99) 99999-9999"
         pattern="^\(\d{2}\)\s?\d{5}-\d{4}$"
         title="Formato esperado: (99) 99999-9999"
+        autocomplete="off"
       />
 
       <!-- Campo para Máquinas que o usuário possui (opcional) -->
@@ -235,6 +215,7 @@
         id="maquinas"
         name="maquinas"
         placeholder="Exemplos: Trator John Deere modelo X, Colheitadeira New Holland..."
+        autocomplete="off"
       ></textarea>
 
       <input type="submit" value="Registrar" />

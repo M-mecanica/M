@@ -73,6 +73,15 @@
       outline: none;
     }
 
+    /* Desativa o preenchimento automático do campo de nome de usuário */
+    input[name="nome"] {
+      autocomplete: off;
+    }
+
+    /* Alternativamente, podemos usar no próprio input:
+       autocomplete="off"
+       para garantir a desativação do preenchimento automático. */
+
     input[type="submit"] {
       background-color: #f5f5f5;
       color: #000;
@@ -177,7 +186,8 @@
     {% endif %}
     <form action="{{ url_for('login') }}" method="POST">
       <label for="nome">Nome de Usuário</label>
-      <input type="text" id="nome" name="nome" required />
+      <!-- Use autocomplete="off" diretamente no input para forçar a desativação do auto-fill -->
+      <input type="text" id="nome" name="nome" required autocomplete="off" />
 
       <label for="senha">Senha</label>
       <input type="password" id="senha" name="senha" required />
