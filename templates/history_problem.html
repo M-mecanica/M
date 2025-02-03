@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>M - Histórico de Pesquisa de Problemas</title>
+  <!-- Meta responsivo -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonte básica (opcional) -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* =========================================================================
+       RESET BÁSICO
+       ========================================================================= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* =========================================================================
+       BODY / FONTES / CORES GERAIS
+       ========================================================================= */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background-color: #f0f0f0;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* =========================================================================
+       HEADER PRETO COM BOTÃO "Voltar"
+       ========================================================================= */
+    header {
+      background-color: #000;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    header h1 {
+      color: #fff;
+      font-size: 1.4rem;
+      margin: 0;
+      text-align: center;
+    }
+
+    .btn-voltar-registros {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 0;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      left: 2rem;
+    }
+    .btn-voltar-registros:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+
+    /* =========================================================================
+       MAIN
+       ========================================================================= */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      margin-bottom: 2rem;
+      color: #000;
+      text-align: center;
+    }
+
+    /* =========================================================================
+       TABELA DE HISTÓRICO
+       ========================================================================= */
+    .history-table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+    table.history-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    table.history-table th,
+    table.history-table td {
+      padding: 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid #ccc;
+      font-size: 0.95rem;
+    }
+    table.history-table th {
+      background-color: #000;
+      color: #fff;
+    }
+    table.history-table tr:hover {
+      background-color: #f9f9f9;
+    }
+    .no-history {
+      margin-top: 2rem;
+      font-size: 1.1rem;
+      color: #666;
+    }
+
+    /* =========================================================================
+       FOOTER
+       ========================================================================= */
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+      margin: 0;
+    }
+
+    /* =========================================================================
+       MEDIA QUERIES
+       ========================================================================= */
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      header h1 {
+        font-size: 1.2rem;
+      }
+      .btn-voltar-registros {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+      main {
+        padding: 1rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+      }
+      table.history-table th,
+      table.history-table td {
+        font-size: 0.85rem;
+        padding: 0.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Botão para voltar a "registros" (Gerenciar Usuários) -->
+    <a href="{{ url_for('listar_usuarios') }}" class="btn-voltar-registros" title="Voltar">
+      &#x2B05;
+    </a>
+    <h1>Histórico de Pesquisas de Problemas</h1>
+  </header>
+
+  <main>
+    <h2>Registros Recentes</h2>
+    {% if history and history|length > 0 %}
+      <div class="history-table-container">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Usuário</th>
+              <th>Pesquisa</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in history %}
+            <tr>
+              <td>{{ entry.user_name }}</td>
+              <td>{{ entry.query }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="no-history">Ainda não há histórico de pesquisas de problemas.</p>
+    {% endif %}
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M</p>
+  </footer>
+</body>
+</html>

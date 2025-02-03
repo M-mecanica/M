@@ -2,6 +2,7 @@ import os
 import json
 import re
 import unicodedata
+from datetime import datetime
 
 from flask import (
     Flask, render_template, request, redirect,
@@ -36,8 +37,11 @@ usuarios_collection = db_m["usuarios"]
 # GridFS para armazenar as imagens no DB "m_plataforma"
 fs_m = gridfs.GridFS(db_m)
 
-# Coleção para histórico de buscas
+# Coleção para histórico de buscas de PEÇAS (já existente)
 history_collection = db_m["search_history"]
+
+# --- NOVA COLEÇÃO para histórico de pesquisa de PROBLEMAS ---
+problem_history_collection = db_m["problem_search_history"]
 
 # ------------------------ DB do MZ (MachineZONE) ----------------------------
 client_mz = MongoClient(
@@ -217,6 +221,8 @@ def search():
     - Busca no 'titulo' (por regex case-insensitive) E/OU
     - Busca nas 'tags' (já normalizadas) por tokens (AND).
     Se 'q' estiver vazio, mostra todos os problemas resolvidos.
+
+    Também registra histórico de pesquisa de PROBLEMAS em 'problem_history_collection'.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -235,6 +241,15 @@ def search():
                 {"tags": {"$all": tokens}}  # busca pelas tags normalizadas
             ]
         }
+
+        # REGISTRAR no histórico de pesquisa de problemas
+        problem_history_collection.insert_one({
+            "user_id": session["user_id"],
+            "user_name": session["nome"],
+            "query": termo_busca,
+            "timestamp": datetime.now()
+        })
+
     else:
         query = {"resolvido": True}
 
@@ -278,7 +293,6 @@ def add_problem():
                 "titulo": titulo,
                 "descricao": descricao,
                 "resolvido": False,
-                # Armazena as tags normalizadas (título + as informadas)
                 "tags": all_tags
             }
             problemas_collection.insert_one(problema)
@@ -379,16 +393,11 @@ def delete_problem(problem_id):
     else:
         return redirect(url_for("unresolved"))
 
-##############################################################################
-#            NOVA ROTA PARA EDITAR PROBLEMA EM UMA PÁGINA SEPARADA
-##############################################################################
-
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
     """
     Exibe um formulário (GET) para editar título/descrição/tags de um problema,
     e salva as alterações no banco (POST). Somente 'solucionador'.
-    O título também é convertido em tags normalizadas.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -412,7 +421,6 @@ def edit_problem(problem_id):
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
 
-        # Unifica: título + tags
         all_tags = list(set(titulo_tokens + user_tags_normalized))
 
         if not titulo_novo or not descricao_nova:
@@ -432,7 +440,6 @@ def edit_problem(problem_id):
         )
         return redirect(url_for("search"))
 
-    # GET - exibe o formulário
     return render_template("edit_problem.html", problema=problema, erro=None)
 
 ##############################################################################
@@ -465,6 +472,7 @@ def listar_usuarios():
     """
     Lista todos os usuários (somente 'solucionador').
     Agora com sistema de pesquisa por nome, whatsapp ou máquinas.
+    E agora também com botão para HISTÓRICO de pesquisa de problemas.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))
@@ -653,7 +661,8 @@ def load_items():
         history_collection.insert_one({
             "user_id": session["user_id"],
             "user_name": session["nome"],
-            "query": search_query
+            "query": search_query,
+            "timestamp": datetime.now()
         })
 
     # Se não há busca, carrega tudo ordenado por description
@@ -786,13 +795,13 @@ def gridfs_image(file_id):
         return "Imagem não encontrada ou inválida.", 404
 
 ##############################################################################
-#            ROTA PARA EXIBIR HISTÓRICO DE PESQUISAS (SOLUCIONADOR)
+#            ROTA PARA EXIBIR HISTÓRICO DE PESQUISAS DE ITENS
 ##############################################################################
 
 @app.route("/history_search", methods=["GET"])
 def history_search():
     """
-    Mostra o histórico de pesquisas de todos os usuários.
+    Mostra o histórico de pesquisas de todos os usuários (para PEÇAS).
     Somente 'solucionador' tem acesso.
     """
     if not user_is_logged_in():
@@ -800,8 +809,28 @@ def history_search():
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
-    all_history = list(history_collection.find({}))
+    # Ordena do mais recente para o mais antigo
+    all_history = list(history_collection.find({}).sort("timestamp", -1))
     return render_template("history_search.html", history=all_history)
+
+##############################################################################
+#          NOVA ROTA PARA EXIBIR HISTÓRICO DE PESQUISAS DE PROBLEMAS
+##############################################################################
+
+@app.route("/history_problem", methods=["GET"])
+def history_problem():
+    """
+    Mostra o histórico de pesquisas de PROBLEMAS.
+    Somente 'solucionador' tem acesso.
+    """
+    if not user_is_logged_in():
+        return redirect(url_for("login"))
+    if not user_has_role(["solucionador"]):
+        return "Acesso negado.", 403
+
+    # Ordena do mais recente para o mais antigo
+    all_history = list(problem_history_collection.find({}).sort("timestamp", -1))
+    return render_template("history_problem.html", history=all_history)
 
 ##############################################################################
 #                              EXECUTAR APP

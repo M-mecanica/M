@@ -38,7 +38,7 @@
     }
 
     /* =========================================================================
-       HEADER PRETO COM BOTÕES
+       HEADER PRETO
        ========================================================================= */
     header {
       background-color: #000;
@@ -51,10 +51,10 @@
     header h1 {
       color: #fff;
       font-size: 1.4rem;
-      margin: 0;
+      margin: 0 auto; /* Mantém o título centralizado */
     }
 
-    /* Botão "Voltar" retangular, com hover */
+    /* Botão "Voltar" retangular, com hover (fica à esquerda) */
     .btn-voltar-index {
       background-color: #000;
       color: #fff;
@@ -78,11 +78,26 @@
       transform: scale(1.02);
     }
 
-    /* Botão "Histórico de Pesquisas" (somente se solucionador) */
-    .btn-history-search {
+    /* =========================================================================
+       NOVO ESTILO P/ BOTÕES NO CANTO SUPERIOR DIREITO
+       (mesmo design do header da página index.html)
+       ========================================================================= */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      margin-left: auto; /* empurra este bloco para a direita */
       position: absolute;
       right: 2rem;
-      background-color: #444;
+    }
+    .divider {
+      width: 1px;
+      height: 24px;
+      background-color: rgba(255, 255, 255, 0.2);
+      margin: 0 0.5rem;
+      align-self: center;
+    }
+    .header-actions a {
+      background-color: #000;
       color: #fff;
       border: none;
       border-radius: 0;
@@ -92,10 +107,20 @@
       text-decoration: none;
       font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
+      height: 40px;
+      display: flex;
+      align-items: center;
     }
-    .btn-history-search:hover {
-      background-color: #666;
+    .header-actions a:hover {
+      background-color: #333;
       transform: scale(1.02);
+    }
+    /* Ícones dentro dos botões */
+    .header-actions a svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      margin-right: 0.4rem;
     }
 
     /* =========================================================================
@@ -104,7 +129,7 @@
     main {
       flex: 1;
       width: 100%;
-      max-width: 1200px;   /* A mesma largura do item_search.html */
+      max-width: 1200px;
       margin: 0 auto;
       padding: 2rem;
       display: flex;
@@ -119,7 +144,7 @@
     }
 
     /* =========================================================================
-       BARRA DE PESQUISA (MESMO DESIGN DO item_search.html)
+       BARRA DE PESQUISA
        ========================================================================= */
     .search-container {
       display: flex;
@@ -148,7 +173,7 @@
        ========================================================================= */
     .users-container {
       width: 100%;
-      max-width: 1200px; /* Para manter alinhado à mesma largura do main */
+      max-width: 1200px;
     }
     .user-item {
       background-color: #fff;
@@ -236,11 +261,15 @@
         font-size: 0.8rem;
         left: 1rem;
       }
-      .btn-history-search {
+      .header-actions {
         right: 1rem;
+      }
+      .header-actions a {
         padding: 0.5rem 1rem;
         font-size: 0.8rem;
+        height: 38px;
       }
+
       main {
         padding: 1rem;
       }
@@ -285,24 +314,50 @@
     <a href="{{ url_for('index') }}" class="btn-voltar-index" title="Voltar para Página Inicial">
       &#x2B05;
     </a>
+
     <h1>Gerenciar Usuários</h1>
 
-    <!-- Botão "Histórico" apenas se for "solucionador" -->
+    <!-- Botões no canto superior direito -->
     {% if session.role == 'solucionador' %}
-      <a
-        href="{{ url_for('history_search') }}"
-        class="btn-history-search"
-        title="Histórico de Pesquisas"
-      >
-        Histórico
+    <div class="header-actions">
+      <!-- Hist. Peças -->
+      <a href="{{ url_for('history_search') }}" title="Histórico de Pesquisas de Peças">
+        <!-- Exemplo de ícone (opcional) -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M10.442 10.442a1 1 0 0 1 1.32-.083
+                   6.5 6.5 0 1 0-1.414 1.414
+                   1 1 0 0 1 .083 1.32l-2.12
+                   2.12a1 1 0 0 1-1.414 0l-2.12-2.12a1 1
+                   0 0 1 0-1.414l2.12-2.12zM6.5
+                   12a5.5 5.5 0 1 1 0-11
+                   5.5 5.5 0 0 1 0 11z"/>
+        </svg>
+        Hist. Peças
       </a>
+      <div class="divider"></div>
+
+      <!-- Hist. Problemas -->
+      <a href="{{ url_for('history_problem') }}" title="Histórico de Pesquisas de Problemas">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M8.982 1.566a.5.5 0 0
+                   0-.964 0l-6.52 12.5A.5.5
+                   0 0 0 2.01 15h11.98a.5.5
+                   0 0 0 .442-.934l-6.45-12.5zM8
+                   5c.28 0 .5.22.5.5V9a.5.5 0 0
+                   1-1 0V5.5c0-.28.22-.5.5-.5zm0
+                   6a.75.75 0 1 1 0 1.5A.75.75
+                   0 0 1 8 11z"/>
+        </svg>
+        Hist. Problemas
+      </a>
+    </div>
     {% endif %}
   </header>
 
   <main>
     <h2 class="page-title">Usuários Registrados</h2>
 
-    <!-- Barra de pesquisa com mesmo layout do item_search.html -->
+    <!-- Barra de pesquisa para filtrar usuários -->
     <form class="search-container" method="GET" action="{{ url_for('listar_usuarios') }}">
       <input
         type="text"
@@ -323,7 +378,8 @@
             <h2>{{ user["nome"] }}</h2>
 
             <!-- WhatsApp -->
-            <p>WhatsApp:
+            <p>
+              <strong>WhatsApp:</strong>
               {% if user.whatsapp %}
                 {{ user.whatsapp }}
               {% else %}
@@ -332,7 +388,8 @@
             </p>
 
             <!-- Máquinas -->
-            <p>Máquinas:
+            <p>
+              <strong>Máquinas:</strong>
               {% if user.maquinas %}
                 {{ user.maquinas }}
               {% else %}
@@ -342,7 +399,7 @@
 
             <!-- Função (role) -->
             {% if session.role == 'solucionador' %}
-              <p>Função atual: {{ user["role"] }}</p>
+              <p><strong>Função atual:</strong> {{ user["role"] }}</p>
               <form
                 class="role-form"
                 action="{{ url_for('edit_user_role', user_id=user['_id_str']) }}"
@@ -368,7 +425,7 @@
                 <button type="submit" class="role-btn">Alterar Função</button>
               </form>
             {% else %}
-              <p>Função: {{ user["role"] }}</p>
+              <p><strong>Função:</strong> {{ user["role"] }}</p>
             {% endif %}
 
             <!-- Botão Excluir (apenas solucionador) -->
