@@ -24,7 +24,7 @@
     }
 
     /* =========================================================================
-       BODY / FONTES / CORES GERAIS (DESKTOP)
+       BODY / FONTES / CORES GERAIS
        ========================================================================= */
     body {
       font-family: 'Roboto', sans-serif;
@@ -38,17 +38,17 @@
     }
 
     /* =========================================================================
-       HEADER PRETO COM BOTÕES (DESKTOP)
+       HEADER PRETO COM BOTÕES
        ========================================================================= */
     header {
       background-color: #000;
       padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: space-between; /* Espaçar os itens (voltar, título, carrinho) */
       position: relative;
     }
-    /* Botão "Voltar" estilo retangular, com hover */
+    /* Botão "Voltar" */
     .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
@@ -71,16 +71,38 @@
     header h1 {
       color: #fff;
       font-size: 1.4rem;
-      margin: 0 auto; /* centraliza o título */
       text-align: center;
+      margin: 0 auto;
     }
 
     /* =========================================================================
-       REMOVIDO: Botão "Histórico de Pesquisas" e suas regras
+       ÍCONE DO CARRINHO
        ========================================================================= */
+    .cart-icon-container {
+      position: relative;
+      cursor: pointer;
+      color: #fff;
+      font-size: 1.4rem;
+    }
+    .cart-icon {
+      font-weight: bold;
+    }
+
+    /* Badge com o número de itens distintos no carrinho */
+    .cart-count-badge {
+      position: absolute;
+      top: -8px;
+      right: -10px;
+      background-color: #e74c3c;
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
 
     /* =========================================================================
-       MAIN: CONTAINER GERAL DOS ELEMENTOS (DESKTOP)
+       MAIN
        ========================================================================= */
     main {
       flex: 1;
@@ -94,7 +116,7 @@
     }
 
     /* =========================================================================
-       CAMPO DE PESQUISA (DESKTOP) - ALTURA E FONTES AUMENTADAS
+       CAMPO DE PESQUISA
        ========================================================================= */
     .search-container {
       display: flex;
@@ -104,11 +126,11 @@
     }
     .search-container input[type="text"] {
       flex: 1;
-      padding: 1.2rem 1.8rem; /* Aumenta a altura do campo de busca */
+      padding: 1.2rem 1.8rem;
       border: none;
       border-radius: 32px;
       background-color: #fff;
-      font-size: 1.2rem; /* Aumenta o tamanho da fonte no campo de busca */
+      font-size: 1.2rem;
       color: #333;
       text-align: center;
       outline: none;
@@ -119,7 +141,7 @@
     }
 
     /* =========================================================================
-       CONTADOR DE RESULTADOS (DESKTOP)
+       CONTADOR DE RESULTADOS
        ========================================================================= */
     #itemCount {
       font-size: 1rem;
@@ -130,7 +152,7 @@
     }
 
     /* =========================================================================
-       LISTA E ITENS DE RESULTADO (DESKTOP)
+       LISTA E ITENS DE RESULTADO
        ========================================================================= */
     .result-container {
       width: 100%;
@@ -147,11 +169,9 @@
       justify-content: space-between;
       background-color: #fff;
       border-radius: 8px;
-      /* Aumenta o espaçamento interno (altura do container) */
       padding: 1.5rem;
       margin-bottom: 1.5rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: relative;
       color: #333;
 
       /* ANIMAÇÃO DE ENTRADA (fade-in) */
@@ -172,42 +192,51 @@
       padding-left: calc(1.5rem - 5px);
     }
 
-    /* Container que agrupa o título (ou descrição) do item */
     .item-info {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
-    /* Aumenta o tamanho da fonte da descrição */
     .item-info strong {
       font-size: 1.1rem;
       color: #000;
     }
 
-    /* =========================================================================
-       BOTÃO WHATSAPP (lado direito do card) (DESKTOP) - TAMANHO AUMENTADO
-       ========================================================================= */
-    .whatsapp-btn {
-      margin-left: 1rem;
-      padding: 0.7rem 1.4rem; /* Aumenta a área de clique do botão */
-      background-color: #25D366;
-      color: #fff;
+    /* Botões "Contato" e "Adicionar" */
+    .item-actions {
+      display: flex;
+      gap: 1rem;
+    }
+    .whatsapp-btn,
+    .add-to-cart-btn {
+      padding: 0.7rem 1.4rem;
       border: none;
       border-radius: 4px;
-      font-size: 1rem; /* Aumenta o tamanho da fonte do botão */
+      font-size: 1rem;
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
       width: fit-content;
+      color: #fff;
+    }
+    .whatsapp-btn {
+      background-color: #25D366;
     }
     .whatsapp-btn:hover {
       background-color: #20b955;
       transform: scale(1.02);
     }
+    .add-to-cart-btn {
+      background-color: #3498db;
+    }
+    .add-to-cart-btn:hover {
+      background-color: #2980b9;
+      transform: scale(1.02);
+    }
 
     /* =========================================================================
-       LOADING (DESKTOP)
+       LOADING
        ========================================================================= */
     .loading {
       text-align: center;
@@ -217,7 +246,7 @@
     }
 
     /* =========================================================================
-       RODAPÉ (DESKTOP)
+       FOOTER
        ========================================================================= */
     footer {
       background-color: #000;
@@ -227,6 +256,144 @@
     footer p {
       font-size: 0.9rem;
       color: #fff;
+    }
+
+    /* =========================================================================
+       MODAL PARA QUANTIDADE (Adicionar ao Carrinho)
+       ========================================================================= */
+    .modal-overlay,
+    .cart-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 999;
+    }
+    .modal-overlay.active,
+    .cart-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-content,
+    .cart-content {
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .modal-content h2,
+    .cart-content h2 {
+      margin-bottom: 1rem;
+    }
+    .close-modal-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      border: none;
+      background: transparent;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    /* Input de quantidade */
+    .quantity-input {
+      width: 100%;
+      font-size: 1rem;
+      padding: 0.5rem;
+      text-align: center;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    /* Botão de confirmar */
+    .confirm-btn {
+      padding: 0.8rem 1rem;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      text-align: center;
+    }
+    .confirm-btn:hover {
+      background-color: #2980b9;
+      transform: scale(1.02);
+    }
+
+    /* =========================================================================
+       MODAL DO CARRINHO
+       ========================================================================= */
+    .cart-items-list {
+      max-height: 250px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 0.5rem;
+    }
+    .cart-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Grupo de setas (botões) e quantidade */
+    .cart-quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 8px;
+    }
+    .quantity-btn {
+      background-color: #ccc;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: background-color 0.2s;
+    }
+    .quantity-btn:hover {
+      background-color: #bbb;
+    }
+
+    .remove-btn {
+      background-color: #e74c3c;
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .remove-btn:hover {
+      background-color: #c0392b;
+    }
+
+    .finalize-btn {
+      background-color: #25D366;
+      color: #fff;
+    }
+    .finalize-btn:hover {
+      background-color: #20b955;
+      transform: scale(1.02);
     }
 
     /* =========================================================================
@@ -246,33 +413,38 @@
       main {
         padding: 1rem;
       }
-      .search-container {
-        max-width: 100%;
-        margin-bottom: 1.5rem;
-      }
       .search-container input[type="text"] {
         padding: 0.8rem;
-        font-size: 1rem; /* Mantém um bom tamanho no mobile */
+        font-size: 1rem;
       }
       .results li {
-        flex-direction: column; /* Empilha conteúdo e botão no modo mobile */
+        flex-direction: column;
         align-items: flex-start;
       }
-      .whatsapp-btn {
-        margin-top: 1rem; /* Para ficar abaixo do texto no modo mobile */
+      .item-actions {
+        margin-top: 1rem;
       }
       #itemCount {
         font-size: 0.95rem;
+      }
+      .cart-items-list {
+        max-height: 200px; /* para caber em telas menores */
       }
     }
   </style>
 </head>
 
 <body>
-  <!-- Cabeçalho com botão de voltar, título (botão histórico removido) -->
+  <!-- Cabeçalho com botão de voltar, título e ícone do carrinho -->
   <header>
     <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">&#x2B05;</a>
     <h1>Pesquisa de Itens</h1>
+
+    <!-- Ícone do Carrinho (topo direito) -->
+    <div class="cart-icon-container" onclick="openCartModal()">
+      <span class="cart-icon">🛒</span>
+      <span class="cart-count-badge" id="cartCount">0</span>
+    </div>
   </header>
 
   <!-- Conteúdo principal -->
@@ -308,7 +480,37 @@
     <p>© 2025 Plataforma M - Integração MZ</p>
   </footer>
 
-  <!-- Scripts de busca, scroll infinito e função WhatsApp -->
+  <!-- MODAL PARA DIGITAR QUANTIDADE (Adicionar ao Carrinho) -->
+  <div class="modal-overlay" id="quantityModal">
+    <div class="modal-content">
+      <button class="close-modal-btn" onclick="closeQuantityModal()">✖</button>
+      <h2>Adicionar ao Carrinho</h2>
+      <p id="modalItemDesc"></p>
+      <input
+        type="number"
+        min="1"
+        step="1"
+        value="1"
+        class="quantity-input"
+        id="quantityInput"
+      />
+      <button class="confirm-btn" id="confirmAddBtn">Confirmar</button>
+    </div>
+  </div>
+
+  <!-- MODAL PARA EXIBIR CARRINHO -->
+  <div class="cart-overlay" id="cartModal">
+    <div class="cart-content">
+      <button class="close-modal-btn" onclick="closeCartModal()">✖</button>
+      <h2>Seu Carrinho</h2>
+      <div class="cart-items-list" id="cartItemsList">
+        <!-- Lista de itens adicionados -->
+      </div>
+      <button class="confirm-btn finalize-btn" onclick="finalizeCart()">Finalizar no WhatsApp</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
   <script>
     let currentPage = 1;
     let isLoading = false;
@@ -318,8 +520,136 @@
     const MZ_WHATSAPP = "5543996436367";
 
     /*
-      1) Carrega itens da base MZ (rota /load_items) via AJAX, página p.
+      Array local para o carrinho.
+      Cada item: { _id, description, quantity }
     */
+    let cart = [];
+
+    // MODAL DE QUANTIDADE (Adicionar) --------------------------------
+    let currentItemToAdd = null; // Armazena temporariamente o item que será adicionado
+    function openQuantityModal(itemId, description) {
+      currentItemToAdd = { _id: itemId, description };
+      document.getElementById('quantityInput').value = 1;
+      document.getElementById('modalItemDesc').textContent = description;
+      document.getElementById('quantityModal').classList.add('active');
+    }
+    function closeQuantityModal() {
+      document.getElementById('quantityModal').classList.remove('active');
+      currentItemToAdd = null;
+    }
+
+    // Confirma a adição no carrinho
+    document.getElementById('confirmAddBtn').addEventListener('click', () => {
+      const quantity = parseInt(document.getElementById('quantityInput').value, 10);
+      if (!currentItemToAdd) return;
+
+      if (quantity > 0) {
+        // Verifica se já existe no carrinho
+        const existing = cart.find(item => item._id === currentItemToAdd._id);
+        if (existing) {
+          existing.quantity += quantity;
+        } else {
+          cart.push({
+            _id: currentItemToAdd._id,
+            description: currentItemToAdd.description,
+            quantity
+          });
+        }
+        updateCartCount();
+      }
+      closeQuantityModal();
+    });
+
+    // MODAL DO CARRINHO ---------------------------------------------
+    function openCartModal() {
+      updateCartModal();
+      document.getElementById('cartModal').classList.add('active');
+    }
+    function closeCartModal() {
+      document.getElementById('cartModal').classList.remove('active');
+    }
+
+    // Atualiza contador no ícone do carrinho (itens distintos)
+    function updateCartCount() {
+      // Agora, o badge reflete a quantidade de itens diferentes
+      const distinctCount = cart.length;
+      document.getElementById('cartCount').textContent = distinctCount;
+    }
+
+    // Remover item do carrinho
+    function removeFromCart(itemId) {
+      cart = cart.filter(it => it._id !== itemId);
+      updateCartCount();
+      updateCartModal();
+    }
+
+    // Incrementar quantidade
+    function incrementItemQuantity(itemId) {
+      const item = cart.find(it => it._id === itemId);
+      if (item) {
+        item.quantity += 1;
+        updateCartModal();
+      }
+    }
+
+    // Decrementar quantidade
+    function decrementItemQuantity(itemId) {
+      const item = cart.find(it => it._id === itemId);
+      if (item) {
+        item.quantity -= 1;
+        if (item.quantity <= 0) {
+          // Se ficar 0 ou menos, remove
+          removeFromCart(itemId);
+        } else {
+          updateCartModal();
+        }
+      }
+    }
+
+    // Atualiza o modal do carrinho (lista de itens)
+    function updateCartModal() {
+      const cartItemsList = document.getElementById('cartItemsList');
+      cartItemsList.innerHTML = '';
+      if (cart.length === 0) {
+        cartItemsList.innerHTML = '<p>O carrinho está vazio.</p>';
+        return;
+      }
+      cart.forEach(cartItem => {
+        const row = document.createElement('div');
+        row.classList.add('cart-item-row');
+        row.innerHTML = `
+          <span>${cartItem.description}</span>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div class="cart-quantity-controls">
+              <button class="quantity-btn" onclick="decrementItemQuantity('${cartItem._id}')">-</button>
+              <span>${cartItem.quantity}</span>
+              <button class="quantity-btn" onclick="incrementItemQuantity('${cartItem._id}')">+</button>
+            </div>
+            <button class="remove-btn" onclick="removeFromCart('${cartItem._id}')">Remover</button>
+          </div>
+        `;
+        cartItemsList.appendChild(row);
+      });
+    }
+
+    // Finalizar no WhatsApp
+    function finalizeCart() {
+      if (cart.length === 0) {
+        alert("Seu carrinho está vazio.");
+        return;
+      }
+      let message = "Olá! Poderiam verificar a disponibilidade dos itens abaixo?\n\n";
+      cart.forEach((item, index) => {
+        message += `${index + 1}) ${item.description} - Qtd: ${item.quantity}\n`;
+      });
+      message += "\nObrigado!";
+
+      const encodedText = encodeURIComponent(message);
+      const waLink = `https://wa.me/${MZ_WHATSAPP}?text=${encodedText}`;
+      window.open(waLink, '_blank');
+    }
+
+    // PESQUISA DE ITENS / SCROLL INFINITO ----------------------------
     function loadItemsPage(p) {
       return new Promise((resolve, reject) => {
         const searchQuery = document.getElementById('searchInput').value.trim();
@@ -327,7 +657,6 @@
           .then(response => response.json())
           .then(data => {
             if (p === 1) {
-              // Se for a primeira página, limpamos e atualizamos o contador
               document.getElementById('itemCount').textContent =
                 `Itens encontrados: ${data.total_items}`;
               document.getElementById('results').innerHTML = '';
@@ -337,18 +666,29 @@
 
             data.items.forEach(item => {
               const listItem = document.createElement('li');
-              // Se no back-end marcamos "is_phrase_match" => item.is_highlighted
               listItem.setAttribute('data-id', item._id);
               listItem.setAttribute('data-highlighted', item.is_highlighted ? '1' : '0');
 
-              // HTML interno: apenas a descrição e o botão de contato
+              // Botões de ação
+              const contatoBtn = `
+                <button class="whatsapp-btn"
+                        onclick="openWhatsApp('${item.description}')">
+                  Contato MZ
+                </button>`;
+              const addBtn = `
+                <button class="add-to-cart-btn"
+                        onclick="openQuantityModal('${item._id}','${item.description}')">
+                  Adicionar
+                </button>`;
+
               listItem.innerHTML = `
                 <div class="item-info">
                   <strong>${item.description}</strong>
                 </div>
-                <button class="whatsapp-btn" onclick="openWhatsApp('${item.description}')">
-                  Contato MZ
-                </button>
+                <div class="item-actions">
+                  ${contatoBtn}
+                  ${addBtn}
+                </div>
               `;
 
               resultsList.appendChild(listItem);
@@ -366,19 +706,14 @@
       });
     }
 
-    /*
-      Função para abrir o WhatsApp com a mensagem:
-      "Olá MZ, vocês tem o item disponível?"
-    */
+    // Abre o WhatsApp para um item específico
     function openWhatsApp(itemDescription) {
       const text = `Olá MZ, vocês têm o ${itemDescription} disponível?`;
       const encodedText = encodeURIComponent(text);
       window.open(`https://wa.me/${MZ_WHATSAPP}?text=${encodedText}`, '_blank');
     }
 
-    /*
-      2) Carregar mais itens ao rolar até perto do fim (scroll infinito).
-    */
+    // Scroll infinito
     function loadMoreItems() {
       if (isLoading || !hasMoreItems) return;
       isLoading = true;
@@ -401,10 +736,7 @@
       }
     });
 
-    /*
-      3) Ao dar ENTER no campo de busca, inicia a pesquisa
-         (resetando para página 1, etc).
-    */
+    // Iniciar busca
     function startSearch() {
       currentPage = 1;
       hasMoreItems = true;
@@ -414,9 +746,7 @@
       loadMoreItems();
     }
 
-    /*
-      4) Quando a página carrega, carregamos a primeira página (p=1).
-    */
+    // Ao carregar a página, carrega a primeira página
     window.onload = function() {
       loadMoreItems();
     };

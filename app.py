@@ -237,8 +237,8 @@ def search():
         query = {
             "resolvido": True,
             "$or": [
-                {"titulo": {"$regex": termo_busca, "$options": "i"}},  # busca pelo título original
-                {"tags": {"$all": tokens}}  # busca pelas tags normalizadas
+                {"titulo": {"$regex": termo_busca, "$options": "i"}},
+                {"tags": {"$all": tokens}}
             ]
         }
 
@@ -631,7 +631,7 @@ def edit_solution(problem_id):
 @app.route("/item_search", methods=["GET"])
 def item_search():
     """
-    Exibe a página de pesquisa de itens (DB MachineZONE).
+    Exibe a página de pesquisa de itens (DB MachineZONE) - agora com carrinho.
     """
     if not user_is_logged_in():
         return redirect(url_for("login"))

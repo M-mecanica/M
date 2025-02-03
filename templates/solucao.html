@@ -436,20 +436,43 @@
   </footer>
 
   <script>
-    // Função de typewriter para animação de texto progressivo
+    // Função de typewriter para animação de texto progressivo com agrupamento por palavra
     function typeWriter(container, text, index, callback) {
-      if (index < text.length) {
+      if (index >= text.length) {
+        if (callback) callback();
+        return;
+      }
+
+      const currentChar = text.charAt(index);
+
+      // Se o caractere for um espaço, insere-o como texto simples
+      if (currentChar === ' ') {
+        container.appendChild(document.createTextNode(' '));
+        setTimeout(() => {
+          typeWriter(container, text, index + 1, callback);
+        }, 50);
+      } else {
+        let wordContainer;
+        // Se for o início do texto ou se o caractere anterior for um espaço, cria um container para a nova palavra
+        if (index === 0 || text.charAt(index - 1) === ' ') {
+          wordContainer = document.createElement('span');
+          // Impede quebras internas na palavra
+          wordContainer.style.whiteSpace = 'nowrap';
+          container.appendChild(wordContainer);
+        } else {
+          // Caso contrário, usa o último container criado (que contém a palavra em andamento)
+          wordContainer = container.lastChild;
+        }
+
+        // Cria o span para a letra atual com a animação
         const span = document.createElement('span');
         span.classList.add('letter-construct');
-        span.textContent = text.charAt(index);
-
-        container.appendChild(span);
+        span.textContent = currentChar;
+        wordContainer.appendChild(span);
 
         setTimeout(() => {
           typeWriter(container, text, index + 1, callback);
-        }, 50); // Velocidade da "digitação"
-      } else {
-        if (callback) callback();
+        }, 50);
       }
     }
 
@@ -476,9 +499,9 @@
       descBlock.classList.add('step-description-block');
       stepDiv.appendChild(descBlock);
 
-      // Animação de texto
+      // Animação de texto para a descrição
       typeWriter(descBlock, `${description}\n`, 0, () => {
-        // Se tiver ID de imagem do passo, insere logo após a descrição
+        // Se houver ID de imagem, insere a imagem após a descrição
         if (imageId && imageId.trim() !== "") {
           const imageContainer = document.createElement('div');
           imageContainer.classList.add('step-image-block');
@@ -493,7 +516,7 @@
       });
     }
 
-    // Exibe um bloco de minipassos, com título, descrição e imagem
+    // Exibe um bloco de minipassos, com título, descrição e imagem (se houver)
     function createMiniStepsArea(stepDiv, miniSteps) {
       const miniStepsWrapper = document.createElement('div');
       miniStepsWrapper.classList.add('mini-steps-block');
@@ -503,7 +526,7 @@
       let isRevealing = false; // flag para evitar múltiplos cliques
       const totalMiniSteps = miniSteps.length;
 
-      // Botão para mostrar minipassos progressivamente
+      // Botão para mostrar os minipassos progressivamente
       const showMiniBtn = document.createElement('button');
       showMiniBtn.type = 'button';
       showMiniBtn.classList.add('mini-steps-btn');
@@ -512,30 +535,29 @@
       const miniStepsOutput = document.createElement('div');
       miniStepsWrapper.appendChild(miniStepsOutput);
 
-      // Função para exibir 1 minipasso por vez
+      // Função para exibir um minipasso por vez
       function revealMiniStep(index) {
         if (index >= totalMiniSteps) {
-          // Acabaram os subpassos
           showMiniBtn.style.display = 'none';
           isRevealing = false;
           return;
         }
         const sub = miniSteps[index];
 
-        // Título
+        // Título do minipasso
         const subTitle = document.createElement('div');
         subTitle.classList.add('mini-step-title');
         miniStepsOutput.appendChild(subTitle);
 
         const titleText = `Mini Passo ${index + 1} - ${sub.miniStepTitle}\n`;
         typeWriter(subTitle, titleText, 0, () => {
-          // Descrição
+          // Descrição do minipasso
           const subDesc = document.createElement('div');
           subDesc.classList.add('mini-step-description');
           miniStepsOutput.appendChild(subDesc);
 
           typeWriter(subDesc, `${sub.miniStepDescription}\n`, 0, () => {
-            // Se tiver imagem
+            // Se houver imagem, insere-a
             if (sub.subStepImage && sub.subStepImage.trim() !== "") {
               const subImgContainer = document.createElement('div');
               subImgContainer.classList.add('mini-step-image-block');
@@ -546,15 +568,14 @@
               miniStepsOutput.appendChild(subImgContainer);
             }
 
-            // Concluiu animação deste subpasso
+            // Concluiu a animação deste minipasso
             currentIndex++;
-            isRevealing = false; // libera para novo clique
+            isRevealing = false;
 
             if (currentIndex < totalMiniSteps) {
               showMiniBtn.textContent = `Mostrar Mini Passo ${currentIndex + 1}`;
               showMiniBtn.style.display = 'inline-block';
             } else {
-              // Não há próximo subpasso
               showMiniBtn.style.display = 'none';
             }
           });
@@ -562,13 +583,12 @@
       }
 
       showMiniBtn.addEventListener('click', () => {
-        if (isRevealing) return; // já em andamento
+        if (isRevealing) return;
         isRevealing = true;
-        showMiniBtn.style.display = 'none'; // oculta enquanto anima
+        showMiniBtn.style.display = 'none';
         revealMiniStep(currentIndex);
       });
 
-      // Insere o botão de "Mostrar 1º Mini Passo" no wrapper
       miniStepsWrapper.appendChild(showMiniBtn);
     }
 
@@ -580,7 +600,6 @@
       revealStepTitle(stepDiv, stepNumber, stepData.stepTitle, () => {
         const stepImageId = stepData.stepImage || "";
         revealStepDescription(stepDiv, stepData.stepDescription, stepImageId, () => {
-          // Verifica se há miniSteps
           if (stepData.miniSteps && stepData.miniSteps.length > 0) {
             createMiniStepsArea(stepDiv, stepData.miniSteps);
           }
@@ -589,7 +608,7 @@
       });
     }
 
-    // Lógica de animação para exibir passo a passo
+    // Lógica para exibir os passos da solução
     document.addEventListener('DOMContentLoaded', () => {
       const solutionContainer = document.getElementById('solutionContainer');
       const stepsData = JSON.parse(solutionContainer.dataset.steps || '[]');
@@ -617,15 +636,15 @@
         });
       }
 
-      // Mostrar o primeiro passo
+      // Exibe o primeiro passo ao clicar em "Mostrar Passos"
       btnShowSolution.addEventListener('click', () => {
-        if (isSolutionActive) return; // evita duplo clique
+        if (isSolutionActive) return;
         isSolutionActive = true;
         btnShowSolution.style.display = 'none';
         revealCurrentStep();
       });
 
-      // "Próximo Passo"
+      // Avança para o próximo passo
       btnNextStep.addEventListener('click', () => {
         btnNextStep.style.display = 'none';
         currentStepIndex++;
