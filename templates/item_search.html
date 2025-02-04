@@ -55,7 +55,7 @@
       border: none;
       border-radius: 32px; /* Arredondado */
       padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
+      font-size: 2rem; /* ÍCONE (SETA) MAIOR */
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
@@ -82,7 +82,7 @@
       position: relative;
       cursor: pointer;
       color: #fff;
-      font-size: 1.4rem;
+      font-size: 2rem; /* AUMENTADO O TAMANHO DO ÍCONE DE CARRINHO */
     }
     .cart-icon {
       font-weight: bold;
@@ -92,11 +92,11 @@
     .cart-count-badge {
       position: absolute;
       top: -8px;
-      right: -10px;
+      right: -14px; /* Ajustado um pouco mais para a direita por conta do tamanho maior */
       background-color: #e74c3c;
       color: #fff;
-      font-size: 0.75rem;
-      padding: 2px 6px;
+      font-size: 0.85rem; /* Ajustar se quiser maior ou menor */
+      padding: 3px 7px;
       border-radius: 50%;
       pointer-events: none;
     }
@@ -411,7 +411,7 @@
       }
       .btn-voltar-inicio {
         padding: 0.5rem 1rem;
-        font-size: 0.8rem;
+        /* Mantemos o font-size aumentado no mobile também */
       }
       main {
         padding: 1rem;
@@ -420,18 +420,29 @@
         padding: 0.8rem;
         font-size: 1rem;
       }
-      .results li {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .item-actions {
-        margin-top: 1rem;
-      }
       #itemCount {
         font-size: 0.95rem;
       }
       .cart-items-list {
         max-height: 200px; /* para caber em telas menores */
+      }
+
+      /* Centralizar descrição e botão "Adicionar" no mobile */
+      .results li {
+        flex-direction: column;
+        align-items: flex-start;
+        position: relative;
+      }
+      .item-info {
+        width: 100%;
+        margin-bottom: 4rem; /* Espaço para o botão não ficar sobre a descrição */
+        text-align: center;  /* Centraliza a descrição no mobile */
+      }
+      .item-actions {
+        position: absolute;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
       }
     }
   </style>
@@ -671,7 +682,7 @@
               listItem.setAttribute('data-id', item._id);
               listItem.setAttribute('data-highlighted', item.is_highlighted ? '1' : '0');
 
-              // Só o botão "Adicionar" agora, com ícone de +
+              // Só o botão "Adicionar"
               const addBtn = `
                 <button class="add-to-cart-btn"
                         onclick="openQuantityModal('${item._id}','${item.description}')">

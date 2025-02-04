@@ -430,6 +430,15 @@
         </button>
       </div>
     </div>
+
+    <!-- Botão "Pesquisar Peças" no final da página -->
+    <div style="text-align: center; margin-top: 2rem;">
+      <a href="{{ url_for('item_search') }}"
+         class="show-solution-btn"
+         style="font-size: 1rem; padding: 0.8rem 1.4rem;">
+        Pesquisar Peças
+      </a>
+    </div>
   </main>
 
   <footer>
@@ -518,7 +527,7 @@
     }
 
     // Exibe um bloco de minipassos, com título, descrição e imagem (se houver)
-    function createMiniStepsArea(stepDiv, miniSteps) {
+    function createMiniStepsArea(stepDiv, miniSteps, stepNumber) {
       const miniStepsWrapper = document.createElement('div');
       miniStepsWrapper.classList.add('mini-steps-block');
       stepDiv.appendChild(miniStepsWrapper);
@@ -531,7 +540,7 @@
       const showMiniBtn = document.createElement('button');
       showMiniBtn.type = 'button';
       showMiniBtn.classList.add('mini-steps-btn');
-      showMiniBtn.textContent = 'Mostrar 1º Mini Passo';
+      showMiniBtn.textContent = `Mostrar Passo ${stepNumber}.1`; // Texto inicial
 
       const miniStepsOutput = document.createElement('div');
       miniStepsWrapper.appendChild(miniStepsOutput);
@@ -545,12 +554,12 @@
         }
         const sub = miniSteps[index];
 
-        // Título do minipasso
+        // Título do minipasso: Passo X.Y
         const subTitle = document.createElement('div');
         subTitle.classList.add('mini-step-title');
         miniStepsOutput.appendChild(subTitle);
 
-        const titleText = `Mini Passo ${index + 1} - ${sub.miniStepTitle}\n`;
+        const titleText = `Passo ${stepNumber}.${index + 1} - ${sub.miniStepTitle}\n`;
         typeWriter(subTitle, titleText, 0, () => {
           // Descrição do minipasso
           const subDesc = document.createElement('div');
@@ -573,8 +582,9 @@
             currentIndex++;
             isRevealing = false;
 
+            // Se ainda houver minipassos, atualiza texto do botão para o próximo Passo X.Y
             if (currentIndex < totalMiniSteps) {
-              showMiniBtn.textContent = `Mostrar Mini Passo ${currentIndex + 1}`;
+              showMiniBtn.textContent = `Mostrar Passo ${stepNumber}.${currentIndex + 1}`;
               showMiniBtn.style.display = 'inline-block';
             } else {
               showMiniBtn.style.display = 'none';
@@ -602,7 +612,7 @@
         const stepImageId = stepData.stepImage || "";
         revealStepDescription(stepDiv, stepData.stepDescription, stepImageId, () => {
           if (stepData.miniSteps && stepData.miniSteps.length > 0) {
-            createMiniStepsArea(stepDiv, stepData.miniSteps);
+            createMiniStepsArea(stepDiv, stepData.miniSteps, stepNumber);
           }
           if (onFinish) onFinish();
         });

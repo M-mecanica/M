@@ -49,12 +49,12 @@
       text-align: center;
     }
 
-    /* Botão Voltar (seta) no estilo do index.html */
+    /* Botão Voltar (seta) no estilo do index.html, agora apenas com bordas arredondadas */
     .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 0;
+      border-radius: 32px; /* Arredondamento aplicado */
       padding: 0.7rem 1.2rem;
       font-size: 0.9rem;
       cursor: pointer;
@@ -113,7 +113,7 @@
       line-height: 1.4;
     }
 
-    /* Blocos de Passos e Sub-passos */
+    /* Blocos de Passos e Passos x.x */
     .step-block {
       margin-bottom: 1rem;
       border-left: 4px solid #888;
@@ -132,14 +132,14 @@
       font-weight: 700;
     }
 
-    .subpasso-block {
+    .passo-xx-block {
       margin-left: 1rem;
       border-left: 3px dashed #ccc;
       padding-left: 1rem;
       margin-top: 1rem;
       font-size: 1rem;
     }
-    .subpasso-block h4 {
+    .passo-xx-block h4 {
       color: #444;
       margin-bottom: 0.3rem;
       font-size: 1.05rem;
@@ -167,7 +167,7 @@
       box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
     }
 
-    /* Tamanhos diferenciados para os campos de título (Passos e Sub-passos) */
+    /* Tamanhos diferenciados para os campos de título (Passos e Passos x.x) */
     .input-step-title {
       font-size: 1.5rem;
       font-weight: 600;
@@ -178,20 +178,19 @@
       font-weight: 500;
       width: 90% !important;
     }
-
-    /* Aumenta a largura do campo onde ficam as descrições (informações). */
     .textarea-step-description,
     .textarea-substep-description {
       width: 95% !important;
       font-size: 1rem;
     }
 
-    /* Botões (Adicionar, Remover, etc.) no estilo retangular preto com texto branco */
+    /* Botões (Adicionar, Remover, etc.)
+       Mantido o tamanho original, apenas arredondando as bordas */
     .btn {
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 0;
+      border-radius: 32px; /* Arredondamento aplicado */
       padding: 0.6rem 1.2rem;
       font-size: 0.9rem;
       font-weight: 500;
@@ -238,8 +237,7 @@
     }
 
     /*----------------------------------------------
-      VERSÃO MOBILE (não altera a versão desktop)
-      Define estilos específicos para telas menores
+      VERSÃO MOBILE
     ----------------------------------------------*/
     @media (max-width: 768px) {
       header {
@@ -260,8 +258,7 @@
         padding: 1rem;
         max-width: 95%;
       }
-      .step-block,
-      .subpasso-block {
+      .step-block {
         font-size: 1rem;
       }
       .step-block h3 {
@@ -293,8 +290,10 @@
     <div class="container">
       <h2>Criar / Detalhar a Solução</h2>
       <p class="info-text">
-        Aqui você pode adicionar passos e subpassos para compor a solução deste problema.
-        Ao finalizar, clique em <strong>Enviar Solução</strong> para marcar o problema como resolvido.
+        Aqui você pode adicionar passos e também detalhar cada passo em
+        <em>Passos x.x</em> (por exemplo, Passo 1.1, Passo 1.2, Passo 2.1, etc.)
+        para compor a solução deste problema. Ao finalizar, clique em
+        <strong>Enviar Solução</strong> para marcar o problema como resolvido.
       </p>
 
       <!-- FORM que envia o JSON com a solução -->
@@ -327,7 +326,7 @@
   </footer>
 
   <script>
-    // Estrutura que manterá os passos e subpassos:
+    // Estrutura que manterá os passos e "Passos x.x":
     // solutionData = {
     //   steps: [
     //     {
@@ -349,7 +348,7 @@
     const btnAddStep = document.getElementById('btnAddStep');
     const form = document.getElementById('solutionForm');
 
-    // Renderiza a lista de steps e miniSteps
+    // Renderiza a lista de steps e seus "Passos x.x"
     function renderSteps() {
       stepsContainer.innerHTML = '';
 
@@ -357,7 +356,7 @@
         const stepBlock = document.createElement('div');
         stepBlock.className = 'step-block';
 
-        // Título do passo
+        // Título do passo principal
         const stepTitleEl = document.createElement('h3');
         stepTitleEl.textContent = `Passo ${stepIndex + 1}`;
         stepBlock.appendChild(stepTitleEl);
@@ -395,45 +394,52 @@
         };
         stepBlock.appendChild(btnRemoveStep);
 
-        // Container para miniSteps
+        // Container para os passos x.x
         const subPassosWrapper = document.createElement('div');
-        subPassosWrapper.classList.add('subpasso-block');
+        subPassosWrapper.classList.add('passo-xx-block');
 
+        // Título do bloco (ex.: "Passos do Passo 1")
         const subTitleEl = document.createElement('h4');
-        subTitleEl.textContent = 'Sub-passos';
+        subTitleEl.textContent = `Passos do Passo ${stepIndex + 1}`;
         subPassosWrapper.appendChild(subTitleEl);
 
-        // Renderizar cada miniStep
+        // Renderizar cada Passo x.x
         step.miniSteps.forEach((sub, subIndex) => {
           const subDiv = document.createElement('div');
           subDiv.style.marginBottom = '1rem';
 
-          // Título do miniStep
+          // Mostrar "Passo X.Y" acima dos inputs
+          const subStepNumberEl = document.createElement('h5');
+          subStepNumberEl.textContent = `Passo ${stepIndex + 1}.${subIndex + 1}`;
+          subStepNumberEl.style.marginBottom = '0.5rem';
+          subDiv.appendChild(subStepNumberEl);
+
+          // Título do Passo x.x
           const subTitulo = document.createElement('input');
           subTitulo.type = 'text';
           subTitulo.className = 'input-substep-title';
-          subTitulo.placeholder = `Título do Sub-passo ${subIndex + 1}...`;
+          subTitulo.placeholder = `Título do Passo ${stepIndex + 1}.${subIndex + 1}...`;
           subTitulo.value = sub.miniStepTitle || '';
           subTitulo.oninput = () => {
             solutionData.steps[stepIndex].miniSteps[subIndex].miniStepTitle = subTitulo.value;
           };
           subDiv.appendChild(subTitulo);
 
-          // Descrição do miniStep (mais linhas)
+          // Descrição do Passo x.x (mais linhas)
           const subDesc = document.createElement('textarea');
           subDesc.rows = 4; // aumente conforme a necessidade
           subDesc.className = 'textarea-substep-description';
-          subDesc.placeholder = `Descrição do Sub-passo ${subIndex + 1}...`;
+          subDesc.placeholder = `Descrição do Passo ${stepIndex + 1}.${subIndex + 1}...`;
           subDesc.value = sub.miniStepDescription || '';
           subDesc.oninput = () => {
             solutionData.steps[stepIndex].miniSteps[subIndex].miniStepDescription = subDesc.value;
           };
           subDiv.appendChild(subDesc);
 
-          // Botão para remover subpasso
+          // Botão para remover este Passo x.x
           const btnRemoveSub = document.createElement('button');
           btnRemoveSub.type = 'button';
-          btnRemoveSub.textContent = 'Remover Sub-passo';
+          btnRemoveSub.textContent = `Remover Passo ${stepIndex + 1}.${subIndex + 1}`;
           btnRemoveSub.className = 'btn btn-remove';
           btnRemoveSub.style.marginLeft = '8px';
           btnRemoveSub.onclick = () => {
@@ -445,11 +451,12 @@
           subPassosWrapper.appendChild(subDiv);
         });
 
-        // Botão para adicionar subpasso
+        // Botão para adicionar um novo "Passo x.x"
         const btnAddSub = document.createElement('button');
         btnAddSub.type = 'button';
-        btnAddSub.textContent = 'Adicionar Sub-passo';
         btnAddSub.className = 'btn';
+        // Mostra no botão qual será o próximo X.Y
+        btnAddSub.textContent = `Adicionar Passo ${stepIndex + 1}.${step.miniSteps.length + 1}`;
         btnAddSub.onclick = () => {
           solutionData.steps[stepIndex].miniSteps.push({
             miniStepTitle: '',
@@ -464,7 +471,7 @@
       });
     }
 
-    // Adiciona um passo vazio
+    // Adiciona um passo principal vazio
     btnAddStep.addEventListener('click', () => {
       solutionData.steps.push({
         stepTitle: '',
