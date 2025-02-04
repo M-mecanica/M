@@ -1,4 +1,3 @@
-<!-- index.html (Página Inicial) -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -34,127 +33,43 @@
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto, com espaçamento interno, estilo moderno */
+    /* HEADER: fundo preto, mais alto */
     header {
-      background-color: #000; /* Barra superior preta */
-      padding: 1rem 2rem;
+      background-color: #000;  /* Barra superior preta */
+      padding: 2rem 3rem;      /* Aumenta a altura (mais espaço) */
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      position: relative; /* Para contexto de posicionamento do hamburger/menu */
     }
 
-    /* Botão "Problemas Não Resolvidos" (à esquerda) - Versão desktop */
-    .btn-nao-resolvidos {
-      background-color: #000;
-      color: #fff;
+    /* Botão HAMBURGUER no canto esquerdo */
+    .hamburger {
+      background: none;
       border: none;
-      border-radius: 0;
-      padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
       cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      height: 50px; /* Altura aumentada */
+      outline: none;
+      color: #fff;
       display: flex;
       align-items: center;
+      margin-right: auto; /* Deixa o botão à esquerda */
     }
-    .btn-nao-resolvidos:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
-    /* Container de ações no header (lado direito) - Versão desktop */
-    .header-actions {
-      display: flex;
-      align-items: center;
-      margin-left: auto; /* empurra este bloco para a direita */
-    }
-
-    /* Barrinha divisória quase imperceptível */
-    .divider {
-      width: 1px;
+    .hamburger svg {
+      width: 24px;
       height: 24px;
-      background-color: rgba(255, 255, 255, 0.2);
-      margin: 0 0.5rem;
-      align-self: center;
+      fill: #fff;
     }
 
-    /* Links (Novo Problema, Gerenciar Usuários, Logout) - Versão desktop */
-    .header-actions a {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 0;
-      padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      height: 50px;
-      display: flex;
-      align-items: center;
-    }
-    .header-actions a:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
-    /* Ícones dentro dos botões */
-    .header-actions a svg,
-    .btn-nao-resolvidos svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor; /* Permite herdar a cor (#fff) */
-      margin-right: 0.4rem;
-    }
-
-    /* =========================
-       BOTÃO "PESQUISAR PEÇA"
-       ========================= */
-    /* Container para posicionar o botão próximo ao topo, logo abaixo do header */
-    .pesquisar-peca-container {
-      display: flex;
-      justify-content: center;
-      padding: 1rem 2rem; /* espaço abaixo do header */
-      background-color: #f0f0f0; /* mesmo fundo do body para ficar "encostado" */
-    }
-
-    /* Botão maior e destacado */
-    .btn-pesquisar-peca {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 1rem 2rem;       /* Maior espaçamento */
-      font-size: 1.2rem;        /* Fonte maior */
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      display: inline-flex;
-      align-items: center;
-    }
-    .btn-pesquisar-peca:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
-    /* MAIN */
+    /* MAIN: centralizado verticalmente e horizontalmente */
     main {
-      flex: 1;
-      font-size: 1.25rem;
+      flex: 1;                 /* Faz o main ocupar o espaço vertical disponível */
       padding: 3rem 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      text-align: center;
+      justify-content: center; /* Centraliza verticalmente */
+      text-align: center;      /* Centraliza texto horizontalmente */
     }
 
-    /* Logo grande "M" em preto (para combinar com fundo cinza claro) */
+    /* Logo grande "M" */
     .logo-grande {
       font-size: 6rem;
       font-weight: 700;
@@ -184,8 +99,6 @@
       text-align: center;
       outline: none;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      /* Desativa preenchimentos automáticos e sugestões anteriores */
-      autocomplete: off;
     }
     input[type="text"]::placeholder {
       color: #aaa;
@@ -201,7 +114,35 @@
       font-weight: 300;
     }
 
-    /* FOOTER: preto, texto claro, estilo moderno */
+    /* Seção inferior que contém o botão “Pesquisar Peças” */
+    .pesquisar-peca-container {
+      display: flex;
+      justify-content: center;
+      padding: 2rem 3rem; /* Aumenta a altura (mais espaço) */
+      background-color: #f0f0f0;
+    }
+
+    /* Botão maior e arredondado */
+    .btn-pesquisar-peca {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;  /* Deixa o botão bem arredondado */
+      padding: 1rem 2rem;   /* Maior espaçamento */
+      font-size: 1.2rem;    /* Fonte maior */
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+    }
+    .btn-pesquisar-peca:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+
+    /* FOOTER: preto, texto claro */
     footer {
       background-color: #000;
       text-align: center;
@@ -213,24 +154,8 @@
     }
 
     /* ====================
-       -- VERSÃO MOBILE --
+       -- SIDEBAR --
        ==================== */
-    /* O hamburger só aparece no mobile, sem afetar desktop */
-    .hamburger {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      outline: none;
-      color: #fff;
-    }
-    .hamburger svg {
-      width: 24px;
-      height: 24px;
-      fill: #fff;
-    }
-
-    /* Sidebar que contém os links no mobile */
     .mobile-sidebar {
       position: fixed;
       top: 0;
@@ -248,7 +173,7 @@
       left: 0;
     }
 
-    /* Links dentro do menu lateral (mobile) */
+    /* Links dentro do menu lateral */
     .mobile-sidebar a {
       background-color: #000;
       color: #fff;
@@ -290,131 +215,51 @@
     .overlay.open {
       display: block;
     }
-
-    /* Media query para telas até 768px ou outro breakpoint */
-    @media (max-width: 768px) {
-      /* Esconder itens de menu desktop */
-      .btn-nao-resolvidos,
-      .header-actions {
-        display: none;
-      }
-
-      /* Mostrar hamburger e colocá-lo à esquerda */
-      .hamburger {
-        display: block;
-        margin-right: auto; /* Fica na extrema esquerda */
-      }
-
-      /* Ajusta para que o hamburger fique à esquerda */
-      header {
-        justify-content: flex-start;
-      }
-    }
   </style>
 </head>
 <body>
   <header>
-    <!-- Botão HAMBURGER que só aparece no mobile -->
+    <!-- Botão HAMBURGUER no canto esquerdo -->
     <button class="hamburger" aria-label="Abrir Menu" title="Abrir Menu">
-      <!-- Ícone típico de hamburguer (3 linhas) -->
+      <!-- Ícone de hamburguer (3 linhas) -->
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
       </svg>
     </button>
-
-    <!-- Botão de "Problemas Não Resolvidos" (desktop) -->
-    <a href="{{ url_for('unresolved') }}" class="btn-nao-resolvidos" title="Problemas Não Resolvidos">
-      <!-- Ícone (exemplo: triângulo de alerta) -->
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-        <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0 2.01 15h11.98a.5.5 0 0 0
-                 .442-.934l-6.45-12.5zM8 5c.28 0 .5.22.5.5V9a.5.5 0
-                 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0 6a.75.75 0 1 1
-                 0 1.5A.75.75 0 0 1 8 11z"></path>
-      </svg>
-      Problemas Não Resolvidos
-    </a>
-
-    <!-- Ações no header (desktop) -->
-    <div class="header-actions">
-      <!-- Novo Problema -->
-      <a href="{{ url_for('add_problem') }}">
-        <!-- Ícone (exemplo: ícone de "mais") -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
-                   1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-                   0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-        </svg>
-        Novo Problema
-      </a>
-      <div class="divider"></div>
-
-      <!-- Gerenciar Usuários (apenas se for solucionador) -->
-      {% if session.role == 'solucionador' %}
-      <a href="{{ url_for('listar_usuarios') }}">
-        <!-- Ícone (exemplo: ícone de "pessoas") -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M13 7a3 3 0 1 0-6 0 3 3 0 0 0
-                   6 0zm-1.5 0a1.5 1.5 0 1
-                   1-3 0 1.5 1.5 0 0 1 3 0zM6 8c0
-                   1.105-.672 2-1.5 2S3 9.105 3 8s.672-2
-                   1.5-2S6 6.895 6 8zm-1.5
-                   1a2.49 2.49 0 0 0
-                   1-.2 3.006 3.006 0 0 1
-                   2.25 2.9.5.5 0 0 1-1
-                   0 2.001 2.001 0 0
-                   0-4 0 .5.5 0 0
-                   1-1 0 3.006 3.006 0 0
-                   1 2.25-2.9c.306.127.641.2
-                   1 .2zm6.5 3c-.273 0-.535-.03-.789-.086a2.001
-                   2.001 0 0 0-3.422 0A3.105 3.105
-                   0 0 1 8 12a3.106 3.106 0 0
-                   1-1.289-.273.5.5 0 0
-                   1 .578-.816 2.001 2.001
-                   0 0 0 3.422 0 .5.5 0 0
-                   1 .578.816A3.106 3.106 0 0 1 11 12c.54 0
-                   1.064-.138 1.289-.273a.5.5 0 0 1
-                   .578.816c-.254.057-.516.086-.789.086z"/>
-        </svg>
-        Gerenciar Usuários
-      </a>
-      <div class="divider"></div>
-      {% endif %}
-
-      <!-- Botão de Logout no canto superior direito -->
-      <a href="{{ url_for('logout') }}">
-        <!-- Ícone (exemplo: ícone de "sair") -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M9.828 4a.5.5 0 0 1 .354.146l3
-                   3a.5.5 0 0 1 0 .708l-3
-                   3A.5.5 0 0 1 9 10.5V9H5.5a.5.5
-                   0 0 1 0-1H9V5.5a.5.5 0 0
-                   1 .5-.5h.328z"/>
-          <path d="M13 14.5a.5.5 0 0
-                   1-.5.5h-5a2 2 0 0
-                   1-2-2v-1a.5.5 0 0
-                   1 1 0v1a1 1 0 0
-                   0 1 1h5a.5.5 0 0
-                   1 .5.5zm-7-11v-1a2 2 0 0
-                   1 2-2h5a.5.5 0 0
-                   1 0 1h-5a1 1 0 0
-                   0-1 1v1a.5.5 0 0
-                   1-1 0z"/>
-        </svg>
-        Logout
-      </a>
-    </div>
   </header>
 
-  <!-- BOTÃO PESQUISAR PEÇA (GRANDE) LOGO APÓS O HEADER -->
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main>
+    <!-- Logo Grande -->
+    <div class="logo-grande">M</div>
+
+    <div class="search-container">
+      <form action="{{ url_for('search') }}" method="GET">
+        <input
+          type="text"
+          name="q"
+          placeholder="Pesquise um problema mecânico"
+          autocomplete="off"
+        />
+      </form>
+    </div>
+
+    <!-- Texto de boas-vindas -->
+    <p class="texto-neon">
+      Bem-vindo ao M! Aqui você pode pesquisar problemas resolvidos ou cadastrar novos.
+    </p>
+  </main>
+
+  <!-- BOTÃO PESQUISAR PEÇAS (GRANDE) NA PARTE DE BAIXO -->
   <div class="pesquisar-peca-container">
     <a href="{{ url_for('item_search') }}" class="btn-pesquisar-peca">
       Pesquisar Peças
     </a>
   </div>
 
-  <!-- Barra Lateral Mobile (inicialmente oculta) -->
+  <!-- Barra Lateral (menu) -->
   <div class="mobile-sidebar" id="mobileSidebar">
-    <!-- Repetimos as opções que temos no header normal -->
+    <!-- Problemas Não Resolvidos -->
     <a href="{{ url_for('unresolved') }}">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
         <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0 2.01 15h11.98a.5.5 0 0 0
@@ -425,6 +270,7 @@
       Problemas Não Resolvidos
     </a>
 
+    <!-- Novo Problema -->
     <a href="{{ url_for('add_problem') }}">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
@@ -434,6 +280,7 @@
       Novo Problema
     </a>
 
+    <!-- Gerenciar Usuários (apenas se for solucionador) -->
     {% if session.role == 'solucionador' %}
     <a href="{{ url_for('listar_usuarios') }}">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -463,6 +310,7 @@
     </a>
     {% endif %}
 
+    <!-- Logout -->
     <a href="{{ url_for('logout') }}">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
         <path d="M9.828 4a.5.5 0 0 1 .354.146l3
@@ -487,27 +335,6 @@
 
   <!-- Overlay para clicar fora e fechar o menu -->
   <div class="overlay" id="overlay"></div>
-
-  <main>
-    <!-- Logo Grande -->
-    <div class="logo-grande">M</div>
-
-    <div class="search-container">
-      <form action="{{ url_for('search') }}" method="GET">
-        <input
-          type="text"
-          name="q"
-          placeholder="Pesquise um problema mecânico"
-          autocomplete="off"
-        />
-      </form>
-    </div>
-
-    <!-- Texto de boas-vindas -->
-    <p class="texto-neon">
-      Bem-vindo ao M! Aqui você pode pesquisar problemas resolvidos ou cadastrar novos.
-    </p>
-  </main>
 
   <footer>
     <p>© 2025 Plataforma M</p>

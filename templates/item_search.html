@@ -48,12 +48,12 @@
       justify-content: space-between; /* Espaçar os itens (voltar, título, carrinho) */
       position: relative;
     }
-    /* Botão "Voltar" */
+    /* Botão "Voltar" (borda arredondada) */
     .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 0;
+      border-radius: 32px; /* Arredondado */
       padding: 0.7rem 1.2rem;
       font-size: 0.9rem;
       cursor: pointer;
@@ -202,16 +202,15 @@
       color: #000;
     }
 
-    /* Botões "Contato" e "Adicionar" */
+    /* Botão "Adicionar" (borda arredondada) */
     .item-actions {
       display: flex;
       gap: 1rem;
     }
-    .whatsapp-btn,
     .add-to-cart-btn {
       padding: 0.7rem 1.4rem;
       border: none;
-      border-radius: 4px;
+      border-radius: 32px; /* Arredondado */
       font-size: 1rem;
       cursor: pointer;
       text-decoration: none;
@@ -219,19 +218,10 @@
       transition: background-color 0.2s, transform 0.2s;
       width: fit-content;
       color: #fff;
-    }
-    .whatsapp-btn {
-      background-color: #25D366;
-    }
-    .whatsapp-btn:hover {
-      background-color: #20b955;
-      transform: scale(1.02);
-    }
-    .add-to-cart-btn {
-      background-color: #3498db;
+      background-color: #25D366; /* Mesma cor que o antigo Contato MZ */
     }
     .add-to-cart-btn:hover {
-      background-color: #2980b9;
+      background-color: #20b955;
       transform: scale(1.02);
     }
 
@@ -307,6 +297,12 @@
       background: transparent;
       font-size: 1.2rem;
       cursor: pointer;
+      /* Podemos deixar arredondado, embora seja "X" */
+      border-radius: 32px;
+      transition: background-color 0.2s;
+    }
+    .close-modal-btn:hover {
+      background-color: rgba(0, 0, 0, 0.1);
     }
 
     /* Input de quantidade */
@@ -319,13 +315,13 @@
       border: 1px solid #ccc;
     }
 
-    /* Botão de confirmar */
+    /* Botão de confirmar (borda arredondada) */
     .confirm-btn {
       padding: 0.8rem 1rem;
       background-color: #3498db;
       color: #fff;
       border: none;
-      border-radius: 4px;
+      border-radius: 32px; /* Arredondado */
       font-size: 1rem;
       cursor: pointer;
       text-decoration: none;
@@ -362,12 +358,14 @@
       gap: 8px;
       margin-right: 8px;
     }
+
+    /* Botões de quantidade (borda arredondada) */
     .quantity-btn {
       background-color: #ccc;
       border: none;
       padding: 4px 8px;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 32px; /* Arredondado */
       font-size: 1rem;
       transition: background-color 0.2s;
     }
@@ -375,21 +373,26 @@
       background-color: #bbb;
     }
 
+    /* Botão remover (borda arredondada) */
     .remove-btn {
       background-color: #e74c3c;
       color: #fff;
       border: none;
       padding: 4px 8px;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 32px; /* Arredondado */
+      transition: background-color 0.2s, transform 0.2s;
     }
     .remove-btn:hover {
       background-color: #c0392b;
+      transform: scale(1.02);
     }
 
+    /* Botão "Finalizar" (herda confirm-btn, mas sobrescreve cor) */
     .finalize-btn {
       background-color: #25D366;
       color: #fff;
+      border-radius: 32px; /* Arredondado */
     }
     .finalize-btn:hover {
       background-color: #20b955;
@@ -571,7 +574,6 @@
 
     // Atualiza contador no ícone do carrinho (itens distintos)
     function updateCartCount() {
-      // Agora, o badge reflete a quantidade de itens diferentes
       const distinctCount = cart.length;
       document.getElementById('cartCount').textContent = distinctCount;
     }
@@ -669,16 +671,11 @@
               listItem.setAttribute('data-id', item._id);
               listItem.setAttribute('data-highlighted', item.is_highlighted ? '1' : '0');
 
-              // Botões de ação
-              const contatoBtn = `
-                <button class="whatsapp-btn"
-                        onclick="openWhatsApp('${item.description}')">
-                  Contato MZ
-                </button>`;
+              // Só o botão "Adicionar" agora, com ícone de +
               const addBtn = `
                 <button class="add-to-cart-btn"
                         onclick="openQuantityModal('${item._id}','${item.description}')">
-                  Adicionar
+                  + Adicionar
                 </button>`;
 
               listItem.innerHTML = `
@@ -686,7 +683,6 @@
                   <strong>${item.description}</strong>
                 </div>
                 <div class="item-actions">
-                  ${contatoBtn}
                   ${addBtn}
                 </div>
               `;
@@ -704,13 +700,6 @@
             reject(error);
           });
       });
-    }
-
-    // Abre o WhatsApp para um item específico
-    function openWhatsApp(itemDescription) {
-      const text = `Olá MZ, vocês têm o ${itemDescription} disponível?`;
-      const encodedText = encodeURIComponent(text);
-      window.open(`https://wa.me/${MZ_WHATSAPP}?text=${encodedText}`, '_blank');
     }
 
     // Scroll infinito

@@ -54,12 +54,12 @@
       margin: 0 auto; /* Mantém o título centralizado */
     }
 
-    /* Botão "Voltar" retangular, com hover (fica à esquerda) */
+    /* Botão "Voltar" - agora com borda arredondada */
     .btn-voltar-index {
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 0;
+      border-radius: 32px; /* Arredondado */
       padding: 0.7rem 1.2rem;
       font-size: 0.9rem;
       cursor: pointer;
@@ -80,12 +80,11 @@
 
     /* =========================================================================
        NOVO ESTILO P/ BOTÕES NO CANTO SUPERIOR DIREITO
-       (mesmo design do header da página index.html)
        ========================================================================= */
     .header-actions {
       display: flex;
       align-items: center;
-      margin-left: auto; /* empurra este bloco para a direita */
+      margin-left: auto;
       position: absolute;
       right: 2rem;
     }
@@ -96,11 +95,12 @@
       margin: 0 0.5rem;
       align-self: center;
     }
+    /* Botões (agora também arredondados) */
     .header-actions a {
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 0;
+      border-radius: 32px; /* Arredondado */
       padding: 0.7rem 1.2rem;
       font-size: 0.9rem;
       cursor: pointer;
@@ -115,7 +115,6 @@
       background-color: #333;
       transform: scale(1.02);
     }
-    /* Ícones dentro dos botões */
     .header-actions a svg {
       width: 18px;
       height: 18px;
@@ -195,18 +194,18 @@
       line-height: 1.3rem;
     }
 
-    /* Form de deleção (excluir usuário) */
     .delete-form {
       display: inline;
       margin-right: 1rem;
     }
-    /* Botões de ação (excluir, alterar função) */
+
+    /* Botões de ação (arredondados agora) */
     .delete-btn,
     .role-btn {
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 0;
+      border-radius: 32px; /* Arredondado */
       padding: 0.6rem 1.2rem;
       font-size: 0.9rem;
       cursor: pointer;
@@ -221,7 +220,6 @@
       transform: scale(1.02);
     }
 
-    /* Formulário de alteração de função do usuário */
     .role-form {
       display: inline-block;
       margin-top: 0.5rem;
@@ -322,7 +320,6 @@
     <div class="header-actions">
       <!-- Hist. Peças -->
       <a href="{{ url_for('history_search') }}" title="Histórico de Pesquisas de Peças">
-        <!-- Exemplo de ícone (opcional) -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
           <path d="M10.442 10.442a1 1 0 0 1 1.32-.083
                    6.5 6.5 0 1 0-1.414 1.414
