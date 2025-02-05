@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>M - Registro de Usuário</title>
+  <title>M - Cadastro</title>
   <!-- Ajuste para dispositivos mobile -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -126,23 +126,12 @@
       text-align: center;
     }
 
-    /* Botão "Login" no mesmo padrão */
-    .btn-login {
-      display: inline-block;
-      background-color: #000; /* Fundo preto */
-      color: #fff;
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      font-weight: bold;
-      border-radius: 32px;
-      text-decoration: none;
-      transition: background-color 0.2s, transform 0.2s;
+    /* Estilo para o link "Já possui cadastro?" */
+    .login-link {
+      color: blue;
+      text-decoration: underline;
+      font-weight: 500;
       cursor: pointer;
-    }
-
-    .btn-login:hover {
-      background-color: #333;
-      transform: scale(1.02);
     }
 
     /* FOOTER: preto, texto branco */
@@ -184,11 +173,6 @@
         padding: 0.8rem;
       }
 
-      .btn-login {
-        font-size: 1rem;
-        padding: 0.6rem 1rem;
-      }
-
       footer p {
         font-size: 0.9rem;
       }
@@ -208,10 +192,24 @@
 
     <form action="{{ url_for('register') }}" method="POST" autocomplete="off">
       <label for="nome">Nome completo:</label>
-      <input type="text" id="nome" name="nome" required autocomplete="off" />
+      <input
+        type="text"
+        id="nome"
+        name="nome"
+        required
+        autocomplete="off"
+        pattern="^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$"
+        title="Apenas letras e espaços (sem números ou caracteres especiais)."
+      />
 
       <label for="senha">Senha:</label>
-      <input type="password" id="senha" name="senha" required autocomplete="off" />
+      <input
+        type="password"
+        id="senha"
+        name="senha"
+        required
+        autocomplete="off"
+      />
 
       <!-- Novo campo para confirmar senha -->
       <label for="confirmar_senha">Confirmar Senha:</label>
@@ -223,8 +221,8 @@
         autocomplete="off"
       />
 
-      <!-- Campo WhatsApp obrigatório -->
-      <label for="whatsapp">WhatsApp:</label>
+      <!-- Campo WhatsApp obrigatório (com máscara automática) -->
+      <label for="whatsapp">Celular:</label>
       <input
         type="text"
         id="whatsapp"
@@ -248,12 +246,58 @@
     </form>
 
     <div class="links-auth">
-      <a href="{{ url_for('login') }}" class="btn-login">Entrar</a>
+      <a href="{{ url_for('login') }}" class="login-link">Já possui cadastro?</a>
     </div>
   </main>
 
   <footer>
     <p>© 2025 Plataforma M</p>
   </footer>
+
+  <!-- Scripts para correções automáticas no front-end -->
+  <script>
+    // Máscara para o telefone enquanto o usuário digita
+    const whatsappInput = document.getElementById('whatsapp');
+    whatsappInput.addEventListener('input', function (e) {
+      let v = e.target.value.replace(/\D/g, ''); // remove tudo que não é dígito
+
+      // Limita em 11 dígitos (DD + 9 dígitos)
+      if (v.length > 11) {
+        v = v.substring(0, 11);
+      }
+
+      /*
+        Formato alvo: (99) 99999-9999
+        - 2 dígitos para DDD
+        - 9 dígitos para o telefone
+      */
+
+      // Montando a máscara dinamicamente
+      let masked = '';
+      if (v.length > 0) {
+        masked = '(' + v.substring(0, 2);
+      }
+      if (v.length >= 3) {
+        masked += ') ' + v.substring(2, 7);
+      }
+      if (v.length >= 7) {
+        masked += '-' + v.substring(7, 11);
+      }
+
+      e.target.value = masked;
+    });
+
+    // Correção automática do nome completo (Title Case) ao perder o foco
+    const nomeInput = document.getElementById('nome');
+    nomeInput.addEventListener('blur', function(e) {
+      // Já que o pattern restringe a letras e espaços, podemos capitalizar tudo
+      let parts = e.target.value.split(/\s+/);
+      let formatted = parts.map(
+        p => p.charAt(0).toUpperCase() + p.substring(1).toLowerCase()
+      ).join(' ');
+      e.target.value = formatted;
+    });
+  </script>
+
 </body>
 </html>

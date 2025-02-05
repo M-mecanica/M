@@ -205,7 +205,13 @@
     {% endif %}
     <form action="{{ url_for('login') }}" method="POST">
       <label for="nome">Nome completo:</label>
-      <input type="text" id="nome" name="nome" required autocomplete="off" />
+      <input
+        type="text"
+        id="nome"
+        name="nome"
+        required
+        autocomplete="off"
+      />
 
       <label for="senha">Senha:</label>
       <input type="password" id="senha" name="senha" required />
@@ -221,5 +227,27 @@
   <footer>
     <p>© 2025 Plataforma M</p>
   </footer>
+
+  <!-- Script para formatar o nome completo (primeira letra maiúscula, demais minúsculas) -->
+  <script>
+    function formatFullName(name) {
+      // Remove espaços extras nas pontas e divide por espaços
+      let parts = name.trim().split(/\s+/);
+      // Para cada parte, coloca a primeira letra maiúscula e o restante minúsculo
+      let correctedParts = parts.map(part => {
+        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+      });
+      // Une tudo de volta em uma única string
+      return correctedParts.join(' ');
+    }
+
+    // Quando a página carregar, adiciona um evento 'blur' no campo de nome
+    window.addEventListener('DOMContentLoaded', function() {
+      let nameInput = document.getElementById('nome');
+      nameInput.addEventListener('blur', function() {
+        this.value = formatFullName(this.value);
+      });
+    });
+  </script>
 </body>
 </html>

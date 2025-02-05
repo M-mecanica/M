@@ -45,7 +45,7 @@
       padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: space-between; /* Espaçar: voltar, título, espaço vago */
+      justify-content: space-between;
       position: relative;
     }
     /* Botão "Voltar" (borda arredondada, seta grande 2rem) */
@@ -53,7 +53,7 @@
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 32px; /* Arredondado */
+      border-radius: 32px;
       padding: 0.7rem 1.2rem;
       font-size: 2rem; /* ÍCONE (SETA) MAIOR */
       cursor: pointer;
@@ -83,7 +83,7 @@
       font-size: 1rem;
       padding: 2rem 1rem;
       width: 100%;
-      max-width: 1200px; /* Padrão de largura do container em item_search.html */
+      max-width: 1200px; /* Padrão de largura do container */
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -295,7 +295,7 @@
   </style>
 </head>
 <body>
-  <!-- Cabeçalho com botão de voltar e título (mesmo padrão de item_search.html) -->
+  <!-- Cabeçalho com botão de voltar e título -->
   <header>
     <a
       href="{{ url_for('exibir_solucao', problem_id=problema['_id']) }}"
@@ -305,7 +305,6 @@
       &#x2B05;
     </a>
     <h1>Editar Solução</h1>
-    <!-- Espaço vazio à direita para manter alinhamento -->
     <div style="width: 2rem;"></div>
   </header>
 
@@ -672,7 +671,7 @@
       }
     });
 
-    // Botão de deletar imagem existente (marca o hidden para "true")
+    // Botão de deletar imagem existente (marca o hidden para "true" e remove APENAS a imagem e o botão)
     document.addEventListener('click', function(e) {
       if (e.target && e.target.classList.contains('delete-image-btn')) {
         e.preventDefault();
@@ -704,10 +703,21 @@
           hiddenInput.value = "true";
         }
 
-        // Remove a visualização da imagem atual do DOM
+        // Remove apenas a imagem e o botão, mantendo o input hidden
         const parentContainer = e.target.closest('div');
         if (parentContainer) {
-          parentContainer.innerHTML = '<p style="color:red;">Imagem marcada para exclusão.</p>';
+          const imageTag = parentContainer.querySelector('img');
+          if (imageTag) {
+            imageTag.remove();
+          }
+          // Remove o próprio botão
+          e.target.remove();
+
+          // Exibe uma mensagem simples de confirmação
+          const msg = document.createElement('p');
+          msg.style.color = 'red';
+          msg.textContent = 'Imagem marcada para exclusão.';
+          parentContainer.appendChild(msg);
         }
       }
     });

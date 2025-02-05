@@ -135,6 +135,26 @@
       font-size: 1.2rem;
     }
 
+    /* Botão verde para WhatsApp */
+    .btn-whatsapp {
+      display: inline-block;
+      background-color: #25D366; /* Cor do WhatsApp */
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      margin-left: 0.3rem;
+    }
+    .btn-whatsapp:hover {
+      background-color: #20be5e;
+      transform: scale(1.02);
+    }
+
     /* FOOTER preto, texto branco (igual ao index.html) */
     footer {
       background-color: #000;
@@ -197,14 +217,24 @@
           <h2>{{ problema["titulo"] }}</h2>
           <p>{{ problema["descricao"] }}</p>
 
-          <!-- Se o usuário tem permissão de solucionador ou mecânico,
-               pode acessar o formulário para resolver -->
+          <!-- Se o usuário tem permissão de solucionador ou mecânico, pode acessar o formulário para resolver -->
           {% if session.role in ["solucionador", "mecanico"] %}
             <form action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}" method="GET" style="display: inline;">
               <button type="submit" class="btn-resolver">Resolver</button>
             </form>
           {% else %}
-            <!-- Frase removida -->
+            <!-- Mensagem para usuários comuns -->
+            <p>
+              Apenas solucionadores podem resolver os problemas mecânicos,
+              caso você queira se tornar um, clique no botão:
+              <a
+                href="https://wa.me/5543996436367?text=Ol%C3%A1%2C%20sou%20o%20{{ session['username'] }}%20e%20gostaria%20de%20me%20tornar%20um%20solucionador%20para%20resolver%20problemas%20da%20plataforma%20M."
+                target="_blank"
+                class="btn-whatsapp"
+              >
+                Torne-se um solucionador
+              </a>
+            </p>
           {% endif %}
 
           <!-- Botão para remover problema (somente solucionador) -->
