@@ -141,17 +141,6 @@
     }
 
     /* =========================================================================
-       CONTADOR DE RESULTADOS
-       ========================================================================= */
-    #itemCount {
-      font-size: 1rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
-      text-align: center;
-      color: #555;
-    }
-
-    /* =========================================================================
        LISTA E ITENS DE RESULTADO
        ========================================================================= */
     .result-container {
@@ -233,6 +222,30 @@
       margin: 2rem 0;
       font-size: 1rem;
       color: #666;
+    }
+
+    /* =========================================================================
+       MENSAGEM DE NENHUM ITEM
+       ========================================================================= */
+    .no-items-found {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 1rem;
+      color: #666;
+    }
+    .no-items-found button {
+      margin-top: 1rem;
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 32px;
+      background-color: #3498db;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .no-items-found button:hover {
+      background-color: #2980b9;
+      transform: scale(1.02);
     }
 
     /* =========================================================================
@@ -420,9 +433,6 @@
         padding: 0.8rem;
         font-size: 1rem;
       }
-      #itemCount {
-        font-size: 0.95rem;
-      }
       .cart-items-list {
         max-height: 200px; /* para caber em telas menores */
       }
@@ -475,9 +485,6 @@
       />
     </form>
 
-    <!-- Contador de resultados -->
-    <div id="itemCount"></div>
-
     <!-- Lista de resultados -->
     <div class="result-container">
       <ul id="results" class="results"></ul>
@@ -486,6 +493,12 @@
     <!-- Loading (spinner ou texto) -->
     <div id="loading" class="loading" style="display: none;">
       Carregando...
+    </div>
+
+    <!-- Mensagem de nenhum item encontrado (exibida dinamicamente) -->
+    <div id="noItemsFound" class="no-items-found" style="display: none;">
+      <p>Nenhum item encontrado.</p>
+      <button onclick="contactMZ()">Entrar em Contato com a MZ</button>
     </div>
   </main>
 
@@ -662,6 +675,14 @@
       window.open(waLink, '_blank');
     }
 
+    // Função para contato com a MZ (quando nenhum item é encontrado)
+    function contactMZ() {
+      const message = "Olá, não encontrei a peça que procurava. Poderiam me ajudar?";
+      const encodedText = encodeURIComponent(message);
+      const waLink = `https://wa.me/${MZ_WHATSAPP}?text=${encodedText}`;
+      window.open(waLink, '_blank');
+    }
+
     // PESQUISA DE ITENS / SCROLL INFINITO ----------------------------
     function loadItemsPage(p) {
       return new Promise((resolve, reject) => {
@@ -669,9 +690,19 @@
         fetch(`/load_items?page=${p}&search=${encodeURIComponent(searchQuery)}`)
           .then(response => response.json())
           .then(data => {
+            // Se for a primeira página e não houver nenhum item, exibimos mensagem
+            if (p === 1 && data.items.length === 0) {
+              document.getElementById('results').innerHTML = '';
+              document.getElementById('noItemsFound').style.display = 'block';
+              hasMoreItems = false;
+              resolve();
+              return;
+            }
+
+            // Caso contrário, se estiver retornando itens, esconde o aviso "nenhum item"
+            document.getElementById('noItemsFound').style.display = 'none';
+
             if (p === 1) {
-              document.getElementById('itemCount').textContent =
-                `Itens encontrados: ${data.total_items}`;
               document.getElementById('results').innerHTML = '';
             }
 
@@ -741,8 +772,8 @@
       currentPage = 1;
       hasMoreItems = true;
       isLoading = false;
-      document.getElementById('itemCount').textContent = '';
       document.getElementById('results').innerHTML = '';
+      document.getElementById('noItemsFound').style.display = 'none';
       loadMoreItems();
     }
 
