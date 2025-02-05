@@ -1,3 +1,4 @@
+<!-- registros.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -194,14 +195,15 @@
       line-height: 1.3rem;
     }
 
+    /* Botões de ação (arredondados agora) */
     .delete-form {
       display: inline;
       margin-right: 1rem;
     }
 
-    /* Botões de ação (arredondados agora) */
     .delete-btn,
-    .role-btn {
+    .role-btn,
+    .history-btn {
       background-color: #000;
       color: #fff;
       border: none;
@@ -215,7 +217,8 @@
       margin-top: 0.5rem;
     }
     .delete-btn:hover,
-    .role-btn:hover {
+    .role-btn:hover,
+    .history-btn:hover {
       background-color: #333;
       transform: scale(1.02);
     }
@@ -223,6 +226,7 @@
     .role-form {
       display: inline-block;
       margin-top: 0.5rem;
+      margin-right: 1rem;
     }
     .role-form select {
       font-size: 0.9rem;
@@ -295,7 +299,8 @@
         font-size: 0.9rem;
       }
       .delete-btn,
-      .role-btn {
+      .role-btn,
+      .history-btn {
         font-size: 0.8rem;
         padding: 0.5rem 1rem;
       }
@@ -315,7 +320,6 @@
 
     <h1>Gerenciar Usuários</h1>
 
-    <!-- Botões no canto superior direito -->
     {% if session.role == 'solucionador' %}
     <div class="header-actions">
       <!-- Hist. Peças -->
@@ -371,12 +375,9 @@
       {% if usuarios and usuarios|length > 0 %}
         {% for user in usuarios %}
           <div class="user-item">
-            <!-- Nome do usuário -->
             <h2>{{ user["nome"] }}</h2>
 
-            <!-- WhatsApp -->
-            <p>
-              <strong>WhatsApp:</strong>
+            <p><strong>WhatsApp:</strong>
               {% if user.whatsapp %}
                 {{ user.whatsapp }}
               {% else %}
@@ -384,9 +385,7 @@
               {% endif %}
             </p>
 
-            <!-- Máquinas -->
-            <p>
-              <strong>Máquinas:</strong>
+            <p><strong>Máquinas:</strong>
               {% if user.maquinas %}
                 {{ user.maquinas }}
               {% else %}
@@ -394,9 +393,10 @@
               {% endif %}
             </p>
 
-            <!-- Função (role) -->
             {% if session.role == 'solucionador' %}
               <p><strong>Função atual:</strong> {{ user["role"] }}</p>
+
+              <!-- Alterar Função -->
               <form
                 class="role-form"
                 action="{{ url_for('edit_user_role', user_id=user['_id_str']) }}"
@@ -421,12 +421,16 @@
                 </select>
                 <button type="submit" class="role-btn">Alterar Função</button>
               </form>
-            {% else %}
-              <p><strong>Função:</strong> {{ user["role"] }}</p>
-            {% endif %}
 
-            <!-- Botão Excluir (apenas solucionador) -->
-            {% if session.role == 'solucionador' %}
+              <!-- Botão de Histórico do Usuário -->
+              <a
+                href="{{ url_for('user_history', user_id=user['_id_str']) }}"
+                class="history-btn"
+              >
+                Histórico do Usuário
+              </a>
+
+              <!-- Botão Excluir -->
               <form
                 action="{{ url_for('delete_user', user_id=user['_id_str']) }}"
                 method="POST"
@@ -435,6 +439,8 @@
               >
                 <button type="submit" class="delete-btn">Excluir</button>
               </form>
+            {% else %}
+              <p><strong>Função:</strong> {{ user["role"] }}</p>
             {% endif %}
           </div>
         {% endfor %}

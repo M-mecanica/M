@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>M - Histórico do Usuário</title>
+  <!-- Responsividade em dispositivos móveis -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonte básica (opcional) -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* =========================================================================
+       RESET BÁSICO
+       ========================================================================= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* =========================================================================
+       BODY / FONTES / CORES GERAIS
+       ========================================================================= */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background-color: #f0f0f0;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* =========================================================================
+       HEADER PRETO COM BOTÃO DE VOLTAR (ALINHADO AO PADRÃO DE item_search.html)
+       ========================================================================= */
+    header {
+      background-color: #000;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between; /* Para alinhar botão e título, com espaço "vazio" à direita */
+      position: relative;
+    }
+    /* Botão "Voltar" (borda arredondada, seta grande 2rem) */
+    .btn-voltar-usuarios {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px; /* Arredondado */
+      padding: 0.7rem 1.2rem;
+      font-size: 2rem; /* ÍCONE (SETA) MAIOR */
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-voltar-usuarios:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+
+    header h1 {
+      color: #fff;
+      font-size: 1.4rem;
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    /* Espaço vago à direita para manter o mesmo layout */
+    .header-spacer {
+      width: 2rem;
+    }
+
+    /* =========================================================================
+       MAIN / CONTEÚDO PRINCIPAL
+       ========================================================================= */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 1200px; /* Padrão de largura usado em item_search.html */
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .page-title {
+      font-size: 1.6rem;
+      margin-bottom: 2rem;
+      color: #000;
+      text-align: center;
+    }
+
+    /* =========================================================================
+       SEÇÕES DE HISTÓRICO
+       ========================================================================= */
+    .history-section {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+    }
+
+    .history-section h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: #000;
+    }
+
+    .history-list {
+      margin-left: 1rem;
+    }
+
+    .history-list li {
+      margin-bottom: 0.5rem;
+    }
+
+    .history-list a {
+      color: #007bff;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .history-list a:hover {
+      text-decoration: underline;
+    }
+
+    /* Mensagem "Nenhum registro" */
+    .no-records {
+      color: #666;
+      font-style: italic;
+      margin-left: 1rem;
+    }
+
+    /* =========================================================================
+       FOOTER PRETO
+       ========================================================================= */
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+      margin: 0;
+    }
+
+    /* =========================================================================
+       MEDIA QUERY (VERSÃO MOBILE)
+       ========================================================================= */
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      header h1 {
+        font-size: 1.2rem;
+      }
+      .btn-voltar-usuarios {
+        padding: 0.5rem 1rem;
+        /* Mantemos font-size: 2rem para a seta grande no mobile também */
+      }
+      main {
+        padding: 1rem;
+      }
+      .page-title {
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+      }
+      .history-section {
+        padding: 1rem;
+      }
+      .history-section h2 {
+        font-size: 1.2rem;
+      }
+      .history-list {
+        margin-left: 1rem;
+      }
+      .history-list li {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <!-- Botão "Voltar" para a Lista de Usuários -->
+    <a
+      href="{{ url_for('listar_usuarios') }}"
+      class="btn-voltar-usuarios"
+      title="Voltar para Lista de Usuários"
+    >
+      &#x2B05;
+    </a>
+
+    <h1>Histórico do Usuário</h1>
+    <div class="header-spacer"></div> <!-- Espaço vago à direita -->
+  </header>
+
+  <main>
+    <!-- Nome do usuário -->
+    <h2 class="page-title">Usuário: {{ target_user["nome"] }}</h2>
+
+    <!-- Problemas criados/enviados -->
+    <div class="history-section">
+      <h2>Problemas criados pelo usuário</h2>
+      {% if posted_problems and posted_problems|length > 0 %}
+        <ul class="history-list">
+          {% for problem in posted_problems %}
+            <li>
+              <strong>Título:</strong>
+              <a
+                href="{{
+                  url_for('exibir_solucao', problem_id=str(problem['_id']))
+                  if problem.resolvido
+                  else url_for('edit_problem', problem_id=str(problem['_id']))
+                }}"
+              >
+                {{ problem.titulo }}
+              </a>
+              {% if not problem.resolvido %}
+                (Não resolvido)
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="no-records">Nenhum problema criado.</p>
+      {% endif %}
+    </div>
+
+    <!-- Problemas em que o usuário visualizou a solução -->
+    <div class="history-section">
+      <h2>Problemas que o usuário visualizou a solução</h2>
+      {% if viewed_problems and viewed_problems|length > 0 %}
+        <ul class="history-list">
+          {% for problem in viewed_problems %}
+            <li>
+              <strong>Título:</strong>
+              <a href="{{ url_for('exibir_solucao', problem_id=str(problem['_id'])) }}">
+                {{ problem.titulo }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="no-records">Nenhuma solução visualizada.</p>
+      {% endif %}
+    </div>
+
+    <!-- Histórico de pesquisa de itens -->
+    <div class="history-section">
+      <h2>Histórico de pesquisa de itens</h2>
+      {% if item_searches and item_searches|length > 0 %}
+        <ul class="history-list">
+          {% for search in item_searches %}
+            <li>
+              <strong>Peça buscada:</strong> "{{ search.query }}"
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="no-records">Nenhuma pesquisa de itens registrada.</p>
+      {% endif %}
+    </div>
+
+    <!-- Histórico de pesquisa de problemas -->
+    <div class="history-section">
+      <h2>Histórico de pesquisa de problemas</h2>
+      {% if problem_searches and problem_searches|length > 0 %}
+        <ul class="history-list">
+          {% for search in problem_searches %}
+            <li>
+              <strong>Problema buscado:</strong> "{{ search.query }}"
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="no-records">Nenhuma pesquisa de problemas registrada.</p>
+      {% endif %}
+    </div>
+
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M</p>
+  </footer>
+</body>
+</html>

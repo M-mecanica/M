@@ -199,7 +199,7 @@
   <header></header>
 
   <main>
-    <h1>Registrar Novo Usuário</h1>
+    <h1>Cadastro</h1>
 
     <!-- Se existir alguma mensagem de erro, exibe aqui -->
     {% if erro %}
@@ -207,14 +207,24 @@
     {% endif %}
 
     <form action="{{ url_for('register') }}" method="POST" autocomplete="off">
-      <label for="nome">Nome de Usuário</label>
+      <label for="nome">Nome completo:</label>
       <input type="text" id="nome" name="nome" required autocomplete="off" />
 
-      <label for="senha">Senha</label>
+      <label for="senha">Senha:</label>
       <input type="password" id="senha" name="senha" required autocomplete="off" />
 
-      <!-- Campo WhatsApp (Opcional) -->
-      <label for="whatsapp">WhatsApp (Opcional)</label>
+      <!-- Novo campo para confirmar senha -->
+      <label for="confirmar_senha">Confirmar Senha:</label>
+      <input
+        type="password"
+        id="confirmar_senha"
+        name="confirmar_senha"
+        required
+        autocomplete="off"
+      />
+
+      <!-- Campo WhatsApp obrigatório -->
+      <label for="whatsapp">WhatsApp:</label>
       <input
         type="text"
         id="whatsapp"
@@ -223,22 +233,22 @@
         pattern="^\(\d{2}\)\s?\d{5}-\d{4}$"
         title="Formato esperado: (99) 99999-9999"
         autocomplete="off"
+        required
       />
 
       <!-- Campo para Máquinas que o usuário possui (Opcional) -->
-      <label for="maquinas">Máquinas que Possui (Opcional)</label>
+      <label for="maquinas">Máquinas que Possui (Opcional):</label>
       <textarea
         id="maquinas"
         name="maquinas"
-        placeholder="Exemplos: Trator John Deere modelo X, Colheitadeira New Holland..."
         autocomplete="off"
       ></textarea>
 
-      <input type="submit" value="Registrar" />
+      <input type="submit" value="Cadastrar" />
     </form>
 
     <div class="links-auth">
-      <a href="{{ url_for('login') }}" class="btn-login">Login</a>
+      <a href="{{ url_for('login') }}" class="btn-login">Entrar</a>
     </div>
   </main>
 

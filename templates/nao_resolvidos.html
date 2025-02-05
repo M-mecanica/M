@@ -32,10 +32,11 @@
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto, botão "Voltar" no mesmo estilo do index.html */
+    /* HEADER: fundo preto, botão "Voltar" no mesmo estilo do index.html,
+       agora com bem mais altura e ícone maior */
     header {
       background-color: #000;
-      padding: 1rem 2rem;
+      padding: 2rem 3rem; /* Aumentado para dar mais altura à barra superior */
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -43,29 +44,29 @@
     }
     header h1 {
       color: #fff;
-      font-size: 1.4rem;
+      font-size: 1.6rem; /* Aumentado um pouco o título */
       margin: 0 auto; /* Centraliza o título */
       text-align: center;
     }
 
-    /* Botão "Voltar" (seta) no estilo retangular do index */
+    /* Botão "Voltar" (seta) no estilo retangular do index, com ícone maior */
     .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
       border: none;
       border-radius: 0;
-      padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
+      padding: 1rem 2rem;
+      font-size: 1.8rem; /* Deixa a seta maior */
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
-      height: 40px;
+      height: 60px; /* Aumentado para acompanhar o tamanho do ícone */
       display: flex;
       align-items: center;
       justify-content: center;
       position: absolute;
-      left: 2rem;
+      left: 3rem;
     }
     .btn-voltar-inicio:hover {
       background-color: #333;
@@ -152,15 +153,16 @@
     ----------------------------------------------*/
     @media (max-width: 768px) {
       header {
-        padding: 1rem;
+        padding: 1.5rem 2rem;
       }
       header h1 {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
       }
       .btn-voltar-inicio {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-        left: 1rem;
+        padding: 0.8rem 1.2rem;
+        font-size: 1.4rem;
+        left: 2rem;
+        height: auto; /* Ajuste para dispositivos menores */
       }
       main {
         padding: 1rem 1rem;

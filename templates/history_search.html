@@ -2,25 +2,30 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>M - Histórico de Pesquisas</title>
-  <!-- Fonte básica -->
+  <title>M - Histórico de Pesquisa de Problemas</title>
+  <!-- Responsividade em dispositivos móveis -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonte básica (opcional) -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
-  <!-- Meta para responsividade em dispositivos móveis -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* Reset básico */
+    /* =========================================================================
+       RESET BÁSICO
+       ========================================================================= */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    /* BODY: fundo cinza claro, texto escuro */
+    /* =========================================================================
+       BODY / FONTES / CORES GERAIS
+       ========================================================================= */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -32,30 +37,25 @@
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto, estilo retangular para o botão voltar */
+    /* =========================================================================
+       HEADER PRETO COM BOTÃO DE VOLTAR (ESTILO item_search.html)
+       ========================================================================= */
     header {
       background-color: #000;
       padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: space-between; /* Espaçar o botão de voltar, título e espaço vago */
       position: relative;
     }
-    header h1 {
-      color: #fff;
-      font-size: 1.4rem;
-      margin: 0 auto;
-      text-align: center;
-    }
-
-    /* Botão Voltar (apenas seta) */
-    .btn-voltar-index {
+    /* Botão "Voltar" (borda arredondada, seta grande) */
+    .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 0;
+      border-radius: 32px; /* Arredondado */
       padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
+      font-size: 2rem; /* ÍCONE (SETA) MAIOR */
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
@@ -64,24 +64,34 @@
       align-items: center;
       justify-content: center;
     }
-    .btn-voltar-index:hover {
+    .btn-voltar-inicio:hover {
       background-color: #333;
       transform: scale(1.02);
     }
+    header h1 {
+      color: #fff;
+      font-size: 1.4rem;
+      text-align: center;
+      margin: 0 auto;
+    }
 
-    /* MAIN */
+    /* =========================================================================
+       MAIN
+       ========================================================================= */
     main {
       flex: 1;
-      font-size: 1rem;
-      padding: 2rem 1rem;
       width: 100%;
-      max-width: 900px;
+      max-width: 1200px; /* Mantendo o padrão de item_search.html */
       margin: 0 auto;
+      padding: 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
+    /* =========================================================================
+       TÍTULO DE PÁGINA
+       ========================================================================= */
     .page-title {
       font-size: 1.6rem;
       margin-bottom: 2rem;
@@ -89,11 +99,13 @@
       text-align: center;
     }
 
-    /* Container do histórico */
+    /* =========================================================================
+       CONTAINER DO HISTÓRICO
+       ========================================================================= */
     .history-container {
       width: 100%;
+      max-width: 900px;
     }
-
     .search-record {
       background-color: #fff;
       border: 1px solid #ccc;
@@ -102,7 +114,6 @@
       margin-bottom: 1rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-
     .search-record p {
       margin-bottom: 0.5rem;
       color: #555;
@@ -110,7 +121,9 @@
       line-height: 1.3rem;
     }
 
-    /* FOOTER preto, texto branco */
+    /* =========================================================================
+       FOOTER
+       ========================================================================= */
     footer {
       background-color: #000;
       text-align: center;
@@ -122,9 +135,9 @@
       margin: 0;
     }
 
-    /*----------------------------------------------
-      VERSÃO MOBILE
-    ----------------------------------------------*/
+    /* =========================================================================
+       MEDIA QUERIES (VERSÃO MOBILE)
+       ========================================================================= */
     @media (max-width: 768px) {
       header {
         padding: 1rem;
@@ -132,9 +145,9 @@
       header h1 {
         font-size: 1.2rem;
       }
-      .btn-voltar-index {
+      .btn-voltar-inicio {
         padding: 0.5rem 1rem;
-        font-size: 0.8rem;
+        /* Mantemos font-size: 2rem para a seta grande no mobile também */
       }
       main {
         padding: 1rem;
@@ -144,9 +157,11 @@
         font-size: 1.4rem;
         margin-bottom: 1.5rem;
       }
+      .history-container {
+        max-width: 100%;
+      }
       .search-record {
         padding: 0.8rem;
-        margin-bottom: 1rem;
       }
       .search-record p {
         font-size: 0.9rem;
@@ -155,14 +170,19 @@
   </style>
 </head>
 <body>
+  <!-- Cabeçalho com botão de voltar e título (igual ao padrão item_search.html) -->
   <header>
-    <!-- Botão "Voltar" para a Página de Usuários ou Index -->
-    <a href="{{ url_for('listar_usuarios') }}" class="btn-voltar-index" title="Voltar">&#x2B05;</a>
-    <h1>Histórico de Pesquisas</h1>
+    <a href="{{ url_for('listar_usuarios') }}" class="btn-voltar-inicio" title="Voltar">
+      &#x2B05;
+    </a>
+    <h1>Histórico de Pesquisas de Problemas</h1>
+    <!-- Espaço vazio à direita para manter alinhamento similar -->
+    <div style="width: 2rem;"></div>
   </header>
 
   <main>
-    <h2 class="page-title">Consultas Realizadas</h2>
+    <h2 class="page-title">Registros Recentes</h2>
+
     <div class="history-container">
       {% if history and history|length > 0 %}
         {% for record in history %}
@@ -172,7 +192,7 @@
           </div>
         {% endfor %}
       {% else %}
-        <p>Nenhum histórico de pesquisa encontrado.</p>
+        <p>Nenhum histórico de pesquisa de problemas encontrado.</p>
       {% endif %}
     </div>
   </main>

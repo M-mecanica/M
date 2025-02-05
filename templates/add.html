@@ -3,24 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Registrar Novo Problema</title>
-  <!-- Fonte básica -->
+  <!-- Responsividade em dispositivos móveis -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonte básica (opcional) -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
-  <!-- Meta para responsividade em dispositivos móveis -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* Reset básico */
+    /* =========================================================================
+       RESET BÁSICO
+       ========================================================================= */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    /* BODY: fundo cinza claro, texto escuro (como no index.html) */
+    /* =========================================================================
+       BODY / FONTES / CORES GERAIS
+       ========================================================================= */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -32,49 +37,49 @@
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto */
+    /* =========================================================================
+       HEADER PRETO COM BOTÃO DE VOLTAR (MESMO TAMANHO DE item_search.html)
+       ========================================================================= */
     header {
       background-color: #000;
       padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: center; /* Centraliza o título no header */
+      justify-content: space-between; /* Deixa espaço entre o botão de voltar, título e "vazio" à direita */
       position: relative;
     }
 
-    /* Botão "Voltar" (seta) agora com borda arredondada */
-    .btn-voltar-home {
+    /* Botão "Voltar" (borda arredondada, MESMO ESTILO DE item_search.html) */
+    .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
       border: none;
       border-radius: 32px; /* Arredondado */
       padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
+      font-size: 2rem; /* ÍCONE (SETA) MAIOR */
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
-      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: absolute;
-      left: 2rem; /* Para ficar no canto esquerdo */
     }
-    .btn-voltar-home:hover {
+    .btn-voltar-inicio:hover {
       background-color: #333;
       transform: scale(1.02);
     }
 
-    /* Título centralizado no header */
     header h1 {
       color: #fff;
       font-size: 1.4rem;
-      margin: 0;
       text-align: center;
+      margin: 0 auto;
     }
 
-    /* MAIN */
+    /* =========================================================================
+       MAIN
+       ========================================================================= */
     main {
       flex: 1;
       font-size: 1rem;
@@ -87,7 +92,7 @@
       align-items: center;
     }
 
-    /* Título "Registrar um Novo Problema" */
+    /* Título da página (Registrar Novo Problema) */
     .page-title {
       font-size: 1.6rem;
       margin-bottom: 2rem;
@@ -95,7 +100,9 @@
       text-align: center;
     }
 
-    /* Container do formulário */
+    /* =========================================================================
+       CONTAINER DO FORMULÁRIO
+       ========================================================================= */
     .form-container {
       background-color: #fff;
       border: 1px solid #ccc;
@@ -112,7 +119,9 @@
       font-weight: bold;
     }
 
-    /* FORM */
+    /* =========================================================================
+       FORMULÁRIO
+       ========================================================================= */
     form {
       display: flex;
       flex-direction: column;
@@ -164,7 +173,9 @@
       transform: scale(1.02);
     }
 
-    /* FOOTER: fundo preto, texto branco */
+    /* =========================================================================
+       FOOTER
+       ========================================================================= */
     footer {
       background-color: #000;
       text-align: center;
@@ -176,7 +187,9 @@
       margin: 0;
     }
 
-    /* Responsividade */
+    /* =========================================================================
+       MEDIA QUERIES (VERSÃO MOBILE)
+       ========================================================================= */
     @media (max-width: 768px) {
       header {
         padding: 1rem;
@@ -184,10 +197,9 @@
       header h1 {
         font-size: 1.2rem;
       }
-      .btn-voltar-home {
+      .btn-voltar-inicio {
         padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-        left: 1rem;
+        /* Mantemos o font-size em 2rem para a seta grande no mobile também */
       }
       main {
         padding: 1rem;
@@ -220,12 +232,12 @@
   </style>
 </head>
 <body>
+  <!-- Cabeçalho com botão de voltar e título (igual item_search.html) -->
   <header>
-    <!-- Botão "Voltar" (seta) -->
-    <a href="{{ url_for('index') }}" class="btn-voltar-home" title="Voltar para Página Inicial">
-      &#x2B05;
-    </a>
+    <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">&#x2B05;</a>
     <h1>Registrar Novo Problema</h1>
+    <!-- Espaço vazio à direita para manter a mesma distribuição de item_search.html -->
+    <div style="width: 2rem;"></div>
   </header>
 
   <main>

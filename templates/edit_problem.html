@@ -1,55 +1,61 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Editar Problema</title>
+  <!-- Responsividade em dispositivos móveis -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonte básica (opcional) -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    /* Reset básico */
+    /* =========================================================================
+       RESET BÁSICO
+       ========================================================================= */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
+    /* =========================================================================
+       BODY / FONTES / CORES GERAIS
+       ========================================================================= */
     body {
       font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
       background-color: #f0f0f0;
       color: #333;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      overflow-x: hidden; /* Mantém consistência com resultados.html */
+      overflow-x: hidden;
     }
 
-    /* HEADER */
+    /* =========================================================================
+       HEADER PRETO COM BOTÃO DE VOLTAR (MESMO PADRÃO DE item_search.html)
+       ========================================================================= */
     header {
       background-color: #000;
-      color: #fff;
       padding: 1rem 2rem;
       display: flex;
       align-items: center;
+      justify-content: space-between; /* Espaçar os itens (voltar, título, espaço vago) */
+      position: relative;
     }
-    header h1 {
-      flex: 1;
-      text-align: center;
-      margin: 0;
-      font-size: 1.4rem; /* para combinar com resultados.html */
-    }
-
-    .btn-voltar {
+    /* Botão "Voltar" com borda arredondada, seta grande (2rem) */
+    .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
       border: none;
-      /* Borda arredondada */
-      border-radius: 32px;
+      border-radius: 32px; /* Arredondado */
       padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
+      font-size: 2rem; /* ÍCONE (SETA) MAIOR */
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
@@ -58,36 +64,56 @@
       align-items: center;
       justify-content: center;
     }
-    .btn-voltar:hover {
+    .btn-voltar-inicio:hover {
       background-color: #333;
       transform: scale(1.02);
     }
 
-    /* MAIN (adaptado para a mesma largura do container de resultados.html) */
+    header h1 {
+      color: #fff;
+      font-size: 1.4rem;
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    /* =========================================================================
+       MAIN
+       ========================================================================= */
     main {
       flex: 1;
-      font-size: 1.25rem;
+      font-size: 1rem;
       padding: 2rem;
       width: 100%;
-      max-width: 1200px; /* Mesmo max-width do container em resultados.html */
+      max-width: 1200px; /* mesmo max-width utilizado em item_search.html */
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    /* Container para o formulário, semelhante ao "problem-item" */
+    /* =========================================================================
+       CONTAINER DO FORMULÁRIO
+       ========================================================================= */
     .form-container {
       width: 100%;
       background-color: #fff;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      padding: 1rem;
+      padding: 1rem 1.5rem;
       margin-bottom: 2rem; /* Espaçamento extra */
     }
 
-    .form-group {
+    .erro {
+      color: #c00;
       margin-bottom: 1rem;
+      font-weight: bold;
+    }
+
+    /* =========================================================================
+       FORMULÁRIO
+       ========================================================================= */
+    .form-group {
+      margin-bottom: 1.5rem;
     }
 
     label {
@@ -106,6 +132,12 @@
       font-size: 1rem;
       font-family: 'Roboto', sans-serif;
       box-sizing: border-box;
+      color: #333;
+      outline: none;
+    }
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: #999;
     }
 
     /* Desabilita o resize no textarea */
@@ -115,17 +147,22 @@
     }
 
     /* Botões com borda arredondada */
-    .btn-salvar {
-      background-color: #000;
-      color: #fff;
+    .btn-salvar,
+    .btn-cancelar {
       border: none;
-      border-radius: 32px;
+      border-radius: 32px; /* Arredondado */
       padding: 0.7rem 1.5rem;
       font-size: 1rem;
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
+    }
+
+    .btn-salvar {
+      background-color: #000;
+      color: #fff;
+      margin-right: 0.5rem;
     }
     .btn-salvar:hover {
       background-color: #333;
@@ -135,26 +172,15 @@
     .btn-cancelar {
       background-color: #999;
       color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      margin-left: 0.5rem;
     }
     .btn-cancelar:hover {
       background-color: #666;
       transform: scale(1.02);
     }
 
-    .erro {
-      color: #c00;
-      margin-bottom: 1rem;
-    }
-
+    /* =========================================================================
+       FOOTER
+       ========================================================================= */
     footer {
       background-color: #000;
       color: #fff;
@@ -164,8 +190,12 @@
     footer p {
       font-size: 0.9rem;
       color: #fff;
+      margin: 0;
     }
 
+    /* =========================================================================
+       MEDIA QUERIES (VERSÃO MOBILE)
+       ========================================================================= */
     @media (max-width: 768px) {
       header {
         padding: 1rem;
@@ -173,9 +203,9 @@
       header h1 {
         font-size: 1.2rem;
       }
-      .btn-voltar {
+      .btn-voltar-inicio {
         padding: 0.5rem 1rem;
-        font-size: 0.8rem;
+        /* Mantemos font-size 2rem para a seta grande no mobile também */
       }
       main {
         font-size: 1rem;
@@ -183,6 +213,9 @@
       }
       .form-container {
         padding: 1rem;
+      }
+      .form-group {
+        margin-bottom: 1rem;
       }
       .btn-salvar,
       .btn-cancelar {
@@ -193,10 +226,12 @@
   </style>
 </head>
 <body>
+  <!-- Cabeçalho com botão de voltar e título (igual padrão item_search.html) -->
   <header>
-    <!-- Botão Voltar: apenas o ícone (seta), sem texto. -->
-    <a href="{{ url_for('search') }}" class="btn-voltar" title="Voltar">&#x2B05;</a>
+    <a href="{{ url_for('search') }}" class="btn-voltar-inicio" title="Voltar">&#x2B05;</a>
     <h1>Editar Problema</h1>
+    <!-- Espaço vazio à direita para manter a mesma distribuição -->
+    <div style="width: 2rem;"></div>
   </header>
 
   <main>
@@ -233,6 +268,7 @@
             value="{{ ' '.join(problema.tags) if problema.tags else '' }}"
           >
         </div>
+
         <button type="submit" class="btn-salvar">Salvar</button>
         <a href="{{ url_for('search') }}" class="btn-cancelar">Cancelar</a>
       </form>
