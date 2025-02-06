@@ -47,9 +47,11 @@ itens_collection = db_mz["itens"]
 # Coleção para armazenar os 200 itens diários (p/ pesquisa de peças)
 daily_random_items_collection = db_mz["daily_random_items"]
 
+
 def user_is_logged_in():
     """Retorna True se há um usuário logado na sessão (banco 'm_plataforma')."""
     return "user_id" in session
+
 
 def user_has_role(roles_permitidos):
     """
@@ -58,6 +60,7 @@ def user_has_role(roles_permitidos):
     if not user_is_logged_in():
         return False
     return session.get("role") in roles_permitidos
+
 
 def save_image_if_exists(file_obj):
     """
@@ -81,6 +84,7 @@ def save_image_if_exists(file_obj):
     )
     return str(stored_id)
 
+
 def normalize_string(s):
     """
     Remove acentos e deixa tudo em minúsculo, sem espaços repetidos.
@@ -91,6 +95,7 @@ def normalize_string(s):
         if not unicodedata.combining(c)
     )
     return re.sub(r'\s+', ' ', normalized.strip().lower())
+
 
 def generate_sub_phrases(tokens):
     """
@@ -104,6 +109,7 @@ def generate_sub_phrases(tokens):
             sub_slice = tokens[start:end]
             sub_phrases.append(" ".join(sub_slice))
     return sub_phrases
+
 
 def compute_largest_sub_phrase_length(search_tokens, item_phrases):
     """
@@ -120,9 +126,11 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
                 largest_length = num_tokens
     return largest_length
 
+
 def get_today_date_str():
     """Retorna a data de hoje como string 'YYYY-MM-DD'."""
     return datetime.datetime.utcnow().strftime("%Y-%m-%d")
+
 
 def get_daily_random_resolved_problems():
     """
@@ -157,6 +165,7 @@ def get_daily_random_resolved_problems():
         daily_random_problems_collection.insert_one(new_doc)
 
         return [ObjectId(pid) for pid in selected_ids]
+
 
 def get_daily_random_items():
     """
@@ -197,6 +206,7 @@ def root():
     """
     return redirect(url_for("index"))
 
+
 @app.route("/index", methods=["GET"])
 def index():
     """
@@ -206,6 +216,7 @@ def index():
     """
     need_login = request.args.get("need_login", "0")
     return render_template("index.html", need_login=need_login)
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -230,11 +241,13 @@ def login():
             return render_template("login.html", erro=erro)
     return render_template("login.html", erro=None)
 
+
 @app.route("/logout")
 def logout():
     """ Encerra a sessão do usuário atual. """
     session.clear()
     return redirect(url_for("login"))
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -367,6 +380,7 @@ def search():
             termo_busca=""
         )
 
+
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
     """
@@ -403,6 +417,7 @@ def add_problem():
             return render_template("add.html", erro="Preencha todos os campos.")
     return render_template("add.html", erro=None)
 
+
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
     """
@@ -421,6 +436,7 @@ def unresolved():
 
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
 
+
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
     """
@@ -432,6 +448,7 @@ def resolver_form(problem_id):
         return "Acesso negado (somente solucionadores/mecanicos).", 403
 
     return render_template("resolver.html", problem_id=problem_id)
+
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
@@ -460,6 +477,7 @@ def resolver_problema(problem_id):
     )
     return redirect(url_for("unresolved"))
 
+
 @app.route("/solucao/<problem_id>", methods=["GET"])
 def exibir_solucao(problem_id):
     """
@@ -484,6 +502,7 @@ def exibir_solucao(problem_id):
     solucao = problema.get("solucao", {})
     return render_template("solucao.html", problema=problema, solucao=solucao)
 
+
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
     """
@@ -505,19 +524,23 @@ def delete_problem(problem_id):
     else:
         return redirect(url_for("unresolved"))
 
+
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
     """
-    Editar título/descrição/tags (só 'solucionador').
+    Editar título/descrição/tags - permitido ao criador do problema ou a um 'solucionador'.
     """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
-    if not user_has_role(["solucionador"]):
-        return "Acesso negado.", 403
 
     problema = problemas_collection.find_one({"_id": ObjectId(problem_id)})
     if not problema:
         return "Problema não encontrado.", 404
+
+    # Verifica se o usuário é o criador OU se possui role "solucionador"
+    can_edit = (session["user_id"] == problema["creator_id"]) or user_has_role(["solucionador"])
+    if not can_edit:
+        return "Acesso negado.", 403
 
     if request.method == "POST":
         titulo_novo = request.form.get("titulo", "").strip()
@@ -550,6 +573,7 @@ def edit_problem(problem_id):
 
     return render_template("edit_problem.html", problema=problema, erro=None)
 
+
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
     """
@@ -566,6 +590,7 @@ def edit_user_role(user_id):
         {"$set": {"role": novo_role}}
     )
     return redirect(url_for("listar_usuarios"))
+
 
 @app.route("/usuarios", methods=["GET"])
 def listar_usuarios():
@@ -595,6 +620,7 @@ def listar_usuarios():
 
     return render_template("registros.html", usuarios=usuarios, search_query=search_query)
 
+
 @app.route("/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id):
     """
@@ -607,6 +633,7 @@ def delete_user(user_id):
 
     usuarios_collection.delete_one({"_id": ObjectId(user_id)})
     return redirect(url_for("listar_usuarios"))
+
 
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
@@ -712,6 +739,7 @@ def edit_solution(problem_id):
         erro=None
     )
 
+
 @app.route("/item_search", methods=["GET"])
 def item_search():
     """
@@ -719,7 +747,9 @@ def item_search():
     """
     return render_template("item_search.html")
 
+
 ITEMS_PER_PAGE = 20
+
 
 @app.route("/load_items", methods=["GET"])
 def load_items():
@@ -780,11 +810,9 @@ def load_items():
         }, collation={'locale': 'pt', 'strength': 1}).sort('description', 1)
         remaining_list = list(remaining_cursor)
 
-        # Combina
         full_list = daily_list + remaining_list
 
         total_items = len(full_list)
-        # Pagina manualmente
         paged_items = full_list[skip_items : skip_items + ITEMS_PER_PAGE]
         has_more = (len(paged_items) == ITEMS_PER_PAGE)
 
@@ -891,6 +919,7 @@ def load_items():
         'total_items': total_items
     })
 
+
 @app.route("/gridfs_image/<file_id>", methods=["GET"])
 def gridfs_image(file_id):
     """
@@ -906,6 +935,7 @@ def gridfs_image(file_id):
     except:
         return "Imagem não encontrada.", 404
 
+
 @app.route("/history_search", methods=["GET"])
 def history_search():
     """
@@ -918,6 +948,7 @@ def history_search():
 
     all_history = list(history_collection.find({}))
     return render_template("history_search.html", history=all_history)
+
 
 @app.route("/history_problem", methods=["GET"])
 def history_problem():
@@ -956,6 +987,7 @@ def history_problem():
         suggestions_by_problem=suggestions_by_problem
     )
 
+
 @app.route("/suggest_improvement/<problem_id>", methods=["POST"])
 def suggest_improvement(problem_id):
     """
@@ -982,6 +1014,7 @@ def suggest_improvement(problem_id):
     })
 
     return redirect(url_for("exibir_solucao", problem_id=problem_id))
+
 
 @app.route("/user_history/<user_id>", methods=["GET"])
 def user_history(user_id):

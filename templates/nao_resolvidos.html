@@ -91,7 +91,7 @@
       margin-top: 1rem;
     }
 
-    /* Cada problema não resolvido (padrão semelhante a resultados.html) */
+    /* Cada problema não resolvido */
     .problem-item {
       background-color: #fff;
       border-radius: 8px;
@@ -121,7 +121,7 @@
       font-size: 1.2rem;
     }
 
-    /* Botão "Resolver" (centralizado no rodapé do card, mesmo estilo do "ver-solucao-btn" de resultados.html) */
+    /* Botão "Resolver" (centralizado no rodapé do card) */
     .resolver-btn {
       background-color: #000;
       color: #fff;
@@ -143,7 +143,7 @@
       transform: translateX(-50%) scale(1.02);
     }
 
-    /* Botões "Remover" (e possíveis outros) no canto inferior direito */
+    /* Botões no canto inferior direito */
     .action-btns {
       position: absolute;
       bottom: 1rem;
@@ -389,9 +389,20 @@
             </button>
           {% endif %}
 
-          <!-- Botão "Remover" (somente para solucionador) no canto inferior direito -->
-          {% if session.role == "solucionador" %}
-            <div class="action-btns">
+          <!-- Botões de ação no canto inferior direito -->
+          <div class="action-btns">
+            <!-- Botão Editar (para quem criou OU para 'solucionador') -->
+            {% if session.role == "solucionador" or session["user_id"] == problema["creator_id"] %}
+              <a
+                href="{{ url_for('edit_problem', problem_id=problema['_id_str']) }}"
+                class="action-btn"
+              >
+                Editar
+              </a>
+            {% endif %}
+
+            <!-- Botão "Remover" (somente para solucionador) -->
+            {% if session.role == "solucionador" %}
               <form
                 action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}"
                 method="POST"
@@ -401,8 +412,8 @@
                   Remover
                 </button>
               </form>
-            </div>
-          {% endif %}
+            {% endif %}
+          </div>
         </div>
         {% endfor %}
       </div>
