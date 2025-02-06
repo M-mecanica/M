@@ -241,9 +241,9 @@
               <strong>Título:</strong>
               <a
                 href="{{
-                  url_for('exibir_solucao', problem_id=str(problem['_id']))
+                  url_for('exibir_solucao', problem_id=problem._id_str)
                   if problem.resolvido
-                  else url_for('edit_problem', problem_id=str(problem['_id']))
+                  else url_for('edit_problem', problem_id=problem._id_str)
                 }}"
               >
                 {{ problem.titulo }}
@@ -267,7 +267,7 @@
           {% for problem in viewed_problems %}
             <li>
               <strong>Título:</strong>
-              <a href="{{ url_for('exibir_solucao', problem_id=str(problem['_id'])) }}">
+              <a href="{{ url_for('exibir_solucao', problem_id=problem._id_str) }}">
                 {{ problem.titulo }}
               </a>
             </li>

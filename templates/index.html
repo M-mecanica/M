@@ -53,15 +53,32 @@
       margin-right: auto; /* Deixa o botão à esquerda */
     }
     .hamburger svg {
-      /* AUMENTE AQUI O TAMANHO DO ÍCONE */
       width: 32px;
       height: 32px;
       fill: #fff;
     }
 
-    /* MAIN: centralizado verticalmente e horizontalmente */
+    /* Botão ENTRAR no canto direito (quando não logado) */
+    .login-button {
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.8rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .login-button:hover {
+      background-color: #555;
+      transform: scale(1.02);
+    }
+
+    /* MAIN: centraliza vertical/horizontal */
     main {
-      flex: 1;                 /* Faz o main ocupar o espaço vertical disponível */
+      flex: 1;
       padding: 3rem 2rem;
       display: flex;
       flex-direction: column;
@@ -79,18 +96,16 @@
       letter-spacing: 0.05em;
     }
 
-    /* Container do formulário de pesquisa */
+    /* Container da "barra de pesquisa" */
     .search-container {
       width: 100%;
       max-width: 600px;
       margin-bottom: 2.5rem;
     }
-    form {
-      display: flex;
+
+    /* A barra de pesquisa (input), agora somente para clique (readonly) */
+    .search-container input[type="text"] {
       width: 100%;
-    }
-    input[type="text"] {
-      flex: 1;
       padding: 1rem 1.5rem;
       border: none;
       border-radius: 32px;
@@ -100,8 +115,9 @@
       text-align: center;
       outline: none;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      cursor: pointer; /* indica que é clicável */
     }
-    input[type="text"]::placeholder {
+    .search-container input[type="text"]::placeholder {
       color: #aaa;
     }
 
@@ -119,7 +135,7 @@
     .pesquisar-peca-container {
       display: flex;
       justify-content: center;
-      padding: 2rem 3rem; /* Aumenta a altura (mais espaço) */
+      padding: 2rem 3rem;
       background-color: #f0f0f0;
     }
 
@@ -128,9 +144,9 @@
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 32px;  /* Deixa o botão bem arredondado */
-      padding: 1rem 2rem;   /* Maior espaçamento */
-      font-size: 1.2rem;    /* Fonte maior */
+      border-radius: 32px;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
@@ -211,10 +227,106 @@
       width: 100vw;
       height: 100vh;
       background: rgba(0,0,0,0.5);
-      z-index: 9998; /* abaixo da sidebar mas acima do conteúdo */
+      z-index: 9998;
     }
     .overlay.open {
       display: block;
+    }
+
+    /* ====================
+       -- MODAL LOGIN --
+       ==================== */
+    .modal {
+      display: none; /* Inicialmente oculto */
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+
+      /* Centraliza o modal no meio da tela */
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background-color: #fff;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 400px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      animation: modalFadeIn 0.3s ease;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background-color: #000;
+      color: #fff;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 0;
+      visibility: hidden; /* Esconde o título para manter o espaço */
+    }
+    .close {
+      color: #fff;
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .close:hover {
+      color: #ddd;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .modal-text {
+      font-size: 1.1rem;
+      color: #333;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    /* Botão "Entrar" (preto) */
+    .btn-entrar-preto {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .btn-entrar-preto:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
@@ -227,6 +339,11 @@
         <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
       </svg>
     </button>
+
+    <!-- Mostra o botão "Entrar" somente se o usuário NÃO estiver logado -->
+    {% if not session.get('user_id') %}
+      <a class="login-button" href="{{ url_for('login') }}">Entrar</a>
+    {% endif %}
   </header>
 
   <!-- CONTEÚDO PRINCIPAL -->
@@ -234,15 +351,15 @@
     <!-- Logo Grande -->
     <div class="logo-grande">M</div>
 
+    <!-- "Barra de pesquisa" que redireciona ao clicar -->
     <div class="search-container">
-      <form action="{{ url_for('search') }}" method="GET">
-        <input
-          type="text"
-          name="q"
-          placeholder="Pesquise um problema mecânico"
-          autocomplete="off"
-        />
-      </form>
+      <input
+        type="text"
+        placeholder="Pesquise um problema mecânico"
+        autocomplete="off"
+        readonly
+        onclick="window.location.href='{{ url_for('search') }}';"
+      />
     </div>
 
     <!-- Texto de boas-vindas -->
@@ -261,9 +378,10 @@
   <!-- Barra Lateral (menu) -->
   <div class="mobile-sidebar" id="mobileSidebar">
     <!-- Problemas Não Resolvidos -->
-    <a href="{{ url_for('unresolved') }}">
+    <a href="{% if session.get('user_id') %}{{ url_for('unresolved') }}{% else %}javascript:openLoginModal();{% endif %}">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-        <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0 2.01 15h11.98a.5.5 0 0 0
+        <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0
+                 2.01 15h11.98a.5.5 0 0 0
                  .442-.934l-6.45-12.5zM8 5c.28 0 .5.22.5.5V9a.5.5 0
                  0 1-1 0V5.5c0-.28.22-.5.5-.5zm0 6a.75.75 0 1 1
                  0 1.5A.75.75 0 0 1 8 11z"></path>
@@ -272,7 +390,7 @@
     </a>
 
     <!-- Novo Problema -->
-    <a href="{{ url_for('add_problem') }}">
+    <a href="{% if session.get('user_id') %}{{ url_for('add_problem') }}{% else %}javascript:openLoginModal();{% endif %}">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
                  1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
@@ -311,7 +429,8 @@
     </a>
     {% endif %}
 
-    <!-- Logout -->
+    <!-- Logout (só aparece se está logado) -->
+    {% if session.get('user_id') %}
     <a href="{{ url_for('logout') }}">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
         <path d="M9.828 4a.5.5 0 0 1 .354.146l3
@@ -332,6 +451,7 @@
       </svg>
       Logout
     </a>
+    {% endif %}
   </div>
 
   <!-- Overlay para clicar fora e fechar o menu -->
@@ -341,23 +461,57 @@
     <p>© 2025 Plataforma M</p>
   </footer>
 
+  <!-- MODAL LOGIN (exibido se need_login=1 ou se clicado em função JS) -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <!-- Título "escondido" para manter o estilo da faixa preta -->
+        <h2></h2>
+        <span class="close" onclick="closeLoginModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p class="modal-text">
+          Você precisa fazer login para acessar esta funcionalidade.
+        </p>
+        <!-- Botão preto "Entrar" -->
+        <a href="{{ url_for('login') }}" class="btn-entrar-preto">
+          Entrar
+        </a>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Seleciona elementos do DOM
     const hamburgerBtn = document.querySelector('.hamburger');
     const mobileSidebar = document.getElementById('mobileSidebar');
     const overlay = document.getElementById('overlay');
 
-    // Abre/fecha o menu lateral ao clicar no hamburger
+    // Abre/fecha o menu lateral
     hamburgerBtn.addEventListener('click', () => {
       mobileSidebar.classList.toggle('open');
       overlay.classList.toggle('open');
     });
 
-    // Fecha o menu se clicar fora dele (no overlay)
+    // Fecha o menu ao clicar fora (overlay)
     overlay.addEventListener('click', () => {
       mobileSidebar.classList.remove('open');
       overlay.classList.remove('open');
     });
+
+    // Modal de Login
+    function openLoginModal() {
+      document.getElementById('loginModal').style.display = 'flex';
+    }
+    function closeLoginModal() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
+
+    // Se veio com ?need_login=1, abrimos o modal automaticamente
+    {% if need_login == '1' %}
+      window.addEventListener('load', function() {
+        openLoginModal();
+      });
+    {% endif %}
   </script>
 </body>
 </html>

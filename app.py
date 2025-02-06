@@ -1,10 +1,9 @@
-# app.py
-
 import os
 import json
 import re
 import unicodedata
 import datetime
+import random
 from flask import (
     Flask, render_template, request, redirect,
     url_for, session, jsonify, make_response
@@ -14,16 +13,8 @@ from bson.objectid import ObjectId
 from werkzeug.utils import secure_filename
 import gridfs
 
-##############################################################################
-#                           CONFIGURAÇÕES FLASK
-##############################################################################
-
 app = Flask(__name__)
 app.secret_key = "CHAVE_SECRETA_PARA_SESSAO"  # Troque por algo seguro em produção
-
-##############################################################################
-#                CONEXÕES COM DOIS BANCOS DE DADOS MONGODB
-##############################################################################
 
 # ------------------------ DB do M (m_plataforma) ----------------------------
 client_m = MongoClient(
@@ -34,13 +25,16 @@ db_m = client_m["m_plataforma"]
 # Coleções do M
 problemas_collection = db_m["problemas"]
 usuarios_collection = db_m["usuarios"]
-history_collection = db_m["search_history"]  # Histórico de buscas de PEÇAS
-problem_history_collection = db_m["problem_search_history"]  # Histórico de pesquisa de PROBLEMAS
+history_collection = db_m["search_history"]          # Histórico de buscas de PEÇAS
+problem_history_collection = db_m["problem_search_history"]  # Histórico de busca de PROBLEMAS
 problem_view_history_collection = db_m["problem_view_history"]  # Registro de visualização de soluções
-improvement_suggestions_collection = db_m["improvement_suggestions"]  # NOVO: sugestões de melhorias
+improvement_suggestions_collection = db_m["improvement_suggestions"]  # Sugestões de melhorias
 
 # GridFS para armazenar as imagens no DB "m_plataforma"
 fs_m = gridfs.GridFS(db_m)
+
+# Coleção para armazenar os 200 problemas diários (p/ problemas)
+daily_random_problems_collection = db_m["daily_random_problems"]
 
 # ------------------------ DB do MZ (MachineZONE) ----------------------------
 client_mz = MongoClient(
@@ -50,10 +44,8 @@ db_mz = client_mz["MachineZONE"]
 
 # Coleção principal de itens no MZ
 itens_collection = db_mz["itens"]
-
-##############################################################################
-#                    FUNÇÕES AUXILIARES (UPLOAD, LOGIN ETC.)
-##############################################################################
+# Coleção para armazenar os 200 itens diários (p/ pesquisa de peças)
+daily_random_items_collection = db_mz["daily_random_items"]
 
 def user_is_logged_in():
     """Retorna True se há um usuário logado na sessão (banco 'm_plataforma')."""
@@ -88,10 +80,6 @@ def save_image_if_exists(file_obj):
         contentType=content_type
     )
     return str(stored_id)
-
-##############################################################################
-#           FUNÇÕES DE NORMALIZAÇÃO E AVALIAÇÃO (PARA BUSCA MZ)
-##############################################################################
 
 def normalize_string(s):
     """
@@ -132,18 +120,92 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
                 largest_length = num_tokens
     return largest_length
 
-##############################################################################
-#              ROTAS DE LOGIN/LOGOUT/REGISTER (BANCO M)
-##############################################################################
+def get_today_date_str():
+    """Retorna a data de hoje como string 'YYYY-MM-DD'."""
+    return datetime.datetime.utcnow().strftime("%Y-%m-%d")
+
+def get_daily_random_resolved_problems():
+    """
+    Retorna uma lista (em formato de ObjectId) com até 200 problemas
+    (resolvidos) selecionados aleatoriamente para o dia atual.
+
+    - Se já existir um documento para o dia de hoje, retorna a lista armazenada.
+    - Caso contrário, seleciona aleatoriamente 200 problemas resolvidos,
+      salva no documento do dia e retorna essa lista.
+    """
+    today_str = get_today_date_str()
+    daily_doc = daily_random_problems_collection.find_one({"date_str": today_str})
+
+    if daily_doc is not None:
+        # Já temos o documento do dia, apenas retornamos a lista
+        id_strings = daily_doc.get("problem_ids", [])
+        return [ObjectId(pid) for pid in id_strings]
+    else:
+        # Gera 200 problemas resolvidos aleatórios
+        pipeline = [
+            {"$match": {"resolvido": True}},
+            {"$sample": {"size": 200}}
+        ]
+        sampled = list(problemas_collection.aggregate(pipeline))
+        selected_ids = [str(item["_id"]) for item in sampled]
+
+        # Salva no documento para manter a mesma seleção o dia todo
+        new_doc = {
+            "date_str": today_str,
+            "problem_ids": selected_ids
+        }
+        daily_random_problems_collection.insert_one(new_doc)
+
+        return [ObjectId(pid) for pid in selected_ids]
+
+def get_daily_random_items():
+    """
+    Retorna uma lista (em formato de ObjectId) com até 200 itens
+    selecionados aleatoriamente (do acervo total) para o dia atual.
+
+    - Se já existir um documento para o dia de hoje, retorna a lista armazenada.
+    - Caso contrário, seleciona aleatoriamente 200 itens,
+      salva no documento do dia e retorna essa lista.
+    """
+    today_str = get_today_date_str()
+    daily_doc = daily_random_items_collection.find_one({"date_str": today_str})
+
+    if daily_doc is not None:
+        id_strings = daily_doc.get("item_ids", [])
+        return [ObjectId(pid) for pid in id_strings]
+    else:
+        # Gera 200 itens aleatórios
+        pipeline = [
+            {"$sample": {"size": 200}}
+        ]
+        sampled = list(itens_collection.aggregate(pipeline))
+        selected_ids = [str(item["_id"]) for item in sampled]
+
+        new_doc = {
+            "date_str": today_str,
+            "item_ids": selected_ids
+        }
+        daily_random_items_collection.insert_one(new_doc)
+
+        return [ObjectId(pid) for pid in selected_ids]
+
 
 @app.route("/")
 def root():
     """
-    Se o usuário estiver logado, vai para /index, senão para /login.
+    Ao abrir a aplicação pela primeira vez, redireciona para /index.
     """
-    if user_is_logged_in():
-        return redirect(url_for("index"))
-    return redirect(url_for("login"))
+    return redirect(url_for("index"))
+
+@app.route("/index", methods=["GET"])
+def index():
+    """
+    Página inicial da aplicação. Esta rota é acessível mesmo sem login.
+    Se houver o parâmetro ?need_login=1, um modal deverá ser exibido
+    informando ao usuário que ele precisa fazer login.
+    """
+    need_login = request.args.get("need_login", "0")
+    return render_template("index.html", need_login=need_login)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -154,7 +216,7 @@ def login():
         nome = request.form.get("nome", "").strip()
         senha = request.form.get("senha", "").strip()
 
-        # Ajuste para capitalizar cada palavra do nome
+        # Capitalizar cada palavra
         nome = " ".join(word.capitalize() for word in nome.split())
 
         usuario = usuarios_collection.find_one({"nome": nome, "senha": senha})
@@ -178,18 +240,23 @@ def logout():
 def register():
     """
     Criação de um novo usuário. Roles possíveis (ex.: 'comum', 'solucionador', 'mecanico').
+    Após o cadastro, o usuário é logado automaticamente e redirecionado à index.
     """
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
         senha = request.form.get("senha", "").strip()
+        confirmar_senha = request.form.get("confirmar_senha", "").strip()
         role = "comum"
         whatsapp = request.form.get("whatsapp", "").strip()
         maquinas = request.form.get("maquinas", "").strip()
 
-        # Capitaliza cada palavra do nome antes de salvar
+        if senha != confirmar_senha:
+            erro = "As senhas não conferem!"
+            return render_template("register.html", erro=erro)
+
         nome = " ".join(word.capitalize() for word in nome.split())
 
-        # Verifica se usuário já existe
+        # Verifica duplicado
         if usuarios_collection.find_one({"nome": nome}):
             erro = "Usuário já existe!"
             return render_template("register.html", erro=erro)
@@ -201,8 +268,14 @@ def register():
             "whatsapp": whatsapp,
             "maquinas": maquinas
         }
-        usuarios_collection.insert_one(novo_usuario)
-        return redirect(url_for("login"))
+        inserted = usuarios_collection.insert_one(novo_usuario)
+        new_user_id = str(inserted.inserted_id)
+
+        session["user_id"] = new_user_id
+        session["username"] = nome
+        session["role"] = role
+
+        return redirect(url_for("index"))
 
     return render_template("register.html", erro=None)
 
@@ -210,25 +283,15 @@ def register():
 #                ROTAS DO M (m_plataforma) - PROBLEMAS
 ##############################################################################
 
-@app.route("/index", methods=["GET"])
-def index():
-    """
-    Página inicial do sistema M (se logado, senão /login).
-    """
-    if not user_is_logged_in():
-        return redirect(url_for("login"))
-    return render_template("index.html")
-
 @app.route("/search", methods=["GET"])
 def search():
     """
     Pesquisa problemas resolvidos com base em 'q'.
-    Se 'q' estiver vazio, mostra todos os problemas resolvidos.
+    Se 'q' estiver vazio, mostra todos os problemas resolvidos,
+    mas com 200 problemas aleatórios (selecionados 1x por dia) aparecendo primeiro
+    e, a cada carregamento, a ordem desses 200 muda.
     Também registra histórico de pesquisa de PROBLEMAS (sem data/hora).
     """
-    if not user_is_logged_in():
-        return redirect(url_for("login"))
-
     termo_busca = request.args.get("q", "").strip()
 
     if termo_busca:
@@ -243,43 +306,83 @@ def search():
             ]
         }
 
-        # REGISTRAR no histórico de pesquisa de problemas (sem timestamp)
-        problem_history_collection.insert_one({
-            "user_id": session["user_id"],
-            "user_name": session["username"],
-            "query": termo_busca
-        })
+        # Log de pesquisa de problemas
+        if user_is_logged_in():
+            problem_history_collection.insert_one({
+                "user_id": session["user_id"],
+                "user_name": session["username"],
+                "query": termo_busca
+            })
+        else:
+            problem_history_collection.insert_one({
+                "user_id": None,
+                "user_name": "Guest",
+                "query": termo_busca
+            })
+
+        problemas_encontrados = list(problemas_collection.find(query))
+        for p in problemas_encontrados:
+            p["_id_str"] = str(p["_id"])
+
+        return render_template(
+            "resultados.html",
+            problemas=problemas_encontrados,
+            termo_busca=termo_busca
+        )
     else:
-        query = {"resolvido": True}
+        # Sem termo de busca -> mostrar 200 diários + resto
+        daily_ids = get_daily_random_resolved_problems()
+        random.shuffle(daily_ids)
 
-    problemas_encontrados = list(problemas_collection.find(query))
-    for p in problemas_encontrados:
-        p["_id_str"] = str(p["_id"])
+        # Carrega do banco
+        daily_problems_cursor = problemas_collection.find({"_id": {"$in": daily_ids}})
 
-    return render_template(
-        "resultados.html",
-        problemas=problemas_encontrados,
-        termo_busca=termo_busca
-    )
+        # Precisamos reordenar de acordo com a lista shuffled
+        daily_map = {}
+        for dp in daily_problems_cursor:
+            daily_map[str(dp["_id"])] = dp
+
+        daily_problems_list = []
+        for did in daily_ids:
+            did_str = str(did)
+            if did_str in daily_map:
+                item = daily_map[did_str]
+                item["_id_str"] = did_str
+                daily_problems_list.append(item)
+
+        # Carrega os demais problemas resolvidos
+        remaining_cursor = problemas_collection.find({
+            "resolvido": True,
+            "_id": {"$nin": daily_ids}
+        })
+        remaining_problems = list(remaining_cursor)
+        for rp in remaining_problems:
+            rp["_id_str"] = str(rp["_id"])
+
+        problemas_encontrados = daily_problems_list + remaining_problems
+
+        return render_template(
+            "resultados.html",
+            problemas=problemas_encontrados,
+            termo_busca=""
+        )
 
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
     """
     Cadastra novo problema (não resolvido), com possibilidade de adicionar tags.
-    Também salva o 'creator_id' do usuário que criou o problema.
+    Salva também o 'creator_id' do usuário que criou.
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
 
     if request.method == "POST":
         titulo = request.form.get("titulo", "").strip()
         descricao = request.form.get("descricao", "").strip()
 
-        # Normaliza e quebra o título para virar parte das tags
         titulo_normalized = normalize_string(titulo)
         titulo_tokens = titulo_normalized.split()
 
-        # Normaliza também as tags fornecidas
         tags_str = request.form.get("tags", "").strip()
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
@@ -303,25 +406,28 @@ def add_problem():
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
     """
-    Lista problemas que ainda não foram resolvidos.
+    Lista problemas pendentes de solução.
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
 
     query = {"resolvido": False}
     problemas_nao_resolvidos = list(problemas_collection.find(query))
+
     for p in problemas_nao_resolvidos:
         p["_id_str"] = str(p["_id"])
+        user_creator = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
+        p["creator_name"] = user_creator["nome"] if user_creator else "Desconhecido"
 
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
 
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
     """
-    Exibe formulário para resolver um problema (roles 'solucionador' ou 'mecanico').
+    Formulário de resolução (só roles 'solucionador' ou 'mecanico').
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador", "mecanico"]):
         return "Acesso negado (somente solucionadores/mecanicos).", 403
 
@@ -330,10 +436,10 @@ def resolver_form(problem_id):
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
     """
-    Marca o problema como resolvido, salvando estrutura JSON de passos/subpassos.
+    Marca como resolvido, salva solucao (JSON).
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador", "mecanico"]):
         return "Acesso negado (somente solucionadores/mecanicos).", 403
 
@@ -357,29 +463,21 @@ def resolver_problema(problem_id):
 @app.route("/solucao/<problem_id>", methods=["GET"])
 def exibir_solucao(problem_id):
     """
-    Exibe a solução de um problema (se resolvido) e registra que o usuário a visualizou.
+    Exibe solucao de um problema resolvido.
+    Registra que o user visualizou (via upsert).
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
 
     problema = problemas_collection.find_one({"_id": ObjectId(problem_id)})
     if not problema:
         return "Problema não encontrado.", 404
     if not problema.get("resolvido"):
-        return "Este problema ainda não foi marcado como resolvido.", 400
+        return "Ainda não resolvido.", 400
 
-    # Registra a visualização (sem data/hora, via upsert)
     problem_view_history_collection.update_one(
-        {
-            "user_id": session["user_id"],
-            "problem_id": problem_id
-        },
-        {
-            "$set": {
-                "user_id": session["user_id"],
-                "problem_id": problem_id
-            }
-        },
+        {"user_id": session["user_id"], "problem_id": problem_id},
+        {"$set": {"user_id": session["user_id"], "problem_id": problem_id}},
         upsert=True
     )
 
@@ -389,10 +487,10 @@ def exibir_solucao(problem_id):
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
     """
-    Deleta um problema (somente 'solucionador').
+    Deleta problema (role 'solucionador').
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
         return "Acesso negado (somente solucionador).", 403
 
@@ -410,10 +508,10 @@ def delete_problem(problem_id):
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
     """
-    Exibe formulário para editar título/descrição/tags de um problema (somente 'solucionador').
+    Editar título/descrição/tags (só 'solucionador').
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
@@ -425,11 +523,9 @@ def edit_problem(problem_id):
         titulo_novo = request.form.get("titulo", "").strip()
         descricao_nova = request.form.get("descricao", "").strip()
 
-        # Normaliza e quebra o título para virar parte das tags
         titulo_normalized = normalize_string(titulo_novo)
         titulo_tokens = titulo_normalized.split()
 
-        # Normaliza também as tags informadas
         tags_str = request.form.get("tags", "").strip()
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
@@ -437,10 +533,9 @@ def edit_problem(problem_id):
         all_tags = list(set(titulo_tokens + user_tags_normalized))
 
         if not titulo_novo or not descricao_nova:
-            erro = "Preencha todos os campos de título e descrição."
+            erro = "Preencha todos os campos."
             return render_template("edit_problem.html", problema=problema, erro=erro)
 
-        # Atualiza no banco
         problemas_collection.update_one(
             {"_id": ObjectId(problem_id)},
             {
@@ -455,17 +550,13 @@ def edit_problem(problem_id):
 
     return render_template("edit_problem.html", problema=problema, erro=None)
 
-##############################################################################
-#            ROTA PARA EDITAR FUNÇÃO DO USUÁRIO (SOLUCIONADOR)
-##############################################################################
-
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
     """
-    Permite que um 'solucionador' altere a função (role) de um usuário.
+    'solucionador' pode alterar role de outro usuário.
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
@@ -476,31 +567,23 @@ def edit_user_role(user_id):
     )
     return redirect(url_for("listar_usuarios"))
 
-##############################################################################
-#                ROTAS PARA LISTAR/DELETAR USUÁRIOS
-##############################################################################
-
 @app.route("/usuarios", methods=["GET"])
 def listar_usuarios():
     """
-    Lista todos os usuários (somente 'solucionador').
-    Agora com pesquisa e botão para abrir histórico do usuário.
+    Lista todos os usuários (só 'solucionador'), com busca.
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
-    # Captura o termo de pesquisa
     search_query = request.args.get("q", "").strip()
-
-    # Monta o filtro para MongoDB
     if search_query:
         query = {
             "$or": [
                 {"nome": {"$regex": search_query, "$options": "i"}},
                 {"whatsapp": {"$regex": search_query, "$options": "i"}},
-                {"maquinas": {"$regex": search_query, "$options": "i"}},
+                {"maquinas": {"$regex": search_query, "$options": "i"}}
             ]
         }
     else:
@@ -515,28 +598,24 @@ def listar_usuarios():
 @app.route("/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id):
     """
-    Deleta um usuário (somente 'solucionador').
+    Deleta usuário (só 'solucionador').
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
     usuarios_collection.delete_one({"_id": ObjectId(user_id)})
     return redirect(url_for("listar_usuarios"))
 
-##############################################################################
-#                ROTA PARA EDIÇÃO DE SOLUÇÃO (APENAS SOLUCIONADOR)
-##############################################################################
-
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
     """
-    Edição da solução de um problema já resolvido (somente 'solucionador'),
+    Edição da solução de problema resolvido (somente 'solucionador'),
     incluindo upload/manutenção de imagens em GridFS.
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
@@ -544,14 +623,14 @@ def edit_solution(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
     if not problema.get("resolvido"):
-        return "Problema ainda não resolvido.", 400
+        return "Problema ainda não foi resolvido.", 400
 
     if request.method == "POST":
         new_solution_json = request.form.get("solution_data", "").strip()
         try:
             new_solution_data = json.loads(new_solution_json)
         except json.JSONDecodeError:
-            erro = "Erro ao interpretar dados."
+            erro = "Erro ao interpretar os dados."
             return render_template(
                 "edit_solution.html",
                 problema=problema,
@@ -564,13 +643,12 @@ def edit_solution(problem_id):
         steps = new_solution_data.get("steps", [])
 
         for i, step in enumerate(steps):
+            # Lidar com imagem do passo
             delete_step = request.form.get(f"deleteExistingStepImage_{i}", "false") == "true"
             step_image_file = request.files.get(f"stepImage_{i}")
             new_file_id = save_image_if_exists(step_image_file)
 
-            old_file_id = None
-            if i < len(old_steps):
-                old_file_id = old_steps[i].get("stepImage")
+            old_file_id = old_steps[i].get("stepImage") if i < len(old_steps) else None
 
             if delete_step:
                 if old_file_id:
@@ -579,9 +657,7 @@ def edit_solution(problem_id):
                     except:
                         pass
                 step["stepImage"] = None
-
             elif new_file_id:
-                # Se há uma imagem antiga, removemos antes de sobrescrever
                 if old_file_id:
                     try:
                         fs_m.delete(ObjectId(old_file_id))
@@ -589,23 +665,21 @@ def edit_solution(problem_id):
                         pass
                 step["stepImage"] = new_file_id
             else:
-                # Mantém a imagem antiga
                 step["stepImage"] = old_file_id
 
             # Subpassos
             miniSteps = step.get("miniSteps", [])
-            old_miniSteps = []
-            if i < len(old_steps):
-                old_miniSteps = old_steps[i].get("miniSteps", [])
+            old_miniSteps = old_steps[i].get("miniSteps", []) if i < len(old_steps) else []
 
             for j, substep in enumerate(miniSteps):
                 delete_sub = request.form.get(f"deleteExistingSubStepImage_{i}_{j}", "false") == "true"
                 substep_file = request.files.get(f"subStepImage_{i}_{j}")
                 new_sub_file_id = save_image_if_exists(substep_file)
 
-                old_sub_file_id = None
-                if j < len(old_miniSteps):
-                    old_sub_file_id = old_miniSteps[j].get("subStepImage")
+                old_sub_file_id = (
+                    old_miniSteps[j].get("subStepImage")
+                    if j < len(old_miniSteps) else None
+                )
 
                 if delete_sub:
                     if old_sub_file_id:
@@ -615,7 +689,6 @@ def edit_solution(problem_id):
                             pass
                     substep["subStepImage"] = None
                 elif new_sub_file_id:
-                    # Se há uma imagem antiga, removemos antes de sobrescrever
                     if old_sub_file_id:
                         try:
                             fs_m.delete(ObjectId(old_sub_file_id))
@@ -639,22 +712,12 @@ def edit_solution(problem_id):
         erro=None
     )
 
-##############################################################################
-#        ROTA PARA PESQUISAR PEÇAS (ITEM_SEARCH.HTML) - APENAS CARREGA TELA
-##############################################################################
-
 @app.route("/item_search", methods=["GET"])
 def item_search():
     """
-    Exibe a página de pesquisa de itens (DB MachineZONE) - agora com carrinho.
+    Exibe a página de pesquisa de itens (DB MachineZONE).
     """
-    if not user_is_logged_in():
-        return redirect(url_for("login"))
     return render_template("item_search.html")
-
-##############################################################################
-#         ROTA /load_items - BUSCA NO BANCO MZ (MachineZONE) E RETORNA JSON
-##############################################################################
 
 ITEMS_PER_PAGE = 20
 
@@ -662,31 +725,67 @@ ITEMS_PER_PAGE = 20
 def load_items():
     """
     Carrega itens via AJAX do banco MachineZONE, com possibilidade de busca.
-    Armazena a pesquisa do usuário em 'history_collection', caso exista busca.
-    (Sem data/hora)
+    - Se 'search' estiver vazio, aplica a mesma lógica de "200 itens aleatórios do dia"
+      aparecendo primeiro (em ordem embaralhada a cada carregamento) e depois
+      os demais itens.
+    - Se houver 'search', aplica a busca usual (com tags, matching phrases etc.).
+    - Registro de histórico de pesquisa de peças (sem timestamp).
     """
-    if not user_is_logged_in():
-        return jsonify({"success": False, "message": "Não autorizado"}), 403
-
     search_query = request.args.get('search', '').strip()
     page = int(request.args.get('page', 1))
     skip_items = (page - 1) * ITEMS_PER_PAGE
 
-    # Armazena a busca se não estiver vazia (sem timestamp)
+    # Registrar histórico (se houver algo digitado)
     if search_query:
-        history_collection.insert_one({
-            "user_id": session["user_id"],
-            "user_name": session["username"],
-            "query": search_query
-        })
+        if user_is_logged_in():
+            history_collection.insert_one({
+                "user_id": session["user_id"],
+                "user_name": session["username"],
+                "query": search_query
+            })
+        else:
+            history_collection.insert_one({
+                "user_id": None,
+                "user_name": "Guest",
+                "query": search_query
+            })
 
+    # Quando não há termo, exibimos 200 itens diários + demais
     if not search_query:
-        total_items = itens_collection.count_documents({})
-        items_cursor = itens_collection.find({}, collation={'locale': 'pt', 'strength': 1}) \
-                                       .sort('description', 1)
+        # Para fins de "scroll infinito", retornamos tudo de uma vez,
+        # pois queremos primeiro os 200 diários, depois o restante.
+        # Assim, a paginação no front vai simplesmente exibir blocos
+        # sem reordenar.
 
-        all_items = list(items_cursor)
-        paged_items = all_items[skip_items: skip_items + ITEMS_PER_PAGE]
+        daily_ids = get_daily_random_items()
+        # Embaralha a cada carregamento
+        random.shuffle(daily_ids)
+
+        # Busca do banco
+        daily_cursor = itens_collection.find({"_id": {"$in": daily_ids}})
+
+        daily_map = {}
+        for it in daily_cursor:
+            daily_map[str(it["_id"])] = it
+
+        daily_list = []
+        for did in daily_ids:
+            did_str = str(did)
+            if did_str in daily_map:
+                daily_list.append(daily_map[did_str])
+
+        # Carrega os demais (excluindo os daily)
+        remaining_cursor = itens_collection.find({
+            "_id": {"$nin": daily_ids}
+        }, collation={'locale': 'pt', 'strength': 1}).sort('description', 1)
+        remaining_list = list(remaining_cursor)
+
+        # Combina
+        full_list = daily_list + remaining_list
+
+        total_items = len(full_list)
+        # Pagina manualmente
+        paged_items = full_list[skip_items : skip_items + ITEMS_PER_PAGE]
         has_more = (len(paged_items) == ITEMS_PER_PAGE)
 
         items_list = []
@@ -705,6 +804,7 @@ def load_items():
             'total_items': total_items
         })
 
+    # Caso haja termo de busca, aplica pipeline
     normalized_search_phrase = normalize_string(search_query)
     search_tokens = re.findall(r'[^\s]+', normalized_search_phrase)
 
@@ -737,7 +837,7 @@ def load_items():
         }
     ]
 
-    # Contagem total
+    # Contar total
     count_pipeline = pipeline_base + [{'$count': 'total'}]
     count_result = list(itens_collection.aggregate(
         count_pipeline,
@@ -745,20 +845,23 @@ def load_items():
     ))
     total_items = count_result[0]['total'] if count_result else 0
 
-    # Carrega todos que deram match
+    # Carregar matching
     items = list(itens_collection.aggregate(
         pipeline_base,
         collation={'locale': 'pt', 'strength': 1}
     ))
 
-    # Computa maior sub-frase
+    # Calcular maior sub-frase
     for item in items:
         item['largest_sub_phrase_length'] = compute_largest_sub_phrase_length(
             search_tokens,
             item.get('matching_phrases', [])
         )
 
-    # Ordenação final
+    # Ordena:
+    # 1) Aqueles com phrase match primeiro (decrescente)
+    # 2) Maior sub-frase
+    # 3) Alfabético
     items.sort(
         key=lambda x: (
             -x['is_phrase_match'],
@@ -768,7 +871,7 @@ def load_items():
     )
 
     # Paginação
-    paged_items = items[skip_items: skip_items + ITEMS_PER_PAGE]
+    paged_items = items[skip_items : skip_items + ITEMS_PER_PAGE]
     has_more = (len(paged_items) == ITEMS_PER_PAGE)
 
     items_list = []
@@ -788,10 +891,6 @@ def load_items():
         'total_items': total_items
     })
 
-##############################################################################
-#            ROTA PARA SERVIR IMAGENS DIRETAMENTE DO GRIDFS
-##############################################################################
-
 @app.route("/gridfs_image/<file_id>", methods=["GET"])
 def gridfs_image(file_id):
     """
@@ -805,51 +904,34 @@ def gridfs_image(file_id):
         response.headers.set('Content-Type', content_type)
         return response
     except:
-        return "Imagem não encontrada ou inválida.", 404
-
-##############################################################################
-#            ROTA PARA HISTÓRICO GLOBAL DE PESQUISAS DE PEÇAS
-##############################################################################
+        return "Imagem não encontrada.", 404
 
 @app.route("/history_search", methods=["GET"])
 def history_search():
     """
-    Mostra o histórico de pesquisas de PEÇAS de todos os usuários.
-    Somente 'solucionador' tem acesso.
-    (Sem data/hora)
+    Exibe histórico de pesquisa de peças (somente 'solucionador').
     """
     if not user_is_logged_in():
-        return "Não autorizado.", 403
+        return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
     all_history = list(history_collection.find({}))
     return render_template("history_search.html", history=all_history)
 
-##############################################################################
-#        ROTA PARA HISTÓRICO GLOBAL DE PESQUISAS DE PROBLEMAS
-##############################################################################
-
 @app.route("/history_problem", methods=["GET"])
 def history_problem():
     """
-    Mostra o histórico de pesquisas de PROBLEMAS de todos os usuários.
-    Somente 'solucionador' tem acesso.
-    (Sem data/hora)
-    + Mostra também as sugestões de melhorias enviadas pelos usuários.
+    Exibe histórico de pesquisa de problemas + sugestões de melhorias (só 'solucionador').
     """
     if not user_is_logged_in():
-        return "Não autorizado.", 403
+        return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
-    # Histórico de pesquisas
     all_history = list(problem_history_collection.find({}))
-
-    # Carrega sugestões de melhorias
     all_suggestions = list(improvement_suggestions_collection.find({}))
 
-    # Agrupa sugestões por problem_id para exibir de forma "inteligente"
     suggestions_by_problem_dict = {}
     for s in all_suggestions:
         pid = s["problem_id"]
@@ -860,7 +942,6 @@ def history_problem():
             }
         suggestions_by_problem_dict[pid]["suggestions"].append(s)
 
-    # Transforma em lista para facilitar no template
     suggestions_by_problem = []
     for pid, data in suggestions_by_problem_dict.items():
         suggestions_by_problem.append({
@@ -875,27 +956,21 @@ def history_problem():
         suggestions_by_problem=suggestions_by_problem
     )
 
-##############################################################################
-#           ROTA PARA SUGERIR MELHORIA NA SOLUÇÃO
-##############################################################################
-
 @app.route("/suggest_improvement/<problem_id>", methods=["POST"])
 def suggest_improvement(problem_id):
     """
-    Recebe o texto da sugestão de melhoria e armazena na coleção 'improvement_suggestions'.
-    Redireciona de volta para a página de solução do problema.
+    Usuário sugere melhoria na solução de um problema.
     """
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("index", need_login=1))
 
     suggestion_text = request.form.get("suggestion", "").strip()
     if not suggestion_text:
-        return "Texto de sugestão está vazio.", 400
+        return "Texto vazio.", 400
 
-    # Verifica se o problema existe para capturar o título
     problem = problemas_collection.find_one({"_id": ObjectId(problem_id)})
     if not problem:
-        return "Problema não encontrado.", 404
+        return "Problema inexistente.", 404
 
     improvement_suggestions_collection.insert_one({
         "user_id": session["user_id"],
@@ -908,48 +983,39 @@ def suggest_improvement(problem_id):
 
     return redirect(url_for("exibir_solucao", problem_id=problem_id))
 
-##############################################################################
-#              ROTA PARA HISTÓRICO INDIVIDUAL DO USUÁRIO
-##############################################################################
-
 @app.route("/user_history/<user_id>", methods=["GET"])
 def user_history(user_id):
     """
-    Exibe uma página com:
-    - Problemas que o usuário enviou
-    - Problemas que o usuário visualizou a solução
+    Histórico completo de um usuário (só 'solucionador'):
+    - Problemas criados
+    - Problemas visualizados
     - Histórico de pesquisa de itens
     - Histórico de pesquisa de problemas
-    - Sugestões de melhoria que o usuário enviou
-    Somente 'solucionador' pode acessar.
+    - Sugestões de melhoria enviadas
     """
     if not user_is_logged_in():
-        return "Não autorizado.", 403
+        return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
-    # Verifica se o usuário consultado existe
     target_user = usuarios_collection.find_one({"_id": ObjectId(user_id)})
     if not target_user:
         return "Usuário não encontrado.", 404
 
-    # Problemas enviados pelo usuário
     posted_problems = list(problemas_collection.find({"creator_id": user_id}))
+    for p in posted_problems:
+        p["_id_str"] = str(p["_id"])
 
-    # Problemas que o usuário visualizou a solução
     viewed_history = list(problem_view_history_collection.find({"user_id": user_id}))
     viewed_problem_ids = [vh["problem_id"] for vh in viewed_history]
     viewed_problems = list(problemas_collection.find(
         {"_id": {"$in": [ObjectId(pid) for pid in viewed_problem_ids]}}
     ))
+    for vp in viewed_problems:
+        vp["_id_str"] = str(vp["_id"])
 
-    # Histórico de pesquisa de itens
     item_searches = list(history_collection.find({"user_id": user_id}))
-
-    # Histórico de pesquisa de problemas
     problem_searches = list(problem_history_collection.find({"user_id": user_id}))
-
-    # Sugestões de melhorias enviadas
     user_suggestions = list(improvement_suggestions_collection.find({"user_id": user_id}))
 
     return render_template(
@@ -962,9 +1028,6 @@ def user_history(user_id):
         user_suggestions=user_suggestions
     )
 
-##############################################################################
-#                              EXECUTAR APP
-##############################################################################
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

@@ -1,4 +1,3 @@
-<!-- registros.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -39,81 +38,87 @@
     }
 
     /* =========================================================================
-       HEADER PRETO
+       HEADER - BARRA SUPERIOR 100% LARGURA
        ========================================================================= */
     header {
-      background-color: #000;
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       position: relative;
-    }
-    header h1 {
-      color: #fff;
-      font-size: 1.4rem;
-      margin: 0 auto; /* Mantém o título centralizado */
+      width: 100%;             /* ocupa a largura total da página */
+      background-color: #000;
+      padding: 3rem 2rem;      /* AUMENTADO: aumentando o padding para 3rem na vertical */
     }
 
-    /* Botão "Voltar" - agora com borda arredondada */
+    /* Botão "Voltar" no canto esquerdo, centralizado verticalmente */
     .btn-voltar-index {
+      position: absolute;
+      top: 50%;                /* meio vertical do header */
+      left: 2rem;             /* afastamento da borda esquerda */
+      transform: translateY(-50%);
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 32px; /* Arredondado */
+      border-radius: 32px;
       padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
+      font-size: 2rem;
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
-      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: absolute;
-      left: 2rem;
     }
     .btn-voltar-index:hover {
       background-color: #333;
-      transform: scale(1.02);
+      transform: translateY(-50%) scale(1.02);
+    }
+
+    /* Título EXATAMENTE no centro horizontal do header */
+    header h1 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 1.4rem;
+      line-height: 1;
+      text-align: center;
     }
 
     /* =========================================================================
-       NOVO ESTILO P/ BOTÕES NO CANTO SUPERIOR DIREITO
+       AÇÕES NO CANTO SUPERIOR DIREITO
        ========================================================================= */
     .header-actions {
+      position: absolute;
+      top: 50%;                /* meio vertical do header */
+      right: 2rem;            /* afastamento da borda direita */
+      transform: translateY(-50%);
       display: flex;
       align-items: center;
-      margin-left: auto;
-      position: absolute;
-      right: 2rem;
     }
     .divider {
       width: 1px;
       height: 24px;
       background-color: rgba(255, 255, 255, 0.2);
       margin: 0 0.5rem;
-      align-self: center;
     }
-    /* Botões (agora também arredondados) */
     .header-actions a {
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 32px; /* Arredondado */
+      border-radius: 32px;
       padding: 0.7rem 1.2rem;
       font-size: 0.9rem;
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
-      height: 40px;
       display: flex;
       align-items: center;
+      justify-content: center;
     }
     .header-actions a:hover {
       background-color: #333;
+      /* Removido o translateY(-50%) no hover para ficar igual aos outros botões */
       transform: scale(1.02);
     }
     .header-actions a svg {
@@ -136,6 +141,7 @@
       flex-direction: column;
       align-items: center;
     }
+
     .page-title {
       font-size: 1.6rem;
       margin-bottom: 2rem;
@@ -195,19 +201,18 @@
       line-height: 1.3rem;
     }
 
-    /* Botões de ação (arredondados agora) */
+    /* Botões de ação (arredondados) */
     .delete-form {
       display: inline;
       margin-right: 1rem;
     }
-
     .delete-btn,
     .role-btn,
     .history-btn {
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 32px; /* Arredondado */
+      border-radius: 32px;
       padding: 0.6rem 1.2rem;
       font-size: 0.9rem;
       cursor: pointer;
@@ -253,15 +258,15 @@
        ========================================================================= */
     @media (max-width: 768px) {
       header {
-        padding: 1rem;
+        padding: 2rem;
+      }
+      .btn-voltar-index {
+        left: 1rem;
+        font-size: 1.4rem;
+        padding: 0.5rem 1rem;
       }
       header h1 {
         font-size: 1.2rem;
-      }
-      .btn-voltar-index {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-        left: 1rem;
       }
       .header-actions {
         right: 1rem;
@@ -269,7 +274,6 @@
       .header-actions a {
         padding: 0.5rem 1rem;
         font-size: 0.8rem;
-        height: 38px;
       }
 
       main {
@@ -314,44 +318,50 @@
 <body>
   <header>
     <!-- Botão "Voltar" para a Página Inicial -->
-    <a href="{{ url_for('index') }}" class="btn-voltar-index" title="Voltar para Página Inicial">
+    <a
+      href="{{ url_for('index') }}"
+      class="btn-voltar-index"
+      title="Voltar para Página Inicial"
+    >
       &#x2B05;
     </a>
 
+    <!-- Título EXATAMENTE centralizado -->
     <h1>Gerenciar Usuários</h1>
 
+    <!-- Caso seja solucionador, exibe as ações à direita -->
     {% if session.role == 'solucionador' %}
-    <div class="header-actions">
-      <!-- Hist. Peças -->
-      <a href="{{ url_for('history_search') }}" title="Histórico de Pesquisas de Peças">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M10.442 10.442a1 1 0 0 1 1.32-.083
-                   6.5 6.5 0 1 0-1.414 1.414
-                   1 1 0 0 1 .083 1.32l-2.12
-                   2.12a1 1 0 0 1-1.414 0l-2.12-2.12a1 1
-                   0 0 1 0-1.414l2.12-2.12zM6.5
-                   12a5.5 5.5 0 1 1 0-11
-                   5.5 5.5 0 0 1 0 11z"/>
-        </svg>
-        Hist. Peças
-      </a>
-      <div class="divider"></div>
+      <div class="header-actions">
+        <!-- Hist. Peças -->
+        <a href="{{ url_for('history_search') }}" title="Histórico de Pesquisas de Peças">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="M10.442 10.442a1 1 0 0 1 1.32-.083
+                     6.5 6.5 0 1 0-1.414 1.414
+                     1 1 0 0 1 .083 1.32l-2.12
+                     2.12a1 1 0 0 1-1.414 0l-2.12-2.12a1 1
+                     0 0 1 0-1.414l2.12-2.12zM6.5
+                     12a5.5 5.5 0 1 1 0-11
+                     5.5 5.5 0 0 1 0 11z"/>
+          </svg>
+          Hist. Peças
+        </a>
+        <div class="divider"></div>
 
-      <!-- Hist. Problemas -->
-      <a href="{{ url_for('history_problem') }}" title="Histórico de Pesquisas de Problemas">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8.982 1.566a.5.5 0 0
-                   0-.964 0l-6.52 12.5A.5.5
-                   0 0 0 2.01 15h11.98a.5.5
-                   0 0 0 .442-.934l-6.45-12.5zM8
-                   5c.28 0 .5.22.5.5V9a.5.5 0 0
-                   1-1 0V5.5c0-.28.22-.5.5-.5zm0
-                   6a.75.75 0 1 1 0 1.5A.75.75
-                   0 0 1 8 11z"/>
-        </svg>
-        Hist. Problemas
-      </a>
-    </div>
+        <!-- Hist. Problemas -->
+        <a href="{{ url_for('history_problem') }}" title="Histórico de Pesquisas de Problemas">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a.5.5 0 0
+                     0-.964 0l-6.52 12.5A.5.5
+                     0 0 0 2.01 15h11.98a.5.5
+                     0 0 0 .442-.934l-6.45-12.5zM8
+                     5c.28 0 .5.22.5.5V9a.5.5 0 0
+                     1-1 0V5.5c0-.28.22-.5.5-.5zm0
+                     6a.75.75 0 1 1 0 1.5A.75.75
+                     0 0 1 8 11z"/>
+          </svg>
+          Hist. Problemas
+        </a>
+      </div>
     {% endif %}
   </header>
 
