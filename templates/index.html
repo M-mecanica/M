@@ -33,10 +33,10 @@
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto, mais alto */
+    /* HEADER: fundo preto, com padding vertical de 2rem (para manter altura) */
     header {
       background-color: #000;  /* Barra superior preta */
-      padding: 2rem 3rem;      /* Aumenta a altura (mais espaço) */
+      padding: 2rem 3rem;      /* 2rem topo/baixo, 3rem esq/dir */
       display: flex;
       align-items: center;
     }
@@ -56,6 +56,19 @@
       width: 32px;
       height: 32px;
       fill: #fff;
+    }
+
+    /*
+      Ajuste para dispositivos menores:
+      Mantemos a altura (2rem no topo e embaixo),
+      mas aproximamos o botão do lado esquerdo
+      reduzindo o padding-left de 3rem para 1rem.
+    */
+    @media (max-width: 768px) {
+      header {
+        /* Mantém 2rem no topo e embaixo, mas reduz o left para 1rem */
+        padding: 2rem 1rem 2rem 1rem;
+      }
     }
 
     /* Botão ENTRAR no canto direito (quando não logado) */

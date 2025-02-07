@@ -753,14 +753,6 @@ ITEMS_PER_PAGE = 20
 
 @app.route("/load_items", methods=["GET"])
 def load_items():
-    """
-    Carrega itens via AJAX do banco MachineZONE, com possibilidade de busca.
-    - Se 'search' estiver vazio, aplica a mesma lógica de "200 itens aleatórios do dia"
-      aparecendo primeiro (em ordem embaralhada a cada carregamento) e depois
-      os demais itens.
-    - Se houver 'search', aplica a busca usual (com tags, matching phrases etc.).
-    - Registro de histórico de pesquisa de peças (sem timestamp).
-    """
     search_query = request.args.get('search', '').strip()
     page = int(request.args.get('page', 1))
     skip_items = (page - 1) * ITEMS_PER_PAGE

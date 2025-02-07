@@ -38,24 +38,23 @@
       padding: 2rem 3rem;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      position: relative;
+      justify-content: center; /* Centraliza o conteúdo horizontalmente */
+      position: relative;      /* Para posicionar o botão de voltar */
     }
     header h1 {
       color: #fff;
       font-size: 1.6rem;
-      margin: 0 auto;
+      margin: 0;
       text-align: center;
     }
 
-    /* Botão Voltar (borda arredondada, ícone com fonte maior) */
+    /* Botão Voltar próximo ao canto esquerdo */
     .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
       border: none;
       border-radius: 32px;
       padding: 1rem 2rem;
-      font-size: 2rem;
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
@@ -65,11 +64,19 @@
       align-items: center;
       justify-content: center;
       position: absolute;
-      left: 3rem;
+      left: 1rem; /* Aproxima o botão do canto esquerdo */
+      top: 50%;
+      transform: translateY(-50%);
     }
     .btn-voltar-inicio:hover {
       background-color: #333;
-      transform: scale(1.02);
+      transform: translateY(-50%) scale(1.02);
+    }
+
+    /* Ícone (seta) dentro do botão */
+    .btn-voltar-inicio .arrow-icon {
+      font-size: 2rem; /* Tamanho da seta */
+      line-height: 1;
     }
 
     /* MAIN: centralizado, com largura máxima de 1200px */
@@ -168,7 +175,7 @@
       transform: scale(1.02);
     }
 
-    /* Botão "Novo Problema" - caso queira adicionar nessa tela se não houver itens */
+    /* Botão "Novo Problema" */
     .new-problem-btn {
       background-color: #000;
       color: #fff;
@@ -216,11 +223,15 @@
       header h1 {
         font-size: 1.3rem;
       }
+      /* Ajusta o botão voltar em telas menores */
       .btn-voltar-inicio {
-        left: 0;
-        padding: 0.8rem 1.2rem;
-        font-size: 1.5rem;
+        left: 0.5rem;
+        padding: 0.5rem 0.8rem; /* Menor padding, sem mudar o ícone */
         height: auto;
+      }
+      /* Mantém a seta grande (2rem) */
+      .btn-voltar-inicio .arrow-icon {
+        font-size: 2rem;
       }
       main {
         font-size: 1rem;
@@ -354,9 +365,9 @@
 </head>
 <body>
   <header>
-    <!-- Botão "Voltar" no canto esquerdo -->
+    <!-- Botão "Voltar" com a seta maior -->
     <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">
-      &#x2B05; <!-- Unicode left arrow -->
+      <span class="arrow-icon">&#x2B05;</span>
     </a>
     <h1>Problemas Não Resolvidos</h1>
   </header>

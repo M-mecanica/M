@@ -49,20 +49,24 @@
       font-weight: 700;
     }
 
-    /* Botão Voltar (seta) - maior e com borda arredondada */
+    /* Botão Voltar (seta) */
     .btn-voltar-resultados {
       background-color: #000;
       color: #fff;
       border: none;
       border-radius: 32px;
-      padding: 1rem 2rem;
-      font-size: 1.8rem; /* Deixa a seta maior */
+
+      /* Reduzindo o padding sem alterar o tamanho do ícone */
+      padding: 0.5rem 1rem;
+
+      /* Mantendo a seta grande */
+      font-size: 2.4rem;
+
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
-      height: 60px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       position: absolute;
@@ -359,10 +363,10 @@
         font-size: 1.3rem;
       }
       .btn-voltar-resultados {
-        padding: 0.8rem 1.2rem;
-        font-size: 1.4rem;
-        left: 2rem;
-        height: auto;
+        /* Mantém a seta grande, mas o padding ainda menor no mobile */
+        padding: 0.3rem 0.8rem;
+        font-size: 2.4rem;
+        left: 0;
       }
       main {
         padding: 1rem;
@@ -742,8 +746,6 @@
       btnToggleSuggestion.addEventListener('click', () => {
         if (suggestionFormContainer.style.display === 'none') {
           suggestionFormContainer.style.display = 'block';
-          // Se quiser ocultar o botão, podemos setar display none ou deixar como está
-          // btnToggleSuggestion.style.display = 'none';
         } else {
           suggestionFormContainer.style.display = 'none';
         }

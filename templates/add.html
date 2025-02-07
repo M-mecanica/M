@@ -38,7 +38,7 @@
     }
 
     /* =========================================================================
-       HEADER PRETO COM BOTÃO DE VOLTAR (MESMO TAMANHO DE item_search.html)
+       HEADER PRETO COM BOTÃO DE VOLTAR
        ========================================================================= */
     header {
       background-color: #000;
@@ -49,7 +49,7 @@
       position: relative;
     }
 
-    /* Botão "Voltar" (borda arredondada, MESMO ESTILO DE item_search.html) */
+    /* Botão "Voltar" (borda arredondada) */
     .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
@@ -191,39 +191,49 @@
        MEDIA QUERIES (VERSÃO MOBILE)
        ========================================================================= */
     @media (max-width: 768px) {
+      /* Reduzir padding do header para aproximar o botão de voltar do canto esquerdo */
       header {
-        padding: 1rem;
+        padding: 1rem 0.5rem;
       }
+
       header h1 {
         font-size: 1.2rem;
       }
+
       .btn-voltar-inicio {
         padding: 0.5rem 1rem;
         /* Mantemos o font-size em 2rem para a seta grande no mobile também */
       }
+
       main {
         padding: 1rem;
         max-width: 100%;
       }
+
       .page-title {
         font-size: 1.4rem;
         margin-bottom: 1.5rem;
       }
+
       .form-container {
         padding: 1rem;
         max-width: 100%;
       }
+
       form {
         width: 100%;
       }
+
       label {
         font-size: 0.9rem;
       }
+
       input[type="text"],
       textarea {
         font-size: 0.9rem;
         padding: 0.6rem;
       }
+
       input[type="submit"] {
         font-size: 0.9rem;
         padding: 0.6rem 1rem;
@@ -232,11 +242,11 @@
   </style>
 </head>
 <body>
-  <!-- Cabeçalho com botão de voltar e título (igual item_search.html) -->
+  <!-- Cabeçalho com botão de voltar e título -->
   <header>
     <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">&#x2B05;</a>
     <h1>Registrar Novo Problema</h1>
-    <!-- Espaço vazio à direita para manter a mesma distribuição de item_search.html -->
+    <!-- Espaço vazio à direita para manter a mesma distribuição -->
     <div style="width: 2rem;"></div>
   </header>
 
