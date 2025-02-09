@@ -11,10 +11,16 @@ from flask import (
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from werkzeug.utils import secure_filename
+
+# Adicionados para segurança de senhas
+from werkzeug.security import generate_password_hash, check_password_hash
+
 import gridfs
 
 app = Flask(__name__)
-app.secret_key = "CHAVE_SECRETA_PARA_SESSAO"  # Troque por algo seguro em produção
+
+# ------------------ MUDANÇA 1: SECRET_KEY de variável de ambiente ------------------
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "CHAVE_SECRETA_PARA_SESSAO_INSEGURA")
 
 # ------------------------ DB do M (m_plataforma) ----------------------------
 client_m = MongoClient(
@@ -25,7 +31,7 @@ db_m = client_m["m_plataforma"]
 # Coleções do M
 problemas_collection = db_m["problemas"]
 usuarios_collection = db_m["usuarios"]
-history_collection = db_m["search_history"]          # Histórico de buscas de PEÇAS
+history_collection = db_m["search_history"]  # Histórico de buscas de PEÇAS
 problem_history_collection = db_m["problem_search_history"]  # Histórico de busca de PROBLEMAS
 problem_view_history_collection = db_m["problem_view_history"]  # Registro de visualização de soluções
 improvement_suggestions_collection = db_m["improvement_suggestions"]  # Sugestões de melhorias
@@ -46,6 +52,14 @@ db_mz = client_mz["MachineZONE"]
 itens_collection = db_mz["itens"]
 # Coleção para armazenar os 200 itens diários (p/ pesquisa de peças)
 daily_random_items_collection = db_mz["daily_random_items"]
+
+# Definição de stopwords
+STOPWORDS = {
+    "a", "o", "de", "da", "do", "das", "dos", "em", "que", "com",
+    "para", "por", "se", "e", "é", "na", "no", "nas", "nos", "as",
+    "os", "um", "uma", "uns", "umas"
+    # Inclua outras stopwords aqui se desejar
+}
 
 
 def user_is_logged_in():
@@ -136,10 +150,6 @@ def get_daily_random_resolved_problems():
     """
     Retorna uma lista (em formato de ObjectId) com até 200 problemas
     (resolvidos) selecionados aleatoriamente para o dia atual.
-
-    - Se já existir um documento para o dia de hoje, retorna a lista armazenada.
-    - Caso contrário, seleciona aleatoriamente 200 problemas resolvidos,
-      salva no documento do dia e retorna essa lista.
     """
     today_str = get_today_date_str()
     daily_doc = daily_random_problems_collection.find_one({"date_str": today_str})
@@ -157,7 +167,7 @@ def get_daily_random_resolved_problems():
         sampled = list(problemas_collection.aggregate(pipeline))
         selected_ids = [str(item["_id"]) for item in sampled]
 
-        # Salva no documento para manter a mesma seleção o dia todo
+        # Salva no documento
         new_doc = {
             "date_str": today_str,
             "problem_ids": selected_ids
@@ -170,11 +180,7 @@ def get_daily_random_resolved_problems():
 def get_daily_random_items():
     """
     Retorna uma lista (em formato de ObjectId) com até 200 itens
-    selecionados aleatoriamente (do acervo total) para o dia atual.
-
-    - Se já existir um documento para o dia de hoje, retorna a lista armazenada.
-    - Caso contrário, seleciona aleatoriamente 200 itens,
-      salva no documento do dia e retorna essa lista.
+    selecionados aleatoriamente para o dia atual.
     """
     today_str = get_today_date_str()
     daily_doc = daily_random_items_collection.find_one({"date_str": today_str})
@@ -222,6 +228,11 @@ def index():
 def login():
     """
     Formulário de login no sistema (banco 'm_plataforma', coleção 'usuarios').
+
+    ----
+    MUDANÇA 2: agora verificamos 'senha_hash' (se existir).
+    Caso o usuário seja antigo e só tenha "senha", ainda logamos
+    e migramos a senha para hash.
     """
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
@@ -230,15 +241,43 @@ def login():
         # Capitalizar cada palavra
         nome = " ".join(word.capitalize() for word in nome.split())
 
-        usuario = usuarios_collection.find_one({"nome": nome, "senha": senha})
+        # Procuramos pelo nome
+        usuario = usuarios_collection.find_one({"nome": nome})
         if usuario:
-            session["user_id"] = str(usuario["_id"])
-            session["username"] = usuario["nome"]
-            session["role"] = usuario["role"]
-            return redirect(url_for("index"))
+            # Verifica se já tem senha_hash
+            stored_hash = usuario.get("senha_hash")
+
+            if stored_hash:
+                # Se tiver senha_hash, usa check_password_hash
+                if check_password_hash(stored_hash, senha):
+                    # Login com sucesso
+                    session["user_id"] = str(usuario["_id"])
+                    session["username"] = usuario["nome"]
+                    session["role"] = usuario["role"]
+                    return redirect(url_for("index"))
+                else:
+                    erro = "Usuário ou senha inválidos."
+                    return render_template("login.html", erro=erro)
+            else:
+                # Fallback: usuário antigo com campo "senha" em texto puro
+                if usuario.get("senha") == senha:
+                    # Login ok; MIGRA para senha_hash
+                    new_hash = generate_password_hash(senha)
+                    usuarios_collection.update_one(
+                        {"_id": usuario["_id"]},
+                        {"$set": {"senha_hash": new_hash}, "$unset": {"senha": ""}}
+                    )
+                    session["user_id"] = str(usuario["_id"])
+                    session["username"] = usuario["nome"]
+                    session["role"] = usuario["role"]
+                    return redirect(url_for("index"))
+                else:
+                    erro = "Usuário ou senha inválidos."
+                    return render_template("login.html", erro=erro)
         else:
             erro = "Usuário ou senha inválidos."
             return render_template("login.html", erro=erro)
+
     return render_template("login.html", erro=None)
 
 
@@ -254,6 +293,9 @@ def register():
     """
     Criação de um novo usuário. Roles possíveis (ex.: 'comum', 'solucionador', 'mecanico').
     Após o cadastro, o usuário é logado automaticamente e redirecionado à index.
+
+    ----
+    MUDANÇA 3: armazenamos a senha como senha_hash, não em texto puro.
     """
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
@@ -274,9 +316,12 @@ def register():
             erro = "Usuário já existe!"
             return render_template("register.html", erro=erro)
 
+        # Gera o hash da senha
+        senha_hash = generate_password_hash(senha)
+
         novo_usuario = {
             "nome": nome,
-            "senha": senha,
+            "senha_hash": senha_hash,  # MUDANÇA: ao invés de "senha": ...
             "role": role,
             "whatsapp": whatsapp,
             "maquinas": maquinas
@@ -292,6 +337,7 @@ def register():
 
     return render_template("register.html", erro=None)
 
+
 ##############################################################################
 #                ROTAS DO M (m_plataforma) - PROBLEMAS
 ##############################################################################
@@ -301,21 +347,20 @@ def search():
     """
     Pesquisa problemas resolvidos com base em 'q'.
     Se 'q' estiver vazio, mostra todos os problemas resolvidos,
-    mas com 200 problemas aleatórios (selecionados 1x por dia) aparecendo primeiro
-    e, a cada carregamento, a ordem desses 200 muda.
-    Também registra histórico de pesquisa de PROBLEMAS (sem data/hora).
+    mas com 200 problemas aleatórios (selecionados 1x por dia) aparecendo primeiro.
     """
     termo_busca = request.args.get("q", "").strip()
 
     if termo_busca:
         termo_busca_normalized = normalize_string(termo_busca)
-        tokens = [t for t in termo_busca_normalized.split() if t]
+        # Remove stopwords
+        tokens = [t for t in termo_busca_normalized.split() if t and t not in STOPWORDS]
 
         query = {
             "resolvido": True,
             "$or": [
-                {"titulo": {"$regex": termo_busca, "$options": "i"}},
-                {"tags": {"$all": tokens}}
+                {"titulo": {"$regex": termo_busca, "$options": "i"}},  # busca livre no título
+                {"tags": {"$all": tokens}}  # busca em tags (sem stopwords)
             ]
         }
 
@@ -347,10 +392,8 @@ def search():
         daily_ids = get_daily_random_resolved_problems()
         random.shuffle(daily_ids)
 
-        # Carrega do banco
         daily_problems_cursor = problemas_collection.find({"_id": {"$in": daily_ids}})
 
-        # Precisamos reordenar de acordo com a lista shuffled
         daily_map = {}
         for dp in daily_problems_cursor:
             daily_map[str(dp["_id"])] = dp
@@ -400,6 +443,10 @@ def add_problem():
         tags_str = request.form.get("tags", "").strip()
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
+
+        # Filtrando stopwords das tags
+        titulo_tokens = [t for t in titulo_tokens if t not in STOPWORDS]
+        user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
 
         all_tags = list(set(titulo_tokens + user_tags_normalized))
 
@@ -546,12 +593,14 @@ def edit_problem(problem_id):
         titulo_novo = request.form.get("titulo", "").strip()
         descricao_nova = request.form.get("descricao", "").strip()
 
+        # Normaliza e filtra stopwords
         titulo_normalized = normalize_string(titulo_novo)
-        titulo_tokens = titulo_normalized.split()
+        titulo_tokens = [t for t in titulo_normalized.split() if t and t not in STOPWORDS]
 
         tags_str = request.form.get("tags", "").strip()
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
+        user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
 
         all_tags = list(set(titulo_tokens + user_tags_normalized))
 
@@ -650,7 +699,7 @@ def edit_solution(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
     if not problema.get("resolvido"):
-        return "Problema ainda não foi resolvido.", 400
+        return "Ainda não foi resolvido.", 400
 
     if request.method == "POST":
         new_solution_json = request.form.get("solution_data", "").strip()
@@ -740,6 +789,8 @@ def edit_solution(problem_id):
     )
 
 
+# -------------------- PESQUISA DE ITENS (MachineZONE) -----------------------
+
 @app.route("/item_search", methods=["GET"])
 def item_search():
     """
@@ -774,13 +825,7 @@ def load_items():
 
     # Quando não há termo, exibimos 200 itens diários + demais
     if not search_query:
-        # Para fins de "scroll infinito", retornamos tudo de uma vez,
-        # pois queremos primeiro os 200 diários, depois o restante.
-        # Assim, a paginação no front vai simplesmente exibir blocos
-        # sem reordenar.
-
         daily_ids = get_daily_random_items()
-        # Embaralha a cada carregamento
         random.shuffle(daily_ids)
 
         # Busca do banco
@@ -796,7 +841,7 @@ def load_items():
             if did_str in daily_map:
                 daily_list.append(daily_map[did_str])
 
-        # Carrega os demais (excluindo os daily)
+        # Carrega os demais (excluindo daily)
         remaining_cursor = itens_collection.find({
             "_id": {"$nin": daily_ids}
         }, collation={'locale': 'pt', 'strength': 1}).sort('description', 1)
@@ -805,7 +850,7 @@ def load_items():
         full_list = daily_list + remaining_list
 
         total_items = len(full_list)
-        paged_items = full_list[skip_items : skip_items + ITEMS_PER_PAGE]
+        paged_items = full_list[skip_items: skip_items + ITEMS_PER_PAGE]
         has_more = (len(paged_items) == ITEMS_PER_PAGE)
 
         items_list = []
@@ -826,7 +871,7 @@ def load_items():
 
     # Caso haja termo de busca, aplica pipeline
     normalized_search_phrase = normalize_string(search_query)
-    search_tokens = re.findall(r'[^\s]+', normalized_search_phrase)
+    search_tokens = [t for t in normalized_search_phrase.split() if t and t not in STOPWORDS]
 
     phrase_match_cond = {
         '$cond': [
@@ -879,9 +924,9 @@ def load_items():
         )
 
     # Ordena:
-    # 1) Aqueles com phrase match primeiro (decrescente)
-    # 2) Maior sub-frase
-    # 3) Alfabético
+    # 1) is_phrase_match desc
+    # 2) largest_sub_phrase_length desc
+    # 3) description asc
     items.sort(
         key=lambda x: (
             -x['is_phrase_match'],
@@ -891,7 +936,7 @@ def load_items():
     )
 
     # Paginação
-    paged_items = items[skip_items : skip_items + ITEMS_PER_PAGE]
+    paged_items = items[skip_items: skip_items + ITEMS_PER_PAGE]
     has_more = (len(paged_items) == ITEMS_PER_PAGE)
 
     items_list = []
@@ -1054,5 +1099,6 @@ def user_history(user_id):
     )
 
 
+# ------------------- MUDANÇA 4: debug=False em produção ---------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
