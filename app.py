@@ -11,10 +11,7 @@ from flask import (
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from werkzeug.utils import secure_filename
-
-# Adicionados para segurança de senhas
 from werkzeug.security import generate_password_hash, check_password_hash
-
 import gridfs
 
 app = Flask(__name__)
@@ -63,7 +60,7 @@ STOPWORDS = {
 
 
 def user_is_logged_in():
-    """Retorna True se há um usuário logado na sessão (banco 'm_plataforma')."""
+    """Retorna True se há um usuário logado na sessão."""
     return "user_id" in session
 
 
@@ -114,7 +111,6 @@ def normalize_string(s):
 def generate_sub_phrases(tokens):
     """
     Gera todas as sub-frases contíguas de uma lista de tokens.
-    Ex.: ["rolamento","grande","da","redução"] -> várias sub-frases.
     """
     sub_phrases = []
     n = len(tokens)
@@ -155,7 +151,7 @@ def get_daily_random_resolved_problems():
     daily_doc = daily_random_problems_collection.find_one({"date_str": today_str})
 
     if daily_doc is not None:
-        # Já temos o documento do dia, apenas retornamos a lista
+        # Já temos o documento do dia
         id_strings = daily_doc.get("problem_ids", [])
         return [ObjectId(pid) for pid in id_strings]
     else:
@@ -167,7 +163,6 @@ def get_daily_random_resolved_problems():
         sampled = list(problemas_collection.aggregate(pipeline))
         selected_ids = [str(item["_id"]) for item in sampled]
 
-        # Salva no documento
         new_doc = {
             "date_str": today_str,
             "problem_ids": selected_ids
@@ -189,7 +184,6 @@ def get_daily_random_items():
         id_strings = daily_doc.get("item_ids", [])
         return [ObjectId(pid) for pid in id_strings]
     else:
-        # Gera 200 itens aleatórios
         pipeline = [
             {"$sample": {"size": 200}}
         ]
@@ -216,9 +210,9 @@ def root():
 @app.route("/index", methods=["GET"])
 def index():
     """
-    Página inicial da aplicação. Esta rota é acessível mesmo sem login.
-    Se houver o parâmetro ?need_login=1, um modal deverá ser exibido
-    informando ao usuário que ele precisa fazer login.
+    Página inicial da aplicação.
+    Se houver o parâmetro ?need_login=1, um modal deverá ser exibido informando
+    ao usuário que ele precisa fazer login.
     """
     need_login = request.args.get("need_login", "0")
     return render_template("index.html", need_login=need_login)
@@ -229,7 +223,6 @@ def login():
     """
     Formulário de login no sistema (banco 'm_plataforma', coleção 'usuarios').
 
-    ----
     MUDANÇA 2: agora verificamos 'senha_hash' (se existir).
     Caso o usuário seja antigo e só tenha "senha", ainda logamos
     e migramos a senha para hash.
@@ -248,7 +241,6 @@ def login():
             stored_hash = usuario.get("senha_hash")
 
             if stored_hash:
-                # Se tiver senha_hash, usa check_password_hash
                 if check_password_hash(stored_hash, senha):
                     # Login com sucesso
                     session["user_id"] = str(usuario["_id"])
@@ -294,14 +286,12 @@ def register():
     Criação de um novo usuário. Roles possíveis (ex.: 'comum', 'solucionador', 'mecanico').
     Após o cadastro, o usuário é logado automaticamente e redirecionado à index.
 
-    ----
     MUDANÇA 3: armazenamos a senha como senha_hash, não em texto puro.
     """
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
         senha = request.form.get("senha", "").strip()
         confirmar_senha = request.form.get("confirmar_senha", "").strip()
-        role = "comum"
         whatsapp = request.form.get("whatsapp", "").strip()
         maquinas = request.form.get("maquinas", "").strip()
 
@@ -321,8 +311,8 @@ def register():
 
         novo_usuario = {
             "nome": nome,
-            "senha_hash": senha_hash,  # MUDANÇA: ao invés de "senha": ...
-            "role": role,
+            "senha_hash": senha_hash,
+            "role": "comum",
             "whatsapp": whatsapp,
             "maquinas": maquinas
         }
@@ -331,7 +321,7 @@ def register():
 
         session["user_id"] = new_user_id
         session["username"] = nome
-        session["role"] = role
+        session["role"] = "comum"
 
         return redirect(url_for("index"))
 
@@ -345,26 +335,14 @@ def register():
 @app.route("/search", methods=["GET"])
 def search():
     """
-    Pesquisa problemas resolvidos com base em 'q'.
-    Se 'q' estiver vazio, mostra todos os problemas resolvidos,
-    mas com 200 problemas aleatórios (selecionados 1x por dia) aparecendo primeiro.
+    Rota para exibir a página de pesquisa de problemas (infinite scroll).
+    A listagem de resultados será carregada via /load_problems em JSON.
     """
     termo_busca = request.args.get("q", "").strip()
+    need_login = request.args.get("need_login", "0")
 
+    # Registra no histórico de busca, se houver termo
     if termo_busca:
-        termo_busca_normalized = normalize_string(termo_busca)
-        # Remove stopwords
-        tokens = [t for t in termo_busca_normalized.split() if t and t not in STOPWORDS]
-
-        query = {
-            "resolvido": True,
-            "$or": [
-                {"titulo": {"$regex": termo_busca, "$options": "i"}},  # busca livre no título
-                {"tags": {"$all": tokens}}  # busca em tags (sem stopwords)
-            ]
-        }
-
-        # Log de pesquisa de problemas
         if user_is_logged_in():
             problem_history_collection.insert_one({
                 "user_id": session["user_id"],
@@ -378,57 +356,62 @@ def search():
                 "query": termo_busca
             })
 
-        problemas_encontrados = list(problemas_collection.find(query))
-        for p in problemas_encontrados:
-            p["_id_str"] = str(p["_id"])
+    # Apenas renderiza o template e nele faremos o carregamento via JS
+    return render_template("resultados.html", termo_busca=termo_busca, need_login=need_login)
 
-        return render_template(
-            "resultados.html",
-            problemas=problemas_encontrados,
-            termo_busca=termo_busca
-        )
-    else:
-        # Sem termo de busca -> mostrar 200 diários + resto
-        daily_ids = get_daily_random_resolved_problems()
-        random.shuffle(daily_ids)
 
-        daily_problems_cursor = problemas_collection.find({"_id": {"$in": daily_ids}})
+@app.route("/load_problems", methods=["GET"])
+def load_problems():
+    """
+    Rota que retorna problemas (paginados) em JSON para efeito de scroll infinito.
+    """
+    termo_busca = request.args.get("q", "").strip()
+    page = int(request.args.get("page", 1))
+    ITEMS_PER_PAGE = 20
+    skip_items = (page - 1) * ITEMS_PER_PAGE
 
-        daily_map = {}
-        for dp in daily_problems_cursor:
-            daily_map[str(dp["_id"])] = dp
+    if termo_busca:
+        # Normaliza o termo
+        termo_busca_normalized = normalize_string(termo_busca)
+        tokens = [t for t in termo_busca_normalized.split() if t and t not in STOPWORDS]
 
-        daily_problems_list = []
-        for did in daily_ids:
-            did_str = str(did)
-            if did_str in daily_map:
-                item = daily_map[did_str]
-                item["_id_str"] = did_str
-                daily_problems_list.append(item)
-
-        # Carrega os demais problemas resolvidos
-        remaining_cursor = problemas_collection.find({
+        query = {
             "resolvido": True,
-            "_id": {"$nin": daily_ids}
+            "$or": [
+                {"titulo": {"$regex": termo_busca, "$options": "i"}},
+                {"tags": {"$all": tokens}}
+            ]
+        }
+    else:
+        query = {"resolvido": True}
+
+    # Conta total
+    total_count = problemas_collection.count_documents(query)
+
+    # Busca paginada
+    problemas_cursor = problemas_collection.find(query).skip(skip_items).limit(ITEMS_PER_PAGE)
+    problemas_lista = []
+    for p in problemas_cursor:
+        problemas_lista.append({
+            "_id": str(p["_id"]),
+            "titulo": p.get("titulo", ""),
+            "descricao": p.get("descricao", ""),
+            "resolvido": p.get("resolvido", False)
         })
-        remaining_problems = list(remaining_cursor)
-        for rp in remaining_problems:
-            rp["_id_str"] = str(rp["_id"])
 
-        problemas_encontrados = daily_problems_list + remaining_problems
+    has_more = (skip_items + ITEMS_PER_PAGE) < total_count
 
-        return render_template(
-            "resultados.html",
-            problemas=problemas_encontrados,
-            termo_busca=""
-        )
+    return jsonify({
+        "problems": problemas_lista,
+        "has_more": has_more,
+        "total_count": total_count
+    })
 
 
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
     """
     Cadastra novo problema (não resolvido), com possibilidade de adicionar tags.
-    Salva também o 'creator_id' do usuário que criou.
     """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
@@ -444,7 +427,7 @@ def add_problem():
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
 
-        # Filtrando stopwords das tags
+        # Filtra stopwords
         titulo_tokens = [t for t in titulo_tokens if t not in STOPWORDS]
         user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
 
@@ -584,7 +567,6 @@ def edit_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    # Verifica se o usuário é o criador OU se possui role "solucionador"
     can_edit = (session["user_id"] == problema["creator_id"]) or user_has_role(["solucionador"])
     if not can_edit:
         return "Acesso negado.", 403
@@ -790,12 +772,8 @@ def edit_solution(problem_id):
 
 
 # -------------------- PESQUISA DE ITENS (MachineZONE) -----------------------
-
 @app.route("/item_search", methods=["GET"])
 def item_search():
-    """
-    Exibe a página de pesquisa de itens (DB MachineZONE).
-    """
     return render_template("item_search.html")
 
 
@@ -823,14 +801,12 @@ def load_items():
                 "query": search_query
             })
 
-    # Quando não há termo, exibimos 200 itens diários + demais
+    # Se não houver termo, exibimos todos (com a lógica de 200 diários, se quiser)
     if not search_query:
         daily_ids = get_daily_random_items()
         random.shuffle(daily_ids)
 
-        # Busca do banco
         daily_cursor = itens_collection.find({"_id": {"$in": daily_ids}})
-
         daily_map = {}
         for it in daily_cursor:
             daily_map[str(it["_id"])] = it
@@ -841,15 +817,15 @@ def load_items():
             if did_str in daily_map:
                 daily_list.append(daily_map[did_str])
 
-        # Carrega os demais (excluindo daily)
+        # Carrega os demais
         remaining_cursor = itens_collection.find({
             "_id": {"$nin": daily_ids}
         }, collation={'locale': 'pt', 'strength': 1}).sort('description', 1)
         remaining_list = list(remaining_cursor)
 
         full_list = daily_list + remaining_list
-
         total_items = len(full_list)
+
         paged_items = full_list[skip_items: skip_items + ITEMS_PER_PAGE]
         has_more = (len(paged_items) == ITEMS_PER_PAGE)
 
@@ -863,98 +839,96 @@ def load_items():
                 'price': float(item.get('price', 0.0)),
                 'is_highlighted': 0
             })
+
         return jsonify({
             'items': items_list,
             'has_more': has_more,
             'total_items': total_items
         })
+    else:
+        # Com termo de busca
+        normalized_search_phrase = normalize_string(search_query)
+        search_tokens = [t for t in normalized_search_phrase.split() if t and t not in STOPWORDS]
 
-    # Caso haja termo de busca, aplica pipeline
-    normalized_search_phrase = normalize_string(search_query)
-    search_tokens = [t for t in normalized_search_phrase.split() if t and t not in STOPWORDS]
-
-    phrase_match_cond = {
-        '$cond': [
-            {
-                '$and': [
-                    {'$ne': [normalized_search_phrase, ""]},
-                    {'$in': [normalized_search_phrase, {'$ifNull': ['$matching_phrases', []]}]}
-                ]
-            },
-            1,
-            0
-        ]
-    }
-
-    pipeline_base = [
-        {
-            '$addFields': {
-                'is_phrase_match': phrase_match_cond
-            }
-        },
-        {
-            '$match': {
-                '$or': [
-                    {'is_phrase_match': 1},
-                    {'tags': {'$all': search_tokens}}
-                ]
-            }
+        phrase_match_cond = {
+            '$cond': [
+                {
+                    '$and': [
+                        {'$ne': [normalized_search_phrase, ""]},
+                        {'$in': [normalized_search_phrase, {'$ifNull': ['$matching_phrases', []]}]}
+                    ]
+                },
+                1,
+                0
+            ]
         }
-    ]
 
-    # Contar total
-    count_pipeline = pipeline_base + [{'$count': 'total'}]
-    count_result = list(itens_collection.aggregate(
-        count_pipeline,
-        collation={'locale': 'pt', 'strength': 1}
-    ))
-    total_items = count_result[0]['total'] if count_result else 0
+        pipeline_base = [
+            {
+                '$addFields': {
+                    'is_phrase_match': phrase_match_cond
+                }
+            },
+            {
+                '$match': {
+                    '$or': [
+                        {'is_phrase_match': 1},
+                        {'tags': {'$all': search_tokens}}
+                    ]
+                }
+            }
+        ]
 
-    # Carregar matching
-    items = list(itens_collection.aggregate(
-        pipeline_base,
-        collation={'locale': 'pt', 'strength': 1}
-    ))
+        # Contar total
+        count_pipeline = pipeline_base + [{'$count': 'total'}]
+        count_result = list(itens_collection.aggregate(
+            count_pipeline,
+            collation={'locale': 'pt', 'strength': 1}
+        ))
+        total_items = count_result[0]['total'] if count_result else 0
 
-    # Calcular maior sub-frase
-    for item in items:
-        item['largest_sub_phrase_length'] = compute_largest_sub_phrase_length(
-            search_tokens,
-            item.get('matching_phrases', [])
+        # Carregar matching
+        items = list(itens_collection.aggregate(
+            pipeline_base,
+            collation={'locale': 'pt', 'strength': 1}
+        ))
+
+        # Calcular maior sub-frase
+        for item in items:
+            item['largest_sub_phrase_length'] = compute_largest_sub_phrase_length(
+                search_tokens,
+                item.get('matching_phrases', [])
+            )
+
+        # Ordena
+        items.sort(
+            key=lambda x: (
+                -x['is_phrase_match'],
+                -x['largest_sub_phrase_length'],
+                x['description'].lower()
+            )
         )
 
-    # Ordena:
-    # 1) is_phrase_match desc
-    # 2) largest_sub_phrase_length desc
-    # 3) description asc
-    items.sort(
-        key=lambda x: (
-            -x['is_phrase_match'],
-            -x['largest_sub_phrase_length'],
-            x['description'].lower()
-        )
-    )
+        # Paginação
+        paged_items = items[skip_items: skip_items + ITEMS_PER_PAGE]
+        has_more = (len(paged_items) == ITEMS_PER_PAGE)
 
-    # Paginação
-    paged_items = items[skip_items: skip_items + ITEMS_PER_PAGE]
-    has_more = (len(paged_items) == ITEMS_PER_PAGE)
+        items_list = []
+        for item in paged_items:
+            items_list.append({
+                '_id': str(item['_id']),
+                'description': item.get('description', ''),
+                'stock_mz': item.get('stock_mz', 0),
+                'stock_eld': item.get('stock_eld', 0),
+                'price': float(item.get('price', 0.0)),
+                'is_highlighted': 1 if item.get('is_phrase_match') == 1 else 0
+            })
 
-    items_list = []
-    for item in paged_items:
-        items_list.append({
-            '_id': str(item['_id']),
-            'description': item.get('description', ''),
-            'stock_mz': item.get('stock_mz', 0),
-            'stock_eld': item.get('stock_eld', 0),
-            'price': float(item.get('price', 0.0)),
-            'is_highlighted': 1 if item.get('is_phrase_match') == 1 else 0
+        return jsonify({
+            'items': items_list,
+            'has_more': has_more,
+            'total_items': total_items
         })
-
-    return jsonify({
-        'items': items_list,
-        'has_more': has_more,
-        'total_items': total_items
-    })
 
 
 @app.route("/gridfs_image/<file_id>", methods=["GET"])

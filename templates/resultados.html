@@ -108,10 +108,9 @@
       color: #aaa;
     }
 
-    /* Container de resultados */
-    .result-container {
+    /* Container de resultados (usado para injetar os itens via JS) */
+    #problem-container {
       width: 100%;
-      margin-top: 1rem;
     }
 
     /* Cada problema encontrado */
@@ -166,7 +165,7 @@
       transform: translateX(-50%) scale(1.02);
     }
 
-    /* Botões "Editar" e "Deletar" no canto inferior direito */
+    /* Botões Editar/Deletar no canto inferior direito */
     .action-btns {
       position: absolute;
       bottom: 1rem;
@@ -234,7 +233,7 @@
       margin: 0;
     }
 
-    /* Responsividade para tablets/celulares */
+    /* Responsividade */
     @media (max-width: 768px) {
       header {
         padding: 1.5rem 2rem;
@@ -288,7 +287,7 @@
       }
     }
 
-    /* MODAL LOGIN - mesmo estilo do modal em nao_resolvidos.html */
+    /* MODAL LOGIN */
     .modal {
       display: none; /* Inicialmente oculto */
       position: fixed;
@@ -404,93 +403,43 @@
       />
     </form>
 
-    <div class="result-container">
-      {% if problemas and problemas|length > 0 %}
-        {% for problema in problemas %}
-          <div class="problem-item">
-            <h2>{{ problema["titulo"] }}</h2>
-            <p>{{ problema["descricao"] }}</p>
+    <!-- Container onde os problemas serão injetados via JS (scroll infinito) -->
+    <div id="problem-container"></div>
 
-            {% if problema["resolvido"] %}
-              <!-- Ver Solução: precisa estar logado. Se não estiver, abre modal -->
-              {% if session.get('user_id') %}
-                <a
-                  href="{{ url_for('exibir_solucao', problem_id=problema['_id_str']) }}"
-                  class="ver-solucao-btn"
-                >
-                  Ver Solução
-                </a>
-              {% else %}
-                <button
-                  class="ver-solucao-btn"
-                  onclick="openLoginModal()"
-                >
-                  Ver Solução
-                </button>
-              {% endif %}
-            {% endif %}
-
-            <!-- Botões Editar/Deletar (somente 'solucionador') -->
-            {% if session.get('user_id') and session.role == 'solucionador' %}
-              <div class="action-btns">
-                <a
-                  href="{{ url_for('edit_problem', problem_id=problema['_id_str']) }}"
-                  class="action-btn"
-                >
-                  Editar
-                </a>
-                <form
-                  action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}"
-                  method="POST"
-                  class="action-delete-form"
-                  onsubmit="return confirm('Tem certeza que deseja deletar este problema?');"
-                >
-                  <button type="submit" class="action-btn">Deletar</button>
-                </form>
-              </div>
-            {% elif not session.get('user_id') %}
-              <!-- Se não está logado, mas quer clicar em Editar/Deletar: aqui poderíamos
-                   mostrar botões que abrem modal de login ou não mostrar nada.
-                   Exemplo: não mostrar nada -->
-            {% else %}
-              <!-- Se está logado mas não é 'solucionador', também ocultamos. -->
-            {% endif %}
-          </div>
-        {% endfor %}
+    <!-- Mensagem "Nenhum resultado" (inicialmente oculta) -->
+    <div id="no-results" class="no-results" style="display: none;">
+      <p>Nenhum problema encontrado, pesquise de outra forma ou registre seu problema.</p>
+      {% if session.get('user_id') %}
+        <a
+          href="{{ url_for('add_problem') }}"
+          class="new-problem-btn"
+          title="Novo Problema"
+        >
+          <!-- Ícone de "mais" -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path
+              d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
+                 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
+                 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+            />
+          </svg>
+          Novo Problema
+        </a>
       {% else %}
-        <!-- Caso nenhum problema seja encontrado, mostra botão "Novo Problema" -->
-        <div class="no-results">
-          <p>Nenhum problema encontrado, pesquise de outra forma ou registre seu problema.</p>
-          {% if session.get('user_id') %}
-            <a
-              href="{{ url_for('add_problem') }}"
-              class="new-problem-btn"
-              title="Novo Problema"
-            >
-              <!-- Ícone de "mais" -->
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                <path
-                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
-                     1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-                     0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
-                />
-              </svg>
-              Novo Problema
-            </a>
-          {% else %}
-            <!-- Se não está logado, botão que abre modal de login -->
-            <button class="new-problem-btn" onclick="openLoginModal()">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                <path
-                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
-                     1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-                     0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
-                />
-              </svg>
-              Novo Problema
-            </button>
-          {% endif %}
-        </div>
+        <!-- Se não está logado, botão que abre modal de login -->
+        <button
+          class="new-problem-btn"
+          onclick="openLoginModal()"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path
+              d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
+                 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
+                 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+            />
+          </svg>
+          Novo Problema
+        </button>
       {% endif %}
     </div>
   </main>
@@ -500,7 +449,7 @@
   </footer>
 
   <!-- Modal para exigir LOGIN -->
-  <div id="loginModal" class="modal">
+  <div id="loginModal" class="modal" style="{% if need_login == '1' %}display:flex{% endif %}">
     <div class="modal-content">
       <div class="modal-header">
         <h2></h2>
@@ -522,7 +471,134 @@
   </div>
 
   <script>
-    // Funções para abrir/fechar o modal de login
+    const problemContainer = document.getElementById('problem-container');
+    const noResultsDiv = document.getElementById('no-results');
+
+    // Pegamos o termo de busca do input #search-input
+    const searchInput = document.getElementById('search-input');
+    let searchQuery = searchInput.value.trim();
+
+    // Variáveis para paginação
+    let currentPage = 1;
+    let loading = false;
+    let hasMore = true;
+
+    // Ao carregar a página, buscar a primeira página
+    window.addEventListener('DOMContentLoaded', () => {
+      loadProblems();
+      window.addEventListener('scroll', handleScroll);
+    });
+
+    function handleScroll() {
+      if (loading) return;
+
+      const scrollPosition = window.scrollY + window.innerHeight;
+      const threshold = document.body.offsetHeight - 200;
+
+      if (scrollPosition >= threshold && hasMore) {
+        currentPage++;
+        loadProblems();
+      }
+    }
+
+    async function loadProblems() {
+      loading = true;
+
+      try {
+        const response = await fetch(
+          `/load_problems?page=${currentPage}&q=${encodeURIComponent(searchQuery)}`
+        );
+        if (!response.ok) throw new Error('Erro ao carregar problemas');
+
+        const data = await response.json();
+        hasMore = data.has_more;
+
+        // Se for página 1 e não houver nada, exibe "Nenhum resultado"
+        if (currentPage === 1 && data.total_count === 0) {
+          noResultsDiv.style.display = 'block';
+        } else {
+          noResultsDiv.style.display = 'none';
+        }
+
+        data.problems.forEach(problem => {
+          const problemEl = createProblemElement(problem);
+          problemContainer.appendChild(problemEl);
+        });
+
+      } catch (error) {
+        console.error(error);
+      }
+
+      loading = false;
+    }
+
+    function createProblemElement(problem) {
+      // Cria o bloco HTML para cada problema
+      const div = document.createElement('div');
+      div.classList.add('problem-item');
+
+      const h2 = document.createElement('h2');
+      h2.textContent = problem.titulo;
+
+      const p = document.createElement('p');
+      p.textContent = problem.descricao;
+
+      div.appendChild(h2);
+      div.appendChild(p);
+
+      // Se resolvido, exibir botão "Ver Solução"
+      if (problem.resolvido) {
+        {% if session.get('user_id') %}
+        const solucaoLink = document.createElement('a');
+        solucaoLink.href = "{{ url_for('exibir_solucao', problem_id='__ID__') }}"
+                           .replace('__ID__', problem._id);
+        solucaoLink.classList.add('ver-solucao-btn');
+        solucaoLink.textContent = 'Ver Solução';
+        div.appendChild(solucaoLink);
+        {% else %}
+        // Se não estiver logado, o botão abre modal de login
+        const solucaoBtn = document.createElement('button');
+        solucaoBtn.classList.add('ver-solucao-btn');
+        solucaoBtn.textContent = 'Ver Solução';
+        solucaoBtn.addEventListener('click', openLoginModal);
+        div.appendChild(solucaoBtn);
+        {% endif %}
+      }
+
+      // Se role == 'solucionador', exibir "Editar" e "Deletar"
+      {% if session.get('user_id') and session.role == 'solucionador' %}
+      const actionBtns = document.createElement('div');
+      actionBtns.classList.add('action-btns');
+
+      const editLink = document.createElement('a');
+      editLink.href = "{{ url_for('edit_problem', problem_id='__ID__') }}"
+                      .replace('__ID__', problem._id);
+      editLink.classList.add('action-btn');
+      editLink.textContent = 'Editar';
+
+      const deleteForm = document.createElement('form');
+      deleteForm.method = 'POST';
+      deleteForm.action = "{{ url_for('delete_problem', problem_id='__ID__') }}"
+                          .replace('__ID__', problem._id);
+      deleteForm.classList.add('action-delete-form');
+      deleteForm.onsubmit = () => confirm('Tem certeza que deseja deletar este problema?');
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'submit';
+      deleteBtn.classList.add('action-btn');
+      deleteBtn.textContent = 'Deletar';
+
+      deleteForm.appendChild(deleteBtn);
+      actionBtns.appendChild(editLink);
+      actionBtns.appendChild(deleteForm);
+
+      div.appendChild(actionBtns);
+      {% endif %}
+
+      return div;
+    }
+
+    // Modal de login
     function openLoginModal() {
       document.getElementById('loginModal').style.display = 'flex';
     }
