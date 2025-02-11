@@ -20,16 +20,11 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "CHAVE_SECRETA_PARA_SESSAO_INSEGURA")
 
 # ------------------------ DB do M (m_plataforma) ----------------------------
-DB_URI = os.environ.get("DB_URI")
+client_m = MongoClient(
+    "mongodb+srv://msolucoesmecanicasinteligentes:solucao@cluster0.7ljuh.mongodb.net/"
+)
+db_m = client_m["m_plataforma"]
 
-# Conecta na mesma URI para todos os bancos
-client = MongoClient(DB_URI)
-
-# Se quiser usar o banco "m_plataforma":
-db_m = client["m_plataforma"]
-
-# E se quiser usar o banco "MachineZONE":
-db_mz = client["MachineZONE"]
 # Coleções do M
 problemas_collection = db_m["problemas"]
 usuarios_collection = db_m["usuarios"]
