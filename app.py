@@ -412,6 +412,7 @@ def load_problems():
 def add_problem():
     """
     Cadastra novo problema (não resolvido), com possibilidade de adicionar tags.
+    + MUDANÇA: adicionar tokens da descrição nas tags também.
     """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
@@ -422,16 +423,19 @@ def add_problem():
 
         titulo_normalized = normalize_string(titulo)
         titulo_tokens = titulo_normalized.split()
+        titulo_tokens = [t for t in titulo_tokens if t and t not in STOPWORDS]
+
+        descricao_normalized = normalize_string(descricao)
+        descricao_tokens = descricao_normalized.split()
+        descricao_tokens = [t for t in descricao_tokens if t and t not in STOPWORDS]
 
         tags_str = request.form.get("tags", "").strip()
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
-
-        # Filtra stopwords
-        titulo_tokens = [t for t in titulo_tokens if t not in STOPWORDS]
         user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
 
-        all_tags = list(set(titulo_tokens + user_tags_normalized))
+        # Combina tags do título, descrição e as que o usuário digitou
+        all_tags = list(set(titulo_tokens + descricao_tokens + user_tags_normalized))
 
         if titulo and descricao:
             problema = {
@@ -559,6 +563,7 @@ def delete_problem(problem_id):
 def edit_problem(problem_id):
     """
     Editar título/descrição/tags - permitido ao criador do problema ou a um 'solucionador'.
+    + MUDANÇA: descrição também entra nas tags.
     """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
@@ -579,12 +584,15 @@ def edit_problem(problem_id):
         titulo_normalized = normalize_string(titulo_novo)
         titulo_tokens = [t for t in titulo_normalized.split() if t and t not in STOPWORDS]
 
+        descricao_normalized = normalize_string(descricao_nova)
+        descricao_tokens = [t for t in descricao_normalized.split() if t and t not in STOPWORDS]
+
         tags_str = request.form.get("tags", "").strip()
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
         user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
 
-        all_tags = list(set(titulo_tokens + user_tags_normalized))
+        all_tags = list(set(titulo_tokens + descricao_tokens + user_tags_normalized))
 
         if not titulo_novo or not descricao_nova:
             erro = "Preencha todos os campos."
