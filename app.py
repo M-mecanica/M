@@ -37,7 +37,7 @@ problem_history_collection = db_m["problem_search_history"]  # Histórico de bus
 problem_view_history_collection = db_m["problem_view_history"]  # Registro de visualizações
 improvement_suggestions_collection = db_m["improvement_suggestions"]  # Sugestões de melhorias
 
-# GridFS para armazenar imagens (ex.: solução de problemas)
+# GridFS para armazenar imagens (ex.: solução de problemas, imagens do problema etc.)
 fs_m = gridfs.GridFS(db_m)
 
 # -----------------------------------------------------------
@@ -61,7 +61,6 @@ STOPWORDS = {
 ITEMS_PER_PAGE = 20  # Usado tanto para itens quanto para problemas
 MZ_WHATSAPP = "5543996436367"  # Número WhatsApp para finalizar carrinho, etc.
 
-
 # -----------------------------------------------------------
 # FUNÇÕES AUXILIARES
 # -----------------------------------------------------------
@@ -69,13 +68,11 @@ def user_is_logged_in():
     """Retorna True se há um usuário logado."""
     return "user_id" in session
 
-
 def user_has_role(roles_permitidos):
     """Verifica se o usuário logado possui um dos papéis em 'roles_permitidos'."""
     if not user_is_logged_in():
         return False
     return session.get("role") in roles_permitidos
-
 
 def save_image_if_exists(file_obj):
     """
@@ -99,7 +96,6 @@ def save_image_if_exists(file_obj):
     )
     return str(stored_id)
 
-
 def normalize_string(s):
     """
     Remove acentos e deixa tudo em minúsculo, sem espaços extras.
@@ -110,7 +106,6 @@ def normalize_string(s):
         if not unicodedata.combining(c)
     )
     return re.sub(r'\s+', ' ', normalized.strip().lower())
-
 
 def generate_sub_phrases(tokens):
     """
@@ -124,7 +119,6 @@ def generate_sub_phrases(tokens):
             sub_slice = tokens[start:end]
             sub_phrases.append(" ".join(sub_slice))
     return sub_phrases
-
 
 def compute_largest_sub_phrase_length(search_tokens, item_phrases):
     """
@@ -141,7 +135,6 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
                 largest_length = num_tokens
     return largest_length
 
-
 # -----------------------------------------------------------
 # ROTA PRINCIPAL E SISTEMA DE USUÁRIOS
 # -----------------------------------------------------------
@@ -149,12 +142,10 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
 def root():
     return redirect(url_for("index"))
 
-
 @app.route("/index", methods=["GET"])
 def index():
     need_login = request.args.get("need_login", "0")
     return render_template("index.html", need_login=need_login)
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -196,12 +187,10 @@ def login():
 
     return render_template("login.html", erro=None)
 
-
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -240,18 +229,14 @@ def register():
 
     return render_template("register.html", erro=None)
 
-
 # -----------------------------------------------------------
 # ROTAS LIGADAS A PROBLEMAS (Plataforma M)
 # -----------------------------------------------------------
 
-# Apenas renderiza a página de resultados.html com infinite scroll.
-# O carregamento real dos problemas vem via /load_problems (JSON).
 @app.route("/search", methods=["GET"])
 def search():
     termo_busca = request.args.get("q", "").strip()
     return render_template("resultados.html", termo_busca=termo_busca)
-
 
 @app.route("/load_problems", methods=["GET"])
 def load_problems():
@@ -284,20 +269,17 @@ def load_problems():
         # PESQUISA COM SKIP/LIMIT
         skip = (page - 1) * ITEMS_PER_PAGE
 
-        # Aqui podemos replicar a lógica de relevância. Se você tiver
-        # "matching_phrases" em problemas, use a mesma abordagem do item_search.
-        # Caso não tenha, faremos algo mais simples:
         normalized_search_phrase = normalize_string(search_query)
         search_tokens = [t for t in normalized_search_phrase.split() if t and t not in STOPWORDS]
 
-        # Exemplo de pipeline simples (ajuste se quiser sub-frase, etc.):
+        # --- ALTERAÇÃO AQUI: Uso de $all no lugar de $in para buscar TODAS as tags (AND) ---
         pipeline_base = [
             {
                 "$match": {
                     "$or": [
                         {"titulo": {"$regex": search_query, "$options": "i"}},
                         {"descricao": {"$regex": search_query, "$options": "i"}},
-                        {"tags": {"$in": search_tokens}}
+                        {"tags": {"$all": search_tokens}}  # AND em vez de $in (OR)
                     ]
                 }
             }
@@ -316,7 +298,6 @@ def load_problems():
         problems_cursor = problemas_collection.aggregate(pipeline_fetch)
         problems = list(problems_cursor)
 
-        # Montar lista final
         problems_list = []
         for p in problems:
             problems_list.append({
@@ -324,6 +305,8 @@ def load_problems():
                 "titulo": p.get("titulo", ""),
                 "descricao": p.get("descricao", ""),
                 "resolvido": p.get("resolvido", False),
+                # Incluímos a imagem (se houver) no JSON:
+                "problemImage": str(p["problemImage"]) if p.get("problemImage") else None
             })
 
         has_more = (skip + ITEMS_PER_PAGE) < total_count
@@ -340,10 +323,8 @@ def load_problems():
             session["displayed_problem_ids"] = []
         displayed_ids = session.get("displayed_problem_ids", [])
 
-        # Converter string ids p/ ObjectId
         displayed_object_ids = [ObjectId(x) for x in displayed_ids]
 
-        # Quantos restam?
         pipeline_count = [
             {"$match": {"_id": {"$nin": displayed_object_ids}}},
             {"$count": "remaining_count"}
@@ -352,14 +333,12 @@ def load_problems():
         remaining_count = count_res[0]["remaining_count"] if count_res else 0
 
         if remaining_count <= 0:
-            # Não há mais problemas para mostrar
             return jsonify({
                 "problems": [],
                 "has_more": False,
                 "total_count": 0
             })
         else:
-            # Pega no máximo ITEMS_PER_PAGE problemas aleatórios entre os que não foram exibidos
             fetch_size = min(ITEMS_PER_PAGE, remaining_count)
             pipeline_sample = [
                 {"$match": {"_id": {"$nin": displayed_object_ids}}},
@@ -368,15 +347,12 @@ def load_problems():
             cursor_sample = problemas_collection.aggregate(pipeline_sample)
             random_problems = list(cursor_sample)
 
-            # Armazenar novos IDs exibidos na sessão
             for rp in random_problems:
                 displayed_ids.append(str(rp["_id"]))
             session["displayed_problem_ids"] = displayed_ids
 
-            # Se ainda houver mais depois desses, has_more = True
             has_more = (remaining_count - fetch_size) > 0
 
-            # Resposta JSON
             problems_list = []
             for p in random_problems:
                 problems_list.append({
@@ -384,6 +360,7 @@ def load_problems():
                     "titulo": p.get("titulo", ""),
                     "descricao": p.get("descricao", ""),
                     "resolvido": p.get("resolvido", False),
+                    "problemImage": str(p["problemImage"]) if p.get("problemImage") else None
                 })
 
             return jsonify({
@@ -391,7 +368,6 @@ def load_problems():
                 "has_more": has_more,
                 "total_count": remaining_count
             })
-
 
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
@@ -425,7 +401,6 @@ def add_problem():
             return render_template("add.html", erro="Preencha todos os campos.")
     return render_template("add.html", erro=None)
 
-
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
     if not user_is_logged_in():
@@ -439,7 +414,6 @@ def unresolved():
         p["creator_name"] = user_creator["nome"] if user_creator else "Desconhecido"
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
 
-
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
     if not user_is_logged_in():
@@ -447,7 +421,6 @@ def resolver_form(problem_id):
     if not user_has_role(["solucionador", "mecanico"]):
         return "Acesso negado (somente solucionadores/mecânicos).", 403
     return render_template("resolver.html", problem_id=problem_id)
-
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
@@ -467,7 +440,6 @@ def resolver_problema(problem_id):
         {"$set": {"resolvido": True, "solucao": solution_data}}
     )
     return redirect(url_for("unresolved"))
-
 
 @app.route("/solucao/<problem_id>", methods=["GET"])
 def exibir_solucao(problem_id):
@@ -489,7 +461,6 @@ def exibir_solucao(problem_id):
     solucao = problema.get("solucao", {})
     return render_template("solucao.html", problema=problema, solucao=solucao)
 
-
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
     if not user_is_logged_in():
@@ -501,13 +472,20 @@ def delete_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
+    # Se houver imagem no problema, podemos excluí-la do GridFS:
+    old_file_id = problema.get("problemImage")
+    if old_file_id:
+        try:
+            fs_m.delete(ObjectId(old_file_id))
+        except:
+            pass
+
     problemas_collection.delete_one({"_id": ObjectId(problem_id)})
 
     if problema["resolvido"]:
         return redirect(url_for("search"))
     else:
         return redirect(url_for("unresolved"))
-
 
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
@@ -539,18 +517,45 @@ def edit_problem(problem_id):
         if not titulo_novo or not descricao_nova:
             return render_template("edit_problem.html", problema=problema, erro="Preencha todos os campos.")
 
+        # Preparando campos de atualização
+        updated_fields = {
+            "titulo": titulo_novo,
+            "descricao": descricao_nova,
+            "tags": all_tags
+        }
+
+        # Lida com a imagem do problema
+        delete_image = request.form.get("deleteExistingImage", "false") == "true"
+        image_file = request.files.get("problemImage")
+        new_file_id = save_image_if_exists(image_file)
+
+        old_file_id = problema.get("problemImage")
+
+        if delete_image:
+            # Se o usuário marcou para deletar a imagem existente
+            if old_file_id:
+                try:
+                    fs_m.delete(ObjectId(old_file_id))
+                except:
+                    pass
+            updated_fields["problemImage"] = None
+        elif new_file_id:
+            # Se tem nova imagem, excluímos a antiga (se houver)
+            if old_file_id:
+                try:
+                    fs_m.delete(ObjectId(old_file_id))
+                except:
+                    pass
+            updated_fields["problemImage"] = new_file_id
+
+        # Atualiza o problema no banco
         problemas_collection.update_one(
             {"_id": ObjectId(problem_id)},
-            {"$set": {
-                "titulo": titulo_novo,
-                "descricao": descricao_nova,
-                "tags": all_tags
-            }}
+            {"$set": updated_fields}
         )
         return redirect(url_for("search", q=titulo_novo))
 
     return render_template("edit_problem.html", problema=problema, erro=None)
-
 
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
@@ -565,7 +570,6 @@ def edit_user_role(user_id):
         {"$set": {"role": novo_role}}
     )
     return redirect(url_for("listar_usuarios"))
-
 
 @app.route("/usuarios", methods=["GET"])
 def listar_usuarios():
@@ -592,7 +596,6 @@ def listar_usuarios():
 
     return render_template("registros.html", usuarios=usuarios, search_query=search_query)
 
-
 @app.route("/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id):
     if not user_is_logged_in():
@@ -602,7 +605,6 @@ def delete_user(user_id):
 
     usuarios_collection.delete_one({"_id": ObjectId(user_id)})
     return redirect(url_for("listar_usuarios"))
-
 
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
@@ -703,7 +705,6 @@ def edit_solution(problem_id):
         erro=None
     )
 
-
 # -----------------------------------------------------------
 # GRIDFS - EXIBIÇÃO DE IMAGENS
 # -----------------------------------------------------------
@@ -719,7 +720,6 @@ def gridfs_image(file_id):
     except:
         return "Imagem não encontrada.", 404
 
-
 # -----------------------------------------------------------
 # HISTÓRICOS
 # -----------------------------------------------------------
@@ -732,7 +732,6 @@ def history_search():
 
     all_history = list(history_collection.find({}))
     return render_template("history_search.html", history=all_history)
-
 
 @app.route("/history_problem", methods=["GET"])
 def history_problem():
@@ -768,7 +767,6 @@ def history_problem():
         suggestions_by_problem=suggestions_by_problem
     )
 
-
 @app.route("/suggest_improvement/<problem_id>", methods=["POST"])
 def suggest_improvement(problem_id):
     if not user_is_logged_in():
@@ -791,7 +789,6 @@ def suggest_improvement(problem_id):
         "submitted_at": datetime.datetime.utcnow()
     })
     return redirect(url_for("exibir_solucao", problem_id=problem_id))
-
 
 @app.route("/user_history/<user_id>", methods=["GET"])
 def user_history(user_id):
@@ -830,14 +827,12 @@ def user_history(user_id):
         user_suggestions=user_suggestions
     )
 
-
 # -----------------------------------------------------------
-# PESQUISA DE ITENS (MZ) - (permanece igual ao exemplo anterior)
+# PESQUISA DE ITENS (MZ)
 # -----------------------------------------------------------
 @app.route("/item_search", methods=["GET"])
 def item_search():
     return render_template("item_search.html")
-
 
 @app.route("/load_items", methods=["GET"])
 def load_items():
@@ -870,7 +865,6 @@ def load_items():
         normalized_search_phrase = normalize_string(search_query)
         search_tokens = [t for t in normalized_search_phrase.split() if t and t not in STOPWORDS]
 
-        # Field calculado is_phrase_match e contagem de sub-frase
         phrase_match_cond = {
             '$cond': [
                 {
@@ -922,10 +916,7 @@ def load_items():
                 item.get('matching_phrases', [])
             )
 
-        # Ordena:
-        # 1) is_phrase_match desc
-        # 2) largest_sub_phrase_length desc
-        # 3) description asc
+        # Ordena: 1) is_phrase_match desc, 2) largest_sub_phrase_length desc, 3) description asc
         items.sort(
             key=lambda x: (
                 -x['is_phrase_match'],
@@ -961,7 +952,6 @@ def load_items():
         displayed_ids = session.get("displayed_item_ids", [])
         displayed_objectids = [ObjectId(x) for x in displayed_ids]
 
-        # Conta quantos restam
         pipeline_count = [
             {"$match": {"_id": {"$nin": displayed_objectids}}},
             {"$count": "remaining_count"}
@@ -1001,7 +991,6 @@ def load_items():
             "has_more": has_more,
             "total_items": remaining_count
         })
-
 
 # -----------------------------------------------------------
 # EXECUÇÃO

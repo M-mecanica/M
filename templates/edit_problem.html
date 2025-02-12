@@ -38,24 +38,23 @@
     }
 
     /* =========================================================================
-       HEADER PRETO COM BOTÃO DE VOLTAR (MESMO PADRÃO DE item_search.html)
+       HEADER PRETO COM BOTÃO DE VOLTAR
        ========================================================================= */
     header {
       background-color: #000;
       padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: space-between; /* Espaçar os itens (voltar, título, espaço vago) */
+      justify-content: space-between;
       position: relative;
     }
-    /* Botão "Voltar" com borda arredondada, seta grande (2rem) */
     .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
       border: none;
-      border-radius: 32px; /* Arredondado */
+      border-radius: 32px;
       padding: 0.7rem 1.2rem;
-      font-size: 2rem; /* ÍCONE (SETA) MAIOR */
+      font-size: 2rem;
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
@@ -68,7 +67,6 @@
       background-color: #333;
       transform: scale(1.02);
     }
-
     header h1 {
       color: #fff;
       font-size: 1.4rem;
@@ -84,7 +82,7 @@
       font-size: 1rem;
       padding: 2rem;
       width: 100%;
-      max-width: 1200px; /* mesmo max-width utilizado em item_search.html */
+      max-width: 1200px; /* mesmo max-width utilizado em outras páginas */
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -100,7 +98,7 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       padding: 1rem 1.5rem;
-      margin-bottom: 2rem; /* Espaçamento extra */
+      margin-bottom: 2rem;
     }
 
     .erro {
@@ -115,14 +113,12 @@
     .form-group {
       margin-bottom: 1.5rem;
     }
-
     label {
       display: block;
       font-weight: 500;
       margin-bottom: 0.5rem;
       color: #333;
     }
-
     input[type="text"],
     textarea {
       width: 100%;
@@ -139,18 +135,36 @@
     textarea:focus {
       border-color: #999;
     }
-
-    /* Desabilita o resize no textarea */
     textarea {
       min-height: 120px;
       resize: none;
     }
 
-    /* Botões com borda arredondada */
+    /* Imagem existente */
+    .existing-image {
+      display: block;
+      max-width: 100%;
+      margin-top: 0.5rem;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .delete-label {
+      display: inline-block;
+      margin-top: 0.5rem;
+      cursor: pointer;
+    }
+    .delete-label input[type="checkbox"] {
+      margin-right: 0.4rem;
+    }
+
+    /* =========================================================================
+       BOTÕES
+       ========================================================================= */
     .btn-salvar,
     .btn-cancelar {
       border: none;
-      border-radius: 32px; /* Arredondado */
+      border-radius: 32px;
       padding: 0.7rem 1.5rem;
       font-size: 1rem;
       cursor: pointer;
@@ -158,7 +172,6 @@
       font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
     }
-
     .btn-salvar {
       background-color: #000;
       color: #fff;
@@ -168,7 +181,6 @@
       background-color: #333;
       transform: scale(1.02);
     }
-
     .btn-cancelar {
       background-color: #999;
       color: #fff;
@@ -205,7 +217,6 @@
       }
       .btn-voltar-inicio {
         padding: 0.5rem 1rem;
-        /* Mantemos font-size 2rem para a seta grande no mobile também */
       }
       main {
         font-size: 1rem;
@@ -226,11 +237,9 @@
   </style>
 </head>
 <body>
-  <!-- Cabeçalho com botão de voltar e título (igual padrão item_search.html) -->
   <header>
     <a href="{{ url_for('search') }}" class="btn-voltar-inicio" title="Voltar">&#x2B05;</a>
     <h1>Editar Problema</h1>
-    <!-- Espaço vazio à direita para manter a mesma distribuição -->
     <div style="width: 2rem;"></div>
   </header>
 
@@ -240,7 +249,8 @@
         <p class="erro">{{ erro }}</p>
       {% endif %}
 
-      <form method="POST" action="">
+      <!-- Importante: usar enctype="multipart/form-data" para enviar arquivo -->
+      <form method="POST" action="" enctype="multipart/form-data">
         <div class="form-group">
           <label for="titulo">Título:</label>
           <input
@@ -251,6 +261,7 @@
             required
           >
         </div>
+
         <div class="form-group">
           <label for="descricao">Descrição:</label>
           <textarea
@@ -259,6 +270,7 @@
             required
           >{{ problema.descricao }}</textarea>
         </div>
+
         <div class="form-group">
           <label for="tags">Tags (separe por espaço):</label>
           <input
@@ -266,6 +278,36 @@
             name="tags"
             id="tags"
             value="{{ ' '.join(problema.tags) if problema.tags else '' }}"
+          >
+        </div>
+
+        {% if problema.problemImage %}
+          <div class="form-group">
+            <label>Imagem Atual:</label>
+            <img
+              src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}"
+              alt="Imagem do Problema"
+              class="existing-image"
+            >
+            <label for="deleteExistingImage" class="delete-label">
+              <input
+                type="checkbox"
+                name="deleteExistingImage"
+                id="deleteExistingImage"
+                value="true"
+              >
+              Deletar imagem existente
+            </label>
+          </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label for="problemImage">Nova Imagem (opcional):</label>
+          <input
+            type="file"
+            name="problemImage"
+            id="problemImage"
+            accept="image/*"
           >
         </div>
 

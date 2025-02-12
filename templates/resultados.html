@@ -44,7 +44,7 @@
     header h1 {
       color: #fff;
       font-size: 1.6rem;
-      margin: 0 auto; /* centraliza o título */
+      margin: 0 auto;
       text-align: center;
     }
 
@@ -133,6 +133,24 @@
       color: #555;
       margin-bottom: 0.5rem;
       text-align: center;
+    }
+
+    /*
+      Imagem do problema:
+      - Define um tamanho máximo de largura e altura para desktop
+      - Usa object-fit: contain para não cortar a imagem
+      - Assim, a imagem fica dentro dessas dimensões sem distorcer
+    */
+    .problem-image {
+      display: block;
+      margin: 1rem auto;
+      width: auto;
+      height: auto;
+      max-width: 400px;    /* Largura máxima em telas maiores */
+      max-height: 300px;   /* Altura máxima em telas maiores */
+      object-fit: contain; /* Não corta a imagem, ajusta para caber */
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 
     /* Caso não haja resultados */
@@ -233,7 +251,7 @@
       margin: 0;
     }
 
-    /* Responsividade */
+    /* Responsividade geral */
     @media (max-width: 768px) {
       header {
         padding: 1.5rem 2rem;
@@ -284,6 +302,15 @@
       .new-problem-btn svg {
         width: 16px;
         height: 16px;
+      }
+
+      /*
+        Para telas menores, reduzimos também o tamanho máximo da imagem
+        para melhor caber no layout sem cortes e sem distorções.
+      */
+      .problem-image {
+        max-width: 280px;  /* Ajuste menor para mobile */
+        max-height: 200px; /* Ajuste menor para mobile */
       }
     }
 
@@ -545,6 +572,15 @@
 
       div.appendChild(h2);
       div.appendChild(p);
+
+      // Se o problema tiver imagem, exibe-a abaixo da descrição
+      if (problem.problemImage) {
+        const imgEl = document.createElement('img');
+        imgEl.src = "/gridfs_image/" + problem.problemImage;
+        imgEl.alt = "Imagem do problema";
+        imgEl.classList.add('problem-image');
+        div.appendChild(imgEl);
+      }
 
       // Se resolvido, exibir botão "Ver Solução"
       if (problem.resolvido) {
