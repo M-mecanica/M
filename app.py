@@ -16,10 +16,14 @@ import gridfs
 
 app = Flask(__name__)
 
-# ------------------ MUDANÇA 1: SECRET_KEY de variável de ambiente ------------------
+# -----------------------------------------------------------
+# CONFIGURAÇÃO BÁSICA
+# -----------------------------------------------------------
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "CHAVE_SECRETA_PARA_SESSAO_INSEGURA")
 
-# ------------------------ DB do M (m_plataforma) ----------------------------
+# -----------------------------------------------------------
+# CONEXÃO COM O MONGO - BANCO M (Plataforma)
+# -----------------------------------------------------------
 client_m = MongoClient(
     "mongodb+srv://msolucoesmecanicasinteligentes:solucao@cluster0.7ljuh.mongodb.net/"
 )
@@ -30,44 +34,44 @@ problemas_collection = db_m["problemas"]
 usuarios_collection = db_m["usuarios"]
 history_collection = db_m["search_history"]  # Histórico de buscas de PEÇAS
 problem_history_collection = db_m["problem_search_history"]  # Histórico de busca de PROBLEMAS
-problem_view_history_collection = db_m["problem_view_history"]  # Registro de visualização de soluções
+problem_view_history_collection = db_m["problem_view_history"]  # Registro de visualizações
 improvement_suggestions_collection = db_m["improvement_suggestions"]  # Sugestões de melhorias
 
-# GridFS para armazenar as imagens no DB "m_plataforma"
+# GridFS para armazenar imagens (ex.: solução de problemas)
 fs_m = gridfs.GridFS(db_m)
 
-# Coleção para armazenar os 200 problemas diários (p/ problemas)
-daily_random_problems_collection = db_m["daily_random_problems"]
-
-# ------------------------ DB do MZ (MachineZONE) ----------------------------
+# -----------------------------------------------------------
+# CONEXÃO COM O MONGO - BANCO MachineZONE
+# -----------------------------------------------------------
 client_mz = MongoClient(
     "mongodb+srv://adaltonmuzilomendes:rolamento@cluster0.atmeh.mongodb.net/"
 )
 db_mz = client_mz["MachineZONE"]
+itens_collection = db_mz["itens"]  # Coleção principal de itens
 
-# Coleção principal de itens no MZ
-itens_collection = db_mz["itens"]
-# Coleção para armazenar os 200 itens diários (p/ pesquisa de peças)
-daily_random_items_collection = db_mz["daily_random_items"]
-
-# Definição de stopwords
+# -----------------------------------------------------------
+# CONFIGURAÇÃO E CONSTANTES
+# -----------------------------------------------------------
 STOPWORDS = {
     "a", "o", "de", "da", "do", "das", "dos", "em", "que", "com",
     "para", "por", "se", "e", "é", "na", "no", "nas", "nos", "as",
     "os", "um", "uma", "uns", "umas"
-    # Inclua outras stopwords aqui se desejar
 }
 
+ITEMS_PER_PAGE = 20  # Usado tanto para itens quanto para problemas
+MZ_WHATSAPP = "5543996436367"  # Número WhatsApp para finalizar carrinho, etc.
 
+
+# -----------------------------------------------------------
+# FUNÇÕES AUXILIARES
+# -----------------------------------------------------------
 def user_is_logged_in():
-    """Retorna True se há um usuário logado na sessão."""
+    """Retorna True se há um usuário logado."""
     return "user_id" in session
 
 
 def user_has_role(roles_permitidos):
-    """
-    Verifica se o usuário logado possui um dos papéis em 'roles_permitidos'.
-    """
+    """Verifica se o usuário logado possui um dos papéis em 'roles_permitidos'."""
     if not user_is_logged_in():
         return False
     return session.get("role") in roles_permitidos
@@ -98,7 +102,7 @@ def save_image_if_exists(file_obj):
 
 def normalize_string(s):
     """
-    Remove acentos e deixa tudo em minúsculo, sem espaços repetidos.
+    Remove acentos e deixa tudo em minúsculo, sem espaços extras.
     Ex.: 'Rolamento grande' -> 'rolamento grande'
     """
     normalized = ''.join(
@@ -111,6 +115,7 @@ def normalize_string(s):
 def generate_sub_phrases(tokens):
     """
     Gera todas as sub-frases contíguas de uma lista de tokens.
+    Ex.: ["rolamento", "grande", "da", "redução"] -> sub-frases.
     """
     sub_phrases = []
     n = len(tokens)
@@ -137,123 +142,44 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
     return largest_length
 
 
-def get_today_date_str():
-    """Retorna a data de hoje como string 'YYYY-MM-DD'."""
-    return datetime.datetime.utcnow().strftime("%Y-%m-%d")
-
-
-def get_daily_random_resolved_problems():
-    """
-    Retorna uma lista (em formato de ObjectId) com até 200 problemas
-    (resolvidos) selecionados aleatoriamente para o dia atual.
-    """
-    today_str = get_today_date_str()
-    daily_doc = daily_random_problems_collection.find_one({"date_str": today_str})
-
-    if daily_doc is not None:
-        # Já temos o documento do dia
-        id_strings = daily_doc.get("problem_ids", [])
-        return [ObjectId(pid) for pid in id_strings]
-    else:
-        # Gera 200 problemas resolvidos aleatórios
-        pipeline = [
-            {"$match": {"resolvido": True}},
-            {"$sample": {"size": 200}}
-        ]
-        sampled = list(problemas_collection.aggregate(pipeline))
-        selected_ids = [str(item["_id"]) for item in sampled]
-
-        new_doc = {
-            "date_str": today_str,
-            "problem_ids": selected_ids
-        }
-        daily_random_problems_collection.insert_one(new_doc)
-
-        return [ObjectId(pid) for pid in selected_ids]
-
-
-def get_daily_random_items():
-    """
-    Retorna uma lista (em formato de ObjectId) com até 200 itens
-    selecionados aleatoriamente para o dia atual.
-    """
-    today_str = get_today_date_str()
-    daily_doc = daily_random_items_collection.find_one({"date_str": today_str})
-
-    if daily_doc is not None:
-        id_strings = daily_doc.get("item_ids", [])
-        return [ObjectId(pid) for pid in id_strings]
-    else:
-        pipeline = [
-            {"$sample": {"size": 200}}
-        ]
-        sampled = list(itens_collection.aggregate(pipeline))
-        selected_ids = [str(item["_id"]) for item in sampled]
-
-        new_doc = {
-            "date_str": today_str,
-            "item_ids": selected_ids
-        }
-        daily_random_items_collection.insert_one(new_doc)
-
-        return [ObjectId(pid) for pid in selected_ids]
-
-
+# -----------------------------------------------------------
+# ROTA PRINCIPAL E SISTEMA DE USUÁRIOS
+# -----------------------------------------------------------
 @app.route("/")
 def root():
-    """
-    Ao abrir a aplicação pela primeira vez, redireciona para /index.
-    """
     return redirect(url_for("index"))
 
 
 @app.route("/index", methods=["GET"])
 def index():
-    """
-    Página inicial da aplicação.
-    Se houver o parâmetro ?need_login=1, um modal deverá ser exibido informando
-    ao usuário que ele precisa fazer login.
-    """
     need_login = request.args.get("need_login", "0")
     return render_template("index.html", need_login=need_login)
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """
-    Formulário de login no sistema (banco 'm_plataforma', coleção 'usuarios').
-
-    MUDANÇA 2: agora verificamos 'senha_hash' (se existir).
-    Caso o usuário seja antigo e só tenha "senha", ainda logamos
-    e migramos a senha para hash.
-    """
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
         senha = request.form.get("senha", "").strip()
-
-        # Capitalizar cada palavra
+        # Capitaliza cada palavra do nome
         nome = " ".join(word.capitalize() for word in nome.split())
 
-        # Procuramos pelo nome
         usuario = usuarios_collection.find_one({"nome": nome})
         if usuario:
-            # Verifica se já tem senha_hash
             stored_hash = usuario.get("senha_hash")
-
             if stored_hash:
+                # Verifica senha baseada em hash
                 if check_password_hash(stored_hash, senha):
-                    # Login com sucesso
                     session["user_id"] = str(usuario["_id"])
                     session["username"] = usuario["nome"]
                     session["role"] = usuario["role"]
                     return redirect(url_for("index"))
                 else:
-                    erro = "Usuário ou senha inválidos."
-                    return render_template("login.html", erro=erro)
+                    return render_template("login.html", erro="Usuário ou senha inválidos.")
             else:
-                # Fallback: usuário antigo com campo "senha" em texto puro
+                # Fallback para usuários antigos (sem hash)
                 if usuario.get("senha") == senha:
-                    # Login ok; MIGRA para senha_hash
+                    # Migra para hash
                     new_hash = generate_password_hash(senha)
                     usuarios_collection.update_one(
                         {"_id": usuario["_id"]},
@@ -264,30 +190,21 @@ def login():
                     session["role"] = usuario["role"]
                     return redirect(url_for("index"))
                 else:
-                    erro = "Usuário ou senha inválidos."
-                    return render_template("login.html", erro=erro)
+                    return render_template("login.html", erro="Usuário ou senha inválidos.")
         else:
-            erro = "Usuário ou senha inválidos."
-            return render_template("login.html", erro=erro)
+            return render_template("login.html", erro="Usuário ou senha inválidos.")
 
     return render_template("login.html", erro=None)
 
 
 @app.route("/logout")
 def logout():
-    """ Encerra a sessão do usuário atual. """
     session.clear()
     return redirect(url_for("login"))
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """
-    Criação de um novo usuário. Roles possíveis (ex.: 'comum', 'solucionador', 'mecanico').
-    Após o cadastro, o usuário é logado automaticamente e redirecionado à index.
-
-    MUDANÇA 3: armazenamos a senha como senha_hash, não em texto puro.
-    """
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
         senha = request.form.get("senha", "").strip()
@@ -296,19 +213,15 @@ def register():
         maquinas = request.form.get("maquinas", "").strip()
 
         if senha != confirmar_senha:
-            erro = "As senhas não conferem!"
-            return render_template("register.html", erro=erro)
+            return render_template("register.html", erro="As senhas não conferem!")
 
         nome = " ".join(word.capitalize() for word in nome.split())
 
         # Verifica duplicado
         if usuarios_collection.find_one({"nome": nome}):
-            erro = "Usuário já existe!"
-            return render_template("register.html", erro=erro)
+            return render_template("register.html", erro="Usuário já existe!")
 
-        # Gera o hash da senha
         senha_hash = generate_password_hash(senha)
-
         novo_usuario = {
             "nome": nome,
             "senha_hash": senha_hash,
@@ -328,114 +241,175 @@ def register():
     return render_template("register.html", erro=None)
 
 
-##############################################################################
-#                ROTAS DO M (m_plataforma) - PROBLEMAS
-##############################################################################
+# -----------------------------------------------------------
+# ROTAS LIGADAS A PROBLEMAS (Plataforma M)
+# -----------------------------------------------------------
 
+# Apenas renderiza a página de resultados.html com infinite scroll.
+# O carregamento real dos problemas vem via /load_problems (JSON).
 @app.route("/search", methods=["GET"])
 def search():
-    """
-    Rota para exibir a página de pesquisa de problemas (infinite scroll).
-    A listagem de resultados será carregada via /load_problems em JSON.
-    """
     termo_busca = request.args.get("q", "").strip()
-    need_login = request.args.get("need_login", "0")
-
-    # Registra no histórico de busca, se houver termo
-    if termo_busca:
-        if user_is_logged_in():
-            problem_history_collection.insert_one({
-                "user_id": session["user_id"],
-                "user_name": session["username"],
-                "query": termo_busca
-            })
-        else:
-            problem_history_collection.insert_one({
-                "user_id": None,
-                "user_name": "Guest",
-                "query": termo_busca
-            })
-
-    # Apenas renderiza o template e nele faremos o carregamento via JS
-    return render_template("resultados.html", termo_busca=termo_busca, need_login=need_login)
+    return render_template("resultados.html", termo_busca=termo_busca)
 
 
 @app.route("/load_problems", methods=["GET"])
 def load_problems():
     """
-    Rota que retorna problemas (paginados) em JSON para efeito de scroll infinito.
+    Fornece problemas em formato JSON para a página resultados.html fazer scroll infinito.
+    Se 'q' (search_query) estiver vazio, retorna problemas aleatórios (sem repetição) em páginas.
+    Caso haja busca, faz busca normal com skip/limit e ordenação simples.
     """
-    termo_busca = request.args.get("q", "").strip()
+    search_query = request.args.get("q", "").strip()
     page = int(request.args.get("page", 1))
-    ITEMS_PER_PAGE = 20
-    skip_items = (page - 1) * ITEMS_PER_PAGE
 
-    if termo_busca:
-        # Normaliza o termo
-        termo_busca_normalized = normalize_string(termo_busca)
-        tokens = [t for t in termo_busca_normalized.split() if t and t not in STOPWORDS]
+    # Para logar a pesquisa em 'problem_history_collection'
+    if search_query:
+        if user_is_logged_in():
+            problem_history_collection.insert_one({
+                "user_id": session["user_id"],
+                "user_name": session["username"],
+                "query": search_query,
+                "searched_at": datetime.datetime.utcnow()
+            })
+        else:
+            problem_history_collection.insert_one({
+                "user_id": None,
+                "user_name": "Guest",
+                "query": search_query,
+                "searched_at": datetime.datetime.utcnow()
+            })
 
-        query = {
-            "resolvido": True,
-            "$or": [
-                {"titulo": {"$regex": termo_busca, "$options": "i"}},
-                {"tags": {"$all": tokens}}
-            ]
-        }
-    else:
-        query = {"resolvido": True}
+    if search_query:
+        # PESQUISA COM SKIP/LIMIT
+        skip = (page - 1) * ITEMS_PER_PAGE
 
-    # Conta total
-    total_count = problemas_collection.count_documents(query)
+        # Aqui podemos replicar a lógica de relevância. Se você tiver
+        # "matching_phrases" em problemas, use a mesma abordagem do item_search.
+        # Caso não tenha, faremos algo mais simples:
+        normalized_search_phrase = normalize_string(search_query)
+        search_tokens = [t for t in normalized_search_phrase.split() if t and t not in STOPWORDS]
 
-    # Busca paginada
-    problemas_cursor = problemas_collection.find(query).skip(skip_items).limit(ITEMS_PER_PAGE)
-    problemas_lista = []
-    for p in problemas_cursor:
-        problemas_lista.append({
-            "_id": str(p["_id"]),
-            "titulo": p.get("titulo", ""),
-            "descricao": p.get("descricao", ""),
-            "resolvido": p.get("resolvido", False)
+        # Exemplo de pipeline simples (ajuste se quiser sub-frase, etc.):
+        pipeline_base = [
+            {
+                "$match": {
+                    "$or": [
+                        {"titulo": {"$regex": search_query, "$options": "i"}},
+                        {"descricao": {"$regex": search_query, "$options": "i"}},
+                        {"tags": {"$in": search_tokens}}
+                    ]
+                }
+            }
+        ]
+
+        # Contar total
+        count_pipeline = pipeline_base + [{"$count": "total"}]
+        count_result = list(problemas_collection.aggregate(count_pipeline))
+        total_count = count_result[0]["total"] if count_result else 0
+
+        # Carregar problemas
+        pipeline_fetch = pipeline_base + [
+            {"$skip": skip},
+            {"$limit": ITEMS_PER_PAGE}
+        ]
+        problems_cursor = problemas_collection.aggregate(pipeline_fetch)
+        problems = list(problems_cursor)
+
+        # Montar lista final
+        problems_list = []
+        for p in problems:
+            problems_list.append({
+                "_id": str(p["_id"]),
+                "titulo": p.get("titulo", ""),
+                "descricao": p.get("descricao", ""),
+                "resolvido": p.get("resolvido", False),
+            })
+
+        has_more = (skip + ITEMS_PER_PAGE) < total_count
+        return jsonify({
+            "problems": problems_list,
+            "has_more": has_more,
+            "total_count": total_count
         })
 
-    has_more = (skip_items + ITEMS_PER_PAGE) < total_count
+    else:
+        # LÓGICA DE ALEATORIEDADE SE NÃO HOUVER BUSCA
+        if page == 1:
+            # Reinicia a lista de exibidos ao pedir a página 1
+            session["displayed_problem_ids"] = []
+        displayed_ids = session.get("displayed_problem_ids", [])
 
-    return jsonify({
-        "problems": problemas_lista,
-        "has_more": has_more,
-        "total_count": total_count
-    })
+        # Converter string ids p/ ObjectId
+        displayed_object_ids = [ObjectId(x) for x in displayed_ids]
+
+        # Quantos restam?
+        pipeline_count = [
+            {"$match": {"_id": {"$nin": displayed_object_ids}}},
+            {"$count": "remaining_count"}
+        ]
+        count_res = list(problemas_collection.aggregate(pipeline_count))
+        remaining_count = count_res[0]["remaining_count"] if count_res else 0
+
+        if remaining_count <= 0:
+            # Não há mais problemas para mostrar
+            return jsonify({
+                "problems": [],
+                "has_more": False,
+                "total_count": 0
+            })
+        else:
+            # Pega no máximo ITEMS_PER_PAGE problemas aleatórios entre os que não foram exibidos
+            fetch_size = min(ITEMS_PER_PAGE, remaining_count)
+            pipeline_sample = [
+                {"$match": {"_id": {"$nin": displayed_object_ids}}},
+                {"$sample": {"size": fetch_size}}
+            ]
+            cursor_sample = problemas_collection.aggregate(pipeline_sample)
+            random_problems = list(cursor_sample)
+
+            # Armazenar novos IDs exibidos na sessão
+            for rp in random_problems:
+                displayed_ids.append(str(rp["_id"]))
+            session["displayed_problem_ids"] = displayed_ids
+
+            # Se ainda houver mais depois desses, has_more = True
+            has_more = (remaining_count - fetch_size) > 0
+
+            # Resposta JSON
+            problems_list = []
+            for p in random_problems:
+                problems_list.append({
+                    "_id": str(p["_id"]),
+                    "titulo": p.get("titulo", ""),
+                    "descricao": p.get("descricao", ""),
+                    "resolvido": p.get("resolvido", False),
+                })
+
+            return jsonify({
+                "problems": problems_list,
+                "has_more": has_more,
+                "total_count": remaining_count
+            })
 
 
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
-    """
-    Cadastra novo problema (não resolvido), com possibilidade de adicionar tags.
-    + MUDANÇA: adicionar tokens da descrição nas tags também.
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
 
     if request.method == "POST":
         titulo = request.form.get("titulo", "").strip()
         descricao = request.form.get("descricao", "").strip()
-
         titulo_normalized = normalize_string(titulo)
-        titulo_tokens = titulo_normalized.split()
-        titulo_tokens = [t for t in titulo_tokens if t and t not in STOPWORDS]
-
-        descricao_normalized = normalize_string(descricao)
-        descricao_tokens = descricao_normalized.split()
-        descricao_tokens = [t for t in descricao_tokens if t and t not in STOPWORDS]
+        titulo_tokens = [t for t in titulo_normalized.split() if t not in STOPWORDS]
 
         tags_str = request.form.get("tags", "").strip()
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
         user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
 
-        # Combina tags do título, descrição e as que o usuário digitou
-        all_tags = list(set(titulo_tokens + descricao_tokens + user_tags_normalized))
+        all_tags = list(set(titulo_tokens + user_tags_normalized))
 
         if titulo and descricao:
             problema = {
@@ -454,45 +428,33 @@ def add_problem():
 
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
-    """
-    Lista problemas pendentes de solução.
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
 
     query = {"resolvido": False}
     problemas_nao_resolvidos = list(problemas_collection.find(query))
-
     for p in problemas_nao_resolvidos:
         p["_id_str"] = str(p["_id"])
         user_creator = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
         p["creator_name"] = user_creator["nome"] if user_creator else "Desconhecido"
-
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
 
 
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
-    """
-    Formulário de resolução (só roles 'solucionador' ou 'mecanico').
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador", "mecanico"]):
-        return "Acesso negado (somente solucionadores/mecanicos).", 403
-
+        return "Acesso negado (somente solucionadores/mecânicos).", 403
     return render_template("resolver.html", problem_id=problem_id)
 
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
-    """
-    Marca como resolvido, salva solucao (JSON).
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador", "mecanico"]):
-        return "Acesso negado (somente solucionadores/mecanicos).", 403
+        return "Acesso negado (somente solucionadores/mecânicos).", 403
 
     solution_json = request.form.get("solution_data", "")
     try:
@@ -502,22 +464,13 @@ def resolver_problema(problem_id):
 
     problemas_collection.update_one(
         {"_id": ObjectId(problem_id)},
-        {
-            "$set": {
-                "resolvido": True,
-                "solucao": solution_data
-            }
-        }
+        {"$set": {"resolvido": True, "solucao": solution_data}}
     )
     return redirect(url_for("unresolved"))
 
 
 @app.route("/solucao/<problem_id>", methods=["GET"])
 def exibir_solucao(problem_id):
-    """
-    Exibe solucao de um problema resolvido.
-    Registra que o user visualizou (via upsert).
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
 
@@ -539,9 +492,6 @@ def exibir_solucao(problem_id):
 
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
-    """
-    Deleta problema (role 'solucionador').
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
@@ -561,10 +511,6 @@ def delete_problem(problem_id):
 
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
-    """
-    Editar título/descrição/tags - permitido ao criador do problema ou a um 'solucionador'.
-    + MUDANÇA: descrição também entra nas tags.
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
 
@@ -580,44 +526,34 @@ def edit_problem(problem_id):
         titulo_novo = request.form.get("titulo", "").strip()
         descricao_nova = request.form.get("descricao", "").strip()
 
-        # Normaliza e filtra stopwords
         titulo_normalized = normalize_string(titulo_novo)
-        titulo_tokens = [t for t in titulo_normalized.split() if t and t not in STOPWORDS]
-
-        descricao_normalized = normalize_string(descricao_nova)
-        descricao_tokens = [t for t in descricao_normalized.split() if t and t not in STOPWORDS]
+        titulo_tokens = [t for t in titulo_normalized.split() if t not in STOPWORDS]
 
         tags_str = request.form.get("tags", "").strip()
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
         user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
 
-        all_tags = list(set(titulo_tokens + descricao_tokens + user_tags_normalized))
+        all_tags = list(set(titulo_tokens + user_tags_normalized))
 
         if not titulo_novo or not descricao_nova:
-            erro = "Preencha todos os campos."
-            return render_template("edit_problem.html", problema=problema, erro=erro)
+            return render_template("edit_problem.html", problema=problema, erro="Preencha todos os campos.")
 
         problemas_collection.update_one(
             {"_id": ObjectId(problem_id)},
-            {
-                "$set": {
-                    "titulo": titulo_novo,
-                    "descricao": descricao_nova,
-                    "tags": all_tags
-                }
-            }
+            {"$set": {
+                "titulo": titulo_novo,
+                "descricao": descricao_nova,
+                "tags": all_tags
+            }}
         )
-        return redirect(url_for("search"))
+        return redirect(url_for("search", q=titulo_novo))
 
     return render_template("edit_problem.html", problema=problema, erro=None)
 
 
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
-    """
-    'solucionador' pode alterar role de outro usuário.
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
@@ -633,9 +569,6 @@ def edit_user_role(user_id):
 
 @app.route("/usuarios", methods=["GET"])
 def listar_usuarios():
-    """
-    Lista todos os usuários (só 'solucionador'), com busca.
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
@@ -662,9 +595,6 @@ def listar_usuarios():
 
 @app.route("/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id):
-    """
-    Deleta usuário (só 'solucionador').
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
@@ -676,10 +606,6 @@ def delete_user(user_id):
 
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
-    """
-    Edição da solução de problema resolvido (somente 'solucionador'),
-    incluindo upload/manutenção de imagens em GridFS.
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador"]):
@@ -689,19 +615,18 @@ def edit_solution(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
     if not problema.get("resolvido"):
-        return "Ainda não foi resolvido.", 400
+        return "Ainda não resolvido.", 400
 
     if request.method == "POST":
         new_solution_json = request.form.get("solution_data", "").strip()
         try:
             new_solution_data = json.loads(new_solution_json)
         except json.JSONDecodeError:
-            erro = "Erro ao interpretar os dados."
             return render_template(
                 "edit_solution.html",
                 problema=problema,
-                solucao=problema.get("solucao", {}),
-                erro=erro
+                passos=problema.get("solucao", {}).get("steps", []),
+                erro="Erro ao interpretar os dados."
             )
 
         old_solution_data = problema.get("solucao", {})
@@ -709,7 +634,7 @@ def edit_solution(problem_id):
         steps = new_solution_data.get("steps", [])
 
         for i, step in enumerate(steps):
-            # Lidar com imagem do passo
+            # Lidar com imagem do step
             delete_step = request.form.get(f"deleteExistingStepImage_{i}", "false") == "true"
             step_image_file = request.files.get(f"stepImage_{i}")
             new_file_id = save_image_if_exists(step_image_file)
@@ -779,23 +704,154 @@ def edit_solution(problem_id):
     )
 
 
-# -------------------- PESQUISA DE ITENS (MachineZONE) -----------------------
+# -----------------------------------------------------------
+# GRIDFS - EXIBIÇÃO DE IMAGENS
+# -----------------------------------------------------------
+@app.route("/gridfs_image/<file_id>", methods=["GET"])
+def gridfs_image(file_id):
+    try:
+        gridout = fs_m.get(ObjectId(file_id))
+        image_data = gridout.read()
+        content_type = gridout.contentType or "image/jpeg"
+        response = make_response(image_data)
+        response.headers.set('Content-Type', content_type)
+        return response
+    except:
+        return "Imagem não encontrada.", 404
+
+
+# -----------------------------------------------------------
+# HISTÓRICOS
+# -----------------------------------------------------------
+@app.route("/history_search", methods=["GET"])
+def history_search():
+    if not user_is_logged_in():
+        return redirect(url_for("index", need_login=1))
+    if not user_has_role(["solucionador"]):
+        return "Acesso negado.", 403
+
+    all_history = list(history_collection.find({}))
+    return render_template("history_search.html", history=all_history)
+
+
+@app.route("/history_problem", methods=["GET"])
+def history_problem():
+    if not user_is_logged_in():
+        return redirect(url_for("index", need_login=1))
+    if not user_has_role(["solucionador"]):
+        return "Acesso negado.", 403
+
+    all_history = list(problem_history_collection.find({}))
+    all_suggestions = list(improvement_suggestions_collection.find({}))
+
+    suggestions_by_problem_dict = {}
+    for s in all_suggestions:
+        pid = s["problem_id"]
+        if pid not in suggestions_by_problem_dict:
+            suggestions_by_problem_dict[pid] = {
+                "problem_title": s.get("problem_title", "Título não encontrado"),
+                "suggestions": []
+            }
+        suggestions_by_problem_dict[pid]["suggestions"].append(s)
+
+    suggestions_by_problem = []
+    for pid, data in suggestions_by_problem_dict.items():
+        suggestions_by_problem.append({
+            "problem_id": pid,
+            "problem_title": data["problem_title"],
+            "suggestions": data["suggestions"]
+        })
+
+    return render_template(
+        "history_problem.html",
+        history=all_history,
+        suggestions_by_problem=suggestions_by_problem
+    )
+
+
+@app.route("/suggest_improvement/<problem_id>", methods=["POST"])
+def suggest_improvement(problem_id):
+    if not user_is_logged_in():
+        return redirect(url_for("index", need_login=1))
+
+    suggestion_text = request.form.get("suggestion", "").strip()
+    if not suggestion_text:
+        return "Texto vazio.", 400
+
+    problem = problemas_collection.find_one({"_id": ObjectId(problem_id)})
+    if not problem:
+        return "Problema inexistente.", 404
+
+    improvement_suggestions_collection.insert_one({
+        "user_id": session["user_id"],
+        "user_name": session["username"],
+        "problem_id": str(problem["_id"]),
+        "problem_title": problem["titulo"],
+        "suggestion": suggestion_text,
+        "submitted_at": datetime.datetime.utcnow()
+    })
+    return redirect(url_for("exibir_solucao", problem_id=problem_id))
+
+
+@app.route("/user_history/<user_id>", methods=["GET"])
+def user_history(user_id):
+    if not user_is_logged_in():
+        return redirect(url_for("index", need_login=1))
+    if not user_has_role(["solucionador"]):
+        return "Acesso negado.", 403
+
+    target_user = usuarios_collection.find_one({"_id": ObjectId(user_id)})
+    if not target_user:
+        return "Usuário não encontrado.", 404
+
+    posted_problems = list(problemas_collection.find({"creator_id": user_id}))
+    for p in posted_problems:
+        p["_id_str"] = str(p["_id"])
+
+    viewed_history = list(problem_view_history_collection.find({"user_id": user_id}))
+    viewed_problem_ids = [vh["problem_id"] for vh in viewed_history]
+    viewed_problems = list(problemas_collection.find(
+        {"_id": {"$in": [ObjectId(pid) for pid in viewed_problem_ids]}}
+    ))
+    for vp in viewed_problems:
+        vp["_id_str"] = str(vp["_id"])
+
+    item_searches = list(history_collection.find({"user_id": user_id}))
+    problem_searches = list(problem_history_collection.find({"user_id": user_id}))
+    user_suggestions = list(improvement_suggestions_collection.find({"user_id": user_id}))
+
+    return render_template(
+        "history_user.html",
+        target_user=target_user,
+        posted_problems=posted_problems,
+        viewed_problems=viewed_problems,
+        item_searches=item_searches,
+        problem_searches=problem_searches,
+        user_suggestions=user_suggestions
+    )
+
+
+# -----------------------------------------------------------
+# PESQUISA DE ITENS (MZ) - (permanece igual ao exemplo anterior)
+# -----------------------------------------------------------
 @app.route("/item_search", methods=["GET"])
 def item_search():
     return render_template("item_search.html")
 
 
-ITEMS_PER_PAGE = 20
-
-
 @app.route("/load_items", methods=["GET"])
 def load_items():
+    """
+    Retorna JSON com até 20 itens por página, usando a mesma lógica:
+      - Se 'search' não está vazio, faz a busca com relevância.
+      - Se 'search' está vazio, seleciona aleatoriamente 20 itens
+        ainda não exibidos na sessão.
+    """
     search_query = request.args.get('search', '').strip()
     page = int(request.args.get('page', 1))
-    skip_items = (page - 1) * ITEMS_PER_PAGE
 
-    # Registrar histórico (se houver algo digitado)
     if search_query:
+        # Log de pesquisa
         if user_is_logged_in():
             history_collection.insert_one({
                 "user_id": session["user_id"],
@@ -809,55 +865,12 @@ def load_items():
                 "query": search_query
             })
 
-    # Se não houver termo, exibimos todos (com a lógica de 200 diários, se quiser)
-    if not search_query:
-        daily_ids = get_daily_random_items()
-        random.shuffle(daily_ids)
+        skip_items = (page - 1) * ITEMS_PER_PAGE
 
-        daily_cursor = itens_collection.find({"_id": {"$in": daily_ids}})
-        daily_map = {}
-        for it in daily_cursor:
-            daily_map[str(it["_id"])] = it
-
-        daily_list = []
-        for did in daily_ids:
-            did_str = str(did)
-            if did_str in daily_map:
-                daily_list.append(daily_map[did_str])
-
-        # Carrega os demais
-        remaining_cursor = itens_collection.find({
-            "_id": {"$nin": daily_ids}
-        }, collation={'locale': 'pt', 'strength': 1}).sort('description', 1)
-        remaining_list = list(remaining_cursor)
-
-        full_list = daily_list + remaining_list
-        total_items = len(full_list)
-
-        paged_items = full_list[skip_items: skip_items + ITEMS_PER_PAGE]
-        has_more = (len(paged_items) == ITEMS_PER_PAGE)
-
-        items_list = []
-        for item in paged_items:
-            items_list.append({
-                '_id': str(item['_id']),
-                'description': item.get('description', ''),
-                'stock_mz': item.get('stock_mz', 0),
-                'stock_eld': item.get('stock_eld', 0),
-                'price': float(item.get('price', 0.0)),
-                'is_highlighted': 0
-            })
-
-        return jsonify({
-            'items': items_list,
-            'has_more': has_more,
-            'total_items': total_items
-        })
-    else:
-        # Com termo de busca
         normalized_search_phrase = normalize_string(search_query)
         search_tokens = [t for t in normalized_search_phrase.split() if t and t not in STOPWORDS]
 
+        # Field calculado is_phrase_match e contagem de sub-frase
         phrase_match_cond = {
             '$cond': [
                 {
@@ -896,10 +909,11 @@ def load_items():
         total_items = count_result[0]['total'] if count_result else 0
 
         # Carregar matching
-        items = list(itens_collection.aggregate(
+        items_cursor = itens_collection.aggregate(
             pipeline_base,
             collation={'locale': 'pt', 'strength': 1}
-        ))
+        )
+        items = list(items_cursor)
 
         # Calcular maior sub-frase
         for item in items:
@@ -908,7 +922,10 @@ def load_items():
                 item.get('matching_phrases', [])
             )
 
-        # Ordena
+        # Ordena:
+        # 1) is_phrase_match desc
+        # 2) largest_sub_phrase_length desc
+        # 3) description asc
         items.sort(
             key=lambda x: (
                 -x['is_phrase_match'],
@@ -917,19 +934,18 @@ def load_items():
             )
         )
 
-        # Paginação
         paged_items = items[skip_items: skip_items + ITEMS_PER_PAGE]
-        has_more = (len(paged_items) == ITEMS_PER_PAGE)
+        has_more = (len(paged_items) == ITEMS_PER_PAGE and (skip_items + ITEMS_PER_PAGE) < len(items))
 
         items_list = []
-        for item in paged_items:
+        for it in paged_items:
             items_list.append({
-                '_id': str(item['_id']),
-                'description': item.get('description', ''),
-                'stock_mz': item.get('stock_mz', 0),
-                'stock_eld': item.get('stock_eld', 0),
-                'price': float(item.get('price', 0.0)),
-                'is_highlighted': 1 if item.get('is_phrase_match') == 1 else 0
+                '_id': str(it['_id']),
+                'description': it.get('description', ''),
+                'stock_mz': it.get('stock_mz', 0),
+                'stock_eld': it.get('stock_eld', 0),
+                'price': float(it.get('price', 0.0)),
+                'is_highlighted': 1 if it.get('is_phrase_match') == 1 else 0
             })
 
         return jsonify({
@@ -938,149 +954,58 @@ def load_items():
             'total_items': total_items
         })
 
+    else:
+        # Caso SEM TERMO: PAGINAÇÃO ALEATÓRIA
+        if page == 1:
+            session["displayed_item_ids"] = []
+        displayed_ids = session.get("displayed_item_ids", [])
+        displayed_objectids = [ObjectId(x) for x in displayed_ids]
 
-@app.route("/gridfs_image/<file_id>", methods=["GET"])
-def gridfs_image(file_id):
-    """
-    Retorna a imagem armazenada no GridFS pelo seu ID.
-    """
-    try:
-        gridout = fs_m.get(ObjectId(file_id))
-        image_data = gridout.read()
-        content_type = gridout.contentType or "image/jpeg"
-        response = make_response(image_data)
-        response.headers.set('Content-Type', content_type)
-        return response
-    except:
-        return "Imagem não encontrada.", 404
+        # Conta quantos restam
+        pipeline_count = [
+            {"$match": {"_id": {"$nin": displayed_objectids}}},
+            {"$count": "remaining_count"}
+        ]
+        count_res = list(itens_collection.aggregate(pipeline_count))
+        remaining_count = count_res[0]["remaining_count"] if count_res else 0
 
+        if remaining_count <= 0:
+            items = []
+            has_more = False
+        else:
+            fetch_size = min(ITEMS_PER_PAGE, remaining_count)
+            pipeline_sample = [
+                {"$match": {"_id": {"$nin": displayed_objectids}}},
+                {"$sample": {"size": fetch_size}}
+            ]
+            items_cursor = itens_collection.aggregate(pipeline_sample)
+            items = list(items_cursor)
 
-@app.route("/history_search", methods=["GET"])
-def history_search():
-    """
-    Exibe histórico de pesquisa de peças (somente 'solucionador').
-    """
-    if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
-    if not user_has_role(["solucionador"]):
-        return "Acesso negado.", 403
+            for it in items:
+                displayed_ids.append(str(it["_id"]))
+            session["displayed_item_ids"] = displayed_ids
+            has_more = (remaining_count - fetch_size) > 0
 
-    all_history = list(history_collection.find({}))
-    return render_template("history_search.html", history=all_history)
+        response_items = []
+        for it in items:
+            response_items.append({
+                '_id': str(it['_id']),
+                'description': it.get('description', ''),
+                'stock_mz': it.get('stock_mz', 0),
+                'stock_eld': it.get('stock_eld', 0),
+                'price': float(it.get('price', 0.0))
+            })
 
-
-@app.route("/history_problem", methods=["GET"])
-def history_problem():
-    """
-    Exibe histórico de pesquisa de problemas + sugestões de melhorias (só 'solucionador').
-    """
-    if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
-    if not user_has_role(["solucionador"]):
-        return "Acesso negado.", 403
-
-    all_history = list(problem_history_collection.find({}))
-    all_suggestions = list(improvement_suggestions_collection.find({}))
-
-    suggestions_by_problem_dict = {}
-    for s in all_suggestions:
-        pid = s["problem_id"]
-        if pid not in suggestions_by_problem_dict:
-            suggestions_by_problem_dict[pid] = {
-                "problem_title": s.get("problem_title", "Título não encontrado"),
-                "suggestions": []
-            }
-        suggestions_by_problem_dict[pid]["suggestions"].append(s)
-
-    suggestions_by_problem = []
-    for pid, data in suggestions_by_problem_dict.items():
-        suggestions_by_problem.append({
-            "problem_id": pid,
-            "problem_title": data["problem_title"],
-            "suggestions": data["suggestions"]
+        return jsonify({
+            "items": response_items,
+            "has_more": has_more,
+            "total_items": remaining_count
         })
 
-    return render_template(
-        "history_problem.html",
-        history=all_history,
-        suggestions_by_problem=suggestions_by_problem
-    )
 
-
-@app.route("/suggest_improvement/<problem_id>", methods=["POST"])
-def suggest_improvement(problem_id):
-    """
-    Usuário sugere melhoria na solução de um problema.
-    """
-    if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
-
-    suggestion_text = request.form.get("suggestion", "").strip()
-    if not suggestion_text:
-        return "Texto vazio.", 400
-
-    problem = problemas_collection.find_one({"_id": ObjectId(problem_id)})
-    if not problem:
-        return "Problema inexistente.", 404
-
-    improvement_suggestions_collection.insert_one({
-        "user_id": session["user_id"],
-        "user_name": session["username"],
-        "problem_id": str(problem["_id"]),
-        "problem_title": problem["titulo"],
-        "suggestion": suggestion_text,
-        "submitted_at": datetime.datetime.utcnow()
-    })
-
-    return redirect(url_for("exibir_solucao", problem_id=problem_id))
-
-
-@app.route("/user_history/<user_id>", methods=["GET"])
-def user_history(user_id):
-    """
-    Histórico completo de um usuário (só 'solucionador'):
-    - Problemas criados
-    - Problemas visualizados
-    - Histórico de pesquisa de itens
-    - Histórico de pesquisa de problemas
-    - Sugestões de melhoria enviadas
-    """
-    if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
-    if not user_has_role(["solucionador"]):
-        return "Acesso negado.", 403
-
-    target_user = usuarios_collection.find_one({"_id": ObjectId(user_id)})
-    if not target_user:
-        return "Usuário não encontrado.", 404
-
-    posted_problems = list(problemas_collection.find({"creator_id": user_id}))
-    for p in posted_problems:
-        p["_id_str"] = str(p["_id"])
-
-    viewed_history = list(problem_view_history_collection.find({"user_id": user_id}))
-    viewed_problem_ids = [vh["problem_id"] for vh in viewed_history]
-    viewed_problems = list(problemas_collection.find(
-        {"_id": {"$in": [ObjectId(pid) for pid in viewed_problem_ids]}}
-    ))
-    for vp in viewed_problems:
-        vp["_id_str"] = str(vp["_id"])
-
-    item_searches = list(history_collection.find({"user_id": user_id}))
-    problem_searches = list(problem_history_collection.find({"user_id": user_id}))
-    user_suggestions = list(improvement_suggestions_collection.find({"user_id": user_id}))
-
-    return render_template(
-        "history_user.html",
-        target_user=target_user,
-        posted_problems=posted_problems,
-        viewed_problems=viewed_problems,
-        item_searches=item_searches,
-        problem_searches=problem_searches,
-        user_suggestions=user_suggestions
-    )
-
-
-# ------------------- MUDANÇA 4: debug=False em produção ---------------------
+# -----------------------------------------------------------
+# EXECUÇÃO
+# -----------------------------------------------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    # Em produção, lembre de usar debug=False
+    app.run(host="0.0.0.0", port=5000, debug=True)

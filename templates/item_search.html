@@ -87,15 +87,13 @@
     .cart-icon {
       font-weight: bold;
     }
-
-    /* Badge com o número de itens distintos no carrinho */
     .cart-count-badge {
       position: absolute;
       top: -8px;
-      right: -14px; /* Ajustado um pouco mais para a direita por conta do tamanho maior */
+      right: -14px;
       background-color: #e74c3c;
       color: #fff;
-      font-size: 0.85rem; /* Ajustar se quiser maior ou menor */
+      font-size: 0.85rem;
       padding: 3px 7px;
       border-radius: 50%;
       pointer-events: none;
@@ -175,7 +173,7 @@
       }
     }
 
-    /* Destaque quando data-highlighted="1" */
+    /* Destaque quando data-highlighted="1" (usado se quiser colorir item) */
     .results li[data-highlighted="1"] {
       border-left: 5px solid green;
       padding-left: calc(1.5rem - 5px);
@@ -207,7 +205,7 @@
       transition: background-color 0.2s, transform 0.2s;
       width: fit-content;
       color: #fff;
-      background-color: #25D366; /* Mesma cor que o antigo Contato MZ */
+      background-color: #25D366; /* cor verde */
     }
     .add-to-cart-btn:hover {
       background-color: #20b955;
@@ -310,7 +308,6 @@
       background: transparent;
       font-size: 1.2rem;
       cursor: pointer;
-      /* Podemos deixar arredondado, embora seja "X" */
       border-radius: 32px;
       transition: background-color 0.2s;
     }
@@ -318,7 +315,6 @@
       background-color: rgba(0, 0, 0, 0.1);
     }
 
-    /* Input de quantidade */
     .quantity-input {
       width: 100%;
       font-size: 1rem;
@@ -363,16 +359,12 @@
       justify-content: space-between;
       margin-bottom: 0.5rem;
     }
-
-    /* Grupo de setas (botões) e quantidade */
     .cart-quantity-controls {
       display: flex;
       align-items: center;
       gap: 8px;
       margin-right: 8px;
     }
-
-    /* Botões de quantidade (borda arredondada) */
     .quantity-btn {
       background-color: #ccc;
       border: none;
@@ -385,8 +377,6 @@
     .quantity-btn:hover {
       background-color: #bbb;
     }
-
-    /* Botão remover (borda arredondada) */
     .remove-btn {
       background-color: #e74c3c;
       color: #fff;
@@ -400,8 +390,6 @@
       background-color: #c0392b;
       transform: scale(1.02);
     }
-
-    /* Botão "Finalizar" (herda confirm-btn, mas sobrescreve cor) */
     .finalize-btn {
       background-color: #25D366;
       color: #fff;
@@ -413,7 +401,7 @@
     }
 
     /* =========================================================================
-       MEDIA QUERIES (VERSÃO MOBILE)
+       MEDIA QUERIES
        ========================================================================= */
     @media (max-width: 768px) {
       header {
@@ -424,7 +412,6 @@
       }
       .btn-voltar-inicio {
         padding: 0.5rem 1rem;
-        /* Mantemos o font-size aumentado no mobile também */
       }
       main {
         padding: 1rem;
@@ -434,10 +421,8 @@
         font-size: 1rem;
       }
       .cart-items-list {
-        max-height: 200px; /* para caber em telas menores */
+        max-height: 200px;
       }
-
-      /* Centralizar descrição e botão "Adicionar" no mobile */
       .results li {
         flex-direction: column;
         align-items: flex-start;
@@ -445,8 +430,8 @@
       }
       .item-info {
         width: 100%;
-        margin-bottom: 4rem; /* Espaço para o botão não ficar sobre a descrição */
-        text-align: center;  /* Centraliza a descrição no mobile */
+        margin-bottom: 4rem;
+        text-align: center;
       }
       .item-actions {
         position: absolute;
@@ -490,12 +475,12 @@
       <ul id="results" class="results"></ul>
     </div>
 
-    <!-- Loading (spinner ou texto) -->
+    <!-- Loading -->
     <div id="loading" class="loading" style="display: none;">
       Carregando...
     </div>
 
-    <!-- Mensagem de nenhum item encontrado (exibida dinamicamente) -->
+    <!-- Mensagem de nenhum item encontrado -->
     <div id="noItemsFound" class="no-items-found" style="display: none;">
       <p>Nenhum item encontrado.</p>
       <button onclick="contactMZ()">Entrar em Contato com a MZ</button>
@@ -507,7 +492,7 @@
     <p>© 2025 Plataforma M - Integração MZ</p>
   </footer>
 
-  <!-- MODAL PARA DIGITAR QUANTIDADE (Adicionar ao Carrinho) -->
+  <!-- MODAL PARA QUANTIDADE (Adicionar ao Carrinho) -->
   <div class="modal-overlay" id="quantityModal">
     <div class="modal-content">
       <button class="close-modal-btn" onclick="closeQuantityModal()">✖</button>
@@ -539,21 +524,19 @@
 
   <!-- Scripts -->
   <script>
+    const ITEMS_PER_PAGE = 20;
     let currentPage = 1;
     let isLoading = false;
     let hasMoreItems = true;
 
-    // Número de WhatsApp da MZ
+    // Número de WhatsApp da MZ (alterar se precisar)
     const MZ_WHATSAPP = "5543996436367";
 
-    /*
-      Array local para o carrinho.
-      Cada item: { _id, description, quantity }
-    */
+    // Carrinho local
     let cart = [];
 
-    // MODAL DE QUANTIDADE (Adicionar) --------------------------------
-    let currentItemToAdd = null; // Armazena temporariamente o item que será adicionado
+    // MODAL DE QUANTIDADE -------------------------------------
+    let currentItemToAdd = null;
     function openQuantityModal(itemId, description) {
       currentItemToAdd = { _id: itemId, description };
       document.getElementById('quantityInput').value = 1;
@@ -564,14 +547,10 @@
       document.getElementById('quantityModal').classList.remove('active');
       currentItemToAdd = null;
     }
-
-    // Confirma a adição no carrinho
     document.getElementById('confirmAddBtn').addEventListener('click', () => {
       const quantity = parseInt(document.getElementById('quantityInput').value, 10);
       if (!currentItemToAdd) return;
-
       if (quantity > 0) {
-        // Verifica se já existe no carrinho
         const existing = cart.find(item => item._id === currentItemToAdd._id);
         if (existing) {
           existing.quantity += quantity;
@@ -587,7 +566,7 @@
       closeQuantityModal();
     });
 
-    // MODAL DO CARRINHO ---------------------------------------------
+    // MODAL DO CARRINHO ---------------------------------------
     function openCartModal() {
       updateCartModal();
       document.getElementById('cartModal').classList.add('active');
@@ -595,44 +574,32 @@
     function closeCartModal() {
       document.getElementById('cartModal').classList.remove('active');
     }
-
-    // Atualiza contador no ícone do carrinho (itens distintos)
     function updateCartCount() {
-      const distinctCount = cart.length;
-      document.getElementById('cartCount').textContent = distinctCount;
+      document.getElementById('cartCount').textContent = cart.length;
     }
-
-    // Remover item do carrinho
     function removeFromCart(itemId) {
       cart = cart.filter(it => it._id !== itemId);
       updateCartCount();
       updateCartModal();
     }
-
-    // Incrementar quantidade
     function incrementItemQuantity(itemId) {
       const item = cart.find(it => it._id === itemId);
       if (item) {
-        item.quantity += 1;
+        item.quantity++;
         updateCartModal();
       }
     }
-
-    // Decrementar quantidade
     function decrementItemQuantity(itemId) {
       const item = cart.find(it => it._id === itemId);
       if (item) {
-        item.quantity -= 1;
+        item.quantity--;
         if (item.quantity <= 0) {
-          // Se ficar 0 ou menos, remove
           removeFromCart(itemId);
         } else {
           updateCartModal();
         }
       }
     }
-
-    // Atualiza o modal do carrinho (lista de itens)
     function updateCartModal() {
       const cartItemsList = document.getElementById('cartItemsList');
       cartItemsList.innerHTML = '';
@@ -657,8 +624,6 @@
         cartItemsList.appendChild(row);
       });
     }
-
-    // Finalizar no WhatsApp
     function finalizeCart() {
       if (cart.length === 0) {
         alert("Seu carrinho está vazio.");
@@ -669,13 +634,12 @@
         message += `${index + 1}) ${item.description} - Qtd: ${item.quantity}\n`;
       });
       message += "\nObrigado!";
-
       const encodedText = encodeURIComponent(message);
       const waLink = `https://wa.me/${MZ_WHATSAPP}?text=${encodedText}`;
       window.open(waLink, '_blank');
     }
 
-    // Função para contato com a MZ (quando nenhum item é encontrado)
+    // Função para contato com a MZ
     function contactMZ() {
       const message = "Olá, não encontrei a peça que procurava. Poderiam me ajudar?";
       const encodedText = encodeURIComponent(message);
@@ -683,44 +647,43 @@
       window.open(waLink, '_blank');
     }
 
-    // PESQUISA DE ITENS / SCROLL INFINITO ----------------------------
-    function loadItemsPage(p) {
+    // PESQUISA DE ITENS / SCROLL INFINITO ---------------------
+    function loadItemsPage(pageNum) {
       return new Promise((resolve, reject) => {
         const searchQuery = document.getElementById('searchInput').value.trim();
-        fetch(`/load_items?page=${p}&search=${encodeURIComponent(searchQuery)}`)
+        let url = `/load_items?page=${pageNum}&search=${encodeURIComponent(searchQuery)}`;
+        fetch(url)
           .then(response => response.json())
           .then(data => {
-            // Se for a primeira página e não houver nenhum item, exibimos mensagem
-            if (p === 1 && data.items.length === 0) {
+            // Se for a primeira página e não vier nenhum item, exibe aviso
+            if (pageNum === 1 && data.items.length === 0) {
               document.getElementById('results').innerHTML = '';
               document.getElementById('noItemsFound').style.display = 'block';
               hasMoreItems = false;
               resolve();
               return;
             }
-
-            // Caso contrário, se estiver retornando itens, esconde o aviso "nenhum item"
+            // Caso contrário, esconde o aviso
             document.getElementById('noItemsFound').style.display = 'none';
 
-            if (p === 1) {
+            // Se for a primeira página, limpa resultados prévios
+            if (pageNum === 1) {
               document.getElementById('results').innerHTML = '';
             }
 
+            // Adiciona ao DOM
             const resultsList = document.getElementById('results');
-
             data.items.forEach(item => {
-              const listItem = document.createElement('li');
-              listItem.setAttribute('data-id', item._id);
-              listItem.setAttribute('data-highlighted', item.is_highlighted ? '1' : '0');
-
-              // Só o botão "Adicionar"
+              const li = document.createElement('li');
+              li.setAttribute('data-id', item._id);
+              li.setAttribute('data-highlighted', item.is_highlighted ? '1' : '0');
               const addBtn = `
                 <button class="add-to-cart-btn"
                         onclick="openQuantityModal('${item._id}','${item.description}')">
                   + Adicionar
                 </button>`;
 
-              listItem.innerHTML = `
+              li.innerHTML = `
                 <div class="item-info">
                   <strong>${item.description}</strong>
                 </div>
@@ -728,23 +691,19 @@
                   ${addBtn}
                 </div>
               `;
-
-              resultsList.appendChild(listItem);
+              resultsList.appendChild(li);
             });
 
-            if (!data.has_more) {
-              hasMoreItems = false;
-            }
+            hasMoreItems = data.has_more;
             resolve();
           })
           .catch(error => {
-            console.error('Erro:', error);
+            console.error(error);
             reject(error);
           });
       });
     }
 
-    // Scroll infinito
     function loadMoreItems() {
       if (isLoading || !hasMoreItems) return;
       isLoading = true;
@@ -752,7 +711,7 @@
 
       loadItemsPage(currentPage)
         .then(() => {
-          currentPage += 1;
+          currentPage++;
           isLoading = false;
           document.getElementById('loading').style.display = 'none';
         })
@@ -761,23 +720,21 @@
           document.getElementById('loading').style.display = 'none';
         });
     }
+
+    function startSearch() {
+      currentPage = 1;
+      hasMoreItems = true;
+      isLoading = false;
+      document.getElementById('noItemsFound').style.display = 'none';
+      loadMoreItems();
+    }
+
     window.addEventListener('scroll', () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50) {
         loadMoreItems();
       }
     });
 
-    // Iniciar busca
-    function startSearch() {
-      currentPage = 1;
-      hasMoreItems = true;
-      isLoading = false;
-      document.getElementById('results').innerHTML = '';
-      document.getElementById('noItemsFound').style.display = 'none';
-      loadMoreItems();
-    }
-
-    // Ao carregar a página, carrega a primeira página
     window.onload = function() {
       loadMoreItems();
     };
