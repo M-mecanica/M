@@ -37,17 +37,20 @@ problem_history_collection = db_m["problem_search_history"]  # Histórico de bus
 problem_view_history_collection = db_m["problem_view_history"]  # Registro de visualizações
 improvement_suggestions_collection = db_m["improvement_suggestions"]  # Sugestões de melhorias
 
-# GridFS para armazenar imagens (ex.: solução de problemas, imagens do problema etc.)
+# GridFS para armazenar imagens na plataforma M
 fs_m = gridfs.GridFS(db_m)
 
 # -----------------------------------------------------------
-# CONEXÃO COM O MONGO - BANCO MachineZONE
+# CONEXÃO COM O MONGO - BANCO MachineZONE (para itens)
 # -----------------------------------------------------------
 client_mz = MongoClient(
     "mongodb+srv://adaltonmuzilomendes:rolamento@cluster0.atmeh.mongodb.net/"
 )
 db_mz = client_mz["MachineZONE"]
-itens_collection = db_mz["itens"]  # Coleção principal de itens
+itens_collection = db_mz["itens"]
+
+# GridFS para armazenar imagens de itens (MachineZONE)
+fs_mz = gridfs.GridFS(db_mz)
 
 # -----------------------------------------------------------
 # CONFIGURAÇÃO E CONSTANTES
@@ -73,28 +76,6 @@ def user_has_role(roles_permitidos):
     if not user_is_logged_in():
         return False
     return session.get("role") in roles_permitidos
-
-def save_image_if_exists(file_obj):
-    """
-    Salva o arquivo em GridFS e retorna o ID (string) do arquivo.
-    Retorna None se não houver arquivo ou se estiver vazio.
-    """
-    if not file_obj or file_obj.filename.strip() == "":
-        return None
-
-    file_data = file_obj.read()
-    if not file_data:
-        return None
-
-    content_type = file_obj.content_type
-    filename = secure_filename(file_obj.filename)
-
-    stored_id = fs_m.put(
-        file_data,
-        filename=filename,
-        contentType=content_type
-    )
-    return str(stored_id)
 
 def normalize_string(s):
     """
@@ -134,6 +115,52 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
             if num_tokens > largest_length:
                 largest_length = num_tokens
     return largest_length
+
+def save_image_if_exists(file_obj):
+    """
+    Salva o arquivo em GridFS (fs_m) e retorna o ID (string) do arquivo.
+    Retorna None se não houver arquivo ou se estiver vazio.
+    (Usada para imagens de problemas na plataforma M)
+    """
+    if not file_obj or file_obj.filename.strip() == "":
+        return None
+
+    file_data = file_obj.read()
+    if not file_data:
+        return None
+
+    content_type = file_obj.content_type
+    filename = secure_filename(file_obj.filename)
+
+    stored_id = fs_m.put(
+        file_data,
+        filename=filename,
+        contentType=content_type
+    )
+    return str(stored_id)
+
+def save_image_if_exists_mz(file_obj):
+    """
+    Salva o arquivo em GridFS (fs_mz) e retorna o ID (string) do arquivo.
+    Retorna None se não houver arquivo ou se estiver vazio.
+    (Usada para imagens de itens no banco MachineZONE)
+    """
+    if not file_obj or file_obj.filename.strip() == "":
+        return None
+
+    file_data = file_obj.read()
+    if not file_data:
+        return None
+
+    content_type = file_obj.content_type
+    filename = secure_filename(file_obj.filename)
+
+    stored_id = fs_mz.put(
+        file_data,
+        filename=filename,
+        contentType=content_type
+    )
+    return str(stored_id)
 
 # -----------------------------------------------------------
 # ROTA PRINCIPAL E SISTEMA DE USUÁRIOS
@@ -242,8 +269,8 @@ def search():
 def load_problems():
     """
     Fornece problemas em formato JSON para a página resultados.html fazer scroll infinito.
-    Se 'q' (search_query) estiver vazio, retorna problemas aleatórios (sem repetição) em páginas.
-    Caso haja busca, faz busca normal com skip/limit e ordenação simples.
+    Se 'q' (search_query) estiver vazio, retorna problemas aleatórios.
+    Se houver busca, faz a busca com skip/limit.
     """
     search_query = request.args.get("q", "").strip()
     page = int(request.args.get("page", 1))
@@ -272,14 +299,13 @@ def load_problems():
         normalized_search_phrase = normalize_string(search_query)
         search_tokens = [t for t in normalized_search_phrase.split() if t and t not in STOPWORDS]
 
-        # --- ALTERAÇÃO AQUI: Uso de $all no lugar de $in para buscar TODAS as tags (AND) ---
         pipeline_base = [
             {
                 "$match": {
                     "$or": [
                         {"titulo": {"$regex": search_query, "$options": "i"}},
                         {"descricao": {"$regex": search_query, "$options": "i"}},
-                        {"tags": {"$all": search_tokens}}  # AND em vez de $in (OR)
+                        {"tags": {"$all": search_tokens}}  # AND de tokens
                     ]
                 }
             }
@@ -305,7 +331,6 @@ def load_problems():
                 "titulo": p.get("titulo", ""),
                 "descricao": p.get("descricao", ""),
                 "resolvido": p.get("resolvido", False),
-                # Incluímos a imagem (se houver) no JSON:
                 "problemImage": str(p["problemImage"]) if p.get("problemImage") else None
             })
 
@@ -319,7 +344,6 @@ def load_problems():
     else:
         # LÓGICA DE ALEATORIEDADE SE NÃO HOUVER BUSCA
         if page == 1:
-            # Reinicia a lista de exibidos ao pedir a página 1
             session["displayed_problem_ids"] = []
         displayed_ids = session.get("displayed_problem_ids", [])
 
@@ -517,7 +541,6 @@ def edit_problem(problem_id):
         if not titulo_novo or not descricao_nova:
             return render_template("edit_problem.html", problema=problema, erro="Preencha todos os campos.")
 
-        # Preparando campos de atualização
         updated_fields = {
             "titulo": titulo_novo,
             "descricao": descricao_nova,
@@ -532,7 +555,6 @@ def edit_problem(problem_id):
         old_file_id = problema.get("problemImage")
 
         if delete_image:
-            # Se o usuário marcou para deletar a imagem existente
             if old_file_id:
                 try:
                     fs_m.delete(ObjectId(old_file_id))
@@ -540,7 +562,6 @@ def edit_problem(problem_id):
                     pass
             updated_fields["problemImage"] = None
         elif new_file_id:
-            # Se tem nova imagem, excluímos a antiga (se houver)
             if old_file_id:
                 try:
                     fs_m.delete(ObjectId(old_file_id))
@@ -548,7 +569,6 @@ def edit_problem(problem_id):
                     pass
             updated_fields["problemImage"] = new_file_id
 
-        # Atualiza o problema no banco
         problemas_collection.update_one(
             {"_id": ObjectId(problem_id)},
             {"$set": updated_fields}
@@ -706,7 +726,7 @@ def edit_solution(problem_id):
     )
 
 # -----------------------------------------------------------
-# GRIDFS - EXIBIÇÃO DE IMAGENS
+# GRIDFS - EXIBIÇÃO DE IMAGENS (PROBLEMAS)
 # -----------------------------------------------------------
 @app.route("/gridfs_image/<file_id>", methods=["GET"])
 def gridfs_image(file_id):
@@ -719,6 +739,24 @@ def gridfs_image(file_id):
         return response
     except:
         return "Imagem não encontrada.", 404
+
+# -----------------------------------------------------------
+# GRIDFS - EXIBIÇÃO DE IMAGENS (ITENS)
+# -----------------------------------------------------------
+@app.route("/gridfs_item_image/<file_id>", methods=["GET"])
+def gridfs_item_image(file_id):
+    """
+    Exibe a imagem do item armazenada em fs_mz pelo ID do arquivo.
+    """
+    try:
+        gridout = fs_mz.get(ObjectId(file_id))
+        image_data = gridout.read()
+        content_type = gridout.contentType or "image/jpeg"
+        response = make_response(image_data)
+        response.headers.set('Content-Type', content_type)
+        return response
+    except:
+        return "Imagem do item não encontrada.", 404
 
 # -----------------------------------------------------------
 # HISTÓRICOS
@@ -828,7 +866,7 @@ def user_history(user_id):
     )
 
 # -----------------------------------------------------------
-# PESQUISA DE ITENS (MZ)
+# PESQUISA DE ITENS (MZ) + Upload de imagem
 # -----------------------------------------------------------
 @app.route("/item_search", methods=["GET"])
 def item_search():
@@ -837,9 +875,9 @@ def item_search():
 @app.route("/load_items", methods=["GET"])
 def load_items():
     """
-    Retorna JSON com até 20 itens por página, usando a mesma lógica:
+    Retorna JSON com até ITEMS_PER_PAGE itens por página.
       - Se 'search' não está vazio, faz a busca com relevância.
-      - Se 'search' está vazio, seleciona aleatoriamente 20 itens
+      - Se 'search' está vazio, seleciona aleatoriamente itens
         ainda não exibidos na sessão.
     """
     search_query = request.args.get('search', '').strip()
@@ -902,7 +940,7 @@ def load_items():
         ))
         total_items = count_result[0]['total'] if count_result else 0
 
-        # Carregar matching
+        # Carregar matching (não paginado ainda, para depois fazermos slice)
         items_cursor = itens_collection.aggregate(
             pipeline_base,
             collation={'locale': 'pt', 'strength': 1}
@@ -936,7 +974,8 @@ def load_items():
                 'stock_mz': it.get('stock_mz', 0),
                 'stock_eld': it.get('stock_eld', 0),
                 'price': float(it.get('price', 0.0)),
-                'is_highlighted': 1 if it.get('is_phrase_match') == 1 else 0
+                'is_highlighted': 1 if it.get('is_phrase_match') == 1 else 0,
+                'itemImage': str(it['itemImage']) if it.get('itemImage') else None
             })
 
         return jsonify({
@@ -983,7 +1022,8 @@ def load_items():
                 'description': it.get('description', ''),
                 'stock_mz': it.get('stock_mz', 0),
                 'stock_eld': it.get('stock_eld', 0),
-                'price': float(it.get('price', 0.0))
+                'price': float(it.get('price', 0.0)),
+                'itemImage': str(it['itemImage']) if it.get('itemImage') else None
             })
 
         return jsonify({
@@ -991,6 +1031,40 @@ def load_items():
             "has_more": has_more,
             "total_items": remaining_count
         })
+
+@app.route("/upload_item_image/<item_id>", methods=["POST"])
+def upload_item_image(item_id):
+    """
+    Permite que um usuário com papel 'solucionador' envie (ou substitua) a imagem de um item.
+    """
+    if not user_is_logged_in():
+        return "Acesso negado. Faça login.", 403
+    if not user_has_role(["solucionador"]):
+        return "Acesso negado. Apenas solucionadores podem enviar imagens de itens.", 403
+
+    item = itens_collection.find_one({"_id": ObjectId(item_id)})
+    if not item:
+        return "Item não encontrado.", 404
+
+    file_obj = request.files.get("itemImage")
+    if file_obj:
+        new_file_id = save_image_if_exists_mz(file_obj)
+        if new_file_id:
+            old_file_id = item.get("itemImage")
+            # Remove a imagem antiga, se existir
+            if old_file_id:
+                try:
+                    fs_mz.delete(ObjectId(old_file_id))
+                except:
+                    pass
+            # Atualiza o doc do item com a nova imagem
+            itens_collection.update_one(
+                {"_id": ObjectId(item_id)},
+                {"$set": {"itemImage": new_file_id}}
+            )
+
+    # Retorna à página de busca (ou poderia retornar JSON)
+    return redirect(url_for("item_search"))
 
 # -----------------------------------------------------------
 # EXECUÇÃO

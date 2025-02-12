@@ -173,7 +173,6 @@
       }
     }
 
-    /* Destaque quando data-highlighted="1" (usado se quiser colorir item) */
     .results li[data-highlighted="1"] {
       border-left: 5px solid green;
       padding-left: calc(1.5rem - 5px);
@@ -189,10 +188,10 @@
       color: #000;
     }
 
-    /* Botão "Adicionar" (borda arredondada) */
     .item-actions {
       display: flex;
       gap: 1rem;
+      flex-wrap: wrap; /* para não estourar no mobile */
     }
     .add-to-cart-btn {
       padding: 0.7rem 1.4rem;
@@ -209,6 +208,42 @@
     }
     .add-to-cart-btn:hover {
       background-color: #20b955;
+      transform: scale(1.02);
+    }
+
+    /* Imagem do item (200x200, centralizada, sem cortar) */
+    .item-image-display {
+      width: 200px;
+      height: 200px;
+      display: block;
+      margin: 10px auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      object-fit: contain; /* Mantém proporção, sem cortar a imagem */
+    }
+
+    /* Formulário de upload da imagem do item */
+    .upload-form {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .upload-form input[type="file"] {
+      font-size: 0.9rem;
+    }
+    .upload-form button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 32px;
+      background-color: #3498db;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      font-size: 0.9rem;
+    }
+    .upload-form button:hover {
+      background-color: #2980b9;
       transform: scale(1.02);
     }
 
@@ -324,7 +359,6 @@
       border: 1px solid #ccc;
     }
 
-    /* Botão de confirmar (borda arredondada) */
     .confirm-btn {
       padding: 0.8rem 1rem;
       background-color: #3498db;
@@ -440,6 +474,27 @@
         transform: translateX(-50%);
       }
     }
+
+    @media (min-width: 769px) {
+      body {
+        font-size: 1.2rem; /* ajuste conforme desejar */
+      }
+      .results li {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .item-info {
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+      .item-actions {
+        position: static;
+        transform: none;
+        margin-top: 0;
+      }
+    }
   </style>
 </head>
 
@@ -464,7 +519,7 @@
         type="text"
         id="searchInput"
         name="search"
-        placeholder="Digite para pesquisar itens..."
+        placeholder="Pesquise por peças..."
         autocomplete="off"
         autofocus
       />
@@ -522,20 +577,27 @@
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- Define se o usuário atual é "solucionador" (via Jinja) -->
+  {% if session and session.role == 'solucionador' %}
+    <script>window.IS_SOLUCIONADOR = true;</script>
+  {% else %}
+    <script>window.IS_SOLUCIONADOR = false;</script>
+  {% endif %}
+
   <script>
     const ITEMS_PER_PAGE = 20;
     let currentPage = 1;
     let isLoading = false;
     let hasMoreItems = true;
 
-    // Número de WhatsApp da MZ (alterar se precisar)
-    const MZ_WHATSAPP = "5543996436367";
+    const MZ_WHATSAPP = "5543996436367"; // Número de WhatsApp da MZ
 
     // Carrinho local
     let cart = [];
 
-    // MODAL DE QUANTIDADE -------------------------------------
+    // ------------------------------------------------------
+    // MODAL DE QUANTIDADE
+    // ------------------------------------------------------
     let currentItemToAdd = null;
     function openQuantityModal(itemId, description) {
       currentItemToAdd = { _id: itemId, description };
@@ -566,7 +628,9 @@
       closeQuantityModal();
     });
 
-    // MODAL DO CARRINHO ---------------------------------------
+    // ------------------------------------------------------
+    // CARRINHO
+    // ------------------------------------------------------
     function openCartModal() {
       updateCartModal();
       document.getElementById('cartModal').classList.add('active');
@@ -647,7 +711,9 @@
       window.open(waLink, '_blank');
     }
 
-    // PESQUISA DE ITENS / SCROLL INFINITO ---------------------
+    // ------------------------------------------------------
+    // PESQUISA DE ITENS / SCROLL INFINITO
+    // ------------------------------------------------------
     function loadItemsPage(pageNum) {
       return new Promise((resolve, reject) => {
         const searchQuery = document.getElementById('searchInput').value.trim();
@@ -677,20 +743,58 @@
               const li = document.createElement('li');
               li.setAttribute('data-id', item._id);
               li.setAttribute('data-highlighted', item.is_highlighted ? '1' : '0');
+
+              // Cria a parte principal (descrição, imagem, etc.)
+              let htmlContent = `
+                <div class="item-info">
+                  <strong>${item.description}</strong>
+              `;
+
+              // Se o item tiver imagem, exibe
+              if (item.itemImage) {
+                htmlContent += `
+                  <img
+                    src="/gridfs_item_image/${item.itemImage}"
+                    alt="Imagem do Item"
+                    class="item-image-display"
+                  />
+                `;
+              }
+
+              htmlContent += `</div>`; // fecha .item-info
+
+              // Botão de adicionar ao carrinho
               const addBtn = `
                 <button class="add-to-cart-btn"
                         onclick="openQuantityModal('${item._id}','${item.description}')">
                   + Adicionar
-                </button>`;
+                </button>
+              `;
 
-              li.innerHTML = `
-                <div class="item-info">
-                  <strong>${item.description}</strong>
-                </div>
+              // Cria container para as ações
+              htmlContent += `
                 <div class="item-actions">
                   ${addBtn}
                 </div>
               `;
+
+              // Se o usuário for "solucionador", mostra o formulário de upload de imagem
+              if (window.IS_SOLUCIONADOR === true) {
+                htmlContent += `
+                  <form
+                    action="/upload_item_image/${item._id}"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="upload-form"
+                  >
+                    <label for="itemImage_${item._id}">Nova imagem:</label>
+                    <input type="file" name="itemImage" id="itemImage_${item._id}" accept="image/*">
+                    <button type="submit">Enviar</button>
+                  </form>
+                `;
+              }
+
+              li.innerHTML = htmlContent;
               resultsList.appendChild(li);
             });
 
@@ -729,12 +833,14 @@
       loadMoreItems();
     }
 
+    // Scroll infinito
     window.addEventListener('scroll', () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50) {
         loadMoreItems();
       }
     });
 
+    // Ao carregar a página, inicia o load
     window.onload = function() {
       loadMoreItems();
     };

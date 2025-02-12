@@ -85,22 +85,38 @@
       align-items: center;
     }
 
-    /* Caixa de pesquisa */
+    /*
+      Caixa de pesquisa (posicionando a lupa "absoluta" dentro do container)
+      para ficar sobre o input.
+    */
     .search-container {
-      display: flex;
+      position: relative;
       width: 100%;
       max-width: 600px;
       margin-bottom: 2rem;
     }
+    /* Ícone de lupa posicionado à esquerda */
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none; /* Ícone não recebe clique, passa para o input */
+      fill: #aaa;
+      width: 20px;
+      height: 20px;
+    }
+    /* Campo de texto com padding-left maior para não sobrescrever o ícone */
     .search-container input[type="text"] {
-      flex: 1;
+      width: 100%;
       padding: 1rem 1.5rem;
+      padding-left: 3rem; /* Espaço para a lupa */
       border: none;
       border-radius: 32px;
       background-color: #fff;
       font-size: 1rem;
       color: #333;
-      text-align: center;
+      text-align: center; /* se preferir, troque para left */
       outline: none;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
@@ -139,7 +155,6 @@
       Imagem do problema:
       - Define um tamanho máximo de largura e altura para desktop
       - Usa object-fit: contain para não cortar a imagem
-      - Assim, a imagem fica dentro dessas dimensões sem distorcer
     */
     .problem-image {
       display: block;
@@ -276,6 +291,7 @@
       .search-container input[type="text"] {
         padding: 0.8rem;
         font-size: 0.9rem;
+        padding-left: 2.5rem; /* Ajuste menor para mobile */
       }
       .problem-item {
         margin-bottom: 1.5rem;
@@ -324,7 +340,6 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0,0,0,0.4);
-
       /* Centraliza o modal no meio da tela */
       align-items: center;
       justify-content: center;
@@ -419,11 +434,19 @@
   <main>
     <!-- Campo de busca para refinar/editar a pesquisa -->
     <form action="{{ url_for('search') }}" method="GET" class="search-container">
+      <!-- Ícone de lupa (posicionado à esquerda do input) -->
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M10 2a8 8 0 015.29 13.71l5
+                 5a1 1 0 01-1.42 1.42l-5-5A8
+                 8 0 1110 2zm0 2a6 6 0 100
+                 12 6 6 0 000-12z"/>
+      </svg>
+
       <input
         type="text"
         name="q"
         id="search-input"
-        placeholder="Pesquise um problema mecânico"
+        placeholder=""
         value="{{ termo_busca if termo_busca else '' }}"
         autocomplete="off"
         autofocus

@@ -114,18 +114,32 @@
       width: 100%;
       max-width: 600px;
       margin-bottom: 2.5rem;
+      position: relative; /* Para posicionar o ícone */
+    }
+
+    /* Ícone de lupa posicionado à esquerda do input */
+    .search-container .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none; /* O clique passa direto para o input */
+      fill: #aaa;
+      width: 20px;
+      height: 20px;
     }
 
     /* A barra de pesquisa (input), agora somente para clique (readonly) */
     .search-container input[type="text"] {
       width: 100%;
       padding: 1rem 1.5rem;
+      padding-left: 3rem; /* Espaço extra para o ícone à esquerda */
       border: none;
       border-radius: 32px;
       background-color: #fff;
       font-size: 1rem;
       color: #333;
-      text-align: center;
+      text-align: left; /* Ajuste se quiser o texto alinhado à esquerda */
       outline: none;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       cursor: pointer; /* indica que é clicável */
@@ -366,9 +380,17 @@
 
     <!-- "Barra de pesquisa" que redireciona ao clicar -->
     <div class="search-container">
+      <!-- Ícone de lupa -->
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M10 2a8 8 0 015.29 13.71l5
+                 5a1 1 0 01-1.42 1.42l-5-5A8
+                 8 0 1110 2zm0 2a6 6 0 100
+                 12 6 6 0 000-12z"></path>
+      </svg>
+
       <input
         type="text"
-        placeholder="Pesquise um problema mecânico ou eletrônico"
+        placeholder="Pesquise um problema..."
         autocomplete="off"
         readonly
         onclick="window.location.href='{{ url_for('search') }}';"
