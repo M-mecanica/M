@@ -602,6 +602,8 @@
         imgEl.src = "/gridfs_image/" + problem.problemImage;
         imgEl.alt = "Imagem do problema";
         imgEl.classList.add('problem-image');
+        // Lazy Loading aqui:
+        imgEl.loading = "lazy";
         div.appendChild(imgEl);
       }
 
