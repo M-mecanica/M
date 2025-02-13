@@ -5,15 +5,9 @@
   <title>M - Resultados da Pesquisa</title>
   <!-- Fonte básica -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet" />
   <!-- Ícones Material (para a lupa) -->
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/icon?family=Material+Icons"
-  />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
   <!-- Meta para responsividade em dispositivos móveis -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -53,7 +47,7 @@
       text-align: center;
     }
 
-    /* Botão Voltar (borda arredondada, tamanho do ícone 2rem) */
+    /* Botão Voltar */
     .btn-voltar-inicio {
       background-color: #000;
       color: #fff;
@@ -90,9 +84,7 @@
       align-items: center;
     }
 
-    /*
-      Caixa de pesquisa, com a lupa estilo "Google" (Material Icon)
-    */
+    /* Caixa de pesquisa, com a lupa estilo "Google" (Material Icon) */
     .search-container {
       position: relative;
       width: 100%;
@@ -107,25 +99,25 @@
       transform: translateY(-50%);
       color: #aaa;
       font-size: 1.6rem;
-      pointer-events: none; /* Ícone não recebe clique */
+      pointer-events: none;
     }
     /* Campo de texto com padding-left maior para não sobrescrever o ícone */
     .search-container input[type="text"] {
       width: 100%;
       padding: 1rem 1.5rem;
-      padding-left: 3rem; /* Espaço para a lupa */
+      padding-left: 3rem;
       border: none;
       border-radius: 32px;
       background-color: #fff;
       font-size: 1rem;
       color: #333;
-      text-align: left; /* Alinhamento à esquerda */
+      text-align: left;
       outline: none;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     .search-container input[type="text"]::placeholder {
       color: #aaa;
-      text-align: left; /* Placeholder também à esquerda */
+      text-align: left;
     }
 
     /* Container de resultados (usado para injetar os itens via JS) */
@@ -155,19 +147,15 @@
       text-align: center;
     }
 
-    /*
-      Imagem do problema:
-      - Define um tamanho máximo de largura e altura para desktop
-      - Usa object-fit: contain para não cortar a imagem
-    */
+    /* Imagem do problema */
     .problem-image {
       display: block;
       margin: 1rem auto;
       width: auto;
       height: auto;
-      max-width: 400px;    /* Largura máxima em telas maiores */
-      max-height: 300px;   /* Altura máxima em telas maiores */
-      object-fit: contain; /* Não corta a imagem, ajusta para caber */
+      max-width: 400px;
+      max-height: 300px;
+      object-fit: contain;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
@@ -329,6 +317,21 @@
       }
     }
 
+    /* Spinner Styles */
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #000;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     /* MODAL LOGIN */
     .modal {
       display: none; /* Inicialmente oculto */
@@ -386,7 +389,6 @@
       margin-bottom: 1rem;
       line-height: 1.5;
     }
-
     .btn-entrar-preto {
       background-color: #000;
       color: #fff;
@@ -407,7 +409,6 @@
       background-color: #333;
       transform: scale(1.02);
     }
-
     @keyframes modalFadeIn {
       from {
         opacity: 0;
@@ -447,6 +448,9 @@
 
     <!-- Container onde os problemas serão injetados via JS (scroll infinito) -->
     <div id="problem-container"></div>
+
+    <!-- Spinner de carregamento -->
+    <div id="spinner" class="spinner" style="display: none;"></div>
 
     <!-- Mensagem "Nenhum resultado" (inicialmente oculta) -->
     <div id="no-results" class="no-results" style="display: none;">
@@ -494,6 +498,7 @@
   <div id="loginModal" class="modal" style="{% if need_login == '1' %}display:flex{% endif %}">
     <div class="modal-content">
       <div class="modal-header">
+        <!-- Título "escondido" para manter o estilo da faixa preta -->
         <h2></h2>
         <span class="close" onclick="closeLoginModal()">&times;</span>
       </div>
@@ -502,10 +507,7 @@
           Você precisa fazer login para acessar esta funcionalidade.
         </p>
         <!-- Botão preto "Entrar" -->
-        <a
-          href="{{ url_for('login') }}"
-          class="btn-entrar-preto"
-        >
+        <a href="{{ url_for('login') }}" class="btn-entrar-preto">
           Entrar
         </a>
       </div>
@@ -515,8 +517,7 @@
   <script>
     const problemContainer = document.getElementById('problem-container');
     const noResultsDiv = document.getElementById('no-results');
-
-    // Pegamos o termo de busca do input #search-input
+    const spinner = document.getElementById('spinner');
     const searchInput = document.getElementById('search-input');
     let searchQuery = searchInput.value.trim();
 
@@ -545,7 +546,7 @@
 
     async function loadProblems() {
       loading = true;
-
+      spinner.style.display = 'block';
       try {
         const response = await fetch(
           `/load_problems?page=${currentPage}&q=${encodeURIComponent(searchQuery)}`
@@ -570,8 +571,8 @@
       } catch (error) {
         console.error(error);
       }
-
       loading = false;
+      spinner.style.display = 'none';
     }
 
     function createProblemElement(problem) {
@@ -594,7 +595,7 @@
         imgEl.src = "/gridfs_image_thumb/" + problem.problemImageThumb;
         imgEl.alt = "Thumbnail do problema";
         imgEl.classList.add('problem-image');
-        imgEl.loading = "lazy";  // Lazy loading
+        imgEl.loading = "lazy";
         div.appendChild(imgEl);
       }
       // Se não tiver thumbnail mas tiver a imagem original, exibe a original
@@ -603,7 +604,7 @@
         imgEl.src = "/gridfs_image/" + problem.problemImage;
         imgEl.alt = "Imagem do problema (sem thumbnail)";
         imgEl.classList.add('problem-image');
-        imgEl.loading = "lazy";  // Lazy loading
+        imgEl.loading = "lazy";
         div.appendChild(imgEl);
       }
 
