@@ -268,8 +268,20 @@
     .loading {
       text-align: center;
       margin: 2rem 0;
-      font-size: 1rem;
-      color: #666;
+    }
+    /* Spinner */
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     /* =========================================================================
@@ -547,9 +559,9 @@
       <ul id="results" class="results"></ul>
     </div>
 
-    <!-- Loading -->
+    <!-- Spinner de Loading -->
     <div id="loading" class="loading" style="display: none;">
-      Carregando...
+      <div class="loading-spinner"></div>
     </div>
 
     <!-- Mensagem de nenhum item encontrado -->
@@ -691,8 +703,8 @@
       cart.forEach(cartItem => {
         const row = document.createElement('div');
         row.classList.add('cart-item-row');
-        row.innerHTML = `
-          <span>${cartItem.description}</span>
+        row.innerHTML =
+          `<span>${cartItem.description}</span>
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <div class="cart-quantity-controls">
               <button class="quantity-btn" onclick="decrementItemQuantity('${cartItem._id}')">-</button>
@@ -700,8 +712,7 @@
               <button class="quantity-btn" onclick="incrementItemQuantity('${cartItem._id}')">+</button>
             </div>
             <button class="remove-btn" onclick="removeFromCart('${cartItem._id}')">Remover</button>
-          </div>
-        `;
+          </div>`;
         cartItemsList.appendChild(row);
       });
     }
@@ -762,43 +773,39 @@
               li.setAttribute('data-highlighted', item.is_highlighted ? '1' : '0');
 
               // Cria a parte principal (descrição, imagem, etc.)
-              let htmlContent = `
-                <div class="item-info">
-                  <strong>${item.description}</strong>
-              `;
+              let htmlContent =
+                `<div class="item-info">
+                  <strong>${item.description}</strong>`;
 
               // Se o item tiver imagem, exibe
               if (item.itemImage) {
-                htmlContent += `
-                  <img
+                htmlContent +=
+                  `<img
                     src="/gridfs_item_image/${item.itemImage}"
                     alt="Imagem do Item"
                     class="item-image-display"
-                  />
-                `;
+                  />`;
               }
 
               htmlContent += `</div>`; // fecha .item-info
 
               // Botão de adicionar ao carrinho
-              const addBtn = `
-                <button class="add-to-cart-btn"
+              const addBtn =
+                `<button class="add-to-cart-btn"
                         onclick="openQuantityModal('${item._id}','${item.description}')">
                   + Adicionar
-                </button>
-              `;
+                </button>`;
 
               // Cria container para as ações
-              htmlContent += `
-                <div class="item-actions">
+              htmlContent +=
+                `<div class="item-actions">
                   ${addBtn}
-                </div>
-              `;
+                </div>`;
 
               // Se o usuário for "solucionador", mostra o formulário de upload de imagem
               if (window.IS_SOLUCIONADOR === true) {
-                htmlContent += `
-                  <form
+                htmlContent +=
+                  `<form
                     action="/upload_item_image/${item._id}"
                     method="POST"
                     enctype="multipart/form-data"
@@ -807,8 +814,7 @@
                     <label for="itemImage_${item._id}">Nova imagem:</label>
                     <input type="file" name="itemImage" id="itemImage_${item._id}" accept="image/*">
                     <button type="submit">Enviar</button>
-                  </form>
-                `;
+                  </form>`;
               }
 
               li.innerHTML = htmlContent;
