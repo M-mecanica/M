@@ -291,7 +291,7 @@
       .search-container input[type="text"] {
         padding: 0.8rem;
         font-size: 0.9rem;
-        padding-left: 2.5rem; /* Ajuste menor para mobile */
+        padding-left: 2.5rem;
       }
       .problem-item {
         margin-bottom: 1.5rem;
@@ -319,14 +319,9 @@
         width: 16px;
         height: 16px;
       }
-
-      /*
-        Para telas menores, reduzimos também o tamanho máximo da imagem
-        para melhor caber no layout sem cortes e sem distorções.
-      */
       .problem-image {
-        max-width: 280px;  /* Ajuste menor para mobile */
-        max-height: 200px; /* Ajuste menor para mobile */
+        max-width: 280px;
+        max-height: 200px;
       }
     }
 
@@ -388,7 +383,6 @@
       line-height: 1.5;
     }
 
-    /* Botão "Entrar" (preto) */
     .btn-entrar-preto {
       background-color: #000;
       color: #fff;
@@ -596,14 +590,22 @@
       div.appendChild(h2);
       div.appendChild(p);
 
-      // Se o problema tiver imagem, exibe-a abaixo da descrição
-      if (problem.problemImage) {
+      // Se tiver thumbnail, exibe a thumbnail
+      if (problem.problemImageThumb) {
+        const imgEl = document.createElement('img');
+        imgEl.src = "/gridfs_image_thumb/" + problem.problemImageThumb;
+        imgEl.alt = "Thumbnail do problema";
+        imgEl.classList.add('problem-image');
+        imgEl.loading = "lazy";  // Lazy loading
+        div.appendChild(imgEl);
+      }
+      // Se não tiver thumbnail mas tiver a imagem original, exibe a original
+      else if (problem.problemImage) {
         const imgEl = document.createElement('img');
         imgEl.src = "/gridfs_image/" + problem.problemImage;
-        imgEl.alt = "Imagem do problema";
+        imgEl.alt = "Imagem do problema (sem thumbnail)";
         imgEl.classList.add('problem-image');
-        // Lazy Loading aqui:
-        imgEl.loading = "lazy";
+        imgEl.loading = "lazy";  // Lazy loading
         div.appendChild(imgEl);
       }
 

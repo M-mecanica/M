@@ -14,6 +14,10 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import gridfs
 
+# Biblioteca para criar thumbnails
+from PIL import Image
+import io
+
 app = Flask(__name__)
 
 # -----------------------------------------------------------
@@ -116,51 +120,52 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
                 largest_length = num_tokens
     return largest_length
 
-def save_image_if_exists(file_obj):
+def create_thumbnail(image_bytes, max_size=(300, 300)):
     """
-    Salva o arquivo em GridFS (fs_m) e retorna o ID (string) do arquivo.
-    Retorna None se não houver arquivo ou se estiver vazio.
-    (Usada para imagens de problemas na plataforma M)
+    Cria um thumbnail a partir dos bytes de imagem (bytes do arquivo original).
+    Retorna os bytes do thumbnail em formato JPEG.
+    """
+    img = Image.open(io.BytesIO(image_bytes))
+    img.thumbnail(max_size)  # Reduz a imagem mantendo a proporção
+    output = io.BytesIO()
+    # Salva em JPEG (poderia ser PNG, WEBP etc.)
+    img.save(output, format="JPEG", quality=85)
+    output.seek(0)
+    return output.read()
+
+def save_image_with_thumbnail(file_obj, fs_instance):
+    """
+    Salva a imagem original e o thumbnail no GridFS (fs_instance).
+    Retorna (original_id, thumb_id).
+    Se não houver arquivo ou estiver vazio, retorna (None, None).
     """
     if not file_obj or file_obj.filename.strip() == "":
-        return None
+        return None, None
 
     file_data = file_obj.read()
     if not file_data:
-        return None
+        return None, None
 
     content_type = file_obj.content_type
     filename = secure_filename(file_obj.filename)
 
-    stored_id = fs_m.put(
+    # Armazena imagem original
+    original_id = fs_instance.put(
         file_data,
         filename=filename,
         contentType=content_type
     )
-    return str(stored_id)
 
-def save_image_if_exists_mz(file_obj):
-    """
-    Salva o arquivo em GridFS (fs_mz) e retorna o ID (string) do arquivo.
-    Retorna None se não houver arquivo ou se estiver vazio.
-    (Usada para imagens de itens no banco MachineZONE)
-    """
-    if not file_obj or file_obj.filename.strip() == "":
-        return None
-
-    file_data = file_obj.read()
-    if not file_data:
-        return None
-
-    content_type = file_obj.content_type
-    filename = secure_filename(file_obj.filename)
-
-    stored_id = fs_mz.put(
-        file_data,
-        filename=filename,
-        contentType=content_type
+    # Gera e armazena thumbnail
+    thumb_data = create_thumbnail(file_data)
+    thumb_filename = "thumb_" + filename
+    thumb_id = fs_instance.put(
+        thumb_data,
+        filename=thumb_filename,
+        contentType="image/jpeg"
     )
-    return str(stored_id)
+
+    return str(original_id), str(thumb_id)
 
 # -----------------------------------------------------------
 # ROTA PRINCIPAL E SISTEMA DE USUÁRIOS
@@ -331,7 +336,9 @@ def load_problems():
                 "titulo": p.get("titulo", ""),
                 "descricao": p.get("descricao", ""),
                 "resolvido": p.get("resolvido", False),
-                "problemImage": str(p["problemImage"]) if p.get("problemImage") else None
+                # Se tivermos thumbnail, enviamos no JSON
+                "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
+                "problemImageThumb": str(p["problemImageThumb"]) if p.get("problemImageThumb") else None
             })
 
         has_more = (skip + ITEMS_PER_PAGE) < total_count
@@ -384,7 +391,8 @@ def load_problems():
                     "titulo": p.get("titulo", ""),
                     "descricao": p.get("descricao", ""),
                     "resolvido": p.get("resolvido", False),
-                    "problemImage": str(p["problemImage"]) if p.get("problemImage") else None
+                    "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
+                    "problemImageThumb": str(p["problemImageThumb"]) if p.get("problemImageThumb") else None
                 })
 
             return jsonify({
@@ -411,13 +419,19 @@ def add_problem():
 
         all_tags = list(set(titulo_tokens + user_tags_normalized))
 
+        # Lida com a imagem + thumbnail
+        image_file = request.files.get("problemImage")
+        original_id, thumb_id = save_image_with_thumbnail(image_file, fs_m)
+
         if titulo and descricao:
             problema = {
                 "titulo": titulo,
                 "descricao": descricao,
                 "resolvido": False,
                 "tags": all_tags,
-                "creator_id": session["user_id"]
+                "creator_id": session["user_id"],
+                "problemImage": original_id,
+                "problemImageThumb": thumb_id
             }
             problemas_collection.insert_one(problema)
             return redirect(url_for("unresolved"))
@@ -496,11 +510,18 @@ def delete_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    # Se houver imagem no problema, podemos excluí-la do GridFS:
+    # Se houver imagem e thumbnail no problema, podemos excluí-los do GridFS:
     old_file_id = problema.get("problemImage")
     if old_file_id:
         try:
             fs_m.delete(ObjectId(old_file_id))
+        except:
+            pass
+
+    old_thumb_id = problema.get("problemImageThumb")
+    if old_thumb_id:
+        try:
+            fs_m.delete(ObjectId(old_thumb_id))
         except:
             pass
 
@@ -547,27 +568,48 @@ def edit_problem(problem_id):
             "tags": all_tags
         }
 
-        # Lida com a imagem do problema
+        # Lida com a imagem do problema + thumbnail
         delete_image = request.form.get("deleteExistingImage", "false") == "true"
         image_file = request.files.get("problemImage")
-        new_file_id = save_image_if_exists(image_file)
 
-        old_file_id = problema.get("problemImage")
-
+        # Se o usuário quer apagar a imagem
         if delete_image:
+            old_file_id = problema.get("problemImage")
+            old_thumb_id = problema.get("problemImageThumb")
             if old_file_id:
                 try:
                     fs_m.delete(ObjectId(old_file_id))
+                except:
+                    pass
+            if old_thumb_id:
+                try:
+                    fs_m.delete(ObjectId(old_thumb_id))
                 except:
                     pass
             updated_fields["problemImage"] = None
-        elif new_file_id:
+            updated_fields["problemImageThumb"] = None
+
+        # Se subiu imagem nova, cria e substitui
+        elif image_file and image_file.filename.strip():
+            new_orig_id, new_thumb_id = save_image_with_thumbnail(image_file, fs_m)
+
+            # Exclui a antiga, se houver
+            old_file_id = problema.get("problemImage")
             if old_file_id:
                 try:
                     fs_m.delete(ObjectId(old_file_id))
                 except:
                     pass
-            updated_fields["problemImage"] = new_file_id
+
+            old_thumb_id = problema.get("problemImageThumb")
+            if old_thumb_id:
+                try:
+                    fs_m.delete(ObjectId(old_thumb_id))
+                except:
+                    pass
+
+            updated_fields["problemImage"] = new_orig_id
+            updated_fields["problemImageThumb"] = new_thumb_id
 
         problemas_collection.update_one(
             {"_id": ObjectId(problem_id)},
@@ -659,25 +701,30 @@ def edit_solution(problem_id):
             # Lidar com imagem do step
             delete_step = request.form.get(f"deleteExistingStepImage_{i}", "false") == "true"
             step_image_file = request.files.get(f"stepImage_{i}")
-            new_file_id = save_image_if_exists(step_image_file)
 
-            old_file_id = old_steps[i].get("stepImage") if i < len(old_steps) else None
+            old_file_id = None
+            if i < len(old_steps):
+                old_file_id = old_steps[i].get("stepImage")
 
-            if delete_step:
-                if old_file_id:
-                    try:
-                        fs_m.delete(ObjectId(old_file_id))
-                    except:
-                        pass
+            if delete_step and old_file_id:
+                try:
+                    fs_m.delete(ObjectId(old_file_id))
+                except:
+                    pass
                 step["stepImage"] = None
-            elif new_file_id:
+            elif step_image_file and step_image_file.filename.strip():
+                # salva nova
+                orig_id, thumb_id = save_image_with_thumbnail(step_image_file, fs_m)
+                # Exclui antiga
                 if old_file_id:
                     try:
                         fs_m.delete(ObjectId(old_file_id))
                     except:
                         pass
-                step["stepImage"] = new_file_id
+                step["stepImage"] = orig_id
+                # Se quiser, poderíamos também salvar "stepImageThumb", se aplicável
             else:
+                # Mantém a anterior
                 step["stepImage"] = old_file_id
 
             # Subpassos
@@ -687,28 +734,28 @@ def edit_solution(problem_id):
             for j, substep in enumerate(miniSteps):
                 delete_sub = request.form.get(f"deleteExistingSubStepImage_{i}_{j}", "false") == "true"
                 substep_file = request.files.get(f"subStepImage_{i}_{j}")
-                new_sub_file_id = save_image_if_exists(substep_file)
 
-                old_sub_file_id = (
-                    old_miniSteps[j].get("subStepImage")
-                    if j < len(old_miniSteps) else None
-                )
+                old_sub_file_id = None
+                if j < len(old_miniSteps):
+                    old_sub_file_id = old_miniSteps[j].get("subStepImage")
 
-                if delete_sub:
-                    if old_sub_file_id:
-                        try:
-                            fs_m.delete(ObjectId(old_sub_file_id))
-                        except:
-                            pass
+                if delete_sub and old_sub_file_id:
+                    try:
+                        fs_m.delete(ObjectId(old_sub_file_id))
+                    except:
+                        pass
                     substep["subStepImage"] = None
-                elif new_sub_file_id:
+                elif substep_file and substep_file.filename.strip():
+                    # salva nova
+                    orig_sub_id, thumb_sub_id = save_image_with_thumbnail(substep_file, fs_m)
                     if old_sub_file_id:
                         try:
                             fs_m.delete(ObjectId(old_sub_file_id))
                         except:
                             pass
-                    substep["subStepImage"] = new_sub_file_id
+                    substep["subStepImage"] = orig_sub_id
                 else:
+                    # Mantém a anterior
                     substep["subStepImage"] = old_sub_file_id
 
         problemas_collection.update_one(
@@ -730,6 +777,9 @@ def edit_solution(problem_id):
 # -----------------------------------------------------------
 @app.route("/gridfs_image/<file_id>", methods=["GET"])
 def gridfs_image(file_id):
+    """
+    Exibe a versão ORIGINAL da imagem
+    """
     try:
         gridout = fs_m.get(ObjectId(file_id))
         image_data = gridout.read()
@@ -740,13 +790,28 @@ def gridfs_image(file_id):
     except:
         return "Imagem não encontrada.", 404
 
+@app.route("/gridfs_image_thumb/<file_id>", methods=["GET"])
+def gridfs_image_thumb(file_id):
+    """
+    Exibe a versão THUMBNAIL da imagem
+    """
+    try:
+        gridout = fs_m.get(ObjectId(file_id))
+        image_data = gridout.read()
+        # Forçamos tipo "image/jpeg" já que salvamos como JPEG
+        response = make_response(image_data)
+        response.headers.set('Content-Type', "image/jpeg")
+        return response
+    except:
+        return "Thumbnail não encontrada.", 404
+
 # -----------------------------------------------------------
 # GRIDFS - EXIBIÇÃO DE IMAGENS (ITENS)
 # -----------------------------------------------------------
 @app.route("/gridfs_item_image/<file_id>", methods=["GET"])
 def gridfs_item_image(file_id):
     """
-    Exibe a imagem do item armazenada em fs_mz pelo ID do arquivo.
+    Exibe a imagem do item armazenada em fs_mz pelo ID do arquivo (VERSÃO ORIGINAL).
     """
     try:
         gridout = fs_mz.get(ObjectId(file_id))
@@ -757,6 +822,11 @@ def gridfs_item_image(file_id):
         return response
     except:
         return "Imagem do item não encontrada.", 404
+
+# Você pode criar rotas similares para thumbnails de itens, se desejar:
+# @app.route("/gridfs_item_image_thumb/<file_id>", methods=["GET"])
+# def gridfs_item_image_thumb(file_id):
+#     pass
 
 # -----------------------------------------------------------
 # HISTÓRICOS
@@ -976,6 +1046,7 @@ def load_items():
                 'price': float(it.get('price', 0.0)),
                 'is_highlighted': 1 if it.get('is_phrase_match') == 1 else 0,
                 'itemImage': str(it['itemImage']) if it.get('itemImage') else None
+                # Você pode adicionar itemImageThumb se também gerar thumbnails de itens
             })
 
         return jsonify({
@@ -1036,6 +1107,7 @@ def load_items():
 def upload_item_image(item_id):
     """
     Permite que um usuário com papel 'solucionador' envie (ou substitua) a imagem de um item.
+    (Você poderia criar e salvar thumbnail da mesma forma que em problemas.)
     """
     if not user_is_logged_in():
         return "Acesso negado. Faça login.", 403
@@ -1048,22 +1120,30 @@ def upload_item_image(item_id):
 
     file_obj = request.files.get("itemImage")
     if file_obj:
-        new_file_id = save_image_if_exists_mz(file_obj)
-        if new_file_id:
+        file_data = file_obj.read()
+        if file_data:
+            content_type = file_obj.content_type
+            filename = secure_filename(file_obj.filename)
+
+            # Armazena original (poderia também criar thumbnail)
+            new_file_id = fs_mz.put(
+                file_data,
+                filename=filename,
+                contentType=content_type
+            )
+
             old_file_id = item.get("itemImage")
-            # Remove a imagem antiga, se existir
             if old_file_id:
                 try:
                     fs_mz.delete(ObjectId(old_file_id))
                 except:
                     pass
-            # Atualiza o doc do item com a nova imagem
+
             itens_collection.update_one(
                 {"_id": ObjectId(item_id)},
-                {"$set": {"itemImage": new_file_id}}
+                {"$set": {"itemImage": str(new_file_id)}}
             )
 
-    # Retorna à página de busca (ou poderia retornar JSON)
     return redirect(url_for("item_search"))
 
 # -----------------------------------------------------------
