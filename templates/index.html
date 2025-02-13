@@ -412,6 +412,16 @@
 
   <!-- Barra Lateral (menu) -->
   <div class="mobile-sidebar" id="mobileSidebar">
+    <!-- "Envie o seu problema" é o primeiro item agora -->
+    <a href="{% if session.get('user_id') %}{{ url_for('add_problem') }}{% else %}javascript:openLoginModal();{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
+                 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
+                 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+      </svg>
+      Envie o seu problema
+    </a>
+
     <!-- Problemas Não Resolvidos -->
     <a href="{% if session.get('user_id') %}{{ url_for('unresolved') }}{% else %}javascript:openLoginModal();{% endif %}">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -422,16 +432,6 @@
                  0 1.5A.75.75 0 0 1 8 11z"></path>
       </svg>
       Problemas Não Resolvidos
-    </a>
-
-    <!-- Novo Problema -->
-    <a href="{% if session.get('user_id') %}{{ url_for('add_problem') }}{% else %}javascript:openLoginModal();{% endif %}">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
-                 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-                 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-      </svg>
-      Novo Problema
     </a>
 
     <!-- Gerenciar Usuários (apenas se for solucionador) -->

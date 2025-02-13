@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>M - Pesquisa de Itens</title>
+  <title>M - Pesquisa de Peças</title>
   <!-- Responsividade em dispositivos móveis -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -11,6 +11,11 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
+  />
+  <!-- Ícones Material (para a lupa) -->
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
   />
 
   <style>
@@ -114,23 +119,33 @@
     }
 
     /* =========================================================================
-       CAMPO DE PESQUISA
+       CAMPO DE PESQUISA (com lupa estilo "Google")
        ========================================================================= */
     .search-container {
-      display: flex;
+      position: relative;
       width: 100%;
       max-width: 800px;
       margin-bottom: 2rem;
     }
+    /* Lupa (Material Icon) posicionada dentro do campo */
+    .search-container .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 20px;
+      transform: translateY(-50%);
+      color: #aaa;
+      font-size: 1.6rem;
+      pointer-events: none; /* Não interfere nos cliques */
+    }
     .search-container input[type="text"] {
-      flex: 1;
-      padding: 1.2rem 1.8rem;
+      width: 100%;
+      padding: 1.2rem 1.8rem 1.2rem 3.2rem; /* espaçamento para a lupa */
       border: none;
       border-radius: 32px;
       background-color: #fff;
       font-size: 1.2rem;
       color: #333;
-      text-align: center;
+      text-align: left;
       outline: none;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
@@ -451,7 +466,7 @@
         padding: 1rem;
       }
       .search-container input[type="text"] {
-        padding: 0.8rem;
+        padding: 0.8rem 2.5rem 0.8rem 2.5rem;
         font-size: 1rem;
       }
       .cart-items-list {
@@ -502,7 +517,7 @@
   <!-- Cabeçalho com botão de voltar, título e ícone do carrinho -->
   <header>
     <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">&#x2B05;</a>
-    <h1>Pesquisa de Itens</h1>
+    <h1>Pesquisa de Peças</h1>
 
     <!-- Ícone do Carrinho (topo direito) -->
     <div class="cart-icon-container" onclick="openCartModal()">
@@ -513,8 +528,10 @@
 
   <!-- Conteúdo principal -->
   <main>
-    <!-- Barra de busca -->
+    <!-- Barra de busca (com lupa estilo Google) -->
     <form class="search-container" onsubmit="startSearch(); return false;">
+      <!-- Ícone de lupa -->
+      <span class="material-icons search-icon">search</span>
       <input
         type="text"
         id="searchInput"
@@ -538,7 +555,7 @@
     <!-- Mensagem de nenhum item encontrado -->
     <div id="noItemsFound" class="no-items-found" style="display: none;">
       <p>Nenhum item encontrado.</p>
-      <button onclick="contactMZ()">Entrar em Contato com a MZ</button>
+      <button onclick="contactMZ()">Entre em Contato com a MZ</button>
     </div>
   </main>
 

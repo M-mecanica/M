@@ -9,6 +9,11 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
+  <!-- Ícones Material (para a lupa) -->
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+  />
   <!-- Meta para responsividade em dispositivos móveis -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -86,8 +91,7 @@
     }
 
     /*
-      Caixa de pesquisa (posicionando a lupa "absoluta" dentro do container)
-      para ficar sobre o input.
+      Caixa de pesquisa, com a lupa estilo "Google" (Material Icon)
     */
     .search-container {
       position: relative;
@@ -95,16 +99,15 @@
       max-width: 600px;
       margin-bottom: 2rem;
     }
-    /* Ícone de lupa posicionado à esquerda */
+    /* Ícone de lupa (Material Icon) posicionado sobre o input */
     .search-icon {
       position: absolute;
-      left: 1rem;
       top: 50%;
+      left: 1rem;
       transform: translateY(-50%);
-      pointer-events: none; /* Ícone não recebe clique, passa para o input */
-      fill: #aaa;
-      width: 20px;
-      height: 20px;
+      color: #aaa;
+      font-size: 1.6rem;
+      pointer-events: none; /* Ícone não recebe clique */
     }
     /* Campo de texto com padding-left maior para não sobrescrever o ícone */
     .search-container input[type="text"] {
@@ -116,12 +119,13 @@
       background-color: #fff;
       font-size: 1rem;
       color: #333;
-      text-align: center; /* se preferir, troque para left */
+      text-align: left; /* Alinhamento à esquerda */
       outline: none;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     .search-container input[type="text"]::placeholder {
       color: #aaa;
+      text-align: left; /* Placeholder também à esquerda */
     }
 
     /* Container de resultados (usado para injetar os itens via JS) */
@@ -426,16 +430,10 @@
   </header>
 
   <main>
-    <!-- Campo de busca para refinar/editar a pesquisa -->
+    <!-- Campo de busca (lupa estilo Google) -->
     <form action="{{ url_for('search') }}" method="GET" class="search-container">
-      <!-- Ícone de lupa (posicionado à esquerda do input) -->
-      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M10 2a8 8 0 015.29 13.71l5
-                 5a1 1 0 01-1.42 1.42l-5-5A8
-                 8 0 1110 2zm0 2a6 6 0 100
-                 12 6 6 0 000-12z"/>
-      </svg>
-
+      <!-- Ícone de lupa (Material Icon) -->
+      <span class="material-icons search-icon">search</span>
       <input
         type="text"
         name="q"
@@ -467,7 +465,7 @@
                  0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
             />
           </svg>
-          Novo Problema
+          Envie seu problema
         </a>
       {% else %}
         <!-- Se não está logado, botão que abre modal de login -->
@@ -609,20 +607,20 @@
         div.appendChild(imgEl);
       }
 
-      // Se resolvido, exibir botão "Ver Solução"
+      // Se resolvido, exibir botão "Veja a Solução"
       if (problem.resolvido) {
         {% if session.get('user_id') %}
         const solucaoLink = document.createElement('a');
         solucaoLink.href = "{{ url_for('exibir_solucao', problem_id='__ID__') }}"
                            .replace('__ID__', problem._id);
         solucaoLink.classList.add('ver-solucao-btn');
-        solucaoLink.textContent = 'Ver Solução';
+        solucaoLink.textContent = 'Veja a Solução';
         div.appendChild(solucaoLink);
         {% else %}
         // Se não estiver logado, o botão abre modal de login
         const solucaoBtn = document.createElement('button');
         solucaoBtn.classList.add('ver-solucao-btn');
-        solucaoBtn.textContent = 'Ver Solução';
+        solucaoBtn.textContent = 'Veja a Solução';
         solucaoBtn.addEventListener('click', openLoginModal);
         div.appendChild(solucaoBtn);
         {% endif %}
