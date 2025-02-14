@@ -4,6 +4,8 @@ import re
 import unicodedata
 import datetime
 import random
+import secrets
+from urllib.parse import quote
 from flask import (
     Flask, render_template, request, redirect,
     url_for, session, jsonify, make_response
@@ -68,6 +70,7 @@ STOPWORDS = {
 ITEMS_PER_PAGE = 20  # Usado tanto para itens quanto para problemas
 MZ_WHATSAPP = "5543996436367"  # Número WhatsApp para finalizar carrinho, etc.
 
+
 # -----------------------------------------------------------
 # FUNÇÕES AUXILIARES
 # -----------------------------------------------------------
@@ -75,11 +78,13 @@ def user_is_logged_in():
     """Retorna True se há um usuário logado."""
     return "user_id" in session
 
+
 def user_has_role(roles_permitidos):
     """Verifica se o usuário logado possui um dos papéis em 'roles_permitidos'."""
     if not user_is_logged_in():
         return False
     return session.get("role") in roles_permitidos
+
 
 def normalize_string(s):
     """
@@ -91,6 +96,7 @@ def normalize_string(s):
         if not unicodedata.combining(c)
     )
     return re.sub(r'\s+', ' ', normalized.strip().lower())
+
 
 def generate_sub_phrases(tokens):
     """
@@ -104,6 +110,7 @@ def generate_sub_phrases(tokens):
             sub_slice = tokens[start:end]
             sub_phrases.append(" ".join(sub_slice))
     return sub_phrases
+
 
 def compute_largest_sub_phrase_length(search_tokens, item_phrases):
     """
@@ -120,6 +127,7 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
                 largest_length = num_tokens
     return largest_length
 
+
 def create_thumbnail(image_bytes, max_size=(300, 300)):
     """
     Cria um thumbnail a partir dos bytes de imagem (bytes do arquivo original).
@@ -132,6 +140,7 @@ def create_thumbnail(image_bytes, max_size=(300, 300)):
     img.save(output, format="JPEG", quality=85)
     output.seek(0)
     return output.read()
+
 
 def save_image_with_thumbnail(file_obj, fs_instance):
     """
@@ -167,6 +176,7 @@ def save_image_with_thumbnail(file_obj, fs_instance):
 
     return str(original_id), str(thumb_id)
 
+
 # -----------------------------------------------------------
 # ROTA PRINCIPAL E SISTEMA DE USUÁRIOS
 # -----------------------------------------------------------
@@ -174,10 +184,12 @@ def save_image_with_thumbnail(file_obj, fs_instance):
 def root():
     return redirect(url_for("index"))
 
+
 @app.route("/index", methods=["GET"])
 def index():
     need_login = request.args.get("need_login", "0")
     return render_template("index.html", need_login=need_login)
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -219,10 +231,12 @@ def login():
 
     return render_template("login.html", erro=None)
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -261,6 +275,7 @@ def register():
 
     return render_template("register.html", erro=None)
 
+
 # -----------------------------------------------------------
 # ROTAS LIGADAS A PROBLEMAS (Plataforma M)
 # -----------------------------------------------------------
@@ -269,6 +284,7 @@ def register():
 def search():
     termo_busca = request.args.get("q", "").strip()
     return render_template("resultados.html", termo_busca=termo_busca)
+
 
 @app.route("/load_problems", methods=["GET"])
 def load_problems():
@@ -401,6 +417,7 @@ def load_problems():
                 "total_count": remaining_count
             })
 
+
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
     if not user_is_logged_in():
@@ -439,6 +456,7 @@ def add_problem():
             return render_template("add.html", erro="Preencha todos os campos.")
     return render_template("add.html", erro=None)
 
+
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
     if not user_is_logged_in():
@@ -452,6 +470,7 @@ def unresolved():
         p["creator_name"] = user_creator["nome"] if user_creator else "Desconhecido"
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
 
+
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
     if not user_is_logged_in():
@@ -459,6 +478,7 @@ def resolver_form(problem_id):
     if not user_has_role(["solucionador", "mecanico"]):
         return "Acesso negado (somente solucionadores/mecânicos).", 403
     return render_template("resolver.html", problem_id=problem_id)
+
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
@@ -479,25 +499,59 @@ def resolver_problema(problem_id):
     )
     return redirect(url_for("unresolved"))
 
+
 @app.route("/solucao/<problem_id>", methods=["GET"])
 def exibir_solucao(problem_id):
-    if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
-
+    """
+    Exibe a solução de um problema.
+    - Se o usuário estiver logado, exibe diretamente.
+    - Se não estiver logado, exige que um 'token' específico
+      seja fornecido na query string, que corresponde ao 'share_token' do problema.
+      Assim, somente via link compartilhado a pessoa não-logada acessa.
+    """
     problema = problemas_collection.find_one({"_id": ObjectId(problem_id)})
     if not problema:
         return "Problema não encontrado.", 404
     if not problema.get("resolvido"):
         return "Ainda não resolvido.", 400
 
-    problem_view_history_collection.update_one(
-        {"user_id": session["user_id"], "problem_id": problem_id},
-        {"$set": {"user_id": session["user_id"], "problem_id": problem_id}},
-        upsert=True
-    )
+    # Se não tiver share_token no doc, geramos um agora
+    if "share_token" not in problema:
+        new_token = secrets.token_urlsafe(16)
+        problemas_collection.update_one(
+            {"_id": ObjectId(problem_id)},
+            {"$set": {"share_token": new_token}}
+        )
+        problema["share_token"] = new_token
+
+    # Verifica se usuário está logado
+    if not user_is_logged_in():
+        # Se não estiver logado, confere se foi passado um 'token'
+        token_param = request.args.get("token", "")
+        # Se não coincidir com o do problema, nega acesso
+        if token_param != problema["share_token"]:
+            return "Acesso negado. Faça login ou utilize o link de compartilhamento correto.", 403
+
+    # Registra a visualização (se usuário estiver logado, registramos no problem_view_history)
+    if user_is_logged_in():
+        problem_view_history_collection.update_one(
+            {"user_id": session["user_id"], "problem_id": problem_id},
+            {"$set": {"user_id": session["user_id"], "problem_id": problem_id}},
+            upsert=True
+        )
 
     solucao = problema.get("solucao", {})
-    return render_template("solucao.html", problema=problema, solucao=solucao)
+
+    # Monta o link de compartilhamento (com token) para a função "compartilhar no WhatsApp"
+    share_url = url_for("exibir_solucao", problem_id=problem_id, token=problema["share_token"], _external=True)
+    share_text = f"Confira a solução para: {problema['titulo']} - {share_url}"
+    share_msg_encoded = quote(share_text, safe='')
+
+    return render_template("solucao.html",
+                           problema=problema,
+                           solucao=solucao,
+                           share_msg_encoded=share_msg_encoded)
+
 
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
@@ -531,6 +585,7 @@ def delete_problem(problem_id):
         return redirect(url_for("search"))
     else:
         return redirect(url_for("unresolved"))
+
 
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
@@ -619,6 +674,7 @@ def edit_problem(problem_id):
 
     return render_template("edit_problem.html", problema=problema, erro=None)
 
+
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
     if not user_is_logged_in():
@@ -632,6 +688,7 @@ def edit_user_role(user_id):
         {"$set": {"role": novo_role}}
     )
     return redirect(url_for("listar_usuarios"))
+
 
 @app.route("/usuarios", methods=["GET"])
 def listar_usuarios():
@@ -658,6 +715,7 @@ def listar_usuarios():
 
     return render_template("registros.html", usuarios=usuarios, search_query=search_query)
 
+
 @app.route("/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id):
     if not user_is_logged_in():
@@ -667,6 +725,7 @@ def delete_user(user_id):
 
     usuarios_collection.delete_one({"_id": ObjectId(user_id)})
     return redirect(url_for("listar_usuarios"))
+
 
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
@@ -722,7 +781,6 @@ def edit_solution(problem_id):
                     except:
                         pass
                 step["stepImage"] = orig_id
-                # Se quiser, poderíamos também salvar "stepImageThumb", se aplicável
             else:
                 # Mantém a anterior
                 step["stepImage"] = old_file_id
@@ -772,6 +830,7 @@ def edit_solution(problem_id):
         erro=None
     )
 
+
 # -----------------------------------------------------------
 # GRIDFS - EXIBIÇÃO DE IMAGENS (PROBLEMAS)
 # -----------------------------------------------------------
@@ -790,6 +849,7 @@ def gridfs_image(file_id):
     except:
         return "Imagem não encontrada.", 404
 
+
 @app.route("/gridfs_image_thumb/<file_id>", methods=["GET"])
 def gridfs_image_thumb(file_id):
     """
@@ -798,12 +858,12 @@ def gridfs_image_thumb(file_id):
     try:
         gridout = fs_m.get(ObjectId(file_id))
         image_data = gridout.read()
-        # Forçamos tipo "image/jpeg" já que salvamos como JPEG
         response = make_response(image_data)
         response.headers.set('Content-Type', "image/jpeg")
         return response
     except:
         return "Thumbnail não encontrada.", 404
+
 
 # -----------------------------------------------------------
 # GRIDFS - EXIBIÇÃO DE IMAGENS (ITENS)
@@ -823,10 +883,6 @@ def gridfs_item_image(file_id):
     except:
         return "Imagem do item não encontrada.", 404
 
-# Você pode criar rotas similares para thumbnails de itens, se desejar:
-# @app.route("/gridfs_item_image_thumb/<file_id>", methods=["GET"])
-# def gridfs_item_image_thumb(file_id):
-#     pass
 
 # -----------------------------------------------------------
 # HISTÓRICOS
@@ -840,6 +896,7 @@ def history_search():
 
     all_history = list(history_collection.find({}))
     return render_template("history_search.html", history=all_history)
+
 
 @app.route("/history_problem", methods=["GET"])
 def history_problem():
@@ -875,10 +932,11 @@ def history_problem():
         suggestions_by_problem=suggestions_by_problem
     )
 
+
 @app.route("/suggest_improvement/<problem_id>", methods=["POST"])
 def suggest_improvement(problem_id):
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return "Texto vazio.", 400  # Aqui podemos simplesmente negar se não estiver logado.
 
     suggestion_text = request.form.get("suggestion", "").strip()
     if not suggestion_text:
@@ -897,6 +955,7 @@ def suggest_improvement(problem_id):
         "submitted_at": datetime.datetime.utcnow()
     })
     return redirect(url_for("exibir_solucao", problem_id=problem_id))
+
 
 @app.route("/user_history/<user_id>", methods=["GET"])
 def user_history(user_id):
@@ -935,12 +994,14 @@ def user_history(user_id):
         user_suggestions=user_suggestions
     )
 
+
 # -----------------------------------------------------------
 # PESQUISA DE ITENS (MZ) + Upload de imagem
 # -----------------------------------------------------------
 @app.route("/item_search", methods=["GET"])
 def item_search():
     return render_template("item_search.html")
+
 
 @app.route("/load_items", methods=["GET"])
 def load_items():
@@ -1046,7 +1107,6 @@ def load_items():
                 'price': float(it.get('price', 0.0)),
                 'is_highlighted': 1 if it.get('is_phrase_match') == 1 else 0,
                 'itemImage': str(it['itemImage']) if it.get('itemImage') else None
-                # Você pode adicionar itemImageThumb se também gerar thumbnails de itens
             })
 
         return jsonify({
@@ -1103,11 +1163,11 @@ def load_items():
             "total_items": remaining_count
         })
 
+
 @app.route("/upload_item_image/<item_id>", methods=["POST"])
 def upload_item_image(item_id):
     """
     Permite que um usuário com papel 'solucionador' envie (ou substitua) a imagem de um item.
-    (Você poderia criar e salvar thumbnail da mesma forma que em problemas.)
     """
     if not user_is_logged_in():
         return "Acesso negado. Faça login.", 403
@@ -1146,9 +1206,9 @@ def upload_item_image(item_id):
 
     return redirect(url_for("item_search"))
 
+
 # -----------------------------------------------------------
 # EXECUÇÃO
 # -----------------------------------------------------------
 if __name__ == "__main__":
-    # Em produção, lembre de usar debug=False
     app.run(host="0.0.0.0", port=5000, debug=True)
