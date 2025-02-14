@@ -16,7 +16,6 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import gridfs
 
-# Biblioteca para criar thumbnails
 from PIL import Image
 import io
 
@@ -70,7 +69,6 @@ STOPWORDS = {
 ITEMS_PER_PAGE = 20  # Usado tanto para itens quanto para problemas
 MZ_WHATSAPP = "5543996436367"  # Número WhatsApp para finalizar carrinho, etc.
 
-
 # -----------------------------------------------------------
 # FUNÇÕES AUXILIARES
 # -----------------------------------------------------------
@@ -78,13 +76,11 @@ def user_is_logged_in():
     """Retorna True se há um usuário logado."""
     return "user_id" in session
 
-
 def user_has_role(roles_permitidos):
     """Verifica se o usuário logado possui um dos papéis em 'roles_permitidos'."""
     if not user_is_logged_in():
         return False
     return session.get("role") in roles_permitidos
-
 
 def normalize_string(s):
     """
@@ -96,7 +92,6 @@ def normalize_string(s):
         if not unicodedata.combining(c)
     )
     return re.sub(r'\s+', ' ', normalized.strip().lower())
-
 
 def generate_sub_phrases(tokens):
     """
@@ -110,7 +105,6 @@ def generate_sub_phrases(tokens):
             sub_slice = tokens[start:end]
             sub_phrases.append(" ".join(sub_slice))
     return sub_phrases
-
 
 def compute_largest_sub_phrase_length(search_tokens, item_phrases):
     """
@@ -127,7 +121,6 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
                 largest_length = num_tokens
     return largest_length
 
-
 def create_thumbnail(image_bytes, max_size=(300, 300)):
     """
     Cria um thumbnail a partir dos bytes de imagem (bytes do arquivo original).
@@ -136,11 +129,9 @@ def create_thumbnail(image_bytes, max_size=(300, 300)):
     img = Image.open(io.BytesIO(image_bytes))
     img.thumbnail(max_size)  # Reduz a imagem mantendo a proporção
     output = io.BytesIO()
-    # Salva em JPEG (poderia ser PNG, WEBP etc.)
     img.save(output, format="JPEG", quality=85)
     output.seek(0)
     return output.read()
-
 
 def save_image_with_thumbnail(file_obj, fs_instance):
     """
@@ -176,6 +167,26 @@ def save_image_with_thumbnail(file_obj, fs_instance):
 
     return str(original_id), str(thumb_id)
 
+# -----------------------------------------------------------
+# CRIAR ÍNDICE DE TEXTO (se ainda não existir)
+# -----------------------------------------------------------
+@app.before_first_request
+def init_db():
+    """
+    Garante que haja um índice de texto para 'titulo', 'descricao' e 'tags'.
+    Rodará apenas quando a aplicação receber a primeira requisição.
+    """
+    existing_indexes = problemas_collection.index_information()
+    if "TextoProblemas" not in existing_indexes:
+        problemas_collection.create_index(
+            [
+                ("titulo", "text"),
+                ("descricao", "text"),
+                ("tags", "text")
+            ],
+            name="TextoProblemas",
+            default_language="portuguese"
+        )
 
 # -----------------------------------------------------------
 # ROTA PRINCIPAL E SISTEMA DE USUÁRIOS
@@ -184,12 +195,10 @@ def save_image_with_thumbnail(file_obj, fs_instance):
 def root():
     return redirect(url_for("index"))
 
-
 @app.route("/index", methods=["GET"])
 def index():
     need_login = request.args.get("need_login", "0")
     return render_template("index.html", need_login=need_login)
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -231,12 +240,10 @@ def login():
 
     return render_template("login.html", erro=None)
 
-
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -275,28 +282,24 @@ def register():
 
     return render_template("register.html", erro=None)
 
-
 # -----------------------------------------------------------
 # ROTAS LIGADAS A PROBLEMAS (Plataforma M)
 # -----------------------------------------------------------
-
 @app.route("/search", methods=["GET"])
 def search():
     termo_busca = request.args.get("q", "").strip()
     return render_template("resultados.html", termo_busca=termo_busca)
 
-
 @app.route("/load_problems", methods=["GET"])
 def load_problems():
     """
-    Fornece problemas em formato JSON para a página resultados.html fazer scroll infinito.
-    Se 'q' (search_query) estiver vazio, retorna problemas aleatórios.
-    Se houver busca, faz a busca com skip/limit.
+    Fornece problemas em formato JSON para a página resultados.html fazer scroll infinito
+    ou Intersection Observer. A lógica permanece a mesma.
     """
     search_query = request.args.get("q", "").strip()
     page = int(request.args.get("page", 1))
 
-    # Para logar a pesquisa em 'problem_history_collection'
+    # Log de pesquisa em 'problem_history_collection'
     if search_query:
         if user_is_logged_in():
             problem_history_collection.insert_one({
@@ -314,31 +317,21 @@ def load_problems():
             })
 
     if search_query:
-        # PESQUISA COM SKIP/LIMIT
+        # PESQUISA COM SKIP/LIMIT usando índice de texto
         skip = (page - 1) * ITEMS_PER_PAGE
 
-        normalized_search_phrase = normalize_string(search_query)
-        search_tokens = [t for t in normalized_search_phrase.split() if t and t not in STOPWORDS]
-
-        pipeline_base = [
-            {
-                "$match": {
-                    "$or": [
-                        {"titulo": {"$regex": search_query, "$options": "i"}},
-                        {"descricao": {"$regex": search_query, "$options": "i"}},
-                        {"tags": {"$all": search_tokens}}  # AND de tokens
-                    ]
-                }
-            }
-        ]
-
         # Contar total
-        count_pipeline = pipeline_base + [{"$count": "total"}]
+        count_pipeline = [
+            {"$match": {"$text": {"$search": search_query}}},
+            {"$count": "total"}
+        ]
         count_result = list(problemas_collection.aggregate(count_pipeline))
         total_count = count_result[0]["total"] if count_result else 0
 
-        # Carregar problemas
-        pipeline_fetch = pipeline_base + [
+        # Buscar problemas (com relevância)
+        pipeline_fetch = [
+            {"$match": {"$text": {"$search": search_query}}},
+            {"$sort": {"score": {"$meta": "textScore"}}},  # ordena por relevância
             {"$skip": skip},
             {"$limit": ITEMS_PER_PAGE}
         ]
@@ -352,7 +345,6 @@ def load_problems():
                 "titulo": p.get("titulo", ""),
                 "descricao": p.get("descricao", ""),
                 "resolvido": p.get("resolvido", False),
-                # Se tivermos thumbnail, enviamos no JSON
                 "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
                 "problemImageThumb": str(p["problemImageThumb"]) if p.get("problemImageThumb") else None
             })
@@ -363,13 +355,11 @@ def load_problems():
             "has_more": has_more,
             "total_count": total_count
         })
-
     else:
         # LÓGICA DE ALEATORIEDADE SE NÃO HOUVER BUSCA
         if page == 1:
             session["displayed_problem_ids"] = []
         displayed_ids = session.get("displayed_problem_ids", [])
-
         displayed_object_ids = [ObjectId(x) for x in displayed_ids]
 
         pipeline_count = [
@@ -417,7 +407,6 @@ def load_problems():
                 "total_count": remaining_count
             })
 
-
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
     if not user_is_logged_in():
@@ -456,7 +445,6 @@ def add_problem():
             return render_template("add.html", erro="Preencha todos os campos.")
     return render_template("add.html", erro=None)
 
-
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
     if not user_is_logged_in():
@@ -470,7 +458,6 @@ def unresolved():
         p["creator_name"] = user_creator["nome"] if user_creator else "Desconhecido"
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
 
-
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
     if not user_is_logged_in():
@@ -478,7 +465,6 @@ def resolver_form(problem_id):
     if not user_has_role(["solucionador", "mecanico"]):
         return "Acesso negado (somente solucionadores/mecânicos).", 403
     return render_template("resolver.html", problem_id=problem_id)
-
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
@@ -499,16 +485,8 @@ def resolver_problema(problem_id):
     )
     return redirect(url_for("unresolved"))
 
-
 @app.route("/solucao/<problem_id>", methods=["GET"])
 def exibir_solucao(problem_id):
-    """
-    Exibe a solução de um problema.
-    - Se o usuário estiver logado, exibe diretamente.
-    - Se não estiver logado, exige que um 'token' específico
-      seja fornecido na query string, que corresponde ao 'share_token' do problema.
-      Assim, somente via link compartilhado a pessoa não-logada acessa.
-    """
     problema = problemas_collection.find_one({"_id": ObjectId(problem_id)})
     if not problema:
         return "Problema não encontrado.", 404
@@ -528,11 +506,10 @@ def exibir_solucao(problem_id):
     if not user_is_logged_in():
         # Se não estiver logado, confere se foi passado um 'token'
         token_param = request.args.get("token", "")
-        # Se não coincidir com o do problema, nega acesso
         if token_param != problema["share_token"]:
             return "Acesso negado. Faça login ou utilize o link de compartilhamento correto.", 403
 
-    # Registra a visualização (se usuário estiver logado, registramos no problem_view_history)
+    # Registra a visualização (se usuário estiver logado)
     if user_is_logged_in():
         problem_view_history_collection.update_one(
             {"user_id": session["user_id"], "problem_id": problem_id},
@@ -542,7 +519,6 @@ def exibir_solucao(problem_id):
 
     solucao = problema.get("solucao", {})
 
-    # Monta o link de compartilhamento (com token) para a função "compartilhar no WhatsApp"
     share_url = url_for("exibir_solucao", problem_id=problem_id, token=problema["share_token"], _external=True)
     share_text = f"Confira a solução para: {problema['titulo']} - {share_url}"
     share_msg_encoded = quote(share_text, safe='')
@@ -551,7 +527,6 @@ def exibir_solucao(problem_id):
                            problema=problema,
                            solucao=solucao,
                            share_msg_encoded=share_msg_encoded)
-
 
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
@@ -564,7 +539,7 @@ def delete_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    # Se houver imagem e thumbnail no problema, podemos excluí-los do GridFS:
+    # Se houver imagem, excluímos do GridFS
     old_file_id = problema.get("problemImage")
     if old_file_id:
         try:
@@ -585,7 +560,6 @@ def delete_problem(problem_id):
         return redirect(url_for("search"))
     else:
         return redirect(url_for("unresolved"))
-
 
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
@@ -627,8 +601,8 @@ def edit_problem(problem_id):
         delete_image = request.form.get("deleteExistingImage", "false") == "true"
         image_file = request.files.get("problemImage")
 
-        # Se o usuário quer apagar a imagem
         if delete_image:
+            # Apagar a imagem existente
             old_file_id = problema.get("problemImage")
             old_thumb_id = problema.get("problemImageThumb")
             if old_file_id:
@@ -643,19 +617,15 @@ def edit_problem(problem_id):
                     pass
             updated_fields["problemImage"] = None
             updated_fields["problemImageThumb"] = None
-
-        # Se subiu imagem nova, cria e substitui
         elif image_file and image_file.filename.strip():
             new_orig_id, new_thumb_id = save_image_with_thumbnail(image_file, fs_m)
 
-            # Exclui a antiga, se houver
             old_file_id = problema.get("problemImage")
             if old_file_id:
                 try:
                     fs_m.delete(ObjectId(old_file_id))
                 except:
                     pass
-
             old_thumb_id = problema.get("problemImageThumb")
             if old_thumb_id:
                 try:
@@ -674,7 +644,6 @@ def edit_problem(problem_id):
 
     return render_template("edit_problem.html", problema=problema, erro=None)
 
-
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
     if not user_is_logged_in():
@@ -688,7 +657,6 @@ def edit_user_role(user_id):
         {"$set": {"role": novo_role}}
     )
     return redirect(url_for("listar_usuarios"))
-
 
 @app.route("/usuarios", methods=["GET"])
 def listar_usuarios():
@@ -715,7 +683,6 @@ def listar_usuarios():
 
     return render_template("registros.html", usuarios=usuarios, search_query=search_query)
 
-
 @app.route("/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id):
     if not user_is_logged_in():
@@ -725,7 +692,6 @@ def delete_user(user_id):
 
     usuarios_collection.delete_one({"_id": ObjectId(user_id)})
     return redirect(url_for("listar_usuarios"))
-
 
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
@@ -772,9 +738,7 @@ def edit_solution(problem_id):
                     pass
                 step["stepImage"] = None
             elif step_image_file and step_image_file.filename.strip():
-                # salva nova
                 orig_id, thumb_id = save_image_with_thumbnail(step_image_file, fs_m)
-                # Exclui antiga
                 if old_file_id:
                     try:
                         fs_m.delete(ObjectId(old_file_id))
@@ -804,7 +768,6 @@ def edit_solution(problem_id):
                         pass
                     substep["subStepImage"] = None
                 elif substep_file and substep_file.filename.strip():
-                    # salva nova
                     orig_sub_id, thumb_sub_id = save_image_with_thumbnail(substep_file, fs_m)
                     if old_sub_file_id:
                         try:
@@ -813,7 +776,6 @@ def edit_solution(problem_id):
                             pass
                     substep["subStepImage"] = orig_sub_id
                 else:
-                    # Mantém a anterior
                     substep["subStepImage"] = old_sub_file_id
 
         problemas_collection.update_one(
@@ -829,7 +791,6 @@ def edit_solution(problem_id):
         passos=passos,
         erro=None
     )
-
 
 # -----------------------------------------------------------
 # GRIDFS - EXIBIÇÃO DE IMAGENS (PROBLEMAS)
@@ -849,7 +810,6 @@ def gridfs_image(file_id):
     except:
         return "Imagem não encontrada.", 404
 
-
 @app.route("/gridfs_image_thumb/<file_id>", methods=["GET"])
 def gridfs_image_thumb(file_id):
     """
@@ -863,7 +823,6 @@ def gridfs_image_thumb(file_id):
         return response
     except:
         return "Thumbnail não encontrada.", 404
-
 
 # -----------------------------------------------------------
 # GRIDFS - EXIBIÇÃO DE IMAGENS (ITENS)
@@ -883,7 +842,6 @@ def gridfs_item_image(file_id):
     except:
         return "Imagem do item não encontrada.", 404
 
-
 # -----------------------------------------------------------
 # HISTÓRICOS
 # -----------------------------------------------------------
@@ -896,7 +854,6 @@ def history_search():
 
     all_history = list(history_collection.find({}))
     return render_template("history_search.html", history=all_history)
-
 
 @app.route("/history_problem", methods=["GET"])
 def history_problem():
@@ -932,11 +889,10 @@ def history_problem():
         suggestions_by_problem=suggestions_by_problem
     )
 
-
 @app.route("/suggest_improvement/<problem_id>", methods=["POST"])
 def suggest_improvement(problem_id):
     if not user_is_logged_in():
-        return "Texto vazio.", 400  # Aqui podemos simplesmente negar se não estiver logado.
+        return "Texto vazio.", 400  # Aqui poderíamos exigir login.
 
     suggestion_text = request.form.get("suggestion", "").strip()
     if not suggestion_text:
@@ -955,7 +911,6 @@ def suggest_improvement(problem_id):
         "submitted_at": datetime.datetime.utcnow()
     })
     return redirect(url_for("exibir_solucao", problem_id=problem_id))
-
 
 @app.route("/user_history/<user_id>", methods=["GET"])
 def user_history(user_id):
@@ -994,7 +949,6 @@ def user_history(user_id):
         user_suggestions=user_suggestions
     )
 
-
 # -----------------------------------------------------------
 # PESQUISA DE ITENS (MZ) + Upload de imagem
 # -----------------------------------------------------------
@@ -1002,14 +956,10 @@ def user_history(user_id):
 def item_search():
     return render_template("item_search.html")
 
-
 @app.route("/load_items", methods=["GET"])
 def load_items():
     """
     Retorna JSON com até ITEMS_PER_PAGE itens por página.
-      - Se 'search' não está vazio, faz a busca com relevância.
-      - Se 'search' está vazio, seleciona aleatoriamente itens
-        ainda não exibidos na sessão.
     """
     search_query = request.args.get('search', '').strip()
     page = int(request.args.get('page', 1))
@@ -1030,27 +980,24 @@ def load_items():
             })
 
         skip_items = (page - 1) * ITEMS_PER_PAGE
-
         normalized_search_phrase = normalize_string(search_query)
         search_tokens = [t for t in normalized_search_phrase.split() if t and t not in STOPWORDS]
-
-        phrase_match_cond = {
-            '$cond': [
-                {
-                    '$and': [
-                        {'$ne': [normalized_search_phrase, ""]},
-                        {'$in': [normalized_search_phrase, {'$ifNull': ['$matching_phrases', []]}]}
-                    ]
-                },
-                1,
-                0
-            ]
-        }
 
         pipeline_base = [
             {
                 '$addFields': {
-                    'is_phrase_match': phrase_match_cond
+                    'is_phrase_match': {
+                        '$cond': [
+                            {
+                                '$and': [
+                                    {'$ne': [normalized_search_phrase, ""]},
+                                    {'$in': [normalized_search_phrase, {'$ifNull': ['$matching_phrases', []]}]}
+                                ]
+                            },
+                            1,
+                            0
+                        ]
+                    }
                 }
             },
             {
@@ -1071,7 +1018,7 @@ def load_items():
         ))
         total_items = count_result[0]['total'] if count_result else 0
 
-        # Carregar matching (não paginado ainda, para depois fazermos slice)
+        # Carregar matching
         items_cursor = itens_collection.aggregate(
             pipeline_base,
             collation={'locale': 'pt', 'strength': 1}
@@ -1085,7 +1032,7 @@ def load_items():
                 item.get('matching_phrases', [])
             )
 
-        # Ordena: 1) is_phrase_match desc, 2) largest_sub_phrase_length desc, 3) description asc
+        # Ordena
         items.sort(
             key=lambda x: (
                 -x['is_phrase_match'],
@@ -1094,6 +1041,7 @@ def load_items():
             )
         )
 
+        # Paginação manual
         paged_items = items[skip_items: skip_items + ITEMS_PER_PAGE]
         has_more = (len(paged_items) == ITEMS_PER_PAGE and (skip_items + ITEMS_PER_PAGE) < len(items))
 
@@ -1163,7 +1111,6 @@ def load_items():
             "total_items": remaining_count
         })
 
-
 @app.route("/upload_item_image/<item_id>", methods=["POST"])
 def upload_item_image(item_id):
     """
@@ -1185,7 +1132,7 @@ def upload_item_image(item_id):
             content_type = file_obj.content_type
             filename = secure_filename(file_obj.filename)
 
-            # Armazena original (poderia também criar thumbnail)
+            # Armazena original (poderia também criar thumbnail para itens)
             new_file_id = fs_mz.put(
                 file_data,
                 filename=filename,
@@ -1206,9 +1153,9 @@ def upload_item_image(item_id):
 
     return redirect(url_for("item_search"))
 
-
 # -----------------------------------------------------------
 # EXECUÇÃO
 # -----------------------------------------------------------
 if __name__ == "__main__":
+    # Em produção, configure wsgi/gunicorn/etc.
     app.run(host="0.0.0.0", port=5000, debug=True)

@@ -123,6 +123,12 @@
       width: 100%;
     }
 
+    /* Sentinela para Intersection Observer */
+    #sentinel {
+      width: 100%;
+      height: 50px;
+    }
+
     /* Cada problema */
     .problem-item {
       background-color: #fff;
@@ -442,6 +448,9 @@
     <!-- Container onde os problemas serão injetados -->
     <div id="problem-container"></div>
 
+    <!-- Div Sentinela (Intersection Observer) -->
+    <div id="sentinel"></div>
+
     <!-- Spinner de carregamento -->
     <div id="spinner" class="spinner" style="display: none;"></div>
 
@@ -507,22 +516,26 @@
     let loading = false;
     let hasMore = true;
 
-    // Ao carregar a página
+    // Carrega a primeira página ao iniciar
     window.addEventListener('DOMContentLoaded', () => {
       loadProblems();
-      window.addEventListener('scroll', handleScroll);
+
+      // Configura o Intersection Observer no 'sentinel'
+      const observer = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && hasMore && !loading) {
+          // Carregar próxima página
+          currentPage++;
+          loadProblems();
+        }
+      }, {
+        root: null,    // viewport
+        threshold: 0.1 // dispara quando ~10% do sentinel estiver visível
+      });
+
+      const sentinel = document.getElementById('sentinel');
+      observer.observe(sentinel);
     });
-
-    function handleScroll() {
-      if (loading) return;
-      const scrollPosition = window.scrollY + window.innerHeight;
-      const threshold = document.body.offsetHeight - 200;
-
-      if (scrollPosition >= threshold && hasMore) {
-        currentPage++;
-        loadProblems();
-      }
-    }
 
     async function loadProblems() {
       loading = true;
@@ -543,10 +556,14 @@
           noResultsDiv.style.display = 'none';
         }
 
+        // Inserir problemas no container
+        const fragment = document.createDocumentFragment();
         data.problems.forEach(problem => {
           const problemEl = createProblemElement(problem);
-          problemContainer.appendChild(problemEl);
+          fragment.appendChild(problemEl);
         });
+        problemContainer.appendChild(fragment);
+
       } catch (error) {
         console.error(error);
       }
