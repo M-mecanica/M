@@ -31,7 +31,7 @@
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto, com maior altura (padding) e título */
+    /* HEADER: fundo preto, padding e título */
     header {
       background-color: #000;
       padding: 2rem 3rem;
@@ -71,7 +71,7 @@
       transform: scale(1.02);
     }
 
-    /* MAIN: centralizado, com largura máxima de 1200px */
+    /* MAIN: centralizado, largura max 1200px */
     main {
       flex: 1;
       font-size: 1.25rem;
@@ -84,14 +84,13 @@
       align-items: center;
     }
 
-    /* Caixa de pesquisa, com a lupa estilo "Google" (Material Icon) */
+    /* Caixa de pesquisa */
     .search-container {
       position: relative;
       width: 100%;
       max-width: 600px;
       margin-bottom: 2rem;
     }
-    /* Ícone de lupa (Material Icon) posicionado sobre o input */
     .search-icon {
       position: absolute;
       top: 50%;
@@ -101,7 +100,6 @@
       font-size: 1.6rem;
       pointer-events: none;
     }
-    /* Campo de texto com padding-left maior para não sobrescrever o ícone */
     .search-container input[type="text"] {
       width: 100%;
       padding: 1rem 1.5rem;
@@ -120,12 +118,12 @@
       text-align: left;
     }
 
-    /* Container de resultados (usado para injetar os itens via JS) */
+    /* Container de resultados */
     #problem-container {
       width: 100%;
     }
 
-    /* Cada problema encontrado */
+    /* Cada problema */
     .problem-item {
       background-color: #fff;
       border-radius: 8px;
@@ -160,7 +158,6 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 
-    /* Caso não haja resultados */
     .no-results {
       text-align: center;
       margin-top: 2rem;
@@ -190,7 +187,7 @@
       transform: translateX(-50%) scale(1.02);
     }
 
-    /* Botões Editar/Deletar no canto inferior direito */
+    /* Botões Editar/Deletar */
     .action-btns {
       position: absolute;
       bottom: 1rem;
@@ -246,7 +243,7 @@
       margin-right: 0.4rem;
     }
 
-    /* FOOTER: preto, texto branco */
+    /* FOOTER */
     footer {
       background-color: #000;
       text-align: center;
@@ -258,7 +255,7 @@
       margin: 0;
     }
 
-    /* Responsividade geral */
+    /* Responsividade */
     @media (max-width: 768px) {
       header {
         padding: 1.5rem 2rem;
@@ -277,7 +274,6 @@
         padding: 1rem;
       }
       .search-container {
-        max-width: 100%;
         margin-bottom: 1rem;
       }
       .search-container input[type="text"] {
@@ -334,7 +330,7 @@
 
     /* MODAL LOGIN */
     .modal {
-      display: none; /* Inicialmente oculto */
+      display: none;
       position: fixed;
       z-index: 9999;
       left: 0;
@@ -342,7 +338,6 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0,0,0,0.4);
-      /* Centraliza o modal no meio da tela */
       align-items: center;
       justify-content: center;
     }
@@ -364,7 +359,7 @@
     .modal-header h2 {
       margin: 0;
       font-size: 0;
-      visibility: hidden; /* Esconde o título para manter o espaço */
+      visibility: hidden;
     }
     .close {
       color: #fff;
@@ -423,7 +418,6 @@
 </head>
 <body>
   <header>
-    <!-- Botão Voltar -->
     <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">
       &#x2B05;
     </a>
@@ -431,9 +425,8 @@
   </header>
 
   <main>
-    <!-- Campo de busca (lupa estilo Google) -->
+    <!-- Campo de busca -->
     <form action="{{ url_for('search') }}" method="GET" class="search-container">
-      <!-- Ícone de lupa (Material Icon) -->
       <span class="material-icons search-icon">search</span>
       <input
         type="text"
@@ -446,22 +439,17 @@
       />
     </form>
 
-    <!-- Container onde os problemas serão injetados via JS (scroll infinito) -->
+    <!-- Container onde os problemas serão injetados -->
     <div id="problem-container"></div>
 
     <!-- Spinner de carregamento -->
     <div id="spinner" class="spinner" style="display: none;"></div>
 
-    <!-- Mensagem "Nenhum resultado" (inicialmente oculta) -->
+    <!-- Mensagem "Nenhum resultado" -->
     <div id="no-results" class="no-results" style="display: none;">
       <p>Nenhum problema encontrado, pesquise de outra forma ou registre seu problema.</p>
       {% if session.get('user_id') %}
-        <a
-          href="{{ url_for('add_problem') }}"
-          class="new-problem-btn"
-          title="Novo Problema"
-        >
-          <!-- Ícone de "mais" -->
+        <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <path
               d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
@@ -472,11 +460,7 @@
           Envie seu problema
         </a>
       {% else %}
-        <!-- Se não está logado, botão que abre modal de login -->
-        <button
-          class="new-problem-btn"
-          onclick="openLoginModal()"
-        >
+        <button class="new-problem-btn" onclick="openLoginModal()">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <path
               d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
@@ -494,11 +478,10 @@
     <p>© 2025 Plataforma M</p>
   </footer>
 
-  <!-- Modal para exigir LOGIN -->
+  <!-- Modal de login -->
   <div id="loginModal" class="modal" style="{% if need_login == '1' %}display:flex{% endif %}">
     <div class="modal-content">
       <div class="modal-header">
-        <!-- Título "escondido" para manter o estilo da faixa preta -->
         <h2></h2>
         <span class="close" onclick="closeLoginModal()">&times;</span>
       </div>
@@ -506,7 +489,6 @@
         <p class="modal-text">
           Você precisa fazer login para acessar esta funcionalidade.
         </p>
-        <!-- Botão preto "Entrar" -->
         <a href="{{ url_for('login') }}" class="btn-entrar-preto">
           Entrar
         </a>
@@ -521,12 +503,11 @@
     const searchInput = document.getElementById('search-input');
     let searchQuery = searchInput.value.trim();
 
-    // Variáveis para paginação
     let currentPage = 1;
     let loading = false;
     let hasMore = true;
 
-    // Ao carregar a página, buscar a primeira página
+    // Ao carregar a página
     window.addEventListener('DOMContentLoaded', () => {
       loadProblems();
       window.addEventListener('scroll', handleScroll);
@@ -534,7 +515,6 @@
 
     function handleScroll() {
       if (loading) return;
-
       const scrollPosition = window.scrollY + window.innerHeight;
       const threshold = document.body.offsetHeight - 200;
 
@@ -567,7 +547,6 @@
           const problemEl = createProblemElement(problem);
           problemContainer.appendChild(problemEl);
         });
-
       } catch (error) {
         console.error(error);
       }
@@ -576,7 +555,6 @@
     }
 
     function createProblemElement(problem) {
-      // Cria o bloco HTML para cada problema
       const div = document.createElement('div');
       div.classList.add('problem-item');
 
@@ -589,7 +567,7 @@
       div.appendChild(h2);
       div.appendChild(p);
 
-      // Se tiver thumbnail, exibe a thumbnail
+      // Imagem (thumbnail ou original)
       if (problem.problemImageThumb) {
         const imgEl = document.createElement('img');
         imgEl.src = "/gridfs_image_thumb/" + problem.problemImageThumb;
@@ -597,9 +575,7 @@
         imgEl.classList.add('problem-image');
         imgEl.loading = "lazy";
         div.appendChild(imgEl);
-      }
-      // Se não tiver thumbnail mas tiver a imagem original, exibe a original
-      else if (problem.problemImage) {
+      } else if (problem.problemImage) {
         const imgEl = document.createElement('img');
         imgEl.src = "/gridfs_image/" + problem.problemImage;
         imgEl.alt = "Imagem do problema (sem thumbnail)";
@@ -613,12 +589,11 @@
         {% if session.get('user_id') %}
         const solucaoLink = document.createElement('a');
         solucaoLink.href = "{{ url_for('exibir_solucao', problem_id='__ID__') }}"
-                           .replace('__ID__', problem._id);
+          .replace('__ID__', problem._id);
         solucaoLink.classList.add('ver-solucao-btn');
         solucaoLink.textContent = 'Veja a Solução';
         div.appendChild(solucaoLink);
         {% else %}
-        // Se não estiver logado, o botão abre modal de login
         const solucaoBtn = document.createElement('button');
         solucaoBtn.classList.add('ver-solucao-btn');
         solucaoBtn.textContent = 'Veja a Solução';
@@ -632,16 +607,18 @@
       const actionBtns = document.createElement('div');
       actionBtns.classList.add('action-btns');
 
+      // Editar
       const editLink = document.createElement('a');
       editLink.href = "{{ url_for('edit_problem', problem_id='__ID__') }}"
-                      .replace('__ID__', problem._id);
+        .replace('__ID__', problem._id);
       editLink.classList.add('action-btn');
       editLink.textContent = 'Editar';
 
+      // Deletar
       const deleteForm = document.createElement('form');
       deleteForm.method = 'POST';
       deleteForm.action = "{{ url_for('delete_problem', problem_id='__ID__') }}"
-                          .replace('__ID__', problem._id);
+        .replace('__ID__', problem._id);
       deleteForm.classList.add('action-delete-form');
       deleteForm.onsubmit = () => confirm('Tem certeza que deseja deletar este problema?');
 

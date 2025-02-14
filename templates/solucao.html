@@ -352,6 +352,7 @@
       font-family: 'Roboto', sans-serif;
       padding: 0.5rem;
       font-size: 1rem;
+      width: 100%;
     }
     #btnToggleSuggestion {
       background-color: #000;
@@ -405,7 +406,7 @@
         font-size: 1.3rem;
       }
       .btn-voltar-resultados {
-        /* Mantém a seta grande, mas o padding ainda menor no mobile */
+        /* Mantém a seta grande, mas com menos padding em telas menores */
         padding: 0.3rem 0.8rem;
         font-size: 2.4rem;
         left: 0;
@@ -494,7 +495,7 @@
     <h2>{{ problema["titulo"] }}</h2>
     <p class="description">{{ problema["descricao"] }}</p>
 
-    <!-- EXIBIR A IMAGEM DO PROBLEMA -->
+    <!-- EXIBIR A IMAGEM DO PROBLEMA, se houver -->
     {% if problema.problemImageThumb %}
       <img
         src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}"
@@ -509,7 +510,7 @@
       />
     {% endif %}
 
-    <!-- Botão de Compartilhar via WhatsApp (agora abaixo da imagem) -->
+    <!-- Botão de Compartilhar via WhatsApp (abaixo da imagem) -->
     <div style="text-align: center; margin-top: 1rem;">
       <a href="https://wa.me/?text={{ share_msg_encoded }}"
          class="whatsapp-share-btn"
@@ -564,7 +565,7 @@
     <!-- Container da Solução -->
     <div class="solution-container"
          id="solutionContainer"
-         data-steps='{{ solucao.steps | tojson if solucao.steps else "[]" }}'>
+         data-steps='{{ solucao.get("steps", [])|tojson }}'>
       <h3>Solução:</h3>
 
       <!-- Botão para iniciar animação dos passos -->
@@ -598,7 +599,6 @@
       >
         <textarea name="suggestion"
                   rows="5"
-                  style="width:100%;"
                   placeholder="Descreva sua sugestão..."></textarea>
         <br>
         <button type="submit"
@@ -624,7 +624,7 @@
   </footer>
 
   <script>
-    // Função de typewriter para animação de texto progressivo com agrupamento por palavra
+    // Função de "typewriter" para animação de texto progressivo com agrupamento por palavra
     function typeWriter(container, text, index, callback) {
       if (index >= text.length) {
         if (callback) callback();
@@ -641,14 +641,14 @@
         }, 50);
       } else {
         let wordContainer;
-        // Se for o início do texto ou se o caractere anterior for um espaço, cria um container para a nova palavra
+        // Se for o início do texto ou se o caractere anterior for um espaço, cria container p/ nova palavra
         if (index === 0 || text.charAt(index - 1) === ' ') {
           wordContainer = document.createElement('span');
           // Impede quebras internas na palavra
           wordContainer.style.whiteSpace = 'nowrap';
           container.appendChild(wordContainer);
         } else {
-          // Caso contrário, usa o último container criado (que contém a palavra em andamento)
+          // Caso contrário, usa o último container criado (palavra em andamento)
           wordContainer = container.lastChild;
         }
 
@@ -688,7 +688,7 @@
       stepDiv.appendChild(descBlock);
 
       typeWriter(descBlock, `${description}\n`, 0, () => {
-        // Se houver ID de imagem, insere a imagem
+        // Se houver ID de imagem, insere-a
         if (imageId && imageId.trim() !== "") {
           const imageContainer = document.createElement('div');
           imageContainer.classList.add('step-image-block');
@@ -716,7 +716,7 @@
       const showMiniBtn = document.createElement('button');
       showMiniBtn.type = 'button';
       showMiniBtn.classList.add('mini-steps-btn');
-      showMiniBtn.textContent = `Mostrar Passo ${stepNumber}.1`; // Texto inicial
+      showMiniBtn.textContent = `Mostrar Passo ${stepNumber}.1`;
 
       const miniStepsOutput = document.createElement('div');
       miniStepsWrapper.appendChild(miniStepsOutput);
@@ -756,7 +756,7 @@
             currentIndex++;
             isRevealing = false;
 
-            // Atualiza texto do botão
+            // Atualiza texto do botão para o próximo mini-passo
             if (currentIndex < totalMiniSteps) {
               showMiniBtn.textContent = `Mostrar Passo ${stepNumber}.${currentIndex + 1}`;
               showMiniBtn.style.display = 'inline-block';
@@ -777,7 +777,7 @@
       miniStepsWrapper.appendChild(showMiniBtn);
     }
 
-    // Exibe um passo (título -> descrição -> minipassos)
+    // Exibe um passo completo (título -> descrição -> minipassos)
     function revealStep(stepsOutput, stepNumber, stepData, onFinish) {
       const stepDiv = createStepContainer();
       stepsOutput.appendChild(stepDiv);
@@ -795,6 +795,8 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       const solutionContainer = document.getElementById('solutionContainer');
+      // Carrega a lista de passos do atributo data-steps
+      // Ex: data-steps='[...]' em JSON
       const stepsData = JSON.parse(solutionContainer.dataset.steps || '[]');
       const stepsOutput = solutionContainer.querySelector('.steps-output');
       const btnShowSolution = document.getElementById('btnShowSolution');
@@ -806,7 +808,7 @@
       let isSolutionActive = false;
 
       function revealCurrentStep() {
-        // Se já exibimos todos os passos, não faz nada
+        // Se já exibimos todos os passos, não faz nada (exceto mostrar botão de sugestões)
         if (currentStepIndex >= stepsData.length) {
           btnNextStep.style.display = 'none';
           // Quando chegar no final, mostramos o botão "Sugerir melhorias"
@@ -817,6 +819,7 @@
         const stepNumber = currentStepIndex + 1;
 
         revealStep(stepsOutput, stepNumber, stepData, () => {
+          // Se ainda não for o último, mostra "Próximo Passo"
           if (currentStepIndex < stepsData.length - 1) {
             btnNextStep.style.display = 'inline-block';
           } else {
@@ -842,7 +845,7 @@
         revealCurrentStep();
       });
 
-      // Botão "Sugerir melhorias" - toggle do formulário
+      // Botão "Sugerir melhorias" - exibe/esconde o formulário
       btnToggleSuggestion.addEventListener('click', () => {
         if (suggestionFormContainer.style.display === 'none') {
           suggestionFormContainer.style.display = 'block';
