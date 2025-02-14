@@ -106,6 +106,19 @@
       text-align: center;
     }
 
+    /* Imagem do problema */
+    .problem-image {
+      display: block;
+      margin: 1rem auto;
+      width: auto;
+      height: auto;
+      max-width: 400px;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
     /* Botão "Editar Solução" (apenas para solucionador) */
     .show-solution-btn {
       background-color: #000;
@@ -451,6 +464,21 @@
     <!-- Título do problema e descrição -->
     <h2>{{ problema["titulo"] }}</h2>
     <p class="description">{{ problema["descricao"] }}</p>
+
+    <!-- EXIBIR A IMAGEM DO PROBLEMA -->
+    {% if problema.problemImageThumb %}
+      <img
+        src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}"
+        alt="Thumbnail do Problema"
+        class="problem-image"
+      />
+    {% elif problema.problemImage %}
+      <img
+        src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}"
+        alt="Imagem do Problema"
+        class="problem-image"
+      />
+    {% endif %}
 
     <!-- Botão "Editar Solução" (somente para solucionador) -->
     {% if session.get("role") == "solucionador" %}
