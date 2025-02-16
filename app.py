@@ -294,7 +294,7 @@ def search():
 def load_problems():
     """
     Fornece problemas em formato JSON para a página resultados.html fazer scroll infinito
-    ou Intersection Observer. A lógica permanece a mesma.
+    ou Intersection Observer. Aqui também lidamos com creator_custom_name e solver_custom_name.
     """
     search_query = request.args.get("q", "").strip()
     page = int(request.args.get("page", 1))
@@ -340,13 +340,35 @@ def load_problems():
 
         problems_list = []
         for p in problems:
+            # -- Criador --
+            if p.get("creator_custom_name"):
+                creator_name = p["creator_custom_name"]
+            else:
+                if p.get("creator_id"):
+                    c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
+                    creator_name = c_user["nome"] if c_user else "Usuário?"
+                else:
+                    creator_name = "Não definido"
+
+            # -- Solucionador --
+            solver_name = None
+            if p.get("solver_custom_name"):
+                solver_name = p["solver_custom_name"]
+            else:
+                if p.get("solver_id"):
+                    s_user = usuarios_collection.find_one({"_id": ObjectId(p["solver_id"])})
+                    solver_name = s_user["nome"] if s_user else "Usuário?"
+                # se não houver solver_id e solver_custom_name, solver_name permanece None
+
             problems_list.append({
                 "_id": str(p["_id"]),
                 "titulo": p.get("titulo", ""),
                 "descricao": p.get("descricao", ""),
                 "resolvido": p.get("resolvido", False),
                 "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
-                "problemImageThumb": str(p["problemImageThumb"]) if p.get("problemImageThumb") else None
+                "problemImageThumb": str(p["problemImageThumb"]) if p.get("problemImageThumb") else None,
+                "creator_name": creator_name,
+                "solver_name": solver_name
             })
 
         has_more = (skip + ITEMS_PER_PAGE) < total_count
@@ -392,13 +414,34 @@ def load_problems():
 
             problems_list = []
             for p in random_problems:
+                # -- Criador --
+                if p.get("creator_custom_name"):
+                    creator_name = p["creator_custom_name"]
+                else:
+                    if p.get("creator_id"):
+                        c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
+                        creator_name = c_user["nome"] if c_user else "Usuário?"
+                    else:
+                        creator_name = "Não definido"
+
+                # -- Solucionador --
+                solver_name = None
+                if p.get("solver_custom_name"):
+                    solver_name = p["solver_custom_name"]
+                else:
+                    if p.get("solver_id"):
+                        s_user = usuarios_collection.find_one({"_id": ObjectId(p["solver_id"])})
+                        solver_name = s_user["nome"] if s_user else "Usuário?"
+
                 problems_list.append({
                     "_id": str(p["_id"]),
                     "titulo": p.get("titulo", ""),
                     "descricao": p.get("descricao", ""),
                     "resolvido": p.get("resolvido", False),
                     "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
-                    "problemImageThumb": str(p["problemImageThumb"]) if p.get("problemImageThumb") else None
+                    "problemImageThumb": str(p["problemImageThumb"]) if p.get("problemImageThumb") else None,
+                    "creator_name": creator_name,
+                    "solver_name": solver_name
                 })
 
             return jsonify({
@@ -430,12 +473,17 @@ def add_problem():
         original_id, thumb_id = save_image_with_thumbnail(image_file, fs_m)
 
         if titulo and descricao:
+            # Aqui definimos creator_id igual ao usuário logado;
+            # se quiser deixar "custom" no momento de criar, pode estender
             problema = {
                 "titulo": titulo,
                 "descricao": descricao,
                 "resolvido": False,
                 "tags": all_tags,
                 "creator_id": session["user_id"],
+                "creator_custom_name": None,  # por padrão
+                "solver_id": None,
+                "solver_custom_name": None,
                 "problemImage": original_id,
                 "problemImageThumb": thumb_id
             }
@@ -454,8 +502,14 @@ def unresolved():
     problemas_nao_resolvidos = list(problemas_collection.find(query))
     for p in problemas_nao_resolvidos:
         p["_id_str"] = str(p["_id"])
-        user_creator = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
-        p["creator_name"] = user_creator["nome"] if user_creator else "Desconhecido"
+
+        # Exibe criador
+        if p.get("creator_custom_name"):
+            p["creator_name"] = p["creator_custom_name"]
+        else:
+            c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])}) if p.get("creator_id") else None
+            p["creator_name"] = c_user["nome"] if c_user else "Desconhecido"
+
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
 
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
@@ -468,6 +522,10 @@ def resolver_form(problem_id):
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
+    """
+    Marca o problema como resolvido e atribui solver_id = usuário atual.
+    Caso queira permitir 'custom' no momento de resolver, seria preciso outra abordagem.
+    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador", "mecanico"]):
@@ -481,7 +539,14 @@ def resolver_problema(problem_id):
 
     problemas_collection.update_one(
         {"_id": ObjectId(problem_id)},
-        {"$set": {"resolvido": True, "solucao": solution_data}}
+        {
+            "$set": {
+                "resolvido": True,
+                "solucao": solution_data,
+                "solver_id": session["user_id"],
+                "solver_custom_name": None  # Se quiser 'custom', tratar em outro local
+            }
+        }
     )
     return redirect(url_for("unresolved"))
 
@@ -570,31 +635,74 @@ def edit_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    can_edit = (session["user_id"] == problema["creator_id"]) or user_has_role(["solucionador"])
+    # Pode editar se for dono do problema ou se tiver papel solucionador
+    can_edit = (session["user_id"] == problema.get("creator_id")) or user_has_role(["solucionador"])
     if not can_edit:
         return "Acesso negado.", 403
+
+    # Carrega todos os usuários para permitir selecionar no form
+    all_users = list(usuarios_collection.find({}, {"_id": 1, "nome": 1}))
 
     if request.method == "POST":
         titulo_novo = request.form.get("titulo", "").strip()
         descricao_nova = request.form.get("descricao", "").strip()
 
+        tags_str = request.form.get("tags", "").strip()
         titulo_normalized = normalize_string(titulo_novo)
         titulo_tokens = [t for t in titulo_normalized.split() if t not in STOPWORDS]
-
-        tags_str = request.form.get("tags", "").strip()
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
         user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
-
         all_tags = list(set(titulo_tokens + user_tags_normalized))
 
+        # Dados do criador
+        creator_id = request.form.get("creator_id", "")
+        creator_custom_name = request.form.get("creator_custom_name", "").strip()
+
+        # Dados do solver
+        solver_id = request.form.get("solver_id", "")
+        solver_custom_name = request.form.get("solver_custom_name", "").strip()
+
+        # Ajusta solver_id ou None
+        if solver_id in ("", "None"):
+            solver_id = None
+        # Ajusta creator_id ou None
+        if creator_id in ("", "None"):
+            creator_id = None
+
+        # Verifica campos obrigatórios
         if not titulo_novo or not descricao_nova:
-            return render_template("edit_problem.html", problema=problema, erro="Preencha todos os campos.")
+            return render_template(
+                "edit_problem.html",
+                problema=problema,
+                erro="Preencha todos os campos.",
+                all_users=all_users
+            )
+
+        # Decide se vamos salvar ID ou nome custom para CRIADOR
+        if creator_id == "custom":
+            final_creator_id = None
+            final_creator_name = creator_custom_name
+        else:
+            final_creator_id = creator_id
+            final_creator_name = None
+
+        # Decide se vamos salvar ID ou nome custom para SOLVER
+        if solver_id == "custom":
+            final_solver_id = None
+            final_solver_name = solver_custom_name
+        else:
+            final_solver_id = solver_id
+            final_solver_name = None
 
         updated_fields = {
             "titulo": titulo_novo,
             "descricao": descricao_nova,
-            "tags": all_tags
+            "tags": all_tags,
+            "creator_id": final_creator_id,
+            "creator_custom_name": final_creator_name,
+            "solver_id": final_solver_id,
+            "solver_custom_name": final_solver_name
         }
 
         # Lida com a imagem do problema + thumbnail
@@ -602,7 +710,6 @@ def edit_problem(problem_id):
         image_file = request.files.get("problemImage")
 
         if delete_image:
-            # Apagar a imagem existente
             old_file_id = problema.get("problemImage")
             old_thumb_id = problema.get("problemImageThumb")
             if old_file_id:
@@ -619,7 +726,6 @@ def edit_problem(problem_id):
             updated_fields["problemImageThumb"] = None
         elif image_file and image_file.filename.strip():
             new_orig_id, new_thumb_id = save_image_with_thumbnail(image_file, fs_m)
-
             old_file_id = problema.get("problemImage")
             if old_file_id:
                 try:
@@ -642,7 +748,13 @@ def edit_problem(problem_id):
         )
         return redirect(url_for("search", q=titulo_novo))
 
-    return render_template("edit_problem.html", problema=problema, erro=None)
+    # GET
+    return render_template(
+        "edit_problem.html",
+        problema=problema,
+        erro=None,
+        all_users=all_users
+    )
 
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
@@ -746,7 +858,6 @@ def edit_solution(problem_id):
                         pass
                 step["stepImage"] = orig_id
             else:
-                # Mantém a anterior
                 step["stepImage"] = old_file_id
 
             # Subpassos

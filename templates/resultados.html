@@ -575,13 +575,20 @@
       const div = document.createElement('div');
       div.classList.add('problem-item');
 
+      // "Enviado por" no topo
+      const creatorEl = document.createElement('p');
+      creatorEl.textContent = "Enviado por: " + (problem.creator_name || "Usuário");
+      creatorEl.style.fontWeight = "bold";
+      div.appendChild(creatorEl);
+
+      // Título
       const h2 = document.createElement('h2');
       h2.textContent = problem.titulo;
+      div.appendChild(h2);
 
+      // Descrição
       const p = document.createElement('p');
       p.textContent = problem.descricao;
-
-      div.appendChild(h2);
       div.appendChild(p);
 
       // Imagem (thumbnail ou original)
@@ -601,8 +608,15 @@
         div.appendChild(imgEl);
       }
 
-      // Se resolvido, exibir botão "Veja a Solução"
+      // Se resolvido, exibir "Resolvido por" + Botão Solução
       if (problem.resolvido) {
+        // Resolver info
+        const solverEl = document.createElement('p');
+        solverEl.textContent = "Resolvido por: " + (problem.solver_name || "Usuário");
+        solverEl.style.fontStyle = "italic";
+        solverEl.style.marginTop = "0.5rem";
+        div.appendChild(solverEl);
+
         {% if session.get('user_id') %}
         const solucaoLink = document.createElement('a');
         solucaoLink.href = "{{ url_for('exibir_solucao', problem_id='__ID__') }}"

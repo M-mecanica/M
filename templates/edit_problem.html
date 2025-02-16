@@ -82,7 +82,7 @@
       font-size: 1rem;
       padding: 2rem;
       width: 100%;
-      max-width: 1200px; /* mesmo max-width utilizado em outras páginas */
+      max-width: 1200px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -120,7 +120,8 @@
       color: #333;
     }
     input[type="text"],
-    textarea {
+    textarea,
+    select {
       width: 100%;
       padding: 0.8rem;
       border-radius: 4px;
@@ -132,7 +133,8 @@
       outline: none;
     }
     input[type="text"]:focus,
-    textarea:focus {
+    textarea:focus,
+    select:focus {
       border-color: #999;
     }
     textarea {
@@ -251,6 +253,8 @@
 
       <!-- Importante: usar enctype="multipart/form-data" para enviar arquivo -->
       <form method="POST" action="" enctype="multipart/form-data">
+
+        <!-- Campo Título -->
         <div class="form-group">
           <label for="titulo">Título:</label>
           <input
@@ -262,6 +266,7 @@
           >
         </div>
 
+        <!-- Campo Descrição -->
         <div class="form-group">
           <label for="descricao">Descrição:</label>
           <textarea
@@ -271,6 +276,7 @@
           >{{ problema.descricao }}</textarea>
         </div>
 
+        <!-- Campo Tags -->
         <div class="form-group">
           <label for="tags">Tags (separe por espaço):</label>
           <input
@@ -281,6 +287,77 @@
           >
         </div>
 
+        <!-- Escolher quem enviou (criador) OU escrever nome -->
+        <div class="form-group">
+          <label for="creator_id">Enviado por (criador):</label>
+          <select name="creator_id" id="creator_id" onchange="toggleCreatorCustomInput()">
+            <option value="">-- Nenhum --</option>
+            {% for usr in all_users %}
+              <option
+                value="{{ usr._id }}"
+                {% if problema.creator_id == usr._id|string %}
+                  selected
+                {% endif %}
+              >
+                {{ usr.nome }}
+              </option>
+            {% endfor %}
+            <option value="custom"
+              {% if problema.creator_id == None and problema.creator_custom_name %}
+                selected
+              {% endif %}
+            >
+              Outro (digitar nome)
+            </option>
+          </select>
+
+          <!-- Campo adicional para escrever nome livremente -->
+          <input
+            type="text"
+            name="creator_custom_name"
+            id="creator_custom_name"
+            placeholder="Digite o nome do criador"
+            style="margin-top: 0.5rem; display: none;"
+            value="{{ problema.creator_custom_name if problema.creator_custom_name else '' }}"
+          >
+        </div>
+
+        <!-- Escolher quem resolveu (solver) OU escrever nome -->
+        <div class="form-group">
+          <label for="solver_id">Resolvido por (solucionador):</label>
+          <select name="solver_id" id="solver_id" onchange="toggleSolverCustomInput()">
+            <option value="">-- Nenhum --</option>
+            {% for usr in all_users %}
+              <option
+                value="{{ usr._id }}"
+                {% if problema.solver_id == usr._id|string %}
+                  selected
+                {% endif %}
+              >
+                {{ usr.nome }}
+              </option>
+            {% endfor %}
+            <option value="custom"
+              {% if problema.solver_id == None and problema.solver_custom_name %}
+                selected
+              {% endif %}
+            >
+              Outro (digitar nome)
+            </option>
+          </select>
+
+          <!-- Campo adicional para escrever nome livremente -->
+          <input
+            type="text"
+            name="solver_custom_name"
+            id="solver_custom_name"
+            placeholder="Digite o nome do solucionador"
+            style="margin-top: 0.5rem; display: none;"
+            value="{{ problema.solver_custom_name if problema.solver_custom_name else '' }}"
+          >
+        </div>
+
+        <!-- Se já houver imagem, exibir e permitir apagar -->
         {% if problema.problemImage %}
           <div class="form-group">
             <label>Imagem Atual:</label>
@@ -301,6 +378,7 @@
           </div>
         {% endif %}
 
+        <!-- Campo para nova imagem (opcional) -->
         <div class="form-group">
           <label for="problemImage">Nova Imagem (opcional):</label>
           <input
@@ -311,6 +389,7 @@
           >
         </div>
 
+        <!-- Botões -->
         <button type="submit" class="btn-salvar">Salvar</button>
         <a href="{{ url_for('search') }}" class="btn-cancelar">Cancelar</a>
       </form>
@@ -320,5 +399,35 @@
   <footer>
     <p>© 2025 Plataforma M</p>
   </footer>
+
+  <script>
+    // Mostra/esconde campo de texto para "Outro" (criador)
+    function toggleCreatorCustomInput() {
+      const selectEl = document.getElementById('creator_id');
+      const customInputEl = document.getElementById('creator_custom_name');
+      if (selectEl.value === 'custom') {
+        customInputEl.style.display = 'block';
+      } else {
+        customInputEl.style.display = 'none';
+      }
+    }
+
+    // Mostra/esconde campo de texto para "Outro" (solver)
+    function toggleSolverCustomInput() {
+      const selectEl = document.getElementById('solver_id');
+      const customInputEl = document.getElementById('solver_custom_name');
+      if (selectEl.value === 'custom') {
+        customInputEl.style.display = 'block';
+      } else {
+        customInputEl.style.display = 'none';
+      }
+    }
+
+    // Ao carregar a página, checar se select está em "custom"
+    window.addEventListener('DOMContentLoaded', () => {
+      toggleCreatorCustomInput();
+      toggleSolverCustomInput();
+    });
+  </script>
 </body>
 </html>
