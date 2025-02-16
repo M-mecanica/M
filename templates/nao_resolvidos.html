@@ -120,6 +120,17 @@
       text-align: center;
     }
 
+    /* Exibição da imagem (thumbnail) do problema */
+    .problem-image-container {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .problem-image {
+      max-width: 300px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
     /* Caso não haja problemas */
     .no-results {
       text-align: center;
@@ -223,13 +234,11 @@
       header h1 {
         font-size: 1.3rem;
       }
-      /* Ajusta o botão voltar em telas menores */
       .btn-voltar-inicio {
         left: 0.5rem;
-        padding: 0.5rem 0.8rem; /* Menor padding, sem mudar o ícone */
+        padding: 0.5rem 0.8rem;
         height: auto;
       }
-      /* Mantém a seta grande (2rem) */
       .btn-voltar-inicio .arrow-icon {
         font-size: 2rem;
       }
@@ -239,7 +248,7 @@
       }
       .problem-item {
         margin-bottom: 1.5rem;
-        padding-bottom: 4.5rem; /* espaço para botões em telas menores */
+        padding-bottom: 4.5rem;
       }
       .problem-item h2 {
         font-size: 1.2rem;
@@ -289,8 +298,6 @@
       animation: modalFadeIn 0.3s ease;
       overflow: hidden;
     }
-
-    /* Cabeçalho do modal (faixa preta) */
     .modal-header {
       background-color: #000;
       color: #fff;
@@ -315,8 +322,6 @@
     .close:hover {
       color: #ddd;
     }
-
-    /* Corpo do modal */
     .modal-body {
       padding: 1.5rem;
       text-align: center;
@@ -327,8 +332,6 @@
       margin-bottom: 1rem;
       line-height: 1.5;
     }
-
-    /* Botão WhatsApp dentro do modal */
     .btn-whatsapp {
       background-color: #25D366; /* Cor do WhatsApp */
       color: #fff;
@@ -349,8 +352,6 @@
       background-color: #20be5e;
       transform: scale(1.02);
     }
-
-    /* Animação simples de aparição do modal */
     @keyframes modalFadeIn {
       from {
         opacity: 0;
@@ -378,13 +379,23 @@
         {% for problema in problemas %}
         <div class="problem-item">
           <h2>{{ problema["titulo"] }}</h2>
+
+          <!-- Descrição primeiro -->
           <p>{{ problema["descricao"] }}</p>
-          <!-- Exibe o nome do usuário que enviou o problema -->
+
+          <!-- Depois a imagem (se houver) -->
+          {% if problema.problemImageThumb %}
+            <div class="problem-image-container">
+              <img
+                src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}"
+                alt="Imagem do problema"
+                class="problem-image"
+              />
+            </div>
+          {% endif %}
+
           <p>Enviado por: {{ problema["creator_name"] }}</p>
 
-          <!-- Botão "Resolver":
-               - Se for solucionador ou mecânico, leva ao form
-               - Se for usuário comum, abre o modal -->
           {% if session.role in ["solucionador", "mecanico"] %}
             <form
               action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}"
@@ -402,7 +413,6 @@
 
           <!-- Botões de ação no canto inferior direito -->
           <div class="action-btns">
-            <!-- Botão Editar (para quem criou OU para 'solucionador') -->
             {% if session.role == "solucionador" or session["user_id"] == problema["creator_id"] %}
               <a
                 href="{{ url_for('edit_problem', problem_id=problema['_id_str']) }}"
@@ -412,7 +422,6 @@
               </a>
             {% endif %}
 
-            <!-- Botão "Remover" (somente para solucionador) -->
             {% if session.role == "solucionador" %}
               <form
                 action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}"
@@ -431,18 +440,16 @@
     {% else %}
       <div class="no-results">
         <p>Não há problemas não resolvidos.</p>
-        <!-- Caso queira oferecer a opção de registrar novo problema -->
         <a
           href="{{ url_for('add_problem') }}"
           class="new-problem-btn"
           title="Novo Problema"
         >
-          <!-- Ícone de "mais" -->
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <path
-              d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
-                 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-                 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+              d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5
+                 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
+                 0 0 1 8 4z"
             />
           </svg>
           Novo Problema

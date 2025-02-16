@@ -1132,7 +1132,7 @@ def upload_item_image(item_id):
             content_type = file_obj.content_type
             filename = secure_filename(file_obj.filename)
 
-            # Armazena original (poderia também criar thumbnail para itens)
+            # Armazena original
             new_file_id = fs_mz.put(
                 file_data,
                 filename=filename,
