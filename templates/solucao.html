@@ -568,10 +568,11 @@
          data-steps='{{ solucao.get("steps", [])|tojson }}'>
       <h3>Solução:</h3>
 
-      <!-- Botão para iniciar animação dos passos -->
+      <!-- Botão para iniciar animação dos passos (somente NÃO solucionador) -->
       <button type="button"
               class="show-solution-btn"
-              id="btnShowSolution">
+              id="btnShowSolution"
+              style="display: none;">
         Mostrar Passos
       </button>
 
@@ -624,8 +625,19 @@
   </footer>
 
   <script>
-    // Função de "typewriter" para animação de texto progressivo com agrupamento por palavra
+    // Verifica se o usuário atual é "solucionador"
+    const isSolucionador = {{ 'true' if session.get("role") == "solucionador" else 'false' }};
+
+    // === FUNÇÕES DE ANIMAÇÃO (para quem NÃO é solucionador) ===
     function typeWriter(container, text, index, callback) {
+      // Se for solucionador, pula a animação por segurança (fallback),
+      // embora iremos usar outra lógica no "DOMContentLoaded".
+      if (isSolucionador) {
+        container.textContent = text;
+        if (callback) callback();
+        return;
+      }
+
       if (index >= text.length) {
         if (callback) callback();
         return;
@@ -633,7 +645,7 @@
 
       const currentChar = text.charAt(index);
 
-      // Se o caractere for um espaço, insere-o como texto simples
+      // Se o caractere for espaço
       if (currentChar === ' ') {
         container.appendChild(document.createTextNode(' '));
         setTimeout(() => {
@@ -641,14 +653,12 @@
         }, 50);
       } else {
         let wordContainer;
-        // Se for o início do texto ou se o caractere anterior for um espaço, cria container p/ nova palavra
+        // Se for o início do texto ou se o caractere anterior for espaço
         if (index === 0 || text.charAt(index - 1) === ' ') {
           wordContainer = document.createElement('span');
-          // Impede quebras internas na palavra
           wordContainer.style.whiteSpace = 'nowrap';
           container.appendChild(wordContainer);
         } else {
-          // Caso contrário, usa o último container criado (palavra em andamento)
           wordContainer = container.lastChild;
         }
 
@@ -664,7 +674,7 @@
       }
     }
 
-    // Cria o container principal de um passo
+    // Cria o container principal de um passo (estilo box cinza)
     function createStepContainer() {
       const stepDiv = document.createElement('div');
       stepDiv.classList.add('step-container');
@@ -729,7 +739,7 @@
         }
         const sub = miniSteps[index];
 
-        // Título do minipasso: Passo X.Y
+        // Título do minipasso
         const subTitle = document.createElement('div');
         subTitle.classList.add('mini-step-title');
         miniStepsOutput.appendChild(subTitle);
@@ -793,12 +803,73 @@
       });
     }
 
+    // === FUNÇÃO QUE RENDERIZA TUDO DE UMA VEZ (SEM ANIMAÇÃO) para SOLUCIONADOR ===
+    function renderSolutionNoAnimation(stepsOutput, stepsData) {
+      stepsData.forEach((step, index) => {
+        const stepDiv = document.createElement('div');
+        stepDiv.classList.add('step-container');
+
+        // Título
+        const titleBlock = document.createElement('div');
+        titleBlock.classList.add('step-title-block');
+        titleBlock.textContent = `Passo ${index + 1}: ${step.stepTitle}`;
+        stepDiv.appendChild(titleBlock);
+
+        // Descrição
+        const descBlock = document.createElement('div');
+        descBlock.classList.add('step-description-block');
+        descBlock.textContent = step.stepDescription;
+        stepDiv.appendChild(descBlock);
+
+        // Imagem (se houver)
+        if (step.stepImage && step.stepImage.trim() !== "") {
+          const imageContainer = document.createElement('div');
+          imageContainer.classList.add('step-image-block');
+          const imgEl = document.createElement('img');
+          imgEl.src = `/gridfs_image/${step.stepImage}`;
+          imgEl.alt = "Imagem do Passo";
+          imageContainer.appendChild(imgEl);
+          stepDiv.appendChild(imageContainer);
+        }
+
+        // Minipassos
+        if (step.miniSteps && step.miniSteps.length > 0) {
+          const miniWrapper = document.createElement('div');
+          miniWrapper.classList.add('mini-steps-block');
+          step.miniSteps.forEach((substep, subIndex) => {
+            const subTitle = document.createElement('div');
+            subTitle.classList.add('mini-step-title');
+            subTitle.textContent = `Passo ${index + 1}.${subIndex + 1} - ${substep.miniStepTitle}`;
+            miniWrapper.appendChild(subTitle);
+
+            const subDesc = document.createElement('div');
+            subDesc.classList.add('mini-step-description');
+            subDesc.textContent = substep.miniStepDescription;
+            miniWrapper.appendChild(subDesc);
+
+            if (substep.subStepImage && substep.subStepImage.trim() !== "") {
+              const subImgContainer = document.createElement('div');
+              subImgContainer.classList.add('mini-step-image-block');
+              const subImgEl = document.createElement('img');
+              subImgEl.src = `/gridfs_image/${substep.subStepImage}`;
+              subImgEl.alt = "Imagem do Subpasso";
+              subImgContainer.appendChild(subImgEl);
+              miniWrapper.appendChild(subImgContainer);
+            }
+          });
+          stepDiv.appendChild(miniWrapper);
+        }
+
+        stepsOutput.appendChild(stepDiv);
+      });
+    }
+
+    // === SCRIPT DE CONTROLE GERAL ===
     document.addEventListener('DOMContentLoaded', () => {
       const solutionContainer = document.getElementById('solutionContainer');
-      // Carrega a lista de passos do atributo data-steps
-      // Ex: data-steps='[...]' em JSON
       const stepsData = JSON.parse(solutionContainer.dataset.steps || '[]');
       const stepsOutput = solutionContainer.querySelector('.steps-output');
+
       const btnShowSolution = document.getElementById('btnShowSolution');
       const btnNextStep = document.getElementById('btnNextStep');
       const btnToggleSuggestion = document.getElementById('btnToggleSuggestion');
@@ -807,43 +878,56 @@
       let currentStepIndex = 0;
       let isSolutionActive = false;
 
-      function revealCurrentStep() {
-        // Se já exibimos todos os passos, não faz nada (exceto mostrar botão de sugestões)
-        if (currentStepIndex >= stepsData.length) {
-          btnNextStep.style.display = 'none';
-          // Quando chegar no final, mostramos o botão "Sugerir melhorias"
-          btnToggleSuggestion.style.display = 'inline-block';
-          return;
-        }
-        const stepData = stepsData[currentStepIndex];
-        const stepNumber = currentStepIndex + 1;
+      // Se for solucionador, mostramos tudo de uma vez, SEM animação.
+      if (isSolucionador) {
+        // Renderiza imediatamente
+        renderSolutionNoAnimation(stepsOutput, stepsData);
 
-        revealStep(stepsOutput, stepNumber, stepData, () => {
-          // Se ainda não for o último, mostra "Próximo Passo"
-          if (currentStepIndex < stepsData.length - 1) {
-            btnNextStep.style.display = 'inline-block';
-          } else {
-            // Último passo exibido
+        // Exibe o botão "Sugerir melhorias" diretamente (para quem quiser)
+        btnToggleSuggestion.style.display = 'inline-block';
+        // Os botões de animação e "próximo passo" ficam invisíveis.
+        btnShowSolution.style.display = 'none';
+        btnNextStep.style.display = 'none';
+      } else {
+        // Exibe o botão "Mostrar Passos" apenas para não-solucionador
+        btnShowSolution.style.display = 'inline-block';
+
+        // --- Fluxo normal (com animação) para os demais usuários ---
+        function revealCurrentStep() {
+          if (currentStepIndex >= stepsData.length) {
             btnNextStep.style.display = 'none';
+            // Quando chegar no final, mostramos "Sugerir melhorias"
             btnToggleSuggestion.style.display = 'inline-block';
+            return;
           }
+          const stepData = stepsData[currentStepIndex];
+          const stepNumber = currentStepIndex + 1;
+
+          revealStep(stepsOutput, stepNumber, stepData, () => {
+            if (currentStepIndex < stepsData.length - 1) {
+              btnNextStep.style.display = 'inline-block';
+            } else {
+              btnNextStep.style.display = 'none';
+              btnToggleSuggestion.style.display = 'inline-block';
+            }
+          });
+        }
+
+        // Botão "Mostrar Passos"
+        btnShowSolution.addEventListener('click', () => {
+          if (isSolutionActive) return;
+          isSolutionActive = true;
+          btnShowSolution.style.display = 'none';
+          revealCurrentStep();
+        });
+
+        // Botão "Próximo Passo"
+        btnNextStep.addEventListener('click', () => {
+          btnNextStep.style.display = 'none';
+          currentStepIndex++;
+          revealCurrentStep();
         });
       }
-
-      // Exibe o primeiro passo ao clicar em "Mostrar Passos"
-      btnShowSolution.addEventListener('click', () => {
-        if (isSolutionActive) return;
-        isSolutionActive = true;
-        btnShowSolution.style.display = 'none';
-        revealCurrentStep();
-      });
-
-      // Avança para o próximo passo
-      btnNextStep.addEventListener('click', () => {
-        btnNextStep.style.display = 'none';
-        currentStepIndex++;
-        revealCurrentStep();
-      });
 
       // Botão "Sugerir melhorias" - exibe/esconde o formulário
       btnToggleSuggestion.addEventListener('click', () => {
