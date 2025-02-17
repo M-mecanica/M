@@ -517,6 +517,12 @@
 
     // Carrega a primeira página ao iniciar
     window.addEventListener('DOMContentLoaded', () => {
+      // Se já existe texto no campo, foca e coloca o cursor no fim
+      if (searchInput.value) {
+        searchInput.focus();
+        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+      }
+
       loadProblems();
 
       // Configura o Intersection Observer no 'sentinel'
