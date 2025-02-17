@@ -113,10 +113,6 @@
       outline: none;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    .search-container input[type="text"]::placeholder {
-      color: #aaa;
-      text-align: left;
-    }
 
     /* Container de resultados */
     #problem-container {
@@ -431,15 +427,13 @@
   </header>
 
   <main>
-    <!-- Campo de busca -->
+    <!-- Campo de busca (SEM placeholder e SEM value) -->
     <form action="{{ url_for('search') }}" method="GET" class="search-container">
       <span class="material-icons search-icon">search</span>
       <input
         type="text"
         name="q"
         id="search-input"
-        placeholder="Buscar por tags..."
-        value="{{ termo_busca if termo_busca else '' }}"
         autocomplete="off"
         autofocus
       />
@@ -510,7 +504,9 @@
     const noResultsDiv = document.getElementById('no-results');
     const spinner = document.getElementById('spinner');
     const searchInput = document.getElementById('search-input');
-    let searchQuery = searchInput.value.trim();
+
+    // Como não há mais nenhum texto preenchido, a query inicia vazia
+    let searchQuery = '';
 
     let currentPage = 1;
     let loading = false;
