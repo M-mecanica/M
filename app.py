@@ -628,6 +628,9 @@ def delete_problem(problem_id):
     else:
         return redirect(url_for("unresolved"))
 
+# -----------------------------------------------------------
+# EDITAR PROBLEMA (COM UNIFICAÇÃO DE TAGS)
+# -----------------------------------------------------------
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
     if not user_is_logged_in():
@@ -650,13 +653,6 @@ def edit_problem(problem_id):
         descricao_nova = request.form.get("descricao", "").strip()
 
         tags_str = request.form.get("tags", "").strip()
-        titulo_normalized = normalize_string(titulo_novo)
-        titulo_tokens = [t for t in titulo_normalized.split() if t not in STOPWORDS]
-
-        user_tags_raw = tags_str.split()
-        user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
-        user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
-        all_tags = list(set(titulo_tokens + user_tags_normalized))
 
         # Dados do criador
         creator_id = request.form.get("creator_id", "")
@@ -698,10 +694,32 @@ def edit_problem(problem_id):
             final_solver_id = solver_id
             final_solver_name = None
 
+        # -------------------------
+        # Montar novo conjunto TAGS
+        # -------------------------
+        old_tags = problema.get("tags", [])
+
+        # Normaliza título e descrição (removendo acentos e deixando minúsculo)
+        titulo_normalizado = normalize_string(titulo_novo)
+        descricao_normalizada = normalize_string(descricao_nova)
+
+        # Tokeniza e remove STOPWORDS
+        titulo_tokens = [t for t in titulo_normalizado.split() if t and t not in STOPWORDS]
+        descricao_tokens = [t for t in descricao_normalizada.split() if t and t not in STOPWORDS]
+
+        # Normaliza as tags digitadas
+        user_tags_raw = tags_str.split()
+        user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
+        user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
+
+        # Converte tudo para set() para unificar e remover duplicadas
+        final_tag_set = set(old_tags) | set(titulo_tokens) | set(descricao_tokens) | set(user_tags_normalized)
+        final_tags = list(final_tag_set)  # volta para lista
+
         updated_fields = {
             "titulo": titulo_novo,
             "descricao": descricao_nova,
-            "tags": all_tags,
+            "tags": final_tags,
             "creator_id": final_creator_id,
             "creator_custom_name": final_creator_name,
             "solver_id": final_solver_id,
@@ -837,7 +855,7 @@ def edit_solution(problem_id):
         steps = new_solution_data.get("steps", [])
 
         for i, step in enumerate(steps):
-            # Lidar com imagem do step
+            # Lida com imagem do step
             delete_step = request.form.get(f"deleteExistingStepImage_{i}", "false") == "true"
             step_image_file = request.files.get(f"stepImage_{i}")
 
