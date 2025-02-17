@@ -37,7 +37,7 @@ db_m = client_m["m_plataforma"]
 # Coleções do M
 problemas_collection = db_m["problemas"]
 usuarios_collection = db_m["usuarios"]
-history_collection = db_m["search_history"]  # Histórico de buscas de PEÇAS
+history_collection = db_m["search_history"]  # Histórico de buscas de PEÇAS (MachineZONE)
 problem_history_collection = db_m["problem_search_history"]  # Histórico de busca de PROBLEMAS
 problem_view_history_collection = db_m["problem_view_history"]  # Registro de visualizações
 improvement_suggestions_collection = db_m["improvement_suggestions"]  # Sugestões de melhorias
@@ -96,7 +96,8 @@ def normalize_string(s):
 def generate_sub_phrases(tokens):
     """
     Gera todas as sub-frases contíguas de uma lista de tokens.
-    Ex.: ["rolamento", "grande", "da", "redução"] -> sub-frases.
+    Ex.: ["rolamento", "grande"] => ["rolamento", "grande", "rolamento grande"]
+    (Usado no item_search, se mantiver)
     """
     sub_phrases = []
     n = len(tokens)
@@ -109,6 +110,7 @@ def generate_sub_phrases(tokens):
 def compute_largest_sub_phrase_length(search_tokens, item_phrases):
     """
     Verifica a maior sub-frase (em nº de tokens) presente em 'item_phrases'.
+    (Usado no item_search, se mantiver)
     """
     if not item_phrases:
         return 0
@@ -123,7 +125,7 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
 
 def create_thumbnail(image_bytes, max_size=(300, 300)):
     """
-    Cria um thumbnail a partir dos bytes de imagem (bytes do arquivo original).
+    Cria um thumbnail a partir dos bytes de imagem (arquivo original).
     Retorna os bytes do thumbnail em formato JPEG.
     """
     img = Image.open(io.BytesIO(image_bytes))
@@ -168,13 +170,13 @@ def save_image_with_thumbnail(file_obj, fs_instance):
     return str(original_id), str(thumb_id)
 
 # -----------------------------------------------------------
-# CRIAR ÍNDICE DE TEXTO (se ainda não existir)
+# (OPCIONAL) CRIAR ÍNDICE DE TEXTO (se for necessário em outras consultas)
 # -----------------------------------------------------------
 @app.before_first_request
 def init_db():
     """
-    Garante que haja um índice de texto para 'titulo', 'descricao' e 'tags'.
-    Rodará apenas quando a aplicação receber a primeira requisição.
+    Você pode manter ou remover esse índice de texto se não precisar mais dele.
+    Ele não atrapalha a busca por AND em tags, mas também não é usado nela.
     """
     existing_indexes = problemas_collection.index_information()
     if "TextoProblemas" not in existing_indexes:
@@ -285,6 +287,7 @@ def register():
 # -----------------------------------------------------------
 # ROTAS LIGADAS A PROBLEMAS (Plataforma M)
 # -----------------------------------------------------------
+
 @app.route("/search", methods=["GET"])
 def search():
     termo_busca = request.args.get("q", "").strip()
@@ -294,7 +297,11 @@ def search():
 def load_problems():
     """
     Fornece problemas em formato JSON para a página resultados.html fazer scroll infinito
-    ou Intersection Observer. Aqui também lidamos com creator_custom_name e solver_custom_name.
+    ou Intersection Observer.
+
+    ----
+    AGORA usando lógica de AND em 'tags':
+      -> Para cada token digitado, exigimos que esse token esteja em 'tags'.
     """
     search_query = request.args.get("q", "").strip()
     page = int(request.args.get("page", 1))
@@ -316,22 +323,24 @@ def load_problems():
                 "searched_at": datetime.datetime.utcnow()
             })
 
-    if search_query:
-        # PESQUISA COM SKIP/LIMIT usando índice de texto
+    # Converte busca em tokens (sem acentos, minusculo) e remove stopwords
+    search_tokens = [t for t in normalize_string(search_query).split() if t and t not in STOPWORDS]
+
+    if search_tokens:
+        # MATCH: cada token deve estar presente em 'tags'
         skip = (page - 1) * ITEMS_PER_PAGE
 
         # Contar total
         count_pipeline = [
-            {"$match": {"$text": {"$search": search_query}}},
+            {"$match": {"tags": {"$all": search_tokens}}},
             {"$count": "total"}
         ]
         count_result = list(problemas_collection.aggregate(count_pipeline))
         total_count = count_result[0]["total"] if count_result else 0
 
-        # Buscar problemas (com relevância)
+        # Buscar problemas
         pipeline_fetch = [
-            {"$match": {"$text": {"$search": search_query}}},
-            {"$sort": {"score": {"$meta": "textScore"}}},  # ordena por relevância
+            {"$match": {"tags": {"$all": search_tokens}}},
             {"$skip": skip},
             {"$limit": ITEMS_PER_PAGE}
         ]
@@ -358,7 +367,6 @@ def load_problems():
                 if p.get("solver_id"):
                     s_user = usuarios_collection.find_one({"_id": ObjectId(p["solver_id"])})
                     solver_name = s_user["nome"] if s_user else "Usuário?"
-                # se não houver solver_id e solver_custom_name, solver_name permanece None
 
             problems_list.append({
                 "_id": str(p["_id"]),
@@ -377,8 +385,9 @@ def load_problems():
             "has_more": has_more,
             "total_count": total_count
         })
+
     else:
-        # LÓGICA DE ALEATORIEDADE SE NÃO HOUVER BUSCA
+        # Se não digitou nada, devolvemos resultados aleatórios (sem repetir na mesma sessão)
         if page == 1:
             session["displayed_problem_ids"] = []
         displayed_ids = session.get("displayed_problem_ids", [])
@@ -473,15 +482,13 @@ def add_problem():
         original_id, thumb_id = save_image_with_thumbnail(image_file, fs_m)
 
         if titulo and descricao:
-            # Aqui definimos creator_id igual ao usuário logado;
-            # se quiser deixar "custom" no momento de criar, pode estender
             problema = {
                 "titulo": titulo,
                 "descricao": descricao,
                 "resolvido": False,
                 "tags": all_tags,
                 "creator_id": session["user_id"],
-                "creator_custom_name": None,  # por padrão
+                "creator_custom_name": None,
                 "solver_id": None,
                 "solver_custom_name": None,
                 "problemImage": original_id,
@@ -522,10 +529,6 @@ def resolver_form(problem_id):
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
-    """
-    Marca o problema como resolvido e atribui solver_id = usuário atual.
-    Caso queira permitir 'custom' no momento de resolver, seria preciso outra abordagem.
-    """
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
     if not user_has_role(["solucionador", "mecanico"]):
@@ -544,7 +547,7 @@ def resolver_problema(problem_id):
                 "resolvido": True,
                 "solucao": solution_data,
                 "solver_id": session["user_id"],
-                "solver_custom_name": None  # Se quiser 'custom', tratar em outro local
+                "solver_custom_name": None
             }
         }
     )
@@ -558,7 +561,7 @@ def exibir_solucao(problem_id):
     if not problema.get("resolvido"):
         return "Ainda não resolvido.", 400
 
-    # Se não tiver share_token no doc, geramos um agora
+    # Se não tiver share_token no doc, geramos
     if "share_token" not in problema:
         new_token = secrets.token_urlsafe(16)
         problemas_collection.update_one(
@@ -572,7 +575,7 @@ def exibir_solucao(problem_id):
         # Se não estiver logado, confere se foi passado um 'token'
         token_param = request.args.get("token", "")
         if token_param != problema["share_token"]:
-            return "Acesso negado. Faça login ou utilize o link de compartilhamento correto.", 403
+            return "Acesso negado. Faça login ou utilize o link de compartilhamento.", 403
 
     # Registra a visualização (se usuário estiver logado)
     if user_is_logged_in():
@@ -583,7 +586,6 @@ def exibir_solucao(problem_id):
         )
 
     solucao = problema.get("solucao", {})
-
     share_url = url_for("exibir_solucao", problem_id=problem_id, token=problema["share_token"], _external=True)
     share_text = f"Confira a solução para: {problema['titulo']} - {share_url}"
     share_msg_encoded = quote(share_text, safe='')
@@ -640,7 +642,7 @@ def edit_problem(problem_id):
     if not can_edit:
         return "Acesso negado.", 403
 
-    # Carrega todos os usuários para permitir selecionar no form
+    # Carrega todos os usuários para permitir selecionar no form (caso use)
     all_users = list(usuarios_collection.find({}, {"_id": 1, "nome": 1}))
 
     if request.method == "POST":
@@ -650,6 +652,7 @@ def edit_problem(problem_id):
         tags_str = request.form.get("tags", "").strip()
         titulo_normalized = normalize_string(titulo_novo)
         titulo_tokens = [t for t in titulo_normalized.split() if t not in STOPWORDS]
+
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
         user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
@@ -748,7 +751,6 @@ def edit_problem(problem_id):
         )
         return redirect(url_for("search", q=titulo_novo))
 
-    # GET
     return render_template(
         "edit_problem.html",
         problema=problema,
@@ -936,7 +938,7 @@ def gridfs_image_thumb(file_id):
         return "Thumbnail não encontrada.", 404
 
 # -----------------------------------------------------------
-# GRIDFS - EXIBIÇÃO DE IMAGENS (ITENS)
+# GRIDFS - EXIBIÇÃO DE IMAGENS (ITENS) - (MachineZONE)
 # -----------------------------------------------------------
 @app.route("/gridfs_item_image/<file_id>", methods=["GET"])
 def gridfs_item_image(file_id):
@@ -1003,7 +1005,7 @@ def history_problem():
 @app.route("/suggest_improvement/<problem_id>", methods=["POST"])
 def suggest_improvement(problem_id):
     if not user_is_logged_in():
-        return "Texto vazio.", 400  # Aqui poderíamos exigir login.
+        return "Texto vazio.", 400
 
     suggestion_text = request.form.get("suggestion", "").strip()
     if not suggestion_text:
@@ -1071,6 +1073,7 @@ def item_search():
 def load_items():
     """
     Retorna JSON com até ITEMS_PER_PAGE itens por página.
+    (Mantém a lógica original de matching phrases + tokens, se for útil.)
     """
     search_query = request.args.get('search', '').strip()
     page = int(request.args.get('page', 1))
@@ -1129,7 +1132,7 @@ def load_items():
         ))
         total_items = count_result[0]['total'] if count_result else 0
 
-        # Carregar matching
+        # Buscar matching
         items_cursor = itens_collection.aggregate(
             pipeline_base,
             collation={'locale': 'pt', 'strength': 1}
@@ -1175,7 +1178,7 @@ def load_items():
         })
 
     else:
-        # Caso SEM TERMO: PAGINAÇÃO ALEATÓRIA
+        # Sem termo => Paginação aleatória
         if page == 1:
             session["displayed_item_ids"] = []
         displayed_ids = session.get("displayed_item_ids", [])
@@ -1268,5 +1271,4 @@ def upload_item_image(item_id):
 # EXECUÇÃO
 # -----------------------------------------------------------
 if __name__ == "__main__":
-    # Em produção, configure wsgi/gunicorn/etc.
     app.run(host="0.0.0.0", port=5000, debug=True)

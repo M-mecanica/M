@@ -71,7 +71,7 @@
       transform: scale(1.02);
     }
 
-    /* MAIN: centralizado, largura max 1200px */
+    /* MAIN */
     main {
       flex: 1;
       font-size: 1.25rem;
@@ -123,7 +123,7 @@
       width: 100%;
     }
 
-    /* Sentinela para Intersection Observer */
+    /* Sentinela */
     #sentinel {
       width: 100%;
       height: 50px;
@@ -193,7 +193,7 @@
       transform: translateX(-50%) scale(1.02);
     }
 
-    /* Botões Editar/Deletar */
+    /* Botões Editar/Deletar (exibidos se role=solucionador, etc.) */
     .action-btns {
       position: absolute;
       bottom: 1rem;
@@ -334,7 +334,7 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* MODAL LOGIN */
+    /* MODAL LOGIN (caso precise) */
     .modal {
       display: none;
       position: fixed;
@@ -438,7 +438,7 @@
         type="text"
         name="q"
         id="search-input"
-        placeholder=""
+        placeholder="Buscar por tags..."
         value="{{ termo_busca if termo_busca else '' }}"
         autocomplete="off"
         autofocus
@@ -529,8 +529,8 @@
           loadProblems();
         }
       }, {
-        root: null,    // viewport
-        threshold: 0.1 // dispara quando ~10% do sentinel estiver visível
+        root: null,
+        threshold: 0.1
       });
 
       const sentinel = document.getElementById('sentinel');
@@ -575,7 +575,7 @@
       const div = document.createElement('div');
       div.classList.add('problem-item');
 
-      // "Enviado por" no topo
+      // "Enviado por"
       const creatorEl = document.createElement('p');
       creatorEl.textContent = "Enviado por: " + (problem.creator_name || "Usuário");
       creatorEl.style.fontWeight = "bold";
@@ -591,7 +591,7 @@
       p.textContent = problem.descricao;
       div.appendChild(p);
 
-      // Imagem (thumbnail ou original)
+      // Imagem (se houver)
       if (problem.problemImageThumb) {
         const imgEl = document.createElement('img');
         imgEl.src = "/gridfs_image_thumb/" + problem.problemImageThumb;
@@ -602,7 +602,7 @@
       } else if (problem.problemImage) {
         const imgEl = document.createElement('img');
         imgEl.src = "/gridfs_image/" + problem.problemImage;
-        imgEl.alt = "Imagem do problema (sem thumbnail)";
+        imgEl.alt = "Imagem do problema";
         imgEl.classList.add('problem-image');
         imgEl.loading = "lazy";
         div.appendChild(imgEl);
@@ -610,7 +610,6 @@
 
       // Se resolvido, exibir "Resolvido por" + Botão Solução
       if (problem.resolvido) {
-        // Resolver info
         const solverEl = document.createElement('p');
         solverEl.textContent = "Resolvido por: " + (problem.solver_name || "Usuário");
         solverEl.style.fontStyle = "italic";
