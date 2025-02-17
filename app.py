@@ -69,6 +69,7 @@ STOPWORDS = {
 ITEMS_PER_PAGE = 20  # Usado tanto para itens quanto para problemas
 MZ_WHATSAPP = "5543996436367"  # Número WhatsApp para finalizar carrinho, etc.
 
+
 # -----------------------------------------------------------
 # FUNÇÕES AUXILIARES
 # -----------------------------------------------------------
@@ -76,11 +77,13 @@ def user_is_logged_in():
     """Retorna True se há um usuário logado."""
     return "user_id" in session
 
+
 def user_has_role(roles_permitidos):
     """Verifica se o usuário logado possui um dos papéis em 'roles_permitidos'."""
     if not user_is_logged_in():
         return False
     return session.get("role") in roles_permitidos
+
 
 def normalize_string(s):
     """
@@ -92,6 +95,7 @@ def normalize_string(s):
         if not unicodedata.combining(c)
     )
     return re.sub(r'\s+', ' ', normalized.strip().lower())
+
 
 def generate_sub_phrases(tokens):
     """
@@ -106,6 +110,7 @@ def generate_sub_phrases(tokens):
             sub_slice = tokens[start:end]
             sub_phrases.append(" ".join(sub_slice))
     return sub_phrases
+
 
 def compute_largest_sub_phrase_length(search_tokens, item_phrases):
     """
@@ -123,6 +128,7 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
                 largest_length = num_tokens
     return largest_length
 
+
 def create_thumbnail(image_bytes, max_size=(300, 300)):
     """
     Cria um thumbnail a partir dos bytes de imagem (arquivo original).
@@ -134,6 +140,7 @@ def create_thumbnail(image_bytes, max_size=(300, 300)):
     img.save(output, format="JPEG", quality=85)
     output.seek(0)
     return output.read()
+
 
 def save_image_with_thumbnail(file_obj, fs_instance):
     """
@@ -169,6 +176,7 @@ def save_image_with_thumbnail(file_obj, fs_instance):
 
     return str(original_id), str(thumb_id)
 
+
 # -----------------------------------------------------------
 # (OPCIONAL) CRIAR ÍNDICE DE TEXTO (se for necessário em outras consultas)
 # -----------------------------------------------------------
@@ -190,6 +198,7 @@ def init_db():
             default_language="portuguese"
         )
 
+
 # -----------------------------------------------------------
 # ROTA PRINCIPAL E SISTEMA DE USUÁRIOS
 # -----------------------------------------------------------
@@ -197,10 +206,12 @@ def init_db():
 def root():
     return redirect(url_for("index"))
 
+
 @app.route("/index", methods=["GET"])
 def index():
     need_login = request.args.get("need_login", "0")
     return render_template("index.html", need_login=need_login)
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -242,10 +253,12 @@ def login():
 
     return render_template("login.html", erro=None)
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -284,6 +297,7 @@ def register():
 
     return render_template("register.html", erro=None)
 
+
 # -----------------------------------------------------------
 # ROTAS LIGADAS A PROBLEMAS (Plataforma M)
 # -----------------------------------------------------------
@@ -292,6 +306,7 @@ def register():
 def search():
     termo_busca = request.args.get("q", "").strip()
     return render_template("resultados.html", termo_busca=termo_busca)
+
 
 @app.route("/load_problems", methods=["GET"])
 def load_problems():
@@ -459,6 +474,7 @@ def load_problems():
                 "total_count": remaining_count
             })
 
+
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
     if not user_is_logged_in():
@@ -500,6 +516,7 @@ def add_problem():
             return render_template("add.html", erro="Preencha todos os campos.")
     return render_template("add.html", erro=None)
 
+
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
     if not user_is_logged_in():
@@ -519,6 +536,7 @@ def unresolved():
 
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
 
+
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
     if not user_is_logged_in():
@@ -526,6 +544,7 @@ def resolver_form(problem_id):
     if not user_has_role(["solucionador", "mecanico"]):
         return "Acesso negado (somente solucionadores/mecânicos).", 403
     return render_template("resolver.html", problem_id=problem_id)
+
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
@@ -552,6 +571,7 @@ def resolver_problema(problem_id):
         }
     )
     return redirect(url_for("unresolved"))
+
 
 @app.route("/solucao/<problem_id>", methods=["GET"])
 def exibir_solucao(problem_id):
@@ -595,6 +615,7 @@ def exibir_solucao(problem_id):
                            solucao=solucao,
                            share_msg_encoded=share_msg_encoded)
 
+
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
     if not user_is_logged_in():
@@ -627,6 +648,7 @@ def delete_problem(problem_id):
         return redirect(url_for("search"))
     else:
         return redirect(url_for("unresolved"))
+
 
 # -----------------------------------------------------------
 # EDITAR PROBLEMA (COM UNIFICAÇÃO DE TAGS)
@@ -776,6 +798,7 @@ def edit_problem(problem_id):
         all_users=all_users
     )
 
+
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
     if not user_is_logged_in():
@@ -789,6 +812,7 @@ def edit_user_role(user_id):
         {"$set": {"role": novo_role}}
     )
     return redirect(url_for("listar_usuarios"))
+
 
 @app.route("/usuarios", methods=["GET"])
 def listar_usuarios():
@@ -815,6 +839,7 @@ def listar_usuarios():
 
     return render_template("registros.html", usuarios=usuarios, search_query=search_query)
 
+
 @app.route("/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id):
     if not user_is_logged_in():
@@ -824,6 +849,7 @@ def delete_user(user_id):
 
     usuarios_collection.delete_one({"_id": ObjectId(user_id)})
     return redirect(url_for("listar_usuarios"))
+
 
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
@@ -923,6 +949,7 @@ def edit_solution(problem_id):
         erro=None
     )
 
+
 # -----------------------------------------------------------
 # GRIDFS - EXIBIÇÃO DE IMAGENS (PROBLEMAS)
 # -----------------------------------------------------------
@@ -941,6 +968,7 @@ def gridfs_image(file_id):
     except:
         return "Imagem não encontrada.", 404
 
+
 @app.route("/gridfs_image_thumb/<file_id>", methods=["GET"])
 def gridfs_image_thumb(file_id):
     """
@@ -954,6 +982,7 @@ def gridfs_image_thumb(file_id):
         return response
     except:
         return "Thumbnail não encontrada.", 404
+
 
 # -----------------------------------------------------------
 # GRIDFS - EXIBIÇÃO DE IMAGENS (ITENS) - (MachineZONE)
@@ -973,6 +1002,7 @@ def gridfs_item_image(file_id):
     except:
         return "Imagem do item não encontrada.", 404
 
+
 # -----------------------------------------------------------
 # HISTÓRICOS
 # -----------------------------------------------------------
@@ -985,6 +1015,7 @@ def history_search():
 
     all_history = list(history_collection.find({}))
     return render_template("history_search.html", history=all_history)
+
 
 @app.route("/history_problem", methods=["GET"])
 def history_problem():
@@ -1020,6 +1051,7 @@ def history_problem():
         suggestions_by_problem=suggestions_by_problem
     )
 
+
 @app.route("/suggest_improvement/<problem_id>", methods=["POST"])
 def suggest_improvement(problem_id):
     if not user_is_logged_in():
@@ -1042,6 +1074,7 @@ def suggest_improvement(problem_id):
         "submitted_at": datetime.datetime.utcnow()
     })
     return redirect(url_for("exibir_solucao", problem_id=problem_id))
+
 
 @app.route("/user_history/<user_id>", methods=["GET"])
 def user_history(user_id):
@@ -1080,12 +1113,14 @@ def user_history(user_id):
         user_suggestions=user_suggestions
     )
 
+
 # -----------------------------------------------------------
 # PESQUISA DE ITENS (MZ) + Upload de imagem
 # -----------------------------------------------------------
 @app.route("/item_search", methods=["GET"])
 def item_search():
     return render_template("item_search.html")
+
 
 @app.route("/load_items", methods=["GET"])
 def load_items():
@@ -1243,6 +1278,7 @@ def load_items():
             "total_items": remaining_count
         })
 
+
 @app.route("/upload_item_image/<item_id>", methods=["POST"])
 def upload_item_image(item_id):
     """
@@ -1284,6 +1320,62 @@ def upload_item_image(item_id):
             )
 
     return redirect(url_for("item_search"))
+
+
+# -----------------------------------------------------------
+# ROTA PARA ADICIONAR ITENS (incluindo tokens da descrição nas tags)
+# -----------------------------------------------------------
+@app.route("/add_item", methods=["GET", "POST"])
+def add_item():
+    if not user_is_logged_in():
+        return redirect(url_for("login"))
+    if request.method == "POST":
+        description = request.form.get("description", "").strip()
+        tags_str = request.form.get("tags", "").strip()
+        user_tags_raw = tags_str.split() if tags_str else []
+        user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
+        user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
+
+        description_normalized = normalize_string(description)
+        description_tokens = [t for t in description_normalized.split() if t and t not in STOPWORDS]
+
+        # Junta os tokens das tags digitadas com os tokens da descrição, evitando duplicações
+        all_tags = list(set(user_tags_normalized + description_tokens))
+
+        price = request.form.get("price", "0").strip()
+        try:
+            price = float(price)
+        except:
+            price = 0.0
+        stock_mz = request.form.get("stock_mz", "0").strip()
+        try:
+            stock_mz = int(stock_mz)
+        except:
+            stock_mz = 0
+        stock_eld = request.form.get("stock_eld", "0").strip()
+        try:
+            stock_eld = int(stock_eld)
+        except:
+            stock_eld = 0
+
+        image_file = request.files.get("itemImage")
+        original_id, thumb_id = save_image_with_thumbnail(image_file, fs_mz)
+
+        new_item = {
+            "description": description,
+            "tags": all_tags,
+            "price": price,
+            "stock_mz": stock_mz,
+            "stock_eld": stock_eld,
+            "itemImage": original_id,
+            "itemImageThumb": thumb_id
+        }
+
+        itens_collection.insert_one(new_item)
+        return redirect(url_for("item_search"))
+
+    return render_template("add_item.html")
+
 
 # -----------------------------------------------------------
 # EXECUÇÃO
