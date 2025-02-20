@@ -103,7 +103,7 @@
       margin-bottom: 2rem;
     }
     .logo-grande img {
-      max-width: 250px; /* Ajuste conforme desejar */
+      max-width: 250px;
       height: auto;
     }
 
@@ -114,7 +114,7 @@
       margin: 0 auto 1.2rem auto;
       display: flex;
       align-items: center;
-      gap: 0; /* Elementos colados */
+      gap: 0;
       flex-wrap: wrap;
     }
 
@@ -148,12 +148,10 @@
       padding: 0 1.5rem;
       padding-left: 3rem;
       border: 2px solid #999;
-      /* Arredondamento apenas nas extremidades externas */
       border-top-left-radius: 32px;
       border-bottom-left-radius: 32px;
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
-      /* Remove a borda direita para unificar com o botão */
       border-right: none;
       background-color: #fff;
       font-size: 1rem;
@@ -171,10 +169,8 @@
     .explore-button {
       background-color: #fff;
       color: #333;
-      /* Remove a borda esquerda padrão e define uma barra fina como divisor */
       border: 2px solid #999;
       border-left: 1px solid #999;
-      /* Arredondamento nas extremidades externas */
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
       border-top-right-radius: 32px;
@@ -197,7 +193,6 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
 
-    /* Mantém o mesmo estilo em mobile */
     @media (max-width: 480px) {
       .search-container {
         width: 100vw;
@@ -784,7 +779,7 @@
         subCategories: [
           {
             name: "Carros",
-            brands: ["Toyota", "Honda", "GM", "Ford", "Fiat", "Volkswagen", "Peugeot", "Chevrolet"]
+            brands: ["Toyota", "Honda", "Ford", "Fiat", "Volkswagen", "Peugeot", "Chevrolet"]
           },
           {
             name: "Motos",
