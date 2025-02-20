@@ -7,7 +7,7 @@
   <!-- Responsividade em dispositivos móveis -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Fonte básica (opcional) -->
+  <!-- Fonte básica -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
@@ -188,8 +188,8 @@
       transform: scale(1.02);
     }
 
-    /* Botão que abre o modal de Categoria/Marca */
-    .btn-categorias {
+    /* Botão que abre o modal de seleção de categoria/subcategoria/marca */
+    .btn-categorias-abrir-modal {
       background-color: #000;
       color: #fff;
       border: none;
@@ -204,7 +204,7 @@
       align-items: center;
       margin-bottom: 1rem;
     }
-    .btn-categorias:hover {
+    .btn-categorias-abrir-modal:hover {
       background-color: #333;
       transform: scale(1.02);
     }
@@ -236,7 +236,7 @@
     }
 
     /* =========================================================================
-       MODAL DE CATEGORIAS (3 PASSOS)
+       MODAL (Mesmo estilo do index.html)
        ========================================================================= */
     .modal {
       display: none;
@@ -252,88 +252,17 @@
     }
     .modal-content {
       background-color: #fff;
+      width: 95%;
+      max-width: 700px;
       border-radius: 8px;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
       animation: modalFadeIn 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      border: 1px solid #fff; /* Borda branca fina */
     }
-    .modal-header {
-      background-color: #000;
-      color: #fff;
-      padding: 1.2rem 1.5rem;
-      position: relative;
-    }
-    .modal-header h2 {
-      margin: 0;
-      font-size: 1.2rem;
-      font-weight: 500;
-    }
-    .close {
-      color: #fff;
-      position: absolute;
-      right: 1rem;
-      top: 1rem;
-      font-size: 1.4rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-    .close:hover {
-      color: #ddd;
-    }
-    .modal-body {
-      padding: 1.5rem;
-      text-align: center;
-    }
-    .modal-text {
-      font-size: 1rem;
-      color: #333;
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-    .step-container {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-    .btn-modal-category {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.2s;
-      margin-bottom: 0.5rem;
-    }
-    .btn-modal-category:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-    .btn-modal-back {
-      background-color: #444;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 0.6rem 1rem;
-      font-size: 0.9rem;
-      font-weight: 500;
-      margin-top: 1rem;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.2s;
-    }
-    .btn-modal-back:hover {
-      background-color: #666;
-      transform: scale(1.02);
-    }
-
     @keyframes modalFadeIn {
       from {
         opacity: 0;
@@ -344,8 +273,85 @@
         transform: translateY(0);
       }
     }
+    .modal-header {
+      background-color: #000;
+      color: #fff;
+      padding: 2rem;
+      position: relative;
+      border-bottom: 1px solid #333;
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 500;
+    }
+    .close {
+      color: #fff;
+      position: absolute;
+      right: 2rem;
+      top: 2rem;
+      font-size: 2.4rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .close:hover {
+      color: #ccc;
+    }
+    .modal-body {
+      padding: 2rem;
+      text-align: center;
+      overflow-y: auto;
+      max-height: calc(90vh - 100px);
+    }
+    .modal-text {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 2rem;
+      line-height: 1.4;
+    }
 
-    /* Responsividade */
+    /* Botões de categorias (em coluna) */
+    #editMainCategoryContainer,
+    #editSubCategoryContainer,
+    #editBrandContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* Mesmo estilo de botão de categoria usado no index.html */
+    .btn-categorias {
+      background-color: #f2f2f2;
+      color: #333;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 1.2rem 2rem;
+      font-size: 1.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+      transition: background-color 0.2s, transform 0.2s;
+      text-align: left;
+      display: flex;
+      align-items: center;
+    }
+    .btn-categorias:hover {
+      background-color: #e6e6e6;
+      transform: scale(1.02);
+    }
+    .btn-categorias.voltar {
+      background-color: #ddd;
+      border-color: #bbb;
+      justify-content: center;
+    }
+    .btn-categorias.voltar:hover {
+      background-color: #ccc;
+    }
+
     @media (max-width: 768px) {
       header {
         padding: 1rem;
@@ -371,10 +377,15 @@
         font-size: 0.9rem;
         padding: 0.6rem 1rem;
       }
-      .btn-categorias {
+      .btn-categorias-abrir-modal {
         font-size: 0.9rem;
         padding: 0.6rem 1rem;
       }
+      .existing-image {
+        max-width: 100%;
+      }
+
+      /* Ajustes do modal */
       .modal-content {
         width: 95%;
       }
@@ -382,24 +393,22 @@
         padding: 1rem;
       }
       .modal-header h2 {
-        font-size: 1rem;
+        font-size: 1.4rem;
+      }
+      .close {
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.8rem;
       }
       .modal-body {
         padding: 1rem;
       }
       .modal-text {
-        font-size: 0.9rem;
+        font-size: 1rem;
       }
-      .btn-modal-category {
-        font-size: 0.8rem;
-        padding: 0.5rem 0.8rem;
-      }
-      .btn-modal-back {
-        font-size: 0.8rem;
-        padding: 0.5rem 0.8rem;
-      }
-      .existing-image {
-        max-width: 100%;
+      .btn-categorias {
+        font-size: 1rem;
+        padding: 0.8rem 1rem;
       }
     }
   </style>
@@ -456,7 +465,7 @@
         <!-- Botão para abrir modal de seleção de categoria/subcategoria/marca -->
         <div class="form-group">
           <label>Categorias/Marca:</label>
-          <button type="button" class="btn-categorias" onclick="openCategoryModal()">
+          <button type="button" class="btn-categorias-abrir-modal" onclick="openCategoryModal()">
             Definir/Alterar Categoria
           </button>
           <div class="category-display">
@@ -597,23 +606,23 @@
         <!-- Passo 1: Lista de categorias principais -->
         <div id="editMainCategoryStep" style="display: block;">
           <p class="modal-text">Escolha a categoria principal:</p>
-          <div class="step-container" id="editMainCategoryContainer"></div>
+          <div id="editMainCategoryContainer"></div>
         </div>
 
         <!-- Passo 2: Subcategorias -->
         <div id="editSubCategoryStep" style="display: none;">
           <p class="modal-text" id="editSelectedMainCategoryText"></p>
           <p class="modal-text">Escolha a subcategoria:</p>
-          <div class="step-container" id="editSubCategoryContainer"></div>
-          <button class="btn-modal-back" onclick="backToEditMainCategory()">Voltar</button>
+          <div id="editSubCategoryContainer"></div>
+          <button class="btn-categorias voltar" onclick="backToEditMainCategory()">Voltar</button>
         </div>
 
         <!-- Passo 3: Marcas -->
         <div id="editBrandStep" style="display: none;">
           <p class="modal-text" id="editSelectedSubCategoryText"></p>
           <p class="modal-text">Escolha a marca (ou "Sem marca"):</p>
-          <div class="step-container" id="editBrandContainer"></div>
-          <button class="btn-modal-back" onclick="backToEditSubCategory()">Voltar</button>
+          <div id="editBrandContainer"></div>
+          <button class="btn-categorias voltar" onclick="backToEditSubCategory()">Voltar</button>
         </div>
       </div>
     </div>
@@ -649,7 +658,7 @@
     });
 
     // =========================================================================
-    // Modal de Edição de Categoria (3 passos)
+    // Modal de Edição de Categoria (3 passos) - Mesmo estilo / conteúdo do index.html
     // =========================================================================
     const categoryModal = document.getElementById('categoryModal');
 
@@ -662,10 +671,11 @@
       resetCategoryModal();
     }
 
-    // Dados de categorias
+    // Dados de categorias (mesmo do index.html), incluindo imagens e subcategorias.
     const editCategoryData = [
       {
-        name: "Veículos 🚗🏍️🚛",
+        name: "Veículos",
+        img: "Carro icon.PNG",
         subCategories: [
           {
             name: "Carros",
@@ -690,7 +700,8 @@
         ]
       },
       {
-        name: "Máquinas Agrícolas 🚜🌾",
+        name: "Máquinas Agrícolas",
+        img: "Trator icon.PNG",
         subCategories: [
           {
             name: "Tratores",
@@ -707,7 +718,8 @@
         ]
       },
       {
-        name: "Equipamentos Industriais 🏭🔩",
+        name: "Equipamentos Industriais",
+        img: "Empilhadeira icon.PNG",
         subCategories: [
           {
             name: "Motores e Geradores",
@@ -724,7 +736,8 @@
         ]
       },
       {
-        name: "Eletrônicos e Tecnologia 📱💻⚡",
+        name: "Eletrônicos e Tecnologia",
+        img: "Celular icon.PNG",
         subCategories: [
           {
             name: "Celulares e Tablets",
@@ -749,7 +762,8 @@
         ]
       },
       {
-        name: "Sistemas Hidráulicos e Pneumáticos 🔧⚙️",
+        name: "Sistemas Hidráulicos e Pneumáticos",
+        img: "Compressor de ar icon.PNG",
         subCategories: [
           {
             name: "Bombas Hidráulicas e Pneumáticas",
@@ -766,7 +780,8 @@
         ]
       },
       {
-        name: "Eletrodomésticos e Equipamentos Domésticos 🔌🏠",
+        name: "Eletrodomésticos e Equipamentos Domésticos",
+        img: "Microondas icon.PNG",
         subCategories: [
           {
             name: "Geladeiras e Freezers",
@@ -787,7 +802,8 @@
         ]
       },
       {
-        name: "Ferramentas e Manutenção Geral 🛠️⚡",
+        name: "Ferramentas e Manutenção Geral",
+        img: "Ferramentas icon.PNG",
         subCategories: [
           {
             name: "Furadeiras, Parafusadeiras e Esmerilhadeiras",
@@ -808,7 +824,7 @@
     let selectedMainCatIndex = null;
     let selectedSubCatIndex = null;
 
-    // Step 1: Exibir Categorias Principais
+    // Step 1: Exibir Categorias Principais (com imagens, tal como index.html)
     function showMainCategories() {
       document.getElementById('editMainCategoryStep').style.display = 'block';
       document.getElementById('editSubCategoryStep').style.display = 'none';
@@ -819,8 +835,9 @@
 
       editCategoryData.forEach((cat, idx) => {
         const btn = document.createElement('button');
-        btn.className = 'btn-modal-category';
-        btn.textContent = cat.name;
+        btn.className = 'btn-categorias';
+        // Inclui imagem + texto, conforme index.html
+        btn.innerHTML = `<img src="/static/images/${cat.img}" alt="${cat.name}" style="width:60px;height:60px;margin-right:15px;"> <span>${cat.name}</span>`;
         btn.onclick = () => {
           selectedMainCatIndex = idx;
           document.getElementById('editMainCategoryStep').style.display = 'none';
@@ -841,7 +858,7 @@
 
       subCats.forEach((sub, subIdx) => {
         const btn = document.createElement('button');
-        btn.className = 'btn-modal-category';
+        btn.className = 'btn-categorias';
         btn.textContent = sub.name;
         btn.onclick = () => {
           selectedSubCatIndex = subIdx;
@@ -863,10 +880,10 @@
       const subCat = editCategoryData[mainCatIndex].subCategories[subCatIndex];
       const brands = subCat.brands || [];
 
+      // Se não houver marcas, permitir "Sem marca"
       if (brands.length === 0) {
-        // Nenhuma marca
         const noBrandBtn = document.createElement('button');
-        noBrandBtn.className = 'btn-modal-category';
+        noBrandBtn.className = 'btn-categorias';
         noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
         noBrandBtn.onclick = () => {
           finalizeCategory(mainCatIndex, subCatIndex, "");
@@ -877,7 +894,7 @@
 
       brands.forEach(brand => {
         const btn = document.createElement('button');
-        btn.className = 'btn-modal-category';
+        btn.className = 'btn-categorias';
         btn.textContent = brand;
         btn.onclick = () => {
           finalizeCategory(mainCatIndex, subCatIndex, brand);
@@ -887,7 +904,7 @@
 
       // Botão "Sem marca"
       const noBrandBtn = document.createElement('button');
-      noBrandBtn.className = 'btn-modal-category';
+      noBrandBtn.className = 'btn-categorias';
       noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
       noBrandBtn.onclick = () => {
         finalizeCategory(mainCatIndex, subCatIndex, "");
@@ -895,7 +912,7 @@
       brandContainer.appendChild(noBrandBtn);
     }
 
-    // Definir efetivamente no formulário
+    // Definir valores no formulário
     function finalizeCategory(catIndex, subIndex, brand) {
       const catName = editCategoryData[catIndex].name;
       const subCatName = editCategoryData[catIndex].subCategories[subIndex].name;

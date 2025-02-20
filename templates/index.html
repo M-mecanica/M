@@ -218,7 +218,7 @@
       }
     }
 
-    /* Botão "Selecione Aqui Seu Problema" */
+    /* Botão "Selecione Aqui Seu Problema" modificado */
     .btn-selecione-aqui {
       background-color: #fff;
       color: #333;
@@ -241,8 +241,8 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     .btn-selecione-aqui svg {
-      width: 20px;
-      height: 20px;
+      width: 32px;
+      height: 32px;
       fill: #333;
     }
 
@@ -402,6 +402,7 @@
       flex-direction: column;
       max-height: 90vh;
       overflow: hidden;
+      border: 1px solid #fff; /* Borda branca fina */
     }
     @keyframes modalFadeIn {
       from {
@@ -413,21 +414,21 @@
         transform: translateY(0);
       }
     }
+    /* Modificação: Barra superior do modal em preto */
     .modal-header {
-      background-color: #fff;
-      color: #333;
+      background-color: #000;
+      color: #fff;
       padding: 2rem;
       position: relative;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #333;
     }
     .modal-header h2 {
       margin: 0;
       font-size: 2rem;
       font-weight: 500;
-      color: #333;
     }
     .close {
-      color: #999;
+      color: #fff;
       position: absolute;
       right: 2rem;
       top: 2rem;
@@ -437,7 +438,7 @@
       transition: color 0.3s;
     }
     .close:hover {
-      color: #666;
+      color: #ccc;
     }
     .modal-body {
       padding: 2rem;
@@ -496,11 +497,13 @@
       font-size: 1.5rem;
       font-weight: 500;
       cursor: pointer;
-      display: block;
       width: 100%;
       max-width: 380px;
       margin: 0 auto;
       transition: background-color 0.2s, transform 0.2s;
+      text-align: left;
+      display: flex;
+      align-items: center;
     }
     .btn-categorias:hover {
       background-color: #e6e6e6;
@@ -534,6 +537,7 @@
       background-color: #333;
       transform: scale(1.02);
     }
+
   </style>
 </head>
 <body>
@@ -572,7 +576,7 @@
           autocomplete="off"
         />
       </div>
-      <!-- Botão com emoji 🚀 -->
+      <!-- Botão Explorar -->
       <button type="submit" class="explore-button">
         🚀 Explorar
       </button>
@@ -582,9 +586,9 @@
     <div style="margin-bottom: 1rem;">
       <button class="btn-selecione-aqui" onclick="openCategoryModal()">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M4 6h16v2H4zM4 11h16v2H4zM4 16h16v2H4z"/>
+          <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
         </svg>
-        Selecione Seu Problema
+        Escolha a categoria principal:
       </button>
     </div>
   </main>
@@ -699,20 +703,18 @@
   <div id="categoryModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Selecione Seu Problema</h2>
+        <h2>Escolha a categoria principal:</h2>
         <span class="close" onclick="closeCategoryModal()">&times;</span>
       </div>
       <div class="modal-body">
         <!-- Step 1: Lista de Categorias Principais -->
         <div id="mainCategoryStep" style="display: block;">
-          <p class="modal-text">Escolha a categoria principal:</p>
           <div id="mainCategoryContainer"></div>
         </div>
 
         <!-- Step 2: Subcategoria -->
         <div id="subCategoryStep" style="display: none;">
           <p class="modal-text" id="selectedMainCategoryText"></p>
-          <p class="modal-text">Escolha a subcategoria:</p>
           <div id="subCategoryContainer"></div>
           <button class="btn-categorias voltar" onclick="goBackToMainCategory()">Voltar</button>
         </div>
@@ -720,7 +722,6 @@
         <!-- Step 3: Marca -->
         <div id="brandStep" style="display: none;">
           <p class="modal-text" id="selectedSubCategoryText"></p>
-          <p class="modal-text">Escolha a marca (ou clique para filtrar problemas):</p>
           <div id="brandContainer"></div>
           <button class="btn-categorias voltar" onclick="goBackToSubCategory()">Voltar</button>
         </div>
@@ -775,7 +776,8 @@
     // -------------------------------------------------------
     const categoryData = [
       {
-        name: "Veículos 🚗🏍️🚛",
+        name: "Veículos",
+        img: "Carro icon.PNG",
         subCategories: [
           {
             name: "Carros",
@@ -800,7 +802,8 @@
         ]
       },
       {
-        name: "Máquinas Agrícolas 🚜🌾",
+        name: "Máquinas Agrícolas",
+        img: "Trator icon.PNG",
         subCategories: [
           {
             name: "Tratores",
@@ -817,7 +820,8 @@
         ]
       },
       {
-        name: "Equipamentos Industriais 🏭🔩",
+        name: "Equipamentos Industriais",
+        img: "Empilhadeira icon.PNG",
         subCategories: [
           {
             name: "Motores e Geradores",
@@ -834,7 +838,8 @@
         ]
       },
       {
-        name: "Eletrônicos e Tecnologia 📱💻⚡",
+        name: "Eletrônicos e Tecnologia",
+        img: "Celular icon.PNG",
         subCategories: [
           {
             name: "Celulares e Tablets",
@@ -859,7 +864,8 @@
         ]
       },
       {
-        name: "Sistemas Hidráulicos e Pneumáticos 🔧⚙️",
+        name: "Sistemas Hidráulicos e Pneumáticos",
+        img: "Compressor de ar icon.PNG",
         subCategories: [
           {
             name: "Bombas Hidráulicas e Pneumáticas",
@@ -876,7 +882,8 @@
         ]
       },
       {
-        name: "Eletrodomésticos e Equipamentos Domésticos 🔌🏠",
+        name: "Eletrodomésticos e Equipamentos Domésticos",
+        img: "Microondas icon.PNG",
         subCategories: [
           {
             name: "Geladeiras e Freezers",
@@ -897,7 +904,8 @@
         ]
       },
       {
-        name: "Ferramentas e Manutenção Geral 🛠️⚡",
+        name: "Ferramentas e Manutenção Geral",
+        img: "Ferramentas icon.PNG",
         subCategories: [
           {
             name: "Furadeiras, Parafusadeiras e Esmerilhadeiras",
@@ -919,6 +927,8 @@
     // Modal de Categorias (3 passos)
     // -------------------------------------------------------
     function openCategoryModal() {
+      // Ao abrir, definir o cabeçalho para seleção de categoria principal
+      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
       document.getElementById('categoryModal').style.display = 'flex';
       showMainCategories();
     }
@@ -935,8 +945,10 @@
       categoryData.forEach((cat, idx) => {
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
-        btn.textContent = cat.name;
+        btn.innerHTML = `<img src="/static/images/${cat.img}" alt="${cat.name}" style="width:60px;height:60px;margin-right:15px;"> <span>${cat.name}</span>`;
         btn.onclick = () => {
+          // Atualiza o cabeçalho para seleção de subcategoria
+          document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
           document.getElementById('mainCategoryStep').style.display = 'none';
           document.getElementById('subCategoryStep').style.display = 'block';
           document.getElementById('selectedMainCategoryText').innerText = "Categoria selecionada: " + cat.name;
@@ -960,6 +972,8 @@
         btn.onclick = () => {
           document.getElementById('subCategoryStep').style.display = 'none';
           document.getElementById('brandStep').style.display = 'block';
+          // Atualiza o cabeçalho para seleção de marca
+          document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a marca:";
           document.getElementById('selectedSubCategoryText').innerText = "Subcategoria selecionada: " + sub.name;
           window.selectedSubCatIndex = subIdx;
           showBrands(catIndex, subIdx);
@@ -1016,11 +1030,15 @@
     }
 
     function goBackToMainCategory() {
+      // Ao voltar, redefinir o cabeçalho para seleção de categoria principal
+      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
       document.getElementById('subCategoryStep').style.display = 'none';
       document.getElementById('mainCategoryStep').style.display = 'block';
     }
 
     function goBackToSubCategory() {
+      // Ao voltar para a etapa de subcategoria, garantir o cabeçalho correto
+      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
       document.getElementById('brandStep').style.display = 'none';
       document.getElementById('subCategoryStep').style.display = 'block';
     }
