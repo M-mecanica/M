@@ -221,27 +221,6 @@
         autocomplete="off"
       />
 
-      <!-- Campo WhatsApp obrigatório (com máscara automática) -->
-      <label for="whatsapp">Celular:</label>
-      <input
-        type="text"
-        id="whatsapp"
-        name="whatsapp"
-        placeholder="(99) 99999-9999"
-        pattern="^\(\d{2}\)\s?\d{5}-\d{4}$"
-        title="Formato esperado: (99) 99999-9999"
-        autocomplete="off"
-        required
-      />
-
-      <!-- Campo para Máquinas que o usuário possui (Opcional) -->
-      <label for="maquinas">Máquinas que Possui (Opcional):</label>
-      <textarea
-        id="maquinas"
-        name="maquinas"
-        autocomplete="off"
-      ></textarea>
-
       <input type="submit" value="Cadastrar" />
     </form>
 
@@ -256,37 +235,6 @@
 
   <!-- Scripts para correções automáticas no front-end -->
   <script>
-    // Máscara para o telefone enquanto o usuário digita
-    const whatsappInput = document.getElementById('whatsapp');
-    whatsappInput.addEventListener('input', function (e) {
-      let v = e.target.value.replace(/\D/g, ''); // remove tudo que não é dígito
-
-      // Limita em 11 dígitos (DD + 9 dígitos)
-      if (v.length > 11) {
-        v = v.substring(0, 11);
-      }
-
-      /*
-        Formato alvo: (99) 99999-9999
-        - 2 dígitos para DDD
-        - 9 dígitos para o telefone
-      */
-
-      // Montando a máscara dinamicamente
-      let masked = '';
-      if (v.length > 0) {
-        masked = '(' + v.substring(0, 2);
-      }
-      if (v.length >= 3) {
-        masked += ') ' + v.substring(2, 7);
-      }
-      if (v.length >= 7) {
-        masked += '-' + v.substring(7, 11);
-      }
-
-      e.target.value = masked;
-    });
-
     // Correção automática do nome completo (Title Case) ao perder o foco
     const nomeInput = document.getElementById('nome');
     nomeInput.addEventListener('blur', function(e) {

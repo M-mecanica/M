@@ -414,7 +414,7 @@
         transform: translateY(0);
       }
     }
-    /* Modificação: Barra superior do modal em preto */
+    /* Barra superior do modal em preto */
     .modal-header {
       background-color: #000;
       color: #fff;
@@ -537,7 +537,6 @@
       background-color: #333;
       transform: scale(1.02);
     }
-
   </style>
 </head>
 <body>
@@ -658,19 +657,24 @@
     <p>© 2025 Plataforma M</p>
   </footer>
 
-  <!-- MODAL LOGIN -->
+  <!-- MODAL LOGIN (Reformulado) -->
   <div id="loginModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2></h2>
+        <h2>Desbloqueie as funcionalidades do M!</h2>
         <span class="close" onclick="closeLoginModal()">&times;</span>
       </div>
       <div class="modal-body">
-        <p class="modal-text">
-          Você precisa fazer login para acessar esta funcionalidade.
+        <p class="modal-text" style="font-size: 1.3rem;">
+          Faça login e aproveite:
         </p>
-        <a href="{{ url_for('login') }}" class="btn-entrar-preto">
-          Entrar
+        <ul style="list-style: disc; padding-left: 20px; text-align: left; font-size: 1.2rem; line-height: 1.8rem; color: #333; margin-bottom: 2rem;">
+          <li>Envie seus problemas e obtenha ajuda</li>
+          <li>Acesso completo a soluções de outros usuários</li>
+          <li>Suba no Ranking de Solucionadores resolvendo problemas</li>
+        </ul>
+        <a href="{{ url_for('register') }}" class="btn-entrar-preto">
+          Entrar Agora
         </a>
       </div>
     </div>
