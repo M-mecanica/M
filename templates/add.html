@@ -158,6 +158,44 @@
       font-size: 1rem;
     }
 
+    .btn-definir-cat {
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      margin-bottom: 2rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+    .btn-definir-cat:hover {
+      background-color: #555;
+      transform: scale(1.02);
+    }
+    .btn-definir-cat svg {
+      fill: currentColor;
+      width: 16px;
+      height: 16px;
+    }
+
+    .cat-display {
+      margin-top: -1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      color: #333;
+      background: #f8f8f8;
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+
     input[type="submit"] {
       background-color: #000;
       color: #fff;
@@ -186,6 +224,116 @@
       font-size: 0.9rem;
       color: #fff;
       margin: 0;
+    }
+
+    /* =========================================================================
+       MODAL DE CATEGORIAS (3 PASSOS)
+       ========================================================================= */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background-color: #fff;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      animation: modalFadeIn 0.3s ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      background-color: #000;
+      color: #fff;
+      padding: 1.2rem 1.5rem;
+      position: relative;
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+    .close {
+      color: #fff;
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      font-size: 1.4rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .close:hover {
+      color: #ddd;
+    }
+    .modal-body {
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .modal-text {
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .step-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .btn-modal-category {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      margin-bottom: 0.5rem;
+    }
+    .btn-modal-category:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+    .btn-modal-back {
+      background-color: #444;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-top: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .btn-modal-back:hover {
+      background-color: #666;
+      transform: scale(1.02);
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @media (max-width: 768px) {
@@ -225,6 +373,29 @@
         font-size: 0.9rem;
         padding: 0.6rem 1rem;
       }
+      .modal-content {
+        width: 95%;
+      }
+      .modal-header {
+        padding: 1rem;
+      }
+      .modal-header h2 {
+        font-size: 1rem;
+      }
+      .modal-body {
+        padding: 1rem;
+      }
+      .modal-text {
+        font-size: 0.9rem;
+      }
+      .btn-modal-category {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.8rem;
+      }
+      .btn-modal-back {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.8rem;
+      }
     }
   </style>
 </head>
@@ -245,13 +416,43 @@
       {% endif %}
       <!-- IMPORTANTE: multipart/form-data para envio de arquivos -->
       <form action="{{ url_for('add_problem') }}" method="POST" enctype="multipart/form-data">
+        <!-- Título -->
         <label for="titulo">Título do Problema</label>
         <input type="text" id="titulo" name="titulo" required />
 
+        <!-- Descrição -->
         <label for="descricao">Descrição do Problema</label>
         <textarea id="descricao" name="descricao" rows="5" required></textarea>
 
-        <!-- Campo para upload de imagem -->
+        <!-- Tags (opcional) -->
+        <label for="tags">Tags (opcional, separe por espaço)</label>
+        <input type="text" id="tags" name="tags" placeholder="Ex.: motor queimado falha"/>
+
+        <!-- Botão para selecionar Categoria -->
+        <button type="button" class="btn-definir-cat" onclick="openCatModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
+                     0 0 1 0 1h-3v3a.5.5 0 0
+                     1-1 0v-3h-3a.5.5 0 0
+                     1 0-1h3v-3A.5.5 0 0
+                     1 8 4z"/>
+          </svg>
+          Definir Categoria
+        </button>
+
+        <!-- Exibição "categoria/subcategoria/marca" -->
+        <div class="cat-display">
+          Categoria Principal: <span id="displayCategory">---</span><br>
+          Subcategoria: <span id="displaySubCategory">---</span><br>
+          Marca: <span id="displayBrand">---</span>
+        </div>
+
+        <!-- Campos ocultos que serão enviados ao backend -->
+        <input type="hidden" name="category" id="categoryField" />
+        <input type="hidden" name="subCategory" id="subCategoryField" />
+        <input type="hidden" name="brand" id="brandField" />
+
+        <!-- Campo para upload de imagem (opcional) -->
         <label for="problemImage">Imagem (opcional):</label>
         <input type="file" id="problemImage" name="problemImage" accept="image/*" />
 
@@ -263,5 +464,325 @@
   <footer>
     <p>© 2025 Plataforma M</p>
   </footer>
+
+  <!-- MODAL (3 passos) -->
+  <div id="catModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Escolha a Categoria</h2>
+        <span class="close" onclick="closeCatModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <!-- Passo 1: Lista de categorias -->
+        <div id="catStep1" style="display: block;">
+          <p class="modal-text">Selecione a categoria principal:</p>
+          <div class="step-container" id="catMainContainer"></div>
+        </div>
+
+        <!-- Passo 2: Subcategorias -->
+        <div id="catStep2" style="display: none;">
+          <p class="modal-text" id="catChosenMain"></p>
+          <p class="modal-text">Selecione a subcategoria:</p>
+          <div class="step-container" id="catSubContainer"></div>
+          <button class="btn-modal-back" onclick="backToCatMain()">Voltar</button>
+        </div>
+
+        <!-- Passo 3: Marcas -->
+        <div id="catStep3" style="display: none;">
+          <p class="modal-text" id="catChosenSub"></p>
+          <p class="modal-text">Selecione a marca (ou clique "Sem marca"):</p>
+          <div class="step-container" id="catBrandContainer"></div>
+          <button class="btn-modal-back" onclick="backToCatSub()">Voltar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------------------
+    // MODAL DE CATEGORIA
+    // -------------------------------------------------------------------------
+    const catModal = document.getElementById('catModal');
+
+    function openCatModal() {
+      catModal.style.display = 'flex';
+      showCatStep1();
+    }
+    function closeCatModal() {
+      catModal.style.display = 'none';
+      resetCatSteps();
+    }
+
+    // Opções (category, subCategory, brand)
+    const catData = [
+      {
+        name: "Veículos 🚗🏍️🚛",
+        subCategories: [
+          {
+            name: "Carros",
+            brands: ["Toyota", "Honda", "GM", "Ford", "Fiat", "Volkswagen", "Peugeot", "Chevrolet"]
+          },
+          {
+            name: "Motos",
+            brands: ["Yamaha", "Honda", "Harley-Davidson", "Suzuki", "BMW"]
+          },
+          {
+            name: "Caminhonetes",
+            brands: ["Toyota Hilux", "Chevrolet S10", "Ford Ranger", "Mitsubishi L200", "Nissan Frontier"]
+          },
+          {
+            name: "Caminhões",
+            brands: ["Mercedes-Benz", "Volvo", "Scania", "Iveco"]
+          },
+          {
+            name: "Ônibus",
+            brands: ["Marcopolo", "Volvo", "Mercedes-Benz"]
+          }
+        ]
+      },
+      {
+        name: "Máquinas Agrícolas 🚜🌾",
+        subCategories: [
+          {
+            name: "Tratores",
+            brands: ["John Deere", "Massey Ferguson", "Valtra/Valmet", "New Holland", "Case"]
+          },
+          {
+            name: "Colheitadeiras",
+            brands: ["John Deere", "Case IH", "New Holland"]
+          },
+          {
+            name: "Plantadeiras e Pulverizadores",
+            brands: ["Stara", "Jacto", "Kuhn"]
+          }
+        ]
+      },
+      {
+        name: "Equipamentos Industriais 🏭🔩",
+        subCategories: [
+          {
+            name: "Motores e Geradores",
+            brands: ["Cummins", "Perkins", "Caterpillar"]
+          },
+          {
+            name: "Máquinas Pesadas",
+            brands: ["Caterpillar", "Komatsu", "Volvo"]
+          },
+          {
+            name: "Empilhadeiras e Guinchos",
+            brands: []
+          }
+        ]
+      },
+      {
+        name: "Eletrônicos e Tecnologia 📱💻⚡",
+        subCategories: [
+          {
+            name: "Celulares e Tablets",
+            brands: ["Apple", "Samsung", "Xiaomi", "Motorola"]
+          },
+          {
+            name: "Notebooks e PCs",
+            brands: ["Dell", "Lenovo", "HP", "ASUS", "Acer"]
+          },
+          {
+            name: "Impressoras e Periféricos",
+            brands: []
+          },
+          {
+            name: "Consoles e Videogames",
+            brands: []
+          },
+          {
+            name: "Televisores e Acessórios",
+            brands: ["LG", "Samsung", "Sony", "Philips", "TCL", "Panasonic"]
+          }
+        ]
+      },
+      {
+        name: "Sistemas Hidráulicos e Pneumáticos 🔧⚙️",
+        subCategories: [
+          {
+            name: "Bombas Hidráulicas e Pneumáticas",
+            brands: []
+          },
+          {
+            name: "Compressores de Ar",
+            brands: []
+          },
+          {
+            name: "Cilindros Hidráulicos",
+            brands: []
+          }
+        ]
+      },
+      {
+        name: "Eletrodomésticos e Equipamentos Domésticos 🔌🏠",
+        subCategories: [
+          {
+            name: "Geladeiras e Freezers",
+            brands: []
+          },
+          {
+            name: "Máquinas de Lavar e Secadoras",
+            brands: []
+          },
+          {
+            name: "Ares-condicionados",
+            brands: []
+          },
+          {
+            name: "Cafeteiras e Eletroportáteis",
+            brands: ["Mondial", "Nespresso", "Dolce Gusto", "Oster", "Cadence", "Britânia"]
+          }
+        ]
+      },
+      {
+        name: "Ferramentas e Manutenção Geral 🛠️⚡",
+        subCategories: [
+          {
+            name: "Furadeiras, Parafusadeiras e Esmerilhadeiras",
+            brands: []
+          },
+          {
+            name: "Compressores e Ferramentas Pneumáticas",
+            brands: []
+          },
+          {
+            name: "Equipamentos de Solda e Corte",
+            brands: []
+          }
+        ]
+      }
+    ];
+
+    let chosenCatIndex = null;
+    let chosenSubIndex = null;
+
+    // Step 1
+    function showCatStep1() {
+      document.getElementById('catStep1').style.display = 'block';
+      document.getElementById('catStep2').style.display = 'none';
+      document.getElementById('catStep3').style.display = 'none';
+
+      const mainContainer = document.getElementById('catMainContainer');
+      mainContainer.innerHTML = '';
+
+      catData.forEach((cat, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-modal-category';
+        btn.textContent = cat.name;
+        btn.onclick = () => {
+          chosenCatIndex = idx;
+          document.getElementById('catStep1').style.display = 'none';
+          document.getElementById('catStep2').style.display = 'block';
+          document.getElementById('catChosenMain').textContent = "Categoria Principal: " + cat.name;
+          showCatStep2(idx);
+        };
+        mainContainer.appendChild(btn);
+      });
+    }
+
+    // Step 2
+    function showCatStep2(catIndex) {
+      const subContainer = document.getElementById('catSubContainer');
+      subContainer.innerHTML = '';
+
+      const subCats = catData[catIndex].subCategories;
+      subCats.forEach((sub, subIdx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-modal-category';
+        btn.textContent = sub.name;
+        btn.onclick = () => {
+          chosenSubIndex = subIdx;
+          document.getElementById('catStep2').style.display = 'none';
+          document.getElementById('catStep3').style.display = 'block';
+          document.getElementById('catChosenSub').textContent = "Subcategoria: " + sub.name;
+          showCatStep3(catIndex, subIdx);
+        };
+        subContainer.appendChild(btn);
+      });
+    }
+
+    // Step 3
+    function showCatStep3(catIndex, subIndex) {
+      const brandContainer = document.getElementById('catBrandContainer');
+      brandContainer.innerHTML = '';
+
+      const sub = catData[catIndex].subCategories[subIndex];
+      const brandList = sub.brands || [];
+
+      // Caso não haja marcas
+      if (brandList.length === 0) {
+        // Botão que define sem marca
+        const noBrandBtn = document.createElement('button');
+        noBrandBtn.className = 'btn-modal-category';
+        noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
+        noBrandBtn.onclick = () => {
+          finalizeCategory(catIndex, subIndex, "");
+        };
+        brandContainer.appendChild(noBrandBtn);
+        return;
+      }
+
+      // Para cada marca
+      brandList.forEach(brand => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-modal-category';
+        btn.textContent = brand;
+        btn.onclick = () => {
+          finalizeCategory(catIndex, subIndex, brand);
+        };
+        brandContainer.appendChild(btn);
+      });
+
+      // Adicionar também opção de "Sem marca"
+      const noBrandBtn = document.createElement('button');
+      noBrandBtn.className = 'btn-modal-category';
+      noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
+      noBrandBtn.onclick = () => {
+        finalizeCategory(catIndex, subIndex, "");
+      };
+      brandContainer.appendChild(noBrandBtn);
+    }
+
+    // Quando usuário escolhe a marca ou clica em "Sem marca"
+    function finalizeCategory(catIndex, subIndex, brand) {
+      const catName = catData[catIndex].name;
+      const subName = catData[catIndex].subCategories[subIndex].name;
+
+      // Atribuir aos inputs hidden
+      document.getElementById('categoryField').value = catName;
+      document.getElementById('subCategoryField').value = subName;
+      document.getElementById('brandField').value = brand;
+
+      // Atualizar a exibição para o usuário
+      document.getElementById('displayCategory').textContent = catName;
+      document.getElementById('displaySubCategory').textContent = subName;
+      document.getElementById('displayBrand').textContent = brand || "---";
+
+      closeCatModal();
+    }
+
+    // Voltar step 2 p/ 1
+    function backToCatMain() {
+      document.getElementById('catStep2').style.display = 'none';
+      document.getElementById('catStep1').style.display = 'block';
+    }
+    // Voltar step 3 p/ 2
+    function backToCatSub() {
+      document.getElementById('catStep3').style.display = 'none';
+      document.getElementById('catStep2').style.display = 'block';
+    }
+
+    // Reset
+    function resetCatSteps() {
+      document.getElementById('catStep1').style.display = 'block';
+      document.getElementById('catStep2').style.display = 'none';
+      document.getElementById('catStep3').style.display = 'none';
+      chosenCatIndex = null;
+      chosenSubIndex = null;
+    }
+  </script>
 </body>
 </html>

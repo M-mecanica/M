@@ -164,13 +164,6 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 
-    .no-results {
-      text-align: center;
-      margin-top: 2rem;
-      color: #666;
-      font-size: 1.2rem;
-    }
-
     /* Botão "Ver Solução" */
     .ver-solucao-btn {
       background-color: #000;
@@ -334,7 +327,7 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* MODAL LOGIN (caso precise) */
+    /* MODAL LOGIN */
     .modal {
       display: none;
       position: fixed;
@@ -365,7 +358,7 @@
     .modal-header h2 {
       margin: 0;
       font-size: 0;
-      visibility: hidden;
+      visibility: hidden; /* Apenas para alinhar. Título não aparece. */
     }
     .close {
       color: #fff;
@@ -431,20 +424,35 @@
   </header>
 
   <main>
-    <!-- Campo de busca -->
-    <form action="{{ url_for('search') }}" method="GET" class="search-container">
+    {% set termo_busca = termo_busca or '' %}
+    {% set selected_category = selected_category or '' %}
+    {% set selected_brand = selected_brand or '' %}
+    {# >>> Agora também subCategory #}
+    {% set selected_subcategory = selected_subcategory or '' %}
+
+    <!-- Formulário de busca -->
+    <form
+      action="{{ url_for('search') }}"
+      method="GET"
+      class="search-container"
+      id="searchForm"
+    >
       <span class="material-icons search-icon">search</span>
       <input
         type="text"
         name="q"
         id="search-input"
-        value="{{ termo_busca if termo_busca else '' }}"
+        value="{{ termo_busca }}"
         autocomplete="off"
         autofocus
       />
+      <!-- Mantém category, subcategory e brand para casos de busca vazia -->
+      <input type="hidden" name="category" value="{{ selected_category }}">
+      <input type="hidden" name="subcategory" value="{{ selected_subcategory }}">
+      <input type="hidden" name="brand" value="{{ selected_brand }}">
     </form>
 
-    <!-- Container onde os problemas serão injetados -->
+    <!-- Container onde os problemas serão injetados via JavaScript -->
     <div id="problem-container"></div>
 
     <!-- Div Sentinela (Intersection Observer) -->
@@ -453,9 +461,9 @@
     <!-- Spinner de carregamento -->
     <div id="spinner" class="spinner" style="display: none;"></div>
 
-    <!-- Mensagem "Nenhum resultado" -->
-    <div id="no-results" class="no-results" style="display: none;">
-      <p>Nenhum problema encontrado, pesquise de outra forma ou registre seu problema.</p>
+    <!-- Mensagem final fixa na página -->
+    <div style="text-align:center; margin-top: 2rem;">
+      <p style="font-size: 1.2rem; margin-bottom: 1rem;">Não conseguiu encontrar seu problema?</p>
       {% if session.get('user_id') %}
         <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -465,7 +473,7 @@
                  0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
             />
           </svg>
-          Envie seu problema
+          Envie o seu problema
         </a>
       {% else %}
         <button class="new-problem-btn" onclick="openLoginModal()">
@@ -476,7 +484,7 @@
                  0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
             />
           </svg>
-          Novo Problema
+          Envie o seu problema
         </button>
       {% endif %}
     </div>
@@ -487,7 +495,7 @@
   </footer>
 
   <!-- Modal de login -->
-  <div id="loginModal" class="modal" style="{% if need_login == '1' %}display:flex{% endif %}">
+  <div id="loginModal" class="modal" {% if request.args.get('need_login') == '1' %}style="display:flex"{% endif %}>
     <div class="modal-content">
       <div class="modal-header">
         <h2></h2>
@@ -505,17 +513,20 @@
   </div>
 
   <script>
+    // Variáveis do servidor
+    const searchQuery = "{{ termo_busca|safe }}".trim();
+    const selectedCategory = "{{ selected_category|safe }}";
+    const selectedBrand = "{{ selected_brand|safe }}";
+    const selectedSubcategory = "{{ selected_subcategory|safe }}";
+
     const problemContainer = document.getElementById('problem-container');
-    const noResultsDiv = document.getElementById('no-results');
     const spinner = document.getElementById('spinner');
     const searchInput = document.getElementById('search-input');
-    let searchQuery = searchInput.value.trim();
 
     let currentPage = 1;
     let loading = false;
     let hasMore = true;
 
-    // Carrega a primeira página ao iniciar
     window.addEventListener('DOMContentLoaded', () => {
       // Se já existe texto no campo, foca e coloca o cursor no fim
       if (searchInput.value) {
@@ -529,7 +540,6 @@
       const observer = new IntersectionObserver((entries) => {
         const entry = entries[0];
         if (entry.isIntersecting && hasMore && !loading) {
-          // Carregar próxima página
           currentPage++;
           loadProblems();
         }
@@ -545,21 +555,19 @@
     async function loadProblems() {
       loading = true;
       spinner.style.display = 'block';
+
       try {
-        const response = await fetch(
-          `/load_problems?page=${currentPage}&q=${encodeURIComponent(searchQuery)}`
-        );
+        const url = `/load_problems?page=${currentPage}`
+          + `&q=${encodeURIComponent(searchQuery)}`
+          + `&category=${encodeURIComponent(selectedCategory)}`
+          + `&subcategory=${encodeURIComponent(selectedSubcategory)}`
+          + `&brand=${encodeURIComponent(selectedBrand)}`;
+
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Erro ao carregar problemas');
 
         const data = await response.json();
         hasMore = data.has_more;
-
-        // Se for página 1 e não houver nada, exibe "Nenhum resultado"
-        if (currentPage === 1 && data.total_count === 0) {
-          noResultsDiv.style.display = 'block';
-        } else {
-          noResultsDiv.style.display = 'none';
-        }
 
         // Inserir problemas no container
         const fragment = document.createDocumentFragment();
@@ -571,9 +579,10 @@
 
       } catch (error) {
         console.error(error);
+      } finally {
+        loading = false;
+        spinner.style.display = 'none';
       }
-      loading = false;
-      spinner.style.display = 'none';
     }
 
     function createProblemElement(problem) {
@@ -665,7 +674,6 @@
       deleteForm.appendChild(deleteBtn);
       actionBtns.appendChild(editLink);
       actionBtns.appendChild(deleteForm);
-
       div.appendChild(actionBtns);
       {% endif %}
 
@@ -679,6 +687,21 @@
     function closeLoginModal() {
       document.getElementById('loginModal').style.display = 'none';
     }
+
+    // Desabilitar category/subcategory/brand caso o usuário digite algo
+    const searchForm = document.getElementById('searchForm');
+    const mainSearchInput = document.getElementById('search-input');
+    searchForm.addEventListener('submit', function () {
+      // Se o usuário digitou algo no campo de busca
+      if (mainSearchInput.value.trim() !== "") {
+        const catInput = searchForm.querySelector('input[name="category"]');
+        const subCatInput = searchForm.querySelector('input[name="subcategory"]');
+        const brandInput = searchForm.querySelector('input[name="brand"]');
+        if (catInput) catInput.disabled = true;
+        if (subCatInput) subCatInput.disabled = true;
+        if (brandInput) brandInput.disabled = true;
+      }
+    });
   </script>
 </body>
 </html>

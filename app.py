@@ -1,3 +1,5 @@
+# app.py
+
 import os
 import json
 import re
@@ -69,7 +71,6 @@ STOPWORDS = {
 ITEMS_PER_PAGE = 20  # Usado tanto para itens quanto para problemas
 MZ_WHATSAPP = "5543996436367"  # Número WhatsApp para finalizar carrinho, etc.
 
-
 # -----------------------------------------------------------
 # FUNÇÕES AUXILIARES
 # -----------------------------------------------------------
@@ -101,7 +102,6 @@ def generate_sub_phrases(tokens):
     """
     Gera todas as sub-frases contíguas de uma lista de tokens.
     Ex.: ["rolamento", "grande"] => ["rolamento", "grande", "rolamento grande"]
-    (Usado no item_search, se mantiver)
     """
     sub_phrases = []
     n = len(tokens)
@@ -115,7 +115,6 @@ def generate_sub_phrases(tokens):
 def compute_largest_sub_phrase_length(search_tokens, item_phrases):
     """
     Verifica a maior sub-frase (em nº de tokens) presente em 'item_phrases'.
-    (Usado no item_search, se mantiver)
     """
     if not item_phrases:
         return 0
@@ -178,7 +177,7 @@ def save_image_with_thumbnail(file_obj, fs_instance):
 
 
 # -----------------------------------------------------------
-# (OPCIONAL) CRIAR ÍNDICE DE TEXTO (se for necessário em outras consultas)
+# (OPCIONAL) CRIAR ÍNDICE DE TEXTO (se for necessário)
 # -----------------------------------------------------------
 @app.before_first_request
 def init_db():
@@ -207,9 +206,19 @@ def root():
     return redirect(url_for("index"))
 
 
-@app.route("/index", methods=["GET"])
+@app.route("/index", methods=["GET", "POST"])
 def index():
+    """
+    Agora esta rota aceita GET e POST:
+    - GET: Renderiza a página inicial normalmente.
+    - POST: Captura o termo de pesquisa e redireciona para /search?q=<termo>.
+    """
     need_login = request.args.get("need_login", "0")
+
+    if request.method == "POST":
+        search_term = request.form.get("search", "").strip()
+        return redirect(url_for("search", q=search_term))
+
     return render_template("index.html", need_login=need_login)
 
 
@@ -305,23 +314,34 @@ def register():
 @app.route("/search", methods=["GET"])
 def search():
     termo_busca = request.args.get("q", "").strip()
-    return render_template("resultados.html", termo_busca=termo_busca)
+    selected_category = request.args.get("category", "").strip()
+    selected_subcategory = request.args.get("subcategory", "").strip()
+    selected_brand = request.args.get("brand", "").strip()
+
+    return render_template(
+        "resultados.html",
+        termo_busca=termo_busca,
+        selected_category=selected_category,
+        selected_brand=selected_brand,
+        selected_subcategory=selected_subcategory
+    )
 
 
 @app.route("/load_problems", methods=["GET"])
 def load_problems():
     """
-    Fornece problemas em formato JSON para a página resultados.html fazer scroll infinito
-    ou Intersection Observer.
-
-    ----
-    AGORA usando lógica de AND em 'tags':
-      -> Para cada token digitado, exigimos que esse token esteja em 'tags'.
+    Fornece problemas em formato JSON para a página resultados.html
+    fazer scroll infinito ou Intersection Observer,
+    filtrando também por category, subCategory e brand se passados.
     """
     search_query = request.args.get("q", "").strip()
     page = int(request.args.get("page", 1))
 
-    # Log de pesquisa em 'problem_history_collection'
+    category = request.args.get("category", "").strip()
+    subcategory = request.args.get("subcategory", "").strip()
+    brand = request.args.get("brand", "").strip()
+
+    # Log de pesquisa
     if search_query:
         if user_is_logged_in():
             problem_history_collection.insert_one({
@@ -338,24 +358,37 @@ def load_problems():
                 "searched_at": datetime.datetime.utcnow()
             })
 
-    # Converte busca em tokens (sem acentos, minusculo) e remove stopwords
     search_tokens = [t for t in normalize_string(search_query).split() if t and t not in STOPWORDS]
 
+    filters = {}
+    if category:
+        filters["category"] = category
+    if subcategory:
+        filters["subCategory"] = subcategory
+    if brand:
+        filters["brand"] = brand
+
     if search_tokens:
-        # MATCH: cada token deve estar presente em 'tags'
         skip = (page - 1) * ITEMS_PER_PAGE
 
-        # Contar total
+        match_stage = {
+            "$and": [
+                {"tags": {"$all": search_tokens}}
+            ]
+        }
+        if filters:
+            for key, val in filters.items():
+                match_stage["$and"].append({key: val})
+
         count_pipeline = [
-            {"$match": {"tags": {"$all": search_tokens}}},
+            {"$match": match_stage},
             {"$count": "total"}
         ]
         count_result = list(problemas_collection.aggregate(count_pipeline))
         total_count = count_result[0]["total"] if count_result else 0
 
-        # Buscar problemas
         pipeline_fetch = [
-            {"$match": {"tags": {"$all": search_tokens}}},
+            {"$match": match_stage},
             {"$skip": skip},
             {"$limit": ITEMS_PER_PAGE}
         ]
@@ -364,7 +397,7 @@ def load_problems():
 
         problems_list = []
         for p in problems:
-            # -- Criador --
+            # Criador
             if p.get("creator_custom_name"):
                 creator_name = p["creator_custom_name"]
             else:
@@ -374,7 +407,7 @@ def load_problems():
                 else:
                     creator_name = "Não definido"
 
-            # -- Solucionador --
+            # Solucionador
             solver_name = None
             if p.get("solver_custom_name"):
                 solver_name = p["solver_custom_name"]
@@ -391,7 +424,10 @@ def load_problems():
                 "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
                 "problemImageThumb": str(p["problemImageThumb"]) if p.get("problemImageThumb") else None,
                 "creator_name": creator_name,
-                "solver_name": solver_name
+                "solver_name": solver_name,
+                "category": p.get("category", ""),
+                "subCategory": p.get("subCategory", ""),
+                "brand": p.get("brand", "")
             })
 
         has_more = (skip + ITEMS_PER_PAGE) < total_count
@@ -402,14 +438,18 @@ def load_problems():
         })
 
     else:
-        # Se não digitou nada, devolvemos resultados aleatórios (sem repetir na mesma sessão)
+        # Busca vazia => problemas aleatórios (respeitando filtros, se houver)
         if page == 1:
             session["displayed_problem_ids"] = []
         displayed_ids = session.get("displayed_problem_ids", [])
         displayed_object_ids = [ObjectId(x) for x in displayed_ids]
 
+        random_match_stage = {"_id": {"$nin": displayed_object_ids}}
+        if filters:
+            random_match_stage.update(filters)
+
         pipeline_count = [
-            {"$match": {"_id": {"$nin": displayed_object_ids}}},
+            {"$match": random_match_stage},
             {"$count": "remaining_count"}
         ]
         count_res = list(problemas_collection.aggregate(pipeline_count))
@@ -424,7 +464,7 @@ def load_problems():
         else:
             fetch_size = min(ITEMS_PER_PAGE, remaining_count)
             pipeline_sample = [
-                {"$match": {"_id": {"$nin": displayed_object_ids}}},
+                {"$match": random_match_stage},
                 {"$sample": {"size": fetch_size}}
             ]
             cursor_sample = problemas_collection.aggregate(pipeline_sample)
@@ -438,7 +478,6 @@ def load_problems():
 
             problems_list = []
             for p in random_problems:
-                # -- Criador --
                 if p.get("creator_custom_name"):
                     creator_name = p["creator_custom_name"]
                 else:
@@ -448,7 +487,6 @@ def load_problems():
                     else:
                         creator_name = "Não definido"
 
-                # -- Solucionador --
                 solver_name = None
                 if p.get("solver_custom_name"):
                     solver_name = p["solver_custom_name"]
@@ -465,7 +503,10 @@ def load_problems():
                     "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
                     "problemImageThumb": str(p["problemImageThumb"]) if p.get("problemImageThumb") else None,
                     "creator_name": creator_name,
-                    "solver_name": solver_name
+                    "solver_name": solver_name,
+                    "category": p.get("category", ""),
+                    "subCategory": p.get("subCategory", ""),
+                    "brand": p.get("brand", "")
                 })
 
             return jsonify({
@@ -493,7 +534,10 @@ def add_problem():
 
         all_tags = list(set(titulo_tokens + user_tags_normalized))
 
-        # Lida com a imagem + thumbnail
+        category = request.form.get("category", "").strip()
+        subCategory = request.form.get("subCategory", "").strip()
+        brand = request.form.get("brand", "").strip()
+
         image_file = request.files.get("problemImage")
         original_id, thumb_id = save_image_with_thumbnail(image_file, fs_m)
 
@@ -508,7 +552,10 @@ def add_problem():
                 "solver_id": None,
                 "solver_custom_name": None,
                 "problemImage": original_id,
-                "problemImageThumb": thumb_id
+                "problemImageThumb": thumb_id,
+                "category": category,
+                "subCategory": subCategory,
+                "brand": brand
             }
             problemas_collection.insert_one(problema)
             return redirect(url_for("unresolved"))
@@ -526,8 +573,6 @@ def unresolved():
     problemas_nao_resolvidos = list(problemas_collection.find(query))
     for p in problemas_nao_resolvidos:
         p["_id_str"] = str(p["_id"])
-
-        # Exibe criador
         if p.get("creator_custom_name"):
             p["creator_name"] = p["creator_custom_name"]
         else:
@@ -581,7 +626,7 @@ def exibir_solucao(problem_id):
     if not problema.get("resolvido"):
         return "Ainda não resolvido.", 400
 
-    # Se não tiver share_token no doc, geramos
+    # Gera share_token se ainda não existir
     if "share_token" not in problema:
         new_token = secrets.token_urlsafe(16)
         problemas_collection.update_one(
@@ -590,14 +635,13 @@ def exibir_solucao(problem_id):
         )
         problema["share_token"] = new_token
 
-    # Verifica se usuário está logado
+    # Verifica login ou token
     if not user_is_logged_in():
-        # Se não estiver logado, confere se foi passado um 'token'
         token_param = request.args.get("token", "")
         if token_param != problema["share_token"]:
             return "Acesso negado. Faça login ou utilize o link de compartilhamento.", 403
 
-    # Registra a visualização (se usuário estiver logado)
+    # Registra visualização
     if user_is_logged_in():
         problem_view_history_collection.update_one(
             {"user_id": session["user_id"], "problem_id": problem_id},
@@ -627,14 +671,12 @@ def delete_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    # Se houver imagem, excluímos do GridFS
     old_file_id = problema.get("problemImage")
     if old_file_id:
         try:
             fs_m.delete(ObjectId(old_file_id))
         except:
             pass
-
     old_thumb_id = problema.get("problemImageThumb")
     if old_thumb_id:
         try:
@@ -650,9 +692,6 @@ def delete_problem(problem_id):
         return redirect(url_for("unresolved"))
 
 
-# -----------------------------------------------------------
-# EDITAR PROBLEMA (COM UNIFICAÇÃO DE TAGS)
-# -----------------------------------------------------------
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
     if not user_is_logged_in():
@@ -667,31 +706,27 @@ def edit_problem(problem_id):
     if not can_edit:
         return "Acesso negado.", 403
 
-    # Carrega todos os usuários para permitir selecionar no form (caso use)
     all_users = list(usuarios_collection.find({}, {"_id": 1, "nome": 1}))
 
     if request.method == "POST":
         titulo_novo = request.form.get("titulo", "").strip()
         descricao_nova = request.form.get("descricao", "").strip()
-
         tags_str = request.form.get("tags", "").strip()
 
-        # Dados do criador
+        category = request.form.get("category", "").strip()
+        subCategory = request.form.get("subCategory", "").strip()
+        brand = request.form.get("brand", "").strip()
+
         creator_id = request.form.get("creator_id", "")
         creator_custom_name = request.form.get("creator_custom_name", "").strip()
-
-        # Dados do solver
         solver_id = request.form.get("solver_id", "")
         solver_custom_name = request.form.get("solver_custom_name", "").strip()
 
-        # Ajusta solver_id ou None
         if solver_id in ("", "None"):
             solver_id = None
-        # Ajusta creator_id ou None
         if creator_id in ("", "None"):
             creator_id = None
 
-        # Verifica campos obrigatórios
         if not titulo_novo or not descricao_nova:
             return render_template(
                 "edit_problem.html",
@@ -700,7 +735,6 @@ def edit_problem(problem_id):
                 all_users=all_users
             )
 
-        # Decide se vamos salvar ID ou nome custom para CRIADOR
         if creator_id == "custom":
             final_creator_id = None
             final_creator_name = creator_custom_name
@@ -708,7 +742,6 @@ def edit_problem(problem_id):
             final_creator_id = creator_id
             final_creator_name = None
 
-        # Decide se vamos salvar ID ou nome custom para SOLVER
         if solver_id == "custom":
             final_solver_id = None
             final_solver_name = solver_custom_name
@@ -716,27 +749,19 @@ def edit_problem(problem_id):
             final_solver_id = solver_id
             final_solver_name = None
 
-        # -------------------------
-        # Montar novo conjunto TAGS
-        # -------------------------
         old_tags = problema.get("tags", [])
-
-        # Normaliza título e descrição (removendo acentos e deixando minúsculo)
         titulo_normalizado = normalize_string(titulo_novo)
-        descricao_normalizada = normalize_string(descricao_nova)
+        descricao_normalizado = normalize_string(descricao_nova)
 
-        # Tokeniza e remove STOPWORDS
         titulo_tokens = [t for t in titulo_normalizado.split() if t and t not in STOPWORDS]
-        descricao_tokens = [t for t in descricao_normalizada.split() if t and t not in STOPWORDS]
+        descricao_tokens = [t for t in descricao_normalizado.split() if t and t not in STOPWORDS]
 
-        # Normaliza as tags digitadas
         user_tags_raw = tags_str.split()
         user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
         user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
 
-        # Converte tudo para set() para unificar e remover duplicadas
         final_tag_set = set(old_tags) | set(titulo_tokens) | set(descricao_tokens) | set(user_tags_normalized)
-        final_tags = list(final_tag_set)  # volta para lista
+        final_tags = list(final_tag_set)
 
         updated_fields = {
             "titulo": titulo_novo,
@@ -745,21 +770,23 @@ def edit_problem(problem_id):
             "creator_id": final_creator_id,
             "creator_custom_name": final_creator_name,
             "solver_id": final_solver_id,
-            "solver_custom_name": final_solver_name
+            "solver_custom_name": final_solver_name,
+            "category": category,
+            "subCategory": subCategory,
+            "brand": brand
         }
 
-        # Lida com a imagem do problema + thumbnail
         delete_image = request.form.get("deleteExistingImage", "false") == "true"
         image_file = request.files.get("problemImage")
 
         if delete_image:
             old_file_id = problema.get("problemImage")
-            old_thumb_id = problema.get("problemImageThumb")
             if old_file_id:
                 try:
                     fs_m.delete(ObjectId(old_file_id))
                 except:
                     pass
+            old_thumb_id = problema.get("problemImageThumb")
             if old_thumb_id:
                 try:
                     fs_m.delete(ObjectId(old_thumb_id))
@@ -881,7 +908,6 @@ def edit_solution(problem_id):
         steps = new_solution_data.get("steps", [])
 
         for i, step in enumerate(steps):
-            # Lida com imagem do step
             delete_step = request.form.get(f"deleteExistingStepImage_{i}", "false") == "true"
             step_image_file = request.files.get(f"stepImage_{i}")
 
@@ -906,7 +932,6 @@ def edit_solution(problem_id):
             else:
                 step["stepImage"] = old_file_id
 
-            # Subpassos
             miniSteps = step.get("miniSteps", [])
             old_miniSteps = old_steps[i].get("miniSteps", []) if i < len(old_steps) else []
 
@@ -955,9 +980,6 @@ def edit_solution(problem_id):
 # -----------------------------------------------------------
 @app.route("/gridfs_image/<file_id>", methods=["GET"])
 def gridfs_image(file_id):
-    """
-    Exibe a versão ORIGINAL da imagem
-    """
     try:
         gridout = fs_m.get(ObjectId(file_id))
         image_data = gridout.read()
@@ -971,9 +993,6 @@ def gridfs_image(file_id):
 
 @app.route("/gridfs_image_thumb/<file_id>", methods=["GET"])
 def gridfs_image_thumb(file_id):
-    """
-    Exibe a versão THUMBNAIL da imagem
-    """
     try:
         gridout = fs_m.get(ObjectId(file_id))
         image_data = gridout.read()
@@ -989,9 +1008,6 @@ def gridfs_image_thumb(file_id):
 # -----------------------------------------------------------
 @app.route("/gridfs_item_image/<file_id>", methods=["GET"])
 def gridfs_item_image(file_id):
-    """
-    Exibe a imagem do item armazenada em fs_mz pelo ID do arquivo (VERSÃO ORIGINAL).
-    """
     try:
         gridout = fs_mz.get(ObjectId(file_id))
         image_data = gridout.read()
@@ -1124,15 +1140,10 @@ def item_search():
 
 @app.route("/load_items", methods=["GET"])
 def load_items():
-    """
-    Retorna JSON com até ITEMS_PER_PAGE itens por página.
-    (Mantém a lógica original de matching phrases + tokens, se for útil.)
-    """
     search_query = request.args.get('search', '').strip()
     page = int(request.args.get('page', 1))
 
     if search_query:
-        # Log de pesquisa
         if user_is_logged_in():
             history_collection.insert_one({
                 "user_id": session["user_id"],
@@ -1177,7 +1188,6 @@ def load_items():
             }
         ]
 
-        # Contar total
         count_pipeline = pipeline_base + [{'$count': 'total'}]
         count_result = list(itens_collection.aggregate(
             count_pipeline,
@@ -1185,21 +1195,18 @@ def load_items():
         ))
         total_items = count_result[0]['total'] if count_result else 0
 
-        # Buscar matching
         items_cursor = itens_collection.aggregate(
             pipeline_base,
             collation={'locale': 'pt', 'strength': 1}
         )
         items = list(items_cursor)
 
-        # Calcular maior sub-frase
         for item in items:
             item['largest_sub_phrase_length'] = compute_largest_sub_phrase_length(
                 search_tokens,
                 item.get('matching_phrases', [])
             )
 
-        # Ordena
         items.sort(
             key=lambda x: (
                 -x['is_phrase_match'],
@@ -1207,8 +1214,6 @@ def load_items():
                 x['description'].lower()
             )
         )
-
-        # Paginação manual
         paged_items = items[skip_items: skip_items + ITEMS_PER_PAGE]
         has_more = (len(paged_items) == ITEMS_PER_PAGE and (skip_items + ITEMS_PER_PAGE) < len(items))
 
@@ -1231,7 +1236,6 @@ def load_items():
         })
 
     else:
-        # Sem termo => Paginação aleatória
         if page == 1:
             session["displayed_item_ids"] = []
         displayed_ids = session.get("displayed_item_ids", [])
@@ -1281,9 +1285,6 @@ def load_items():
 
 @app.route("/upload_item_image/<item_id>", methods=["POST"])
 def upload_item_image(item_id):
-    """
-    Permite que um usuário com papel 'solucionador' envie (ou substitua) a imagem de um item.
-    """
     if not user_is_logged_in():
         return "Acesso negado. Faça login.", 403
     if not user_has_role(["solucionador"]):
@@ -1300,7 +1301,6 @@ def upload_item_image(item_id):
             content_type = file_obj.content_type
             filename = secure_filename(file_obj.filename)
 
-            # Armazena original
             new_file_id = fs_mz.put(
                 file_data,
                 filename=filename,
@@ -1322,9 +1322,6 @@ def upload_item_image(item_id):
     return redirect(url_for("item_search"))
 
 
-# -----------------------------------------------------------
-# ROTA PARA ADICIONAR ITENS (incluindo tokens da descrição nas tags)
-# -----------------------------------------------------------
 @app.route("/add_item", methods=["GET", "POST"])
 def add_item():
     if not user_is_logged_in():
@@ -1339,7 +1336,6 @@ def add_item():
         description_normalized = normalize_string(description)
         description_tokens = [t for t in description_normalized.split() if t and t not in STOPWORDS]
 
-        # Junta os tokens das tags digitadas com os tokens da descrição, evitando duplicações
         all_tags = list(set(user_tags_normalized + description_tokens))
 
         price = request.form.get("price", "0").strip()
@@ -1377,8 +1373,5 @@ def add_item():
     return render_template("add_item.html")
 
 
-# -----------------------------------------------------------
-# EXECUÇÃO
-# -----------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

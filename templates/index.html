@@ -25,20 +25,21 @@
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      background-color: #f0f0f0; /* Fundo cinza claro */
-      color: #333; /* Texto em tom mais escuro */
+      background-color: #f0f0f0;
+      color: #333;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto, com padding vertical de 2rem (para manter altura) */
+    /* HEADER: fundo preto */
     header {
-      background-color: #000;  /* Barra superior preta */
-      padding: 2rem 3rem;      /* 2rem topo/baixo, 3rem esq/dir */
+      background-color: #000;
+      padding: 2rem 3rem;
       display: flex;
       align-items: center;
+      justify-content: space-between;
     }
 
     /* Botão HAMBURGUER no canto esquerdo */
@@ -50,28 +51,19 @@
       color: #fff;
       display: flex;
       align-items: center;
-      margin-right: auto; /* Deixa o botão à esquerda */
     }
     .hamburger svg {
       width: 32px;
       height: 32px;
       fill: #fff;
     }
-
-    /*
-      Ajuste para dispositivos menores:
-      Mantemos a altura (2rem no topo e embaixo),
-      mas aproximamos o botão do lado esquerdo
-      reduzindo o padding-left de 3rem para 1rem.
-    */
-    @media (max-width: 768px) {
-      header {
-        /* Mantém 2rem no topo e embaixo, mas reduz o left para 1rem */
-        padding: 2rem 1rem 2rem 1rem;
-      }
+    .hamburger span {
+      color: #fff;
+      font-size: 1rem;
+      margin-left: 0.5rem;
     }
 
-    /* Botão ENTRAR no canto direito (quando não logado) */
+    /* Botão ENTRAR (quando não logado) */
     .login-button {
       background-color: #333;
       color: #fff;
@@ -89,104 +81,209 @@
       transform: scale(1.02);
     }
 
-    /* MAIN: centraliza vertical/horizontal */
+    @media (max-width: 768px) {
+      header {
+        padding: 2rem 1rem;
+      }
+    }
+
+    /* MAIN */
     main {
       flex: 1;
       padding: 3rem 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center; /* Centraliza verticalmente */
-      text-align: center;      /* Centraliza texto horizontalmente */
+      justify-content: center;
+      text-align: center;
     }
 
-    /* Logo grande "M" */
+    /* Logo grande (substituído por imagem) */
     .logo-grande {
-      font-size: 6rem;
-      font-weight: 700;
       margin-bottom: 2rem;
-      color: #000;
-      letter-spacing: 0.05em;
+    }
+    .logo-grande img {
+      max-width: 250px; /* Ajuste conforme desejar */
+      height: auto;
     }
 
-    /* Container da "barra de pesquisa" */
+    /* Container da barra de pesquisa */
     .search-container {
       width: 100%;
       max-width: 600px;
-      margin-bottom: 2.5rem;
-      position: relative; /* Para posicionar o ícone */
+      margin: 0 auto 1.2rem auto;
+      display: flex;
+      align-items: center;
+      gap: 0; /* Elementos colados */
+      flex-wrap: wrap;
     }
 
-    /* Ícone de lupa posicionado à esquerda do input */
-    .search-container .search-icon {
+    /* Wrapper do input */
+    .input-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .search-icon {
       position: absolute;
-      left: 1rem;
       top: 50%;
+      left: 1rem;
       transform: translateY(-50%);
-      pointer-events: none; /* O clique passa direto para o input */
-      fill: #aaa;
+      pointer-events: none;
+      fill: #000;
       width: 20px;
       height: 20px;
     }
 
-    /* A barra de pesquisa (input), agora somente para clique (readonly) */
-    .search-container input[type="text"] {
+    /* Altura fixa para input e botão */
+    .input-wrapper input[type="text"],
+    .explore-button {
+      height: 3.5rem;
+    }
+
+    /* Campo de pesquisa */
+    .input-wrapper input[type="text"] {
       width: 100%;
-      padding: 1rem 1.5rem;
-      padding-left: 3rem; /* Espaço extra para o ícone à esquerda */
-      border: none;
-      border-radius: 32px;
+      padding: 0 1.5rem;
+      padding-left: 3rem;
+      border: 2px solid #999;
+      /* Arredondamento apenas nas extremidades externas */
+      border-top-left-radius: 32px;
+      border-bottom-left-radius: 32px;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      /* Remove a borda direita para unificar com o botão */
+      border-right: none;
       background-color: #fff;
       font-size: 1rem;
       color: #333;
-      text-align: left; /* Ajuste se quiser o texto alinhado à esquerda */
       outline: none;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      cursor: pointer; /* indica que é clicável */
+      line-height: 3.5rem;
     }
-    .search-container input[type="text"]::placeholder {
-      color: #aaa;
+    .input-wrapper input[type="text"]::placeholder {
+      color: #666;
+      font-weight: 500;
     }
 
-    /* Texto de boas-vindas */
-    .texto-neon {
+    /* Botão Explorar */
+    .explore-button {
+      background-color: #fff;
       color: #333;
-      max-width: 800px;
-      margin: 0 auto;
-      line-height: 1.5;
-      font-size: 1.1rem;
-      font-weight: 300;
+      /* Remove a borda esquerda padrão e define uma barra fina como divisor */
+      border: 2px solid #999;
+      border-left: 1px solid #999;
+      /* Arredondamento nas extremidades externas */
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-top-right-radius: 32px;
+      border-bottom-right-radius: 32px;
+      padding: 0 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      white-space: nowrap;
+    }
+    .explore-button:hover {
+      background-color: #f7f7f7;
+      transform: scale(1.02);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
 
-    /* Seção inferior que contém o botão “Pesquisar Peças” */
+    /* Mantém o mesmo estilo em mobile */
+    @media (max-width: 480px) {
+      .search-container {
+        width: 100vw;
+        margin-left: -2rem;
+        margin-right: -2rem;
+        flex-wrap: nowrap;
+        gap: 0;
+        justify-content: flex-start;
+      }
+      .input-wrapper {
+        min-width: 0;
+      }
+      .input-wrapper input[type="text"] {
+        padding-left: 2.4rem;
+        border-radius: 32px 0 0 32px;
+      }
+      .explore-button {
+        padding: 0 0.8rem;
+        border-radius: 0 32px 32px 0;
+      }
+      .search-icon {
+        left: 0.8rem;
+      }
+    }
+
+    /* Botão "Selecione Aqui Seu Problema" */
+    .btn-selecione-aqui {
+      background-color: #fff;
+      color: #333;
+      border: 2px solid #ccc;
+      border-radius: 0;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-selecione-aqui:hover {
+      background-color: #f7f7f7;
+      transform: scale(1.02);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .btn-selecione-aqui svg {
+      width: 20px;
+      height: 20px;
+      fill: #333;
+    }
+
+    /* Seção inferior - Botão Pesquisar Peças */
     .pesquisar-peca-container {
       display: flex;
       justify-content: center;
       padding: 2rem 3rem;
       background-color: #f0f0f0;
     }
-
-    /* Botão maior e arredondado */
     .btn-pesquisar-peca {
       background-color: #000;
       color: #fff;
       border: none;
       border-radius: 32px;
-      padding: 1rem 2rem;
-      font-size: 1.2rem;
+      padding: 0.8rem 1.5rem;
+      font-size: 1.1rem;
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
       display: inline-flex;
       align-items: center;
+      gap: 0.5rem;
     }
     .btn-pesquisar-peca:hover {
       background-color: #333;
       transform: scale(1.02);
     }
+    .btn-pesquisar-peca svg {
+      fill: currentColor;
+      width: 20px;
+      height: 20px;
+    }
 
-    /* FOOTER: preto, texto claro */
+    /* FOOTER */
     footer {
       background-color: #000;
       text-align: center;
@@ -197,13 +294,11 @@
       color: #fff;
     }
 
-    /* ====================
-       -- SIDEBAR --
-       ==================== */
+    /* SIDEBAR */
     .mobile-sidebar {
       position: fixed;
       top: 0;
-      left: -270px; /* escondida inicialmente */
+      left: -270px;
       width: 270px;
       height: 100vh;
       background-color: #000;
@@ -211,20 +306,16 @@
       flex-direction: column;
       padding: 1rem;
       transition: left 0.3s ease;
-      z-index: 9999; /* sobrepõe o conteúdo */
+      z-index: 9999;
     }
     .mobile-sidebar.open {
       left: 0;
     }
-
-    /* Container para os itens do menu, que ocupa o espaço acima do footer */
     .menu-items {
-      flex: 1; /* Faz esta seção crescer e empurrar o footer para baixo */
+      flex: 1;
       display: flex;
       flex-direction: column;
     }
-
-    /* Links comuns do menu (dentro de .menu-items) */
     .menu-items a {
       background-color: #000;
       color: #fff;
@@ -251,12 +342,10 @@
       background-color: #333;
       transform: scale(1.02);
     }
-
-    /* Footer da sidebar, fixado próximo ao rodapé (fim do menu) */
     .sidebar-footer {
       margin-top: auto;
       padding-top: 1rem;
-      border-top: 1px solid #333; /* Linha divisória opcional */
+      border-top: 1px solid #333;
     }
     .sidebar-footer a {
       background-color: #000;
@@ -279,7 +368,7 @@
       transform: scale(1.02);
     }
 
-    /* Overlay para clicar fora e fechar menu */
+    /* Overlay (fundo escuro) */
     .overlay {
       display: none;
       position: fixed;
@@ -294,11 +383,9 @@
       display: block;
     }
 
-    /* ====================
-       -- MODAL GENÉRICO --
-       ==================== */
+    /* MODAL */
     .modal {
-      display: none; /* Inicialmente oculto */
+      display: none;
       position: fixed;
       z-index: 9999;
       left: 0;
@@ -306,106 +393,21 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0,0,0,0.4);
-
-      /* Centraliza o modal no meio da tela */
       align-items: center;
       justify-content: center;
     }
     .modal-content {
       background-color: #fff;
+      width: 95%;
+      max-width: 700px;
       border-radius: 8px;
-      width: 80%;
-      max-width: 400px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
       animation: modalFadeIn 0.3s ease;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
+      max-height: 90vh;
+      overflow: hidden;
     }
-
-    .modal-header {
-      background-color: #000;
-      color: #fff;
-      padding: 2rem 1.5rem;
-      position: relative;
-    }
-    .modal-header h2 {
-      margin: 0;
-      font-size: 0;
-      visibility: hidden; /* Esconde o título para manter o espaço */
-    }
-    .close {
-      color: #fff;
-      position: absolute;
-      right: 1rem;
-      top: 1rem;
-      font-size: 2rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-    .close:hover {
-      color: #ddd;
-    }
-
-    .modal-body {
-      padding: 1.5rem;
-      text-align: center;
-    }
-    .modal-text {
-      font-size: 1.1rem;
-      color: #333;
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-
-    /* Rodapé do modal (botão bloqueado, etc.) */
-    .modal-footer {
-      padding: 1rem;
-      text-align: center;
-    }
-    .locked-button {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      cursor: not-allowed; /* indica que está bloqueado */
-      opacity: 0.6;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .locked-button svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor;
-      margin-right: 0.4rem;
-    }
-
-    /* Botão "Entrar" (preto) usado no modal de login */
-    .btn-entrar-preto {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      text-decoration: none;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-    .btn-entrar-preto:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
     @keyframes modalFadeIn {
       from {
         opacity: 0;
@@ -416,76 +418,199 @@
         transform: translateY(0);
       }
     }
+    .modal-header {
+      background-color: #fff;
+      color: #333;
+      padding: 2rem;
+      position: relative;
+      border-bottom: 1px solid #eee;
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 500;
+      color: #333;
+    }
+    .close {
+      color: #999;
+      position: absolute;
+      right: 2rem;
+      top: 2rem;
+      font-size: 2.4rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .close:hover {
+      color: #666;
+    }
+    .modal-body {
+      padding: 2rem;
+      text-align: center;
+      overflow-y: auto;
+      max-height: calc(90vh - 100px);
+    }
+    .modal-text {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 2rem;
+      line-height: 1.4;
+    }
+    .modal-footer {
+      padding: 2rem;
+      text-align: center;
+      border-top: 1px solid #eee;
+    }
 
-    /* Ajuste de largura maior para o modal do "Manual" (opcional) */
-    #manualModal .modal-content {
-      max-width: 500px;
+    /* Botão "locked" no Manual */
+    .locked-button {
+      background-color: #ccc;
+      color: #666;
+      border: none;
+      border-radius: 32px;
+      padding: 1.2rem 2rem;
+      font-size: 1.5rem;
+      cursor: not-allowed;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.7;
+    }
+    .locked-button svg {
+      width: 28px;
+      height: 28px;
+      fill: currentColor;
+      margin-right: 0.8rem;
+    }
+
+    /* Botões de categorias (em coluna) */
+    #mainCategoryContainer,
+    #subCategoryContainer,
+    #brandContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .btn-categorias {
+      background-color: #f2f2f2;
+      color: #333;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 1.2rem 2rem;
+      font-size: 1.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .btn-categorias:hover {
+      background-color: #e6e6e6;
+      transform: scale(1.02);
+    }
+    .btn-categorias.voltar {
+      background-color: #ddd;
+      border-color: #bbb;
+    }
+    .btn-categorias.voltar:hover {
+      background-color: #ccc;
+    }
+
+    .btn-entrar-preto {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 1.2rem 2.4rem;
+      font-size: 1.5rem;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+    .btn-entrar-preto:hover {
+      background-color: #333;
+      transform: scale(1.02);
     }
   </style>
 </head>
 <body>
   <header>
-    <!-- Botão HAMBURGUER no canto esquerdo -->
+    <!-- Botão HAMBURGUER -->
     <button class="hamburger" aria-label="Abrir Menu" title="Abrir Menu">
-      <!-- Ícone de hamburguer (3 linhas) -->
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
       </svg>
+      <span>Menu</span>
     </button>
 
-    <!-- Mostra o botão "Entrar" somente se o usuário NÃO estiver logado -->
+    <!-- Botão "Entrar" se não logado -->
     {% if not session.get('user_id') %}
       <a class="login-button" href="{{ url_for('login') }}">Entrar</a>
     {% endif %}
   </header>
 
-  <!-- CONTEÚDO PRINCIPAL -->
   <main>
-    <!-- Logo Grande -->
-    <div class="logo-grande">M</div>
-
-    <!-- "Barra de pesquisa" que redireciona ao clicar -->
-    <div class="search-container">
-      <!-- Ícone de lupa -->
-      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M10 2a8 8 0 015.29 13.71l5
-                 5a1 1 0 01-1.42 1.42l-5-5A8
-                 8 0 1110 2zm0 2a6 6 0 100
-                 12 6 6 0 000-12z"></path>
-      </svg>
-
-      <input
-        type="text"
-        placeholder="Pesquise um problema..."
-        autocomplete="off"
-        readonly
-        onclick="window.location.href='{{ url_for('search') }}';"
-      />
+    <!-- Logo grande substituída pela imagem -->
+    <div class="logo-grande">
+      <img src="{{ url_for('static', filename='images/logo_m_transparente.png') }}" alt="Logo M">
     </div>
 
-    <!-- Texto de boas-vindas -->
-    <p class="texto-neon">
-      Bem-vindo ao M! Aqui você pode pesquisar problemas resolvidos ou cadastrar novos.
-    </p>
+    <!-- Barra de Pesquisa com form POST para "/index" -->
+    <form action="{{ url_for('index') }}" method="POST" class="search-container">
+      <!-- Wrapper do input + ícone -->
+      <div class="input-wrapper">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M10 2a8 8 0 015.29 13.71l5 5a1 1 0 01-1.42 1.42l-5-5A8 8 0 1110 2zm0 2a6 6 0 100 12 6 6 0 000-12z"/>
+        </svg>
+        <input
+          type="text"
+          name="search"
+          placeholder="Pesquise um problema..."
+          autocomplete="off"
+        />
+      </div>
+      <!-- Botão com emoji 🚀 -->
+      <button type="submit" class="explore-button">
+        🚀 Explorar
+      </button>
+    </form>
+
+    <!-- Botão para abrir Modal de Categoria/Marca em 3 passos -->
+    <div style="margin-bottom: 1rem;">
+      <button class="btn-selecione-aqui" onclick="openCategoryModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M4 6h16v2H4zM4 11h16v2H4zM4 16h16v2H4z"/>
+        </svg>
+        Selecione Seu Problema
+      </button>
+    </div>
   </main>
 
-  <!-- BOTÃO PESQUISAR PEÇAS (GRANDE) NA PARTE DE BAIXO -->
+  <!-- BOTÃO PESQUISAR PEÇAS (GRANDE) NA PARTE INFERIOR -->
   <div class="pesquisar-peca-container">
     <a href="{{ url_for('item_search') }}" class="btn-pesquisar-peca">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <path d="M9.389 1.539l.469 1.88c.143.01.284.032.424.065l1.546-.773 1.119 1.119-.773 1.546c.032.14.055.281.064.424l1.881.469v1.58l-1.88.469a3.023 3.023 0 0 1-.065.424l.773 1.546-1.119 1.119-1.546-.773a3.023 3.023 0 0 1-.424.064l-.469 1.881h-1.58l-.469-1.88a3.023 3.023 0 0 1-.424-.065l-1.546.773-1.119-1.119.773-1.546a3.023 3.023 0 0 1-.064-.424l-1.881-.469v-1.58l1.88-.469c.01-.143.032-.284.065-.424l-.773-1.546 1.119-1.119 1.546.773c.14-.032.281-.055.424-.064l.469-1.881h1.58zm-.194 2.711a2 2 0 1 0 1.666 2.72 2 2 0 0 0-1.666-2.72z"/>
+      </svg>
       Pesquisar Peças
     </a>
   </div>
 
   <!-- Barra Lateral (menu) -->
   <div class="mobile-sidebar" id="mobileSidebar">
-    <!-- Container para os itens do menu -->
     <div class="menu-items">
       <!-- "Envie o seu problema" -->
       <a href="{% if session.get('user_id') %}{{ url_for('add_problem') }}{% else %}javascript:openLoginModal();{% endif %}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
-                   1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-                   0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
         </svg>
         Envie o seu problema
       </a>
@@ -493,73 +618,33 @@
       <!-- Problemas Não Resolvidos -->
       <a href="{% if session.get('user_id') %}{{ url_for('unresolved') }}{% else %}javascript:openLoginModal();{% endif %}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0
-                   2.01 15h11.98a.5.5 0 0 0
-                   .442-.934l-6.45-12.5zM8 5c.28 0 .5.22.5.5V9a.5.5 0
-                   0 1-1 0V5.5c0-.28.22-.5.5-.5zm0 6a.75.75 0 1 1
-                   0 1.5A.75.75 0 0 1 8 11z"></path>
+          <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8 5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0 6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"/>
         </svg>
         Problemas Não Resolvidos
       </a>
 
-      <!-- Gerenciar Usuários (apenas se for solucionador) -->
+      <!-- Gerenciar Usuários (se for solucionador) -->
       {% if session.role == 'solucionador' %}
       <a href="{{ url_for('listar_usuarios') }}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M13 7a3 3 0 1 0-6 0 3 3 0 0 0
-                   6 0zm-1.5 0a1.5 1.5 0 1
-                   1-3 0 1.5 1.5 0 0 1 3 0zM6 8c0
-                   1.105-.672 2-1.5 2S3 9.105 3 8s.672-2
-                   1.5-2S6 6.895 6 8zm-1.5
-                   1a2.49 2.49 0 0 0
-                   1-.2 3.006 3.006 0 0 1
-                   2.25 2.9.5.5 0 0 1-1
-                   0 2.001 2.001 0 0
-                   0-4 0 .5.5 0 0
-                   1-1 0 3.006 3.006 0 0
-                   1 2.25-2.9c.306.127.641.2
-                   1 .2zm6.5 3c-.273 0-.535-.03-.789-.086a2.001
-                   2.001 0 0 0-3.422 0A3.105 3.105
-                   0 0 1 8 12a3.106 3.106 0 0
-                   1-1.289-.273.5.5 0 0
-                   1 .578-.816 2.001 2.001
-                   0 0 0 3.422 0 .5.5 0 0
-                   1 .578.816A3.106 3.106 0 0 1 11 12c.54 0
-                   1.064-.138 1.289-.273a.5.5 0 0 1
-                   .578.816c-.254.057-.516.086-.789.086z"/>
+          <path d="M13 7a3 3 0 1 0-6 0 3 3 0 0 0 6 0zm-1.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM6 8c0 1.105-.672 2-1.5 2S3 9.105 3 8s.672-2 1.5-2S6 6.895 6 8zm-1.5 1a2.49 2.49 0 0 0 1-.2 3.006 3.006 0 0 1 2.25 2.9.5.5 0 0 1-1 0 2.001 2.001 0 0 0-4 0 .5.5 0 0 1-1 0 3.006 3.006 0 0 1 2.25-2.9c.306.127.641.2 1 .2zm6.5 3c-.273 0-.535-.03-.789-.086a2.001 2.001 0 0 0-3.422 0A3.105 3.105 0 0 1 8 12a3.106 3.106 0 0 1-1.289-.273.5.5 0 0 1 .578-.816 2.001 2.001 0 0 0 3.422 0 .5.5 0 0 1 .578.816A3.106 3.106 0 0 1 11 12c.54 0 1.064-.138 1.289-.273a.5.5 0 0 1 .578.816c-.254.057-.516.086-.789.086z"/>
         </svg>
         Gerenciar Usuários
       </a>
       {% endif %}
 
-      <!-- Logout (só aparece se está logado) -->
+      <!-- Logout (só aparece se logado) -->
       {% if session.get('user_id') %}
       <a href="{{ url_for('logout') }}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M9.828 4a.5.5 0 0 1 .354.146l3
-                   3a.5.5 0 0 1 0 .708l-3
-                   3A.5.5 0 0 1 9 10.5V9H5.5a.5.5
-                   0 0 1 0-1H9V5.5a.5.5 0 0
-                   1 .5-.5h.328z"/>
-          <path d="M13 14.5a.5.5 0 0
-                   1-.5.5h-5a2 2 0 0
-                   1-2-2v-1a.5.5 0 0
-                   1 1 0v1a1 1 0 0
-                   0 1 1h5a.5.5 0 0
-                   1 .5.5zm-7-11v-1a2 2 0 0
-                   1 2-2h5a.5.5 0 0
-                   1 0 1h-5a1 1 0 0
-                   0-1 1v1a.5.5 0 0
-                   1-1 0z"/>
+          <path d="M9.828 4a.5.5 0 0 1 .354.146l3 3a.5.5 0 0 1 0 .708l-3 3A.5.5 0 0 1 9 10.5V9H5.5a.5.5 0 0 1 0-1H9V5.5a.5.5 0 0 1 .5-.5h.328z"/>
+          <path d="M13 14.5a.5.5 0 0 1-.5.5h-5a2 2 0 0 1-2-2v-1a.5.5 0 0 1 1 0v1a1 1 0 0 0 1 1h5a.5.5 0 0 1 .5.5zm-7-11v-1a2 2 0 0 1 2-2h5a.5.5 0 0 1 0 1h-5a1 1 0 0 0-1 1v1a.5.5 0 0 1-1 0z"/>
         </svg>
         Logout
       </a>
       {% endif %}
     </div>
-
-    <!-- Footer da sidebar, onde ficará o botão "Manual das soluções impossíveis" -->
     <div class="sidebar-footer">
-      <!-- MOSTRA APENAS PARA USUÁRIOS LOGADOS -->
       {% if session.get('user_id') %}
       <a href="javascript:openManualModal();">
         🔒 Manual das soluções impossíveis
@@ -568,18 +653,16 @@
     </div>
   </div>
 
-  <!-- Overlay para clicar fora e fechar menu -->
   <div class="overlay" id="overlay"></div>
 
   <footer>
     <p>© 2025 Plataforma M</p>
   </footer>
 
-  <!-- MODAL LOGIN (exibido se need_login=1 ou se clicado em função JS) -->
+  <!-- MODAL LOGIN -->
   <div id="loginModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <!-- Título "escondido" para manter o estilo da faixa preta -->
         <h2></h2>
         <span class="close" onclick="closeLoginModal()">&times;</span>
       </div>
@@ -587,7 +670,6 @@
         <p class="modal-text">
           Você precisa fazer login para acessar esta funcionalidade.
         </p>
-        <!-- Botão preto "Entrar" -->
         <a href="{{ url_for('login') }}" class="btn-entrar-preto">
           Entrar
         </a>
@@ -599,29 +681,18 @@
   <div id="manualModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <!-- Título "escondido" apenas para manter a barra preta -->
         <h2></h2>
         <span class="close" onclick="closeManualModal()">&times;</span>
       </div>
       <div class="modal-body">
-        <!-- Apenas a mensagem solicitada -->
         <p class="modal-text">
           🏆 Resolva diferentes problemas para ter acesso a essa área.
         </p>
       </div>
-      <!-- Botão bloqueado com ícone de cadeado na parte de baixo do modal -->
       <div class="modal-footer">
         <button class="locked-button">
-          <!-- Ícone de cadeado -->
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 2a3 3 0 0 0-3 3v2H4a2 2 0 0
-                     0-2 2v4a2 2 0 0
-                     0 2 2h8a2 2 0 0 0
-                     2-2v-4a2 2 0 0
-                     0-2-2h-1V5a3 3 0 0
-                     0-3-3zm0 2a1 1 0 0
-                     1 1 1v2H7V5a1 1 0 0
-                     1 1-1z"/>
+            <path d="M8 2a3 3 0 0 0-3 3v2H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-1V5a3 3 0 0 0-3-3zm0 2a1 1 0 0 1 1 1v2H7V5a1 1 0 0 1 1-1z"/>
           </svg>
           Acesso Bloqueado
         </button>
@@ -629,44 +700,340 @@
     </div>
   </div>
 
+  <!-- MODAL: 3 Passos (categoria -> subcategoria -> marca) -->
+  <div id="categoryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Selecione Seu Problema</h2>
+        <span class="close" onclick="closeCategoryModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <!-- Step 1: Lista de Categorias Principais -->
+        <div id="mainCategoryStep" style="display: block;">
+          <p class="modal-text">Escolha a categoria principal:</p>
+          <div id="mainCategoryContainer"></div>
+        </div>
+
+        <!-- Step 2: Subcategoria -->
+        <div id="subCategoryStep" style="display: none;">
+          <p class="modal-text" id="selectedMainCategoryText"></p>
+          <p class="modal-text">Escolha a subcategoria:</p>
+          <div id="subCategoryContainer"></div>
+          <button class="btn-categorias voltar" onclick="goBackToMainCategory()">Voltar</button>
+        </div>
+
+        <!-- Step 3: Marca -->
+        <div id="brandStep" style="display: none;">
+          <p class="modal-text" id="selectedSubCategoryText"></p>
+          <p class="modal-text">Escolha a marca (ou clique para filtrar problemas):</p>
+          <div id="brandContainer"></div>
+          <button class="btn-categorias voltar" onclick="goBackToSubCategory()">Voltar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // -------------------------------------------------------
+    // Sidebar
+    // -------------------------------------------------------
     const hamburgerBtn = document.querySelector('.hamburger');
     const mobileSidebar = document.getElementById('mobileSidebar');
     const overlay = document.getElementById('overlay');
 
-    // Abre/fecha o menu lateral
     hamburgerBtn.addEventListener('click', () => {
       mobileSidebar.classList.toggle('open');
       overlay.classList.toggle('open');
     });
-
-    // Fecha o menu ao clicar fora (overlay)
     overlay.addEventListener('click', () => {
       mobileSidebar.classList.remove('open');
       overlay.classList.remove('open');
     });
 
-    // Modal de Login
+    // -------------------------------------------------------
+    // Modal Login
+    // -------------------------------------------------------
     function openLoginModal() {
       document.getElementById('loginModal').style.display = 'flex';
     }
     function closeLoginModal() {
       document.getElementById('loginModal').style.display = 'none';
     }
-
-    // Se veio com ?need_login=1, abrimos o modal automaticamente
     {% if need_login == '1' %}
       window.addEventListener('load', function() {
         openLoginModal();
       });
     {% endif %}
 
-    // Modal Manual das soluções impossíveis
+    // -------------------------------------------------------
+    // Modal Manual
+    // -------------------------------------------------------
     function openManualModal() {
       document.getElementById('manualModal').style.display = 'flex';
     }
     function closeManualModal() {
       document.getElementById('manualModal').style.display = 'none';
+    }
+
+    // -------------------------------------------------------
+    // Estrutura de Categorias, Subcategorias, Marcas
+    // -------------------------------------------------------
+    const categoryData = [
+      {
+        name: "Veículos 🚗🏍️🚛",
+        subCategories: [
+          {
+            name: "Carros",
+            brands: ["Toyota", "Honda", "GM", "Ford", "Fiat", "Volkswagen", "Peugeot", "Chevrolet"]
+          },
+          {
+            name: "Motos",
+            brands: ["Yamaha", "Honda", "Harley-Davidson", "Suzuki", "BMW"]
+          },
+          {
+            name: "Caminhonetes",
+            brands: ["Toyota Hilux", "Chevrolet S10", "Ford Ranger", "Mitsubishi L200", "Nissan Frontier"]
+          },
+          {
+            name: "Caminhões",
+            brands: ["Mercedes-Benz", "Volvo", "Scania", "Iveco"]
+          },
+          {
+            name: "Ônibus",
+            brands: ["Marcopolo", "Volvo", "Mercedes-Benz"]
+          }
+        ]
+      },
+      {
+        name: "Máquinas Agrícolas 🚜🌾",
+        subCategories: [
+          {
+            name: "Tratores",
+            brands: ["John Deere", "Massey Ferguson", "Valtra/Valmet", "New Holland", "Case"]
+          },
+          {
+            name: "Colheitadeiras",
+            brands: ["John Deere", "Case IH", "New Holland"]
+          },
+          {
+            name: "Plantadeiras e Pulverizadores",
+            brands: ["Stara", "Jacto", "Kuhn"]
+          }
+        ]
+      },
+      {
+        name: "Equipamentos Industriais 🏭🔩",
+        subCategories: [
+          {
+            name: "Motores e Geradores",
+            brands: ["Cummins", "Perkins", "Caterpillar"]
+          },
+          {
+            name: "Máquinas Pesadas",
+            brands: ["Caterpillar", "Komatsu", "Volvo"]
+          },
+          {
+            name: "Empilhadeiras e Guinchos",
+            brands: []
+          }
+        ]
+      },
+      {
+        name: "Eletrônicos e Tecnologia 📱💻⚡",
+        subCategories: [
+          {
+            name: "Celulares e Tablets",
+            brands: ["Apple", "Samsung", "Xiaomi", "Motorola"]
+          },
+          {
+            name: "Notebooks e PCs",
+            brands: ["Dell", "Lenovo", "HP", "ASUS", "Acer"]
+          },
+          {
+            name: "Impressoras e Periféricos",
+            brands: []
+          },
+          {
+            name: "Consoles e Videogames",
+            brands: []
+          },
+          {
+            name: "Televisores e Acessórios",
+            brands: ["LG", "Samsung", "Sony", "Philips", "TCL", "Panasonic"]
+          }
+        ]
+      },
+      {
+        name: "Sistemas Hidráulicos e Pneumáticos 🔧⚙️",
+        subCategories: [
+          {
+            name: "Bombas Hidráulicas e Pneumáticas",
+            brands: []
+          },
+          {
+            name: "Compressores de Ar",
+            brands: []
+          },
+          {
+            name: "Cilindros Hidráulicos",
+            brands: []
+          }
+        ]
+      },
+      {
+        name: "Eletrodomésticos e Equipamentos Domésticos 🔌🏠",
+        subCategories: [
+          {
+            name: "Geladeiras e Freezers",
+            brands: []
+          },
+          {
+            name: "Máquinas de Lavar e Secadoras",
+            brands: []
+          },
+          {
+            name: "Ares-condicionados",
+            brands: []
+          },
+          {
+            name: "Cafeteiras e Eletroportáteis",
+            brands: ["Mondial", "Nespresso", "Dolce Gusto", "Oster", "Cadence", "Britânia"]
+          }
+        ]
+      },
+      {
+        name: "Ferramentas e Manutenção Geral 🛠️⚡",
+        subCategories: [
+          {
+            name: "Furadeiras, Parafusadeiras e Esmerilhadeiras",
+            brands: []
+          },
+          {
+            name: "Compressores e Ferramentas Pneumáticas",
+            brands: []
+          },
+          {
+            name: "Equipamentos de Solda e Corte",
+            brands: []
+          }
+        ]
+      }
+    ];
+
+    // -------------------------------------------------------
+    // Modal de Categorias (3 passos)
+    // -------------------------------------------------------
+    function openCategoryModal() {
+      document.getElementById('categoryModal').style.display = 'flex';
+      showMainCategories();
+    }
+    function closeCategoryModal() {
+      document.getElementById('categoryModal').style.display = 'none';
+      resetCategoryModalSteps();
+    }
+
+    // Passo 1: Lista de Categorias Principais
+    function showMainCategories() {
+      const container = document.getElementById('mainCategoryContainer');
+      container.innerHTML = '';
+
+      categoryData.forEach((cat, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-categorias';
+        btn.textContent = cat.name;
+        btn.onclick = () => {
+          document.getElementById('mainCategoryStep').style.display = 'none';
+          document.getElementById('subCategoryStep').style.display = 'block';
+          document.getElementById('selectedMainCategoryText').innerText = "Categoria selecionada: " + cat.name;
+          window.selectedMainCatIndex = idx;
+          showSubCategories(idx);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // Exibe Subcategorias
+    function showSubCategories(catIndex) {
+      const subCatContainer = document.getElementById('subCategoryContainer');
+      subCatContainer.innerHTML = '';
+      const subCats = categoryData[catIndex].subCategories;
+
+      subCats.forEach((sub, subIdx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-categorias';
+        btn.textContent = sub.name;
+        btn.onclick = () => {
+          document.getElementById('subCategoryStep').style.display = 'none';
+          document.getElementById('brandStep').style.display = 'block';
+          document.getElementById('selectedSubCategoryText').innerText = "Subcategoria selecionada: " + sub.name;
+          window.selectedSubCatIndex = subIdx;
+          showBrands(catIndex, subIdx);
+        };
+        subCatContainer.appendChild(btn);
+      });
+    }
+
+    // Exibe Marcas
+    function showBrands(catIndex, subCatIndex) {
+      const brandContainer = document.getElementById('brandContainer');
+      brandContainer.innerHTML = '';
+
+      const subCat = categoryData[catIndex].subCategories[subCatIndex];
+      const brands = subCat.brands || [];
+
+      if (brands.length === 0) {
+        const btnVerProblemas = document.createElement('button');
+        btnVerProblemas.className = 'btn-categorias';
+        btnVerProblemas.textContent = "Ver problemas desta subcategoria";
+        btnVerProblemas.onclick = () => {
+          const catName = categoryData[catIndex].name;
+          const subCatName = subCat.name;
+          window.location.href = `/search?category=${encodeURIComponent(catName)}&subcategory=${encodeURIComponent(subCatName)}`;
+          closeCategoryModal();
+        };
+        brandContainer.appendChild(btnVerProblemas);
+        return;
+      }
+
+      brands.forEach(brand => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-categorias';
+        btn.textContent = brand;
+        btn.onclick = () => {
+          const catName = categoryData[catIndex].name;
+          const subCatName = subCat.name;
+          window.location.href = `/search?category=${encodeURIComponent(catName)}&subcategory=${encodeURIComponent(subCatName)}&brand=${encodeURIComponent(brand)}`;
+          closeCategoryModal();
+        };
+        brandContainer.appendChild(btn);
+      });
+
+      const btnVerTodos = document.createElement('button');
+      btnVerTodos.className = 'btn-categorias';
+      btnVerTodos.textContent = "Ver todos problemas desta subcategoria";
+      btnVerTodos.onclick = () => {
+        const catName = categoryData[catIndex].name;
+        const subCatName = subCat.name;
+        window.location.href = `/search?category=${encodeURIComponent(catName)}&subcategory=${encodeURIComponent(subCatName)}`;
+        closeCategoryModal();
+      };
+      brandContainer.appendChild(btnVerTodos);
+    }
+
+    function goBackToMainCategory() {
+      document.getElementById('subCategoryStep').style.display = 'none';
+      document.getElementById('mainCategoryStep').style.display = 'block';
+    }
+
+    function goBackToSubCategory() {
+      document.getElementById('brandStep').style.display = 'none';
+      document.getElementById('subCategoryStep').style.display = 'block';
+    }
+
+    function resetCategoryModalSteps() {
+      document.getElementById('mainCategoryStep').style.display = 'block';
+      document.getElementById('subCategoryStep').style.display = 'none';
+      document.getElementById('brandStep').style.display = 'none';
     }
   </script>
 </body>
