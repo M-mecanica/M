@@ -28,6 +28,14 @@ app = Flask(__name__)
 # -----------------------------------------------------------
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "CHAVE_SECRETA_PARA_SESSAO_INSEGURA")
 
+# Configuração para evitar cache (útil para sessões e páginas dinâmicas)
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 # -----------------------------------------------------------
 # CONEXÃO COM O MONGO - BANCO M (Plataforma)
 # -----------------------------------------------------------
@@ -78,13 +86,11 @@ def user_is_logged_in():
     """Retorna True se há um usuário logado."""
     return "user_id" in session
 
-
 def user_has_role(roles_permitidos):
     """Verifica se o usuário logado possui um dos papéis em 'roles_permitidos'."""
     if not user_is_logged_in():
         return False
     return session.get("role") in roles_permitidos
-
 
 def normalize_string(s):
     """
@@ -96,7 +102,6 @@ def normalize_string(s):
         if not unicodedata.combining(c)
     )
     return re.sub(r'\s+', ' ', normalized.strip().lower())
-
 
 def generate_sub_phrases(tokens):
     """
@@ -110,7 +115,6 @@ def generate_sub_phrases(tokens):
             sub_slice = tokens[start:end]
             sub_phrases.append(" ".join(sub_slice))
     return sub_phrases
-
 
 def compute_largest_sub_phrase_length(search_tokens, item_phrases):
     """
@@ -127,7 +131,6 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
                 largest_length = num_tokens
     return largest_length
 
-
 def create_thumbnail(image_bytes, max_size=(300, 300)):
     """
     Cria um thumbnail a partir dos bytes de imagem (arquivo original).
@@ -139,7 +142,6 @@ def create_thumbnail(image_bytes, max_size=(300, 300)):
     img.save(output, format="JPEG", quality=85)
     output.seek(0)
     return output.read()
-
 
 def save_image_with_thumbnail(file_obj, fs_instance):
     """
@@ -199,12 +201,11 @@ def init_db():
 
 
 # -----------------------------------------------------------
-# ROTA PRINCIPAL E SISTEMA DE USUÁRIOS
+# ROTAS PRINCIPAIS E DE USUÁRIOS
 # -----------------------------------------------------------
 @app.route("/")
 def root():
     return redirect(url_for("index"))
-
 
 @app.route("/index", methods=["GET", "POST"])
 def index():
@@ -220,7 +221,6 @@ def index():
         return redirect(url_for("search", q=search_term))
 
     return render_template("index.html", need_login=need_login)
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -262,12 +262,10 @@ def login():
 
     return render_template("login.html", erro=None)
 
-
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -326,12 +324,11 @@ def search():
         selected_subcategory=selected_subcategory
     )
 
-
 @app.route("/load_problems", methods=["GET"])
 def load_problems():
     """
     Fornece problemas em formato JSON para a página resultados.html
-    fazer scroll infinito ou Intersection Observer,
+    fazendo scroll infinito ou Intersection Observer,
     filtrando também por category, subCategory e brand se passados.
     """
     search_query = request.args.get("q", "").strip()
@@ -515,7 +512,6 @@ def load_problems():
                 "total_count": remaining_count
             })
 
-
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
     if not user_is_logged_in():
@@ -563,7 +559,6 @@ def add_problem():
             return render_template("add.html", erro="Preencha todos os campos.")
     return render_template("add.html", erro=None)
 
-
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
     if not user_is_logged_in():
@@ -581,7 +576,6 @@ def unresolved():
 
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
 
-
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
     if not user_is_logged_in():
@@ -589,7 +583,6 @@ def resolver_form(problem_id):
     if not user_has_role(["solucionador", "mecanico"]):
         return "Acesso negado (somente solucionadores/mecânicos).", 403
     return render_template("resolver.html", problem_id=problem_id)
-
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
@@ -616,7 +609,6 @@ def resolver_problema(problem_id):
         }
     )
     return redirect(url_for("unresolved"))
-
 
 @app.route("/solucao/<problem_id>", methods=["GET"])
 def exibir_solucao(problem_id):
@@ -659,7 +651,6 @@ def exibir_solucao(problem_id):
                            solucao=solucao,
                            share_msg_encoded=share_msg_encoded)
 
-
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
     if not user_is_logged_in():
@@ -690,7 +681,6 @@ def delete_problem(problem_id):
         return redirect(url_for("search"))
     else:
         return redirect(url_for("unresolved"))
-
 
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
@@ -825,7 +815,6 @@ def edit_problem(problem_id):
         all_users=all_users
     )
 
-
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
     if not user_is_logged_in():
@@ -839,7 +828,6 @@ def edit_user_role(user_id):
         {"$set": {"role": novo_role}}
     )
     return redirect(url_for("listar_usuarios"))
-
 
 @app.route("/usuarios", methods=["GET"])
 def listar_usuarios():
@@ -866,7 +854,6 @@ def listar_usuarios():
 
     return render_template("registros.html", usuarios=usuarios, search_query=search_query)
 
-
 @app.route("/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id):
     if not user_is_logged_in():
@@ -876,7 +863,6 @@ def delete_user(user_id):
 
     usuarios_collection.delete_one({"_id": ObjectId(user_id)})
     return redirect(url_for("listar_usuarios"))
-
 
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
@@ -990,7 +976,6 @@ def gridfs_image(file_id):
     except:
         return "Imagem não encontrada.", 404
 
-
 @app.route("/gridfs_image_thumb/<file_id>", methods=["GET"])
 def gridfs_image_thumb(file_id):
     try:
@@ -1032,7 +1017,6 @@ def history_search():
     all_history = list(history_collection.find({}))
     return render_template("history_search.html", history=all_history)
 
-
 @app.route("/history_problem", methods=["GET"])
 def history_problem():
     if not user_is_logged_in():
@@ -1067,7 +1051,6 @@ def history_problem():
         suggestions_by_problem=suggestions_by_problem
     )
 
-
 @app.route("/suggest_improvement/<problem_id>", methods=["POST"])
 def suggest_improvement(problem_id):
     if not user_is_logged_in():
@@ -1090,7 +1073,6 @@ def suggest_improvement(problem_id):
         "submitted_at": datetime.datetime.utcnow()
     })
     return redirect(url_for("exibir_solucao", problem_id=problem_id))
-
 
 @app.route("/user_history/<user_id>", methods=["GET"])
 def user_history(user_id):
@@ -1136,7 +1118,6 @@ def user_history(user_id):
 @app.route("/item_search", methods=["GET"])
 def item_search():
     return render_template("item_search.html")
-
 
 @app.route("/load_items", methods=["GET"])
 def load_items():
@@ -1282,7 +1263,6 @@ def load_items():
             "total_items": remaining_count
         })
 
-
 @app.route("/upload_item_image/<item_id>", methods=["POST"])
 def upload_item_image(item_id):
     if not user_is_logged_in():
@@ -1320,7 +1300,6 @@ def upload_item_image(item_id):
             )
 
     return redirect(url_for("item_search"))
-
 
 @app.route("/add_item", methods=["GET", "POST"])
 def add_item():
@@ -1373,5 +1352,33 @@ def add_item():
     return render_template("add_item.html")
 
 
+# -----------------------------------------------------------
+# NOVA ROTA: PERFIL DO USUÁRIO
+# -----------------------------------------------------------
+@app.route("/perfil", methods=["GET"])
+def perfil():
+    if not user_is_logged_in():
+        return redirect(url_for("index", need_login=1))
+
+    user_id = session["user_id"]
+    user_obj = usuarios_collection.find_one({"_id": ObjectId(user_id)})
+    if not user_obj:
+        return "Usuário não encontrado.", 404
+
+    # Quantos problemas o usuário enviou
+    posted_count = problemas_collection.count_documents({"creator_id": user_id})
+    # Quantos problemas o usuário solucionou
+    solved_count = problemas_collection.count_documents({"solver_id": user_id, "resolvido": True})
+
+    return render_template(
+        "profil.html",
+        user=user_obj,
+        posted_count=posted_count,
+        solved_count=solved_count
+    )
+
+# -----------------------------------------------------------
+# MAIN
+# -----------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
