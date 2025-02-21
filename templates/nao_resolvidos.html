@@ -3,13 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Problemas Não Resolvidos</title>
-  <!-- Fonte básica -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
-  <!-- Meta para responsividade em dispositivos móveis -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -19,8 +17,7 @@
       padding: 0;
       box-sizing: border-box;
     }
-
-    /* BODY: fundo cinza claro (#f0f0f0), texto #333, ocupando toda a tela */
+    /* BODY */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -31,78 +28,69 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-
-    /* HEADER: fundo preto, com maior altura (padding) e título */
+    /* HEADER FIXO */
     header {
       background-color: #000;
-      padding: 2rem 3rem;
       display: flex;
       align-items: center;
-      justify-content: center; /* Centraliza o conteúdo horizontalmente */
-      position: relative;      /* Para posicionar o botão de voltar */
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 80px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
     }
     header h1 {
       color: #fff;
       font-size: 1.6rem;
       margin: 0;
       text-align: center;
+      flex: 1;
     }
-
-    /* Botão Voltar próximo ao canto esquerdo */
-    .btn-voltar-inicio {
-      background-color: #000;
-      color: #fff;
+    .header-btn {
+      background: none;
       border: none;
-      border-radius: 32px;
-      padding: 1rem 2rem;
       cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      height: 60px;
+      outline: none;
+      color: #fff;
       display: flex;
       align-items: center;
-      justify-content: center;
-      position: absolute;
-      left: 1rem; /* Aproxima o botão do canto esquerdo */
-      top: 50%;
-      transform: translateY(-50%);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
     }
-    .btn-voltar-inicio:hover {
+    .header-btn:hover {
       background-color: #333;
-      transform: translateY(-50%) scale(1.02);
     }
-
-    /* Ícone (seta) dentro do botão */
-    .btn-voltar-inicio .arrow-icon {
-      font-size: 2rem; /* Tamanho da seta */
-      line-height: 1;
+    .header-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
     }
-
-    /* MAIN: centralizado, com largura máxima de 1200px */
+    /* MAIN */
     main {
       flex: 1;
       font-size: 1.25rem;
       padding: 2rem;
       width: 100%;
       max-width: 1200px;
-      margin: 0 auto;
+      margin: 100px auto 0;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-
-    /* Container principal dos problemas */
+    /* Container dos resultados */
     .result-container {
       width: 100%;
       margin-top: 1rem;
     }
-
-    /* Cada problema não resolvido */
+    /* Cada problema */
     .problem-item {
       background-color: #fff;
       border-radius: 8px;
-      padding: 1rem 1rem 3.5rem; /* espaço extra embaixo para botões */
+      padding: 1rem 1rem 3.5rem;
       margin-bottom: 2rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: relative;
@@ -119,8 +107,6 @@
       margin-bottom: 0.5rem;
       text-align: center;
     }
-
-    /* Exibição da imagem (thumbnail) do problema */
     .problem-image-container {
       text-align: center;
       margin-bottom: 1rem;
@@ -130,16 +116,13 @@
       border-radius: 6px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-
-    /* Caso não haja problemas */
     .no-results {
       text-align: center;
       margin-top: 2rem;
       color: #666;
       font-size: 1.2rem;
     }
-
-    /* Botão "Resolver" (centralizado no rodapé do card) */
+    /* Botão "Resolver" */
     .resolver-btn {
       background-color: #000;
       color: #fff;
@@ -160,8 +143,7 @@
       background-color: #333;
       transform: translateX(-50%) scale(1.02);
     }
-
-    /* Botões no canto inferior direito */
+    /* Botões de ação no canto inferior direito */
     .action-btns {
       position: absolute;
       bottom: 1rem;
@@ -185,7 +167,6 @@
       background-color: #333;
       transform: scale(1.02);
     }
-
     /* Botão "Novo Problema" */
     .new-problem-btn {
       background-color: #000;
@@ -213,8 +194,7 @@
       fill: currentColor;
       margin-right: 0.4rem;
     }
-
-    /* FOOTER: preto, texto branco */
+    /* FOOTER */
     footer {
       background-color: #000;
       text-align: center;
@@ -225,58 +205,9 @@
       color: #fff;
       margin: 0;
     }
-
-    /* Responsividade para tablets/celulares */
-    @media (max-width: 768px) {
-      header {
-        padding: 1.5rem 2rem;
-      }
-      header h1 {
-        font-size: 1.3rem;
-      }
-      .btn-voltar-inicio {
-        left: 0.5rem;
-        padding: 0.5rem 0.8rem;
-        height: auto;
-      }
-      .btn-voltar-inicio .arrow-icon {
-        font-size: 2rem;
-      }
-      main {
-        font-size: 1rem;
-        padding: 1rem;
-      }
-      .problem-item {
-        margin-bottom: 1.5rem;
-        padding-bottom: 4.5rem;
-      }
-      .problem-item h2 {
-        font-size: 1.2rem;
-      }
-      .problem-item p {
-        font-size: 0.9rem;
-      }
-      .resolver-btn {
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
-      }
-      .action-btn {
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
-      }
-      .new-problem-btn {
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
-      }
-      .new-problem-btn svg {
-        width: 16px;
-        height: 16px;
-      }
-    }
-
-    /* Modal Estilos */
+    /* Modal */
     .modal {
-      display: none; /* Inicialmente oculto */
+      display: none;
       position: fixed;
       z-index: 9999;
       left: 0;
@@ -284,8 +215,6 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0,0,0,0.4);
-
-      /* Centraliza o modal no meio da tela */
       align-items: center;
       justify-content: center;
     }
@@ -307,7 +236,7 @@
     .modal-header h2 {
       margin: 0;
       font-size: 0;
-      visibility: hidden; /* Esconde o título para manter o espaço */
+      visibility: hidden;
     }
     .close {
       color: #fff;
@@ -333,7 +262,7 @@
       line-height: 1.5;
     }
     .btn-whatsapp {
-      background-color: #25D366; /* Cor do WhatsApp */
+      background-color: #25D366;
       color: #fff;
       border: none;
       border-radius: 32px;
@@ -362,15 +291,60 @@
         transform: translateY(0);
       }
     }
+    @media (max-width: 768px) {
+      header {
+        padding: 1.5rem 2rem;
+      }
+      header h1 {
+        font-size: 1.3rem;
+      }
+      .header-btn {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+      }
+      main {
+        font-size: 1rem;
+        padding: 1rem;
+        margin-top: 70px;
+      }
+      .problem-item {
+        margin-bottom: 1.5rem;
+        padding-bottom: 4.5rem;
+      }
+      .problem-item h2 {
+        font-size: 1.2rem;
+      }
+      .problem-item p {
+        font-size: 0.9rem;
+      }
+      .resolver-btn {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+      }
+      .action-btn {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+      }
+      .new-problem-btn {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+      }
+      .new-problem-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
   </style>
 </head>
 <body>
   <header>
-    <!-- Botão "Voltar" com a seta maior -->
-    <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">
-      <span class="arrow-icon">&#x2B05;</span>
+    <a href="{{ url_for('index') }}" class="header-btn" title="Voltar à Página Inicial">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </a>
     <h1>Problemas Não Resolvidos</h1>
+    <div style="width: 40px;"></div>
   </header>
 
   <main>
@@ -379,58 +353,27 @@
         {% for problema in problemas %}
         <div class="problem-item">
           <h2>{{ problema["titulo"] }}</h2>
-
-          <!-- Descrição primeiro -->
           <p>{{ problema["descricao"] }}</p>
-
-          <!-- Depois a imagem (se houver) -->
           {% if problema.problemImageThumb %}
             <div class="problem-image-container">
-              <img
-                src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}"
-                alt="Imagem do problema"
-                class="problem-image"
-              />
+              <img src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}" alt="Imagem do problema" class="problem-image" />
             </div>
           {% endif %}
-
           <p>Enviado por: {{ problema["creator_name"] }}</p>
-
           {% if session.role in ["solucionador", "mecanico"] %}
-            <form
-              action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}"
-              method="GET"
-            >
-              <button type="submit" class="resolver-btn">
-                Resolver
-              </button>
+            <form action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}" method="GET">
+              <button type="submit" class="resolver-btn">Resolver</button>
             </form>
           {% else %}
-            <button class="resolver-btn" onclick="openModal()">
-              Resolver
-            </button>
+            <button class="resolver-btn" onclick="openModal()">Resolver</button>
           {% endif %}
-
-          <!-- Botões de ação no canto inferior direito -->
           <div class="action-btns">
             {% if session.role == "solucionador" or session["user_id"] == problema["creator_id"] %}
-              <a
-                href="{{ url_for('edit_problem', problem_id=problema['_id_str']) }}"
-                class="action-btn"
-              >
-                Editar
-              </a>
+              <a href="{{ url_for('edit_problem', problem_id=problema['_id_str']) }}" class="action-btn">Editar</a>
             {% endif %}
-
             {% if session.role == "solucionador" %}
-              <form
-                action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}"
-                method="POST"
-                onsubmit="return confirm('Tem certeza que deseja remover este problema?');"
-              >
-                <button type="submit" class="action-btn">
-                  Remover
-                </button>
+              <form action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja remover este problema?');">
+                <button type="submit" class="action-btn">Remover</button>
               </form>
             {% endif %}
           </div>
@@ -440,17 +383,9 @@
     {% else %}
       <div class="no-results">
         <p>Não há problemas não resolvidos.</p>
-        <a
-          href="{{ url_for('add_problem') }}"
-          class="new-problem-btn"
-          title="Novo Problema"
-        >
+        <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path
-              d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5
-                 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
-                 0 0 1 8 4z"
-            />
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
           </svg>
           Novo Problema
         </a>
@@ -462,7 +397,7 @@
     <p>© 2025 Plataforma M</p>
   </footer>
 
-  <!-- Modal para usuários comuns ao clicar em "Resolver" -->
+  <!-- Modal para usuários não autorizados a resolver -->
   <div id="resolverModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -474,11 +409,7 @@
           Apenas solucionadores podem resolver os problemas mecânicos.
           Caso você queira se tornar um, clique no botão abaixo:
         </p>
-        <a
-          href="https://wa.me/5543996436367?text=Ol%C3%A1%2C%20sou%20o%20{{ session['username'] }}%20e%20gostaria%20de%20me%20tornar%20um%20solucionador%20para%20resolver%20problemas%20da%20plataforma%20M."
-          target="_blank"
-          class="btn-whatsapp"
-        >
+        <a href="https://wa.me/5543996436367?text=Ol%C3%A1%2C%20sou%20o%20{{ session['username'] }}%20e%20gostaria%20de%20me%20tornar%20um%20solucionador%20para%20resolver%20problemas%20da%20plataforma%20M." target="_blank" class="btn-whatsapp">
           Torne-se um solucionador
         </a>
       </div>
@@ -489,7 +420,6 @@
     function openModal() {
       document.getElementById('resolverModal').style.display = 'flex';
     }
-
     function closeModal() {
       document.getElementById('resolverModal').style.display = 'none';
     }

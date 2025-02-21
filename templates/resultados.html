@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Resultados da Pesquisa</title>
-  <!-- Fonte básica -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
   <!-- Ícones Material (para a lupa) -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-  <!-- Meta para responsividade em dispositivos móveis -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -18,8 +19,6 @@
       padding: 0;
       box-sizing: border-box;
     }
-
-    /* BODY: fundo cinza claro (#f0f0f0), texto #333, ocupando toda a tela */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -30,68 +29,77 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-
-    /* HEADER: fundo preto, padding e título */
+    /* HEADER FIXO */
     header {
       background-color: #000;
-      padding: 2rem 3rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: relative;
+      padding: 0 2rem;
+      height: 80px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+    @media (max-width: 768px) {
+      header {
+        height: 56px;
+        padding: 0 1rem;
+      }
     }
     header h1 {
       color: #fff;
       font-size: 1.6rem;
-      margin: 0 auto;
+      margin: 0;
       text-align: center;
-    }
-
-    /* Botão Voltar */
-    .btn-voltar-inicio {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 1rem 2rem;
-      font-size: 2rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      left: 3rem;
-    }
-    .btn-voltar-inicio:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
-    /* MAIN */
-    main {
       flex: 1;
-      font-size: 1.25rem;
-      padding: 2rem;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
-
-    /* Caixa de pesquisa */
+    /* Botão de voltar com o mesmo estilo do menu */
+    .header-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      outline: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+    .header-btn:hover {
+      background-color: #333;
+    }
+    .header-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+    /* CAMPO DE PESQUISA FIXO */
+    .fixed-search {
+      position: fixed;
+      top: 80px;
+      left: 0;
+      right: 0;
+      background-color: #f0f0f0;
+      z-index: 999;
+      display: flex;
+      justify-content: center;
+      padding: 0.5rem 0;
+    }
+    @media (max-width: 768px) {
+      .fixed-search {
+        top: 56px;
+      }
+    }
     .search-container {
       position: relative;
       width: 100%;
       max-width: 600px;
-      margin-bottom: 2rem;
     }
-    .search-icon {
+    .search-container .search-icon {
       position: absolute;
       top: 50%;
       left: 1rem;
@@ -109,27 +117,38 @@
       background-color: #fff;
       font-size: 1rem;
       color: #333;
-      text-align: left;
       outline: none;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .search-container input[type="text"]::placeholder {
       color: #aaa;
-      text-align: left;
     }
-
-    /* Container de resultados */
+    /* MAIN: espaçamento para não ficar oculto atrás dos elementos fixos */
+    main {
+      flex: 1;
+      font-size: 1.25rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      margin-top: 140px; /* 80px (header) + ~60px (campo de pesquisa) */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    @media (max-width: 768px) {
+      main {
+        margin-top: 116px; /* 56px + 60px */
+      }
+    }
+    /* Container de problemas */
     #problem-container {
       width: 100%;
     }
-
-    /* Sentinela */
     #sentinel {
       width: 100%;
       height: 50px;
     }
-
-    /* Cada problema */
     .problem-item {
       background-color: #fff;
       border-radius: 8px;
@@ -150,8 +169,6 @@
       margin-bottom: 0.5rem;
       text-align: center;
     }
-
-    /* Imagem do problema */
     .problem-image {
       display: block;
       margin: 1rem auto;
@@ -163,8 +180,6 @@
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
-
-    /* Botão "Ver Solução" */
     .ver-solucao-btn {
       background-color: #000;
       color: #fff;
@@ -185,8 +200,6 @@
       background-color: #333;
       transform: translateX(-50%) scale(1.02);
     }
-
-    /* Botões Editar/Deletar */
     .action-btns {
       position: absolute;
       bottom: 1rem;
@@ -213,8 +226,6 @@
     .action-delete-form {
       display: inline;
     }
-
-    /* Botão "Novo Problema" */
     .new-problem-btn {
       background-color: #000;
       color: #fff;
@@ -241,8 +252,6 @@
       fill: currentColor;
       margin-right: 0.4rem;
     }
-
-    /* FOOTER */
     footer {
       background-color: #000;
       text-align: center;
@@ -251,29 +260,14 @@
     footer p {
       font-size: 0.9rem;
       color: #fff;
-      margin: 0;
     }
-
-    /* Responsividade */
     @media (max-width: 768px) {
-      header {
-        padding: 1.5rem 2rem;
-      }
       header h1 {
         font-size: 1.3rem;
-      }
-      .btn-voltar-inicio {
-        left: 0;
-        padding: 0.8rem 1.2rem;
-        font-size: 2rem;
-        height: auto;
       }
       main {
         font-size: 1rem;
         padding: 1rem;
-      }
-      .search-container {
-        margin-bottom: 1rem;
       }
       .search-container input[type="text"] {
         padding: 0.8rem;
@@ -311,8 +305,7 @@
         max-height: 200px;
       }
     }
-
-    /* MODAL - Mesmo estilo do index.html */
+    /* MODAL (mesmo estilo do index.html) */
     .modal {
       display: none;
       position: fixed;
@@ -408,12 +401,27 @@
   </style>
 </head>
 <body>
+  <!-- Barra superior fixa -->
   <header>
-    <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">
-      &#x2B05;
-    </a>
+    <button class="header-btn" onclick="window.location.href='{{ url_for('index') }}'" aria-label="Voltar">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <h1>Resultados da Pesquisa</h1>
+    <div style="width: 40px;"></div>
   </header>
+
+  <!-- Campo de pesquisa fixo -->
+  <div class="fixed-search">
+    <form action="{{ url_for('search') }}" method="GET" class="search-container" id="searchForm">
+      <span class="material-icons search-icon">search</span>
+      <input type="text" name="q" id="search-input" value="{{ termo_busca }}" autocomplete="off" autofocus />
+      <input type="hidden" name="category" value="{{ selected_category }}">
+      <input type="hidden" name="subcategory" value="{{ selected_subcategory }}">
+      <input type="hidden" name="brand" value="{{ selected_brand }}">
+    </form>
+  </div>
 
   <main>
     {% set termo_busca = termo_busca or '' %}
@@ -421,59 +429,29 @@
     {% set selected_brand = selected_brand or '' %}
     {% set selected_subcategory = selected_subcategory or '' %}
 
-    <!-- Formulário de busca -->
-    <form
-      action="{{ url_for('search') }}"
-      method="GET"
-      class="search-container"
-      id="searchForm"
-    >
-      <span class="material-icons search-icon">search</span>
-      <input
-        type="text"
-        name="q"
-        id="search-input"
-        value="{{ termo_busca }}"
-        autocomplete="off"
-        autofocus
-      />
-      <!-- Mantém category, subcategory e brand para casos de busca vazia -->
-      <input type="hidden" name="category" value="{{ selected_category }}">
-      <input type="hidden" name="subcategory" value="{{ selected_subcategory }}">
-      <input type="hidden" name="brand" value="{{ selected_brand }}">
-    </form>
-
     <!-- Container onde os problemas serão injetados via JavaScript -->
     <div id="problem-container"></div>
 
-    <!-- Div Sentinela (Intersection Observer) -->
+    <!-- Div Sentinela para o Intersection Observer -->
     <div id="sentinel"></div>
 
     <!-- Spinner de carregamento -->
     <div id="spinner" class="spinner" style="display: none;"></div>
 
-    <!-- Mensagem final fixa na página -->
+    <!-- Mensagem final com botão para novo problema -->
     <div style="text-align:center; margin-top: 2rem;">
       <p style="font-size: 1.2rem; margin-bottom: 1rem;">Não conseguiu encontrar seu problema?</p>
       {% if session.get('user_id') %}
         <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path
-              d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
-                 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-                 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
-            />
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
           </svg>
           Envie o seu problema
         </a>
       {% else %}
         <button class="new-problem-btn" onclick="openLoginModal()">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path
-              d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
-                 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-                 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
-            />
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
           </svg>
           Envie o seu problema
         </button>
@@ -485,7 +463,7 @@
     <p>© 2025 Plataforma M</p>
   </footer>
 
-  <!-- MODAL LOGIN (Reformulado - mesmo design do index.html) -->
+  <!-- MODAL LOGIN -->
   <div id="loginModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -509,7 +487,6 @@
   </div>
 
   <script>
-    // Variáveis do servidor
     const searchQuery = "{{ termo_busca|safe }}".trim();
     const selectedCategory = "{{ selected_category|safe }}";
     const selectedBrand = "{{ selected_brand|safe }}";
@@ -524,15 +501,11 @@
     let hasMore = true;
 
     window.addEventListener('DOMContentLoaded', () => {
-      // Se já existe texto no campo, foca e coloca o cursor no fim
       if (searchInput.value) {
         searchInput.focus();
         searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
       }
-
       loadProblems();
-
-      // Configura o Intersection Observer no 'sentinel'
       const observer = new IntersectionObserver((entries) => {
         const entry = entries[0];
         if (entry.isIntersecting && hasMore && !loading) {
@@ -543,7 +516,6 @@
         root: null,
         threshold: 0.1
       });
-
       const sentinel = document.getElementById('sentinel');
       observer.observe(sentinel);
     });
@@ -551,28 +523,22 @@
     async function loadProblems() {
       loading = true;
       spinner.style.display = 'block';
-
       try {
         const url = `/load_problems?page=${currentPage}`
           + `&q=${encodeURIComponent(searchQuery)}`
           + `&category=${encodeURIComponent(selectedCategory)}`
           + `&subcategory=${encodeURIComponent(selectedSubcategory)}`
           + `&brand=${encodeURIComponent(selectedBrand)}`;
-
         const response = await fetch(url);
         if (!response.ok) throw new Error('Erro ao carregar problemas');
-
         const data = await response.json();
         hasMore = data.has_more;
-
-        // Inserir problemas no container
         const fragment = document.createDocumentFragment();
         data.problems.forEach(problem => {
           const problemEl = createProblemElement(problem);
           fragment.appendChild(problemEl);
         });
         problemContainer.appendChild(fragment);
-
       } catch (error) {
         console.error(error);
       } finally {
@@ -585,7 +551,7 @@
       const div = document.createElement('div');
       div.classList.add('problem-item');
 
-      // "Enviado por"
+      // Enviado por:
       const creatorEl = document.createElement('p');
       creatorEl.textContent = "Enviado por: " + (problem.creator_name || "Usuário");
       creatorEl.style.fontWeight = "bold";
@@ -618,7 +584,7 @@
         div.appendChild(imgEl);
       }
 
-      // Se resolvido, exibir "Resolvido por" + Botão Solução
+      // Se resolvido, exibir solução
       if (problem.resolvido) {
         const solverEl = document.createElement('p');
         solverEl.textContent = "Resolvido por: " + (problem.solver_name || "Usuário");
@@ -642,19 +608,17 @@
         {% endif %}
       }
 
-      // Se role == 'solucionador', exibir "Editar" e "Deletar"
+      // Se o usuário for solucionador, exibir botões de editar/deletar
       {% if session.get('user_id') and session.role == 'solucionador' %}
       const actionBtns = document.createElement('div');
       actionBtns.classList.add('action-btns');
 
-      // Editar
       const editLink = document.createElement('a');
       editLink.href = "{{ url_for('edit_problem', problem_id='__ID__') }}"
         .replace('__ID__', problem._id);
       editLink.classList.add('action-btn');
       editLink.textContent = 'Editar';
 
-      // Deletar
       const deleteForm = document.createElement('form');
       deleteForm.method = 'POST';
       deleteForm.action = "{{ url_for('delete_problem', problem_id='__ID__') }}"
@@ -676,19 +640,15 @@
       return div;
     }
 
-    // Modal de login
     function openLoginModal() {
       document.getElementById('loginModal').style.display = 'flex';
     }
     function closeLoginModal() {
       document.getElementById('loginModal').style.display = 'none';
     }
-
-    // Desabilitar category/subcategory/brand caso o usuário digite algo
     const searchForm = document.getElementById('searchForm');
     const mainSearchInput = document.getElementById('search-input');
     searchForm.addEventListener('submit', function () {
-      // Se o usuário digitou algo no campo de busca
       if (mainSearchInput.value.trim() !== "") {
         const catInput = searchForm.querySelector('input[name="category"]');
         const subCatInput = searchForm.querySelector('input[name="subcategory"]');

@@ -3,13 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Solução do Problema</title>
-  <!-- Fonte básica -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
-  <!-- Meta para responsividade em dispositivos móveis -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -20,7 +18,7 @@
       box-sizing: border-box;
     }
 
-    /* BODY: fundo cinza claro, texto base #333 (como no index.html) */
+    /* BODY */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -32,54 +30,57 @@
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto, com maior altura (padding) e título maior */
+    /* HEADER FIXO – mesmo estilo dos outros arquivos */
     header {
       background-color: #000;
-      padding: 2rem 3rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: relative;
+      padding: 0 2rem;
+      height: 80px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
     }
     header h1 {
       color: #fff;
       font-size: 1.6rem;
-      margin: 0 auto;
+      margin: 0;
       text-align: center;
+      flex: 1;
       font-weight: 700;
     }
-
-    /* Botão Voltar (seta) */
-    .btn-voltar-resultados {
-      background-color: #000;
-      color: #fff;
+    .header-btn {
+      background: none;
       border: none;
-      border-radius: 32px;
-      padding: 0.5rem 1rem;
-      font-size: 2.4rem;
       cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      display: inline-flex;
+      outline: none;
+      color: #fff;
+      display: flex;
       align-items: center;
-      justify-content: center;
-      position: absolute;
-      left: 3rem;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
     }
-    .btn-voltar-resultados:hover {
+    .header-btn:hover {
       background-color: #333;
-      transform: scale(1.02);
+    }
+    .header-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
     }
 
-    /* MAIN: uso de max-width de 1200px */
+    /* MAIN – com margem superior para não ficar oculto pelo header */
     main {
       flex: 1;
       font-size: 1.25rem;
       padding: 2rem;
       width: 100%;
       max-width: 1200px;
-      margin: 0 auto;
+      margin: 100px auto 0;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -114,7 +115,7 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 
-    /* Linha divisória discreta */
+    /* Linha divisória */
     .section-divider {
       border: none;
       border-top: 1px solid #ccc;
@@ -123,7 +124,7 @@
       max-width: 1100px;
     }
 
-    /* Botão "Editar Solução" (apenas para solucionador) */
+    /* Botões gerais */
     .show-solution-btn {
       background-color: #000;
       color: #fff;
@@ -176,7 +177,6 @@
       margin-left: auto;
       margin-right: auto;
     }
-
     .next-step-container {
       position: absolute;
       bottom: 1rem;
@@ -185,7 +185,6 @@
       flex-direction: row;
       gap: 1rem;
     }
-
     .next-step-btn {
       background-color: #000;
       color: #fff;
@@ -204,7 +203,7 @@
       transform: scale(1.02);
     }
 
-    /* Blocos de destaque dos passos */
+    /* Blocos de passos */
     .step-container {
       margin-bottom: 2rem;
       padding: 1rem 1rem 2rem;
@@ -275,8 +274,6 @@
       border-radius: 4px;
       margin-top: 0.5rem;
     }
-
-    /* Botão para mostrar minipassos */
     .mini-steps-btn {
       background-color: #000;
       color: #fff;
@@ -296,7 +293,7 @@
       transform: scale(1.02);
     }
 
-    /* FOOTER preto, texto branco */
+    /* FOOTER */
     footer {
       background-color: #000;
       text-align: center;
@@ -305,9 +302,10 @@
     footer p {
       font-size: 0.9rem;
       color: #fff;
+      margin: 0;
     }
 
-    /* Animação simples para cada caractere (typewriter-like) */
+    /* Animação typewriter para cada letra */
     .letter-construct {
       display: inline-block;
       opacity: 0;
@@ -332,88 +330,22 @@
       }
     }
 
-    /* Sugestão de melhorias */
-    #suggestionFormContainer {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-top: 2rem;
-      max-width: 600px;
-      width: 100%;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    #suggestionFormContainer h4 {
-      margin-bottom: 0.5rem;
-      font-size: 1.2rem;
-      color: #000;
-    }
-    #suggestionFormContainer textarea {
-      font-family: 'Roboto', sans-serif;
-      padding: 0.5rem;
-      font-size: 1rem;
-      width: 100%;
-    }
-    #btnToggleSuggestion {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.2rem;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.2s;
-      display: none;
-      margin-top: 2rem;
-      text-decoration: none;
-    }
-    #btnToggleSuggestion:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
-    /* Botão de compartilhamento WhatsApp */
-    .whatsapp-share-btn {
-      background-color: #25D366;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      font-size: 1rem;
-      padding: 0.8rem 1.4rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.2s;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .whatsapp-share-btn:hover {
-      background-color: #20b957;
-      transform: scale(1.02);
-    }
-    /* Ícone do WhatsApp ao lado do texto */
-    .whatsapp-icon {
-      margin-right: 8px;
-    }
-
     @media (max-width: 768px) {
       header {
         padding: 1.5rem 2rem;
+        height: 56px;
       }
       header h1 {
         font-size: 1.3rem;
       }
-      .btn-voltar-resultados {
-        /* Mantém a seta grande, mas com menos padding em telas menores */
-        padding: 0.3rem 0.8rem;
-        font-size: 2.4rem;
-        left: 0;
+      .header-btn {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
       }
       main {
         padding: 1rem;
         font-size: 1rem;
+        margin-top: 70px;
       }
       h2 {
         font-size: 1.4rem;
@@ -470,53 +402,38 @@
         font-size: 0.85rem;
         padding: 0.5rem 0.8rem;
       }
-      #btnToggleSuggestion {
-        margin-top: 1rem;
-      }
-      #suggestionFormContainer {
-        margin-top: 1rem;
-      }
     }
   </style>
 </head>
 <body>
   <header>
-    <!-- Título da página -->
+    <button class="header-btn" onclick="window.location.href='{{ url_for('search') }}'" aria-label="Voltar">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <h1>Detalhes e Solução</h1>
-
-    <!-- Botão Voltar (no canto esquerdo do header) -->
-    <a href="{{ url_for('search') }}" class="btn-voltar-resultados" title="Voltar">
-      &#x2B05;
-    </a>
+    <div style="width: 40px;"></div>
   </header>
 
   <main>
-    <!-- Título do problema e descrição -->
+    <!-- Título e descrição do problema -->
     <h2>{{ problema["titulo"] }}</h2>
     <p class="description">{{ problema["descricao"] }}</p>
 
-    <!-- EXIBIR A IMAGEM DO PROBLEMA, se houver -->
+    <!-- Imagem do problema, se houver -->
     {% if problema.problemImageThumb %}
-      <img
-        src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}"
-        alt="Thumbnail do Problema"
-        class="problem-image"
-      />
+      <img src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}" alt="Thumbnail do Problema" class="problem-image" />
     {% elif problema.problemImage %}
-      <img
-        src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}"
-        alt="Imagem do Problema"
-        class="problem-image"
-      />
+      <img src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}" alt="Imagem do Problema" class="problem-image" />
     {% endif %}
 
-    <!-- Botão de Compartilhar via WhatsApp (abaixo da imagem) -->
+    <!-- Botão de Compartilhamento via WhatsApp -->
     <div style="text-align: center; margin-top: 1rem;">
       <a href="https://wa.me/?text={{ share_msg_encoded }}"
          class="whatsapp-share-btn"
          target="_blank"
          rel="noopener noreferrer">
-        <!-- Ícone WhatsApp (SVG) -->
         <svg class="whatsapp-icon" width="20" height="20" viewBox="0 0 448 512" fill="#fff" xmlns="http://www.w3.org/2000/svg">
           <path d="M380.9 97.1C339 55.2 283.2 32 224 32 100.3
                    32 0 132.3 0 256c0 45.4 11.8 89.3 34.3 128L0 480l100.6
@@ -550,10 +467,10 @@
       </a>
     </div>
 
-    <!-- Barra divisória discreta -->
+    <!-- Linha divisória -->
     <hr class="section-divider" />
 
-    <!-- Botão "Editar Solução" (somente para solucionador) -->
+    <!-- Botão "Editar Solução" (apenas para solucionadores) -->
     {% if session.get("role") == "solucionador" %}
       <a href="{{ url_for('edit_solution', problem_id=problema['_id']) }}"
          class="show-solution-btn"
@@ -567,37 +484,28 @@
          id="solutionContainer"
          data-steps='{{ solucao.get("steps", [])|tojson }}'>
       <h3>Solução:</h3>
-
-      <!-- Botão para iniciar animação dos passos (somente NÃO solucionador) -->
+      <!-- Botão para iniciar a animação dos passos (apenas para não-solucionadores) -->
       <button type="button"
               class="show-solution-btn"
               id="btnShowSolution"
               style="display: none;">
         Mostrar Passos
       </button>
-
       <div class="steps-output"></div>
-
-      <!-- Barra inferior com "Próximo Passo" e "Sugerir melhorias" (após término) -->
       <div class="next-step-container">
         <button type="button" class="next-step-btn" id="btnNextStep">
           Próximo Passo
         </button>
-
-        <!-- Botão que só aparece quando o usuário tiver visto todos os passos -->
         <button type="button" class="next-step-btn" id="btnToggleSuggestion">
           Sugerir melhorias
         </button>
       </div>
     </div>
 
-    <!-- Formulário para sugestão de melhorias, inicialmente oculto -->
+    <!-- Formulário de sugestão de melhorias -->
     <div id="suggestionFormContainer" style="display: none;">
       <h4>Envie sua sugestão de melhoria:</h4>
-      <form
-        action="{{ url_for('suggest_improvement', problem_id=problema['_id']) }}"
-        method="POST"
-      >
+      <form action="{{ url_for('suggest_improvement', problem_id=problema['_id']) }}" method="POST">
         <textarea name="suggestion"
                   rows="5"
                   placeholder="Descreva sua sugestão..."></textarea>
@@ -610,7 +518,7 @@
       </form>
     </div>
 
-    <!-- Botão "Pesquisar Peças" no final da página -->
+    <!-- Botão "Pesquisar Peças" -->
     <div style="text-align: center; margin-top: 2rem;">
       <a href="{{ url_for('item_search') }}"
          class="show-solution-btn"
@@ -625,27 +533,19 @@
   </footer>
 
   <script>
-    // Verifica se o usuário atual é "solucionador"
     const isSolucionador = {{ 'true' if session.get("role") == "solucionador" else 'false' }};
 
-    // === FUNÇÕES DE ANIMAÇÃO (para quem NÃO é solucionador) ===
     function typeWriter(container, text, index, callback) {
-      // Se for solucionador, pula a animação por segurança (fallback),
-      // embora iremos usar outra lógica no "DOMContentLoaded".
       if (isSolucionador) {
         container.textContent = text;
         if (callback) callback();
         return;
       }
-
       if (index >= text.length) {
         if (callback) callback();
         return;
       }
-
       const currentChar = text.charAt(index);
-
-      // Se o caractere for espaço
       if (currentChar === ' ') {
         container.appendChild(document.createTextNode(' '));
         setTimeout(() => {
@@ -653,7 +553,6 @@
         }, 50);
       } else {
         let wordContainer;
-        // Se for o início do texto ou se o caractere anterior for espaço
         if (index === 0 || text.charAt(index - 1) === ' ') {
           wordContainer = document.createElement('span');
           wordContainer.style.whiteSpace = 'nowrap';
@@ -661,44 +560,35 @@
         } else {
           wordContainer = container.lastChild;
         }
-
-        // Cria o span para a letra atual com a animação
         const span = document.createElement('span');
         span.classList.add('letter-construct');
         span.textContent = currentChar;
         wordContainer.appendChild(span);
-
         setTimeout(() => {
           typeWriter(container, text, index + 1, callback);
         }, 50);
       }
     }
 
-    // Cria o container principal de um passo (estilo box cinza)
     function createStepContainer() {
       const stepDiv = document.createElement('div');
       stepDiv.classList.add('step-container');
       return stepDiv;
     }
 
-    // Exibe o título do passo
     function revealStepTitle(stepDiv, stepNumber, title, onFinish) {
       const titleBlock = document.createElement('div');
       titleBlock.classList.add('step-title-block');
       stepDiv.appendChild(titleBlock);
-
       const text = `Passo ${stepNumber}: ${title}\n`;
       typeWriter(titleBlock, text, 0, onFinish);
     }
 
-    // Exibe a descrição do passo + imagem (se existir)
     function revealStepDescription(stepDiv, description, imageId, onFinish) {
       const descBlock = document.createElement('div');
       descBlock.classList.add('step-description-block');
       stepDiv.appendChild(descBlock);
-
       typeWriter(descBlock, `${description}\n`, 0, () => {
-        // Se houver ID de imagem, insere-a
         if (imageId && imageId.trim() !== "") {
           const imageContainer = document.createElement('div');
           imageContainer.classList.add('step-image-block');
@@ -712,7 +602,6 @@
       });
     }
 
-    // Exibe um bloco de minipassos
     function createMiniStepsArea(stepDiv, miniSteps, stepNumber) {
       const miniStepsWrapper = document.createElement('div');
       miniStepsWrapper.classList.add('mini-steps-block');
@@ -722,7 +611,6 @@
       let isRevealing = false;
       const totalMiniSteps = miniSteps.length;
 
-      // Botão para mostrar minipassos progressivamente
       const showMiniBtn = document.createElement('button');
       showMiniBtn.type = 'button';
       showMiniBtn.classList.add('mini-steps-btn');
@@ -738,21 +626,17 @@
           return;
         }
         const sub = miniSteps[index];
-
-        // Título do minipasso
         const subTitle = document.createElement('div');
         subTitle.classList.add('mini-step-title');
         miniStepsOutput.appendChild(subTitle);
 
         const titleText = `Passo ${stepNumber}.${index + 1} - ${sub.miniStepTitle}\n`;
         typeWriter(subTitle, titleText, 0, () => {
-          // Descrição do minipasso
           const subDesc = document.createElement('div');
           subDesc.classList.add('mini-step-description');
           miniStepsOutput.appendChild(subDesc);
 
           typeWriter(subDesc, `${sub.miniStepDescription}\n`, 0, () => {
-            // Se houver imagem, insere-a
             if (sub.subStepImage && sub.subStepImage.trim() !== "") {
               const subImgContainer = document.createElement('div');
               subImgContainer.classList.add('mini-step-image-block');
@@ -762,11 +646,8 @@
               subImgContainer.appendChild(subImgEl);
               miniStepsOutput.appendChild(subImgContainer);
             }
-
             currentIndex++;
             isRevealing = false;
-
-            // Atualiza texto do botão para o próximo mini-passo
             if (currentIndex < totalMiniSteps) {
               showMiniBtn.textContent = `Mostrar Passo ${stepNumber}.${currentIndex + 1}`;
               showMiniBtn.style.display = 'inline-block';
@@ -787,7 +668,6 @@
       miniStepsWrapper.appendChild(showMiniBtn);
     }
 
-    // Exibe um passo completo (título -> descrição -> minipassos)
     function revealStep(stepsOutput, stepNumber, stepData, onFinish) {
       const stepDiv = createStepContainer();
       stepsOutput.appendChild(stepDiv);
@@ -803,25 +683,21 @@
       });
     }
 
-    // === FUNÇÃO QUE RENDERIZA TUDO DE UMA VEZ (SEM ANIMAÇÃO) para SOLUCIONADOR ===
     function renderSolutionNoAnimation(stepsOutput, stepsData) {
       stepsData.forEach((step, index) => {
         const stepDiv = document.createElement('div');
         stepDiv.classList.add('step-container');
 
-        // Título
         const titleBlock = document.createElement('div');
         titleBlock.classList.add('step-title-block');
         titleBlock.textContent = `Passo ${index + 1}: ${step.stepTitle}`;
         stepDiv.appendChild(titleBlock);
 
-        // Descrição
         const descBlock = document.createElement('div');
         descBlock.classList.add('step-description-block');
         descBlock.textContent = step.stepDescription;
         stepDiv.appendChild(descBlock);
 
-        // Imagem (se houver)
         if (step.stepImage && step.stepImage.trim() !== "") {
           const imageContainer = document.createElement('div');
           imageContainer.classList.add('step-image-block');
@@ -832,7 +708,6 @@
           stepDiv.appendChild(imageContainer);
         }
 
-        // Minipassos
         if (step.miniSteps && step.miniSteps.length > 0) {
           const miniWrapper = document.createElement('div');
           miniWrapper.classList.add('mini-steps-block');
@@ -864,7 +739,6 @@
       });
     }
 
-    // === SCRIPT DE CONTROLE GERAL ===
     document.addEventListener('DOMContentLoaded', () => {
       const solutionContainer = document.getElementById('solutionContainer');
       const stepsData = JSON.parse(solutionContainer.dataset.steps || '[]');
@@ -878,25 +752,17 @@
       let currentStepIndex = 0;
       let isSolutionActive = false;
 
-      // Se for solucionador, mostramos tudo de uma vez, SEM animação.
       if (isSolucionador) {
-        // Renderiza imediatamente
         renderSolutionNoAnimation(stepsOutput, stepsData);
-
-        // Exibe o botão "Sugerir melhorias" diretamente (para quem quiser)
         btnToggleSuggestion.style.display = 'inline-block';
-        // Os botões de animação e "próximo passo" ficam invisíveis.
         btnShowSolution.style.display = 'none';
         btnNextStep.style.display = 'none';
       } else {
-        // Exibe o botão "Mostrar Passos" apenas para não-solucionador
         btnShowSolution.style.display = 'inline-block';
 
-        // --- Fluxo normal (com animação) para os demais usuários ---
         function revealCurrentStep() {
           if (currentStepIndex >= stepsData.length) {
             btnNextStep.style.display = 'none';
-            // Quando chegar no final, mostramos "Sugerir melhorias"
             btnToggleSuggestion.style.display = 'inline-block';
             return;
           }
@@ -913,7 +779,6 @@
           });
         }
 
-        // Botão "Mostrar Passos"
         btnShowSolution.addEventListener('click', () => {
           if (isSolutionActive) return;
           isSolutionActive = true;
@@ -921,7 +786,6 @@
           revealCurrentStep();
         });
 
-        // Botão "Próximo Passo"
         btnNextStep.addEventListener('click', () => {
           btnNextStep.style.display = 'none';
           currentStepIndex++;
@@ -929,7 +793,6 @@
         });
       }
 
-      // Botão "Sugerir melhorias" - exibe/esconde o formulário
       btnToggleSuggestion.addEventListener('click', () => {
         if (suggestionFormContainer.style.display === 'none') {
           suggestionFormContainer.style.display = 'block';

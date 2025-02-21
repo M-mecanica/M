@@ -3,29 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Registrar Novo Problema</title>
-  <!-- Responsividade em dispositivos móveis -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Fonte básica (opcional) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
-
   <style>
-    /* =========================================================================
-       RESET BÁSICO
-       ========================================================================= */
+    /* Reset básico */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
-    /* =========================================================================
-       BODY / FONTES / CORES GERAIS
-       ========================================================================= */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -36,56 +26,64 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-
-    /* =========================================================================
-       HEADER PRETO COM BOTÃO DE VOLTAR
-       ========================================================================= */
+    /* HEADER FIXO (mesmo padrão de resultados.html) */
     header {
       background-color: #000;
-      padding: 1rem 2rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: relative;
+      padding: 0 2rem;
+      height: 80px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
     }
-
-    .btn-voltar-inicio {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.2rem;
-      font-size: 2rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    @media (max-width: 768px) {
+      header {
+        height: 56px;
+        padding: 0 1rem;
+      }
     }
-    .btn-voltar-inicio:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
     header h1 {
       color: #fff;
-      font-size: 1.4rem;
+      font-size: 1.6rem;
+      margin: 0;
       text-align: center;
-      margin: 0 auto;
+      flex: 1;
+    }
+    /* Botão de voltar com o mesmo estilo do menu */
+    .header-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      outline: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+    .header-btn:hover {
+      background-color: #333;
+    }
+    .header-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
     }
 
-    /* =========================================================================
-       MAIN
-       ========================================================================= */
+    /* MAIN: espaçamento para não ficar oculto atrás do header */
     main {
+      margin-top: 100px;
       flex: 1;
-      font-size: 1rem;
       padding: 2rem 1rem;
       width: 100%;
       max-width: 900px;
-      margin: 0 auto;
+      margin-left: auto;
+      margin-right: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -98,9 +96,7 @@
       text-align: center;
     }
 
-    /* =========================================================================
-       CONTAINER DO FORMULÁRIO
-       ========================================================================= */
+    /* Container do formulário */
     .form-container {
       background-color: #fff;
       border: 1px solid #ccc;
@@ -117,9 +113,6 @@
       font-weight: bold;
     }
 
-    /* =========================================================================
-       FORMULÁRIO
-       ========================================================================= */
     form {
       display: flex;
       flex-direction: column;
@@ -212,9 +205,6 @@
       transform: scale(1.02);
     }
 
-    /* =========================================================================
-       FOOTER
-       ========================================================================= */
     footer {
       background-color: #000;
       text-align: center;
@@ -226,9 +216,7 @@
       margin: 0;
     }
 
-    /* =========================================================================
-       MODAL DE CATEGORIAS (3 PASSOS)
-       ========================================================================= */
+    /* MODAL DE CATEGORIAS */
     .modal {
       display: none;
       position: fixed;
@@ -337,56 +325,12 @@
     }
 
     @media (max-width: 768px) {
-      header {
-        padding: 1rem 0.5rem;
-      }
       header h1 {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
       }
-      .btn-voltar-inicio {
-        padding: 0.5rem 1rem;
-      }
-      main {
-        padding: 1rem;
-        max-width: 100%;
-      }
-      .page-title {
-        font-size: 1.4rem;
-        margin-bottom: 1.5rem;
-      }
-      .form-container {
-        padding: 1rem;
-        max-width: 100%;
-      }
-      label {
-        font-size: 0.9rem;
-      }
-      input[type="text"],
-      textarea {
-        font-size: 0.9rem;
-        padding: 0.6rem;
-      }
-      input[type="file"] {
-        font-size: 0.9rem;
-      }
-      input[type="submit"] {
-        font-size: 0.9rem;
-        padding: 0.6rem 1rem;
-      }
-      .modal-content {
-        width: 95%;
-      }
-      .modal-header {
-        padding: 1rem;
-      }
-      .modal-header h2 {
-        font-size: 1rem;
-      }
-      .modal-body {
-        padding: 1rem;
-      }
-      .modal-text {
-        font-size: 0.9rem;
+      .btn-definir-cat {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.8rem;
       }
       .btn-modal-category {
         font-size: 0.8rem;
@@ -400,11 +344,15 @@
   </style>
 </head>
 <body>
-  <!-- Cabeçalho com botão de voltar e título -->
+  <!-- Barra superior fixa com botão de voltar -->
   <header>
-    <a href="{{ url_for('index') }}" class="btn-voltar-inicio" title="Voltar à Página Inicial">&#x2B05;</a>
+    <button class="header-btn" onclick="window.location.href='{{ url_for('index') }}'" aria-label="Voltar">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <h1>Registrar Novo Problema</h1>
-    <div style="width: 2rem;"></div>
+    <div style="width: 40px;"></div>
   </header>
 
   <main>
@@ -431,28 +379,24 @@
         <!-- Botão para selecionar Categoria -->
         <button type="button" class="btn-definir-cat" onclick="openCatModal()">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
-                     0 0 1 0 1h-3v3a.5.5 0 0
-                     1-1 0v-3h-3a.5.5 0 0
-                     1 0-1h3v-3A.5.5 0 0
-                     1 8 4z"/>
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
           </svg>
           Definir Categoria
         </button>
 
-        <!-- Exibição "categoria/subcategoria/marca" -->
+        <!-- Exibição da categoria escolhida -->
         <div class="cat-display">
           Categoria Principal: <span id="displayCategory">---</span><br>
           Subcategoria: <span id="displaySubCategory">---</span><br>
           Marca: <span id="displayBrand">---</span>
         </div>
 
-        <!-- Campos ocultos que serão enviados ao backend -->
+        <!-- Campos ocultos para envio -->
         <input type="hidden" name="category" id="categoryField" />
         <input type="hidden" name="subCategory" id="subCategoryField" />
         <input type="hidden" name="brand" id="brandField" />
 
-        <!-- Campo para upload de imagem (opcional) -->
+        <!-- Upload de imagem (opcional) -->
         <label for="problemImage">Imagem (opcional):</label>
         <input type="file" id="problemImage" name="problemImage" accept="image/*" />
 
@@ -465,7 +409,7 @@
     <p>© 2025 Plataforma M</p>
   </footer>
 
-  <!-- MODAL (3 passos) -->
+  <!-- MODAL DE CATEGORIAS (3 passos) -->
   <div id="catModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -659,7 +603,7 @@
     let chosenCatIndex = null;
     let chosenSubIndex = null;
 
-    // Step 1
+    // Passo 1
     function showCatStep1() {
       document.getElementById('catStep1').style.display = 'block';
       document.getElementById('catStep2').style.display = 'none';
@@ -683,7 +627,7 @@
       });
     }
 
-    // Step 2
+    // Passo 2
     function showCatStep2(catIndex) {
       const subContainer = document.getElementById('catSubContainer');
       subContainer.innerHTML = '';
@@ -704,7 +648,7 @@
       });
     }
 
-    // Step 3
+    // Passo 3
     function showCatStep3(catIndex, subIndex) {
       const brandContainer = document.getElementById('catBrandContainer');
       brandContainer.innerHTML = '';
@@ -712,9 +656,7 @@
       const sub = catData[catIndex].subCategories[subIndex];
       const brandList = sub.brands || [];
 
-      // Caso não haja marcas
       if (brandList.length === 0) {
-        // Botão que define sem marca
         const noBrandBtn = document.createElement('button');
         noBrandBtn.className = 'btn-modal-category';
         noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
@@ -725,7 +667,6 @@
         return;
       }
 
-      // Para cada marca
       brandList.forEach(brand => {
         const btn = document.createElement('button');
         btn.className = 'btn-modal-category';
@@ -736,7 +677,6 @@
         brandContainer.appendChild(btn);
       });
 
-      // Adicionar também opção de "Sem marca"
       const noBrandBtn = document.createElement('button');
       noBrandBtn.className = 'btn-modal-category';
       noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
@@ -746,17 +686,15 @@
       brandContainer.appendChild(noBrandBtn);
     }
 
-    // Quando usuário escolhe a marca ou clica em "Sem marca"
+    // Finaliza a escolha e atribui os valores aos inputs ocultos
     function finalizeCategory(catIndex, subIndex, brand) {
       const catName = catData[catIndex].name;
       const subName = catData[catIndex].subCategories[subIndex].name;
 
-      // Atribuir aos inputs hidden
       document.getElementById('categoryField').value = catName;
       document.getElementById('subCategoryField').value = subName;
       document.getElementById('brandField').value = brand;
 
-      // Atualizar a exibição para o usuário
       document.getElementById('displayCategory').textContent = catName;
       document.getElementById('displaySubCategory').textContent = subName;
       document.getElementById('displayBrand').textContent = brand || "---";
@@ -764,18 +702,18 @@
       closeCatModal();
     }
 
-    // Voltar step 2 p/ 1
+    // Voltar do passo 2 para o 1
     function backToCatMain() {
       document.getElementById('catStep2').style.display = 'none';
       document.getElementById('catStep1').style.display = 'block';
     }
-    // Voltar step 3 p/ 2
+    // Voltar do passo 3 para o 2
     function backToCatSub() {
       document.getElementById('catStep3').style.display = 'none';
       document.getElementById('catStep2').style.display = 'block';
     }
 
-    // Reset
+    // Resetar os passos
     function resetCatSteps() {
       document.getElementById('catStep1').style.display = 'block';
       document.getElementById('catStep2').style.display = 'none';

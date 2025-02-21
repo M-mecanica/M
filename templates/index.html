@@ -33,17 +33,25 @@
       overflow-x: hidden;
     }
 
-    /* HEADER: fundo preto */
+    /* HEADER */
     header {
       background-color: #000;
-      padding: 2rem 3rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 0 2rem;
+      height: 80px; /* Tamanho para desktops */
+    }
+    /* Para dispositivos mobile, ajusta para um padrão menor (ex: 56px) */
+    @media (max-width: 768px) {
+      header {
+        height: 56px; /* Padrão de tamanho da barra superior */
+        padding: 0 1rem;
+      }
     }
 
-    /* Botão HAMBURGUER no canto esquerdo */
-    .hamburger {
+    /* Botões no Header (Menu e Entrar/Perfil) com o mesmo estilo */
+    .header-btn {
       background: none;
       border: none;
       cursor: pointer;
@@ -51,40 +59,20 @@
       color: #fff;
       display: flex;
       align-items: center;
-    }
-    .hamburger svg {
-      width: 32px;
-      height: 32px;
-      fill: #fff;
-    }
-    .hamburger span {
-      color: #fff;
+      text-decoration: none; /* para o <a> */
+      padding: 0.5rem 1rem;
       font-size: 1rem;
-      margin-left: 0.5rem;
     }
-
-    /* Botão ENTRAR (quando não logado) */
-    .login-button {
+    .header-btn:hover {
       background-color: #333;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 0.8rem 1.2rem;
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
     }
-    .login-button:hover {
-      background-color: #555;
-      transform: scale(1.02);
+    .header-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
     }
-
-    @media (max-width: 768px) {
-      header {
-        padding: 2rem 1rem;
-      }
+    .header-btn span {
+      margin-left: 0.5rem;
     }
 
     /* MAIN */
@@ -98,12 +86,12 @@
       text-align: center;
     }
 
-    /* Logo grande (substituído por imagem) */
+    /* Logo reduzida */
     .logo-grande {
       margin-bottom: 2rem;
     }
     .logo-grande img {
-      max-width: 250px;
+      max-width: 150px; /* Tamanho reduzido */
       height: auto;
     }
 
@@ -218,14 +206,14 @@
       }
     }
 
-    /* Botão "Selecione Aqui Seu Problema" modificado */
+    /* Botão "Selecione o Problema" modificado */
     .btn-selecione-aqui {
       background-color: #fff;
       color: #333;
       border: 2px solid #ccc;
       border-radius: 0;
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
+      padding: 0.6rem 1rem;  /* Aumentado um pouquinho */
+      font-size: 1rem;       /* Aumentado um pouquinho */
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
@@ -241,41 +229,9 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     .btn-selecione-aqui svg {
-      width: 32px;
-      height: 32px;
+      width: 28px;  /* Ícone aumentado um pouquinho */
+      height: 28px;
       fill: #333;
-    }
-
-    /* Seção inferior - Botão Pesquisar Peças */
-    .pesquisar-peca-container {
-      display: flex;
-      justify-content: center;
-      padding: 2rem 3rem;
-      background-color: #f0f0f0;
-    }
-    .btn-pesquisar-peca {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.8rem 1.5rem;
-      font-size: 1.1rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .btn-pesquisar-peca:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-    .btn-pesquisar-peca svg {
-      fill: currentColor;
-      width: 20px;
-      height: 20px;
     }
 
     /* FOOTER */
@@ -541,22 +497,36 @@
 </head>
 <body>
   <header>
-    <!-- Botão HAMBURGUER -->
-    <button class="hamburger" aria-label="Abrir Menu" title="Abrir Menu">
+    <!-- Botão MENU (Hamburger) -->
+    <button class="header-btn" aria-label="Abrir Menu" title="Abrir Menu" id="hamburgerBtn">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
       </svg>
       <span>Menu</span>
     </button>
 
-    <!-- Botão "Entrar" se não logado -->
+    <!-- Se não estiver logado, mostra "Entrar"; se estiver, mostra "Perfil" -->
     {% if not session.get('user_id') %}
-      <a class="login-button" href="{{ url_for('login') }}">Entrar</a>
+      <a class="header-btn" href="{{ url_for('login') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
+          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+        </svg>
+        <span>Entrar</span>
+      </a>
+    {% else %}
+      <a class="header-btn" href="{{ url_for('perfil') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
+          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+        </svg>
+        <span>Perfil</span>
+      </a>
     {% endif %}
   </header>
 
   <main>
-    <!-- Logo grande substituída pela imagem -->
+    <!-- Logo reduzida -->
     <div class="logo-grande">
       <img src="{{ url_for('static', filename='images/logo_m_transparente.png') }}" alt="Logo M">
     </div>
@@ -581,26 +551,16 @@
       </button>
     </form>
 
-    <!-- Botão para abrir Modal de Categoria/Marca em 3 passos -->
+    <!-- Botão para abrir Modal de Categoria/Marca em 3 passos com texto modificado -->
     <div style="margin-bottom: 1rem;">
       <button class="btn-selecione-aqui" onclick="openCategoryModal()">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
         </svg>
-        Escolha a categoria principal:
+        Selecione o Seu Problema
       </button>
     </div>
   </main>
-
-  <!-- BOTÃO PESQUISAR PEÇAS (GRANDE) NA PARTE INFERIOR -->
-  <div class="pesquisar-peca-container">
-    <a href="{{ url_for('item_search') }}" class="btn-pesquisar-peca">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-        <path d="M9.389 1.539l.469 1.88c.143.01.284.032.424.065l1.546-.773 1.119 1.119-.773 1.546c.032.14.055.281.064.424l1.881.469v1.58l-1.88.469a3.023 3.023 0 0 1-.065.424l.773 1.546-1.119 1.119-1.546-.773a3.023 3.023 0 0 1-.424.064l-.469 1.881h-1.58l-.469-1.88a3.023 3.023 0 0 1-.424-.065l-1.546.773-1.119-1.119.773-1.546a3.023 3.023 0 0 1-.064-.424l-1.881-.469v-1.58l1.88-.469c.01-.143.032-.284.065-.424l-.773-1.546 1.119-1.119 1.546.773c.14-.032.281-.055.424-.064l.469-1.881h1.58zm-.194 2.711a2 2 0 1 0 1.666 2.72 2 2 0 0 0-1.666-2.72z"/>
-      </svg>
-      Pesquisar Peças
-    </a>
-  </div>
 
   <!-- Barra Lateral (menu) -->
   <div class="mobile-sidebar" id="mobileSidebar">
@@ -657,7 +617,7 @@
     <p>© 2025 Plataforma M</p>
   </footer>
 
-  <!-- MODAL LOGIN (Reformulado) -->
+  <!-- MODAL LOGIN -->
   <div id="loginModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -734,10 +694,8 @@
   </div>
 
   <script>
-    // -------------------------------------------------------
-    // Sidebar
-    // -------------------------------------------------------
-    const hamburgerBtn = document.querySelector('.hamburger');
+    // SIDEBAR CONTROLS
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
     const mobileSidebar = document.getElementById('mobileSidebar');
     const overlay = document.getElementById('overlay');
 
@@ -750,9 +708,7 @@
       overlay.classList.remove('open');
     });
 
-    // -------------------------------------------------------
-    // Modal Login
-    // -------------------------------------------------------
+    // MODAL LOGIN
     function openLoginModal() {
       document.getElementById('loginModal').style.display = 'flex';
     }
@@ -765,9 +721,7 @@
       });
     {% endif %}
 
-    // -------------------------------------------------------
-    // Modal Manual
-    // -------------------------------------------------------
+    // MODAL MANUAL
     function openManualModal() {
       document.getElementById('manualModal').style.display = 'flex';
     }
@@ -775,9 +729,19 @@
       document.getElementById('manualModal').style.display = 'none';
     }
 
-    // -------------------------------------------------------
-    // Estrutura de Categorias, Subcategorias, Marcas
-    // -------------------------------------------------------
+    // MODAL DE CATEGORIAS (3 passos)
+    function openCategoryModal() {
+      // Ao abrir, definir o cabeçalho para seleção de categoria principal
+      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
+      document.getElementById('categoryModal').style.display = 'flex';
+      showMainCategories();
+    }
+    function closeCategoryModal() {
+      document.getElementById('categoryModal').style.display = 'none';
+      resetCategoryModalSteps();
+    }
+
+    // Dados de categoria -> subcategoria -> marca
     const categoryData = [
       {
         name: "Veículos",
@@ -927,21 +891,7 @@
       }
     ];
 
-    // -------------------------------------------------------
-    // Modal de Categorias (3 passos)
-    // -------------------------------------------------------
-    function openCategoryModal() {
-      // Ao abrir, definir o cabeçalho para seleção de categoria principal
-      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
-      document.getElementById('categoryModal').style.display = 'flex';
-      showMainCategories();
-    }
-    function closeCategoryModal() {
-      document.getElementById('categoryModal').style.display = 'none';
-      resetCategoryModalSteps();
-    }
-
-    // Passo 1: Lista de Categorias Principais
+    // Exibir categorias principais
     function showMainCategories() {
       const container = document.getElementById('mainCategoryContainer');
       container.innerHTML = '';
@@ -951,7 +901,7 @@
         btn.className = 'btn-categorias';
         btn.innerHTML = `<img src="/static/images/${cat.img}" alt="${cat.name}" style="width:60px;height:60px;margin-right:15px;"> <span>${cat.name}</span>`;
         btn.onclick = () => {
-          // Atualiza o cabeçalho para seleção de subcategoria
+          // Atualiza para subcategoria
           document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
           document.getElementById('mainCategoryStep').style.display = 'none';
           document.getElementById('subCategoryStep').style.display = 'block';
@@ -963,7 +913,7 @@
       });
     }
 
-    // Exibe Subcategorias
+    // Exibir subcategorias
     function showSubCategories(catIndex) {
       const subCatContainer = document.getElementById('subCategoryContainer');
       subCatContainer.innerHTML = '';
@@ -976,7 +926,7 @@
         btn.onclick = () => {
           document.getElementById('subCategoryStep').style.display = 'none';
           document.getElementById('brandStep').style.display = 'block';
-          // Atualiza o cabeçalho para seleção de marca
+          // Atualiza para marca
           document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a marca:";
           document.getElementById('selectedSubCategoryText').innerText = "Subcategoria selecionada: " + sub.name;
           window.selectedSubCatIndex = subIdx;
@@ -986,7 +936,7 @@
       });
     }
 
-    // Exibe Marcas
+    // Exibir marcas
     function showBrands(catIndex, subCatIndex) {
       const brandContainer = document.getElementById('brandContainer');
       brandContainer.innerHTML = '';
@@ -994,6 +944,7 @@
       const subCat = categoryData[catIndex].subCategories[subCatIndex];
       const brands = subCat.brands || [];
 
+      // Se não há marcas, mostra apenas o botão de ver problemas
       if (brands.length === 0) {
         const btnVerProblemas = document.createElement('button');
         btnVerProblemas.className = 'btn-categorias';
@@ -1008,6 +959,7 @@
         return;
       }
 
+      // Caso tenha marcas
       brands.forEach(brand => {
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
@@ -1021,6 +973,7 @@
         brandContainer.appendChild(btn);
       });
 
+      // Botão adicional: Ver todos os problemas dessa subcategoria
       const btnVerTodos = document.createElement('button');
       btnVerTodos.className = 'btn-categorias';
       btnVerTodos.textContent = "Ver todos problemas desta subcategoria";
@@ -1034,14 +987,14 @@
     }
 
     function goBackToMainCategory() {
-      // Ao voltar, redefinir o cabeçalho para seleção de categoria principal
+      // Voltar para o passo 1
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
       document.getElementById('subCategoryStep').style.display = 'none';
       document.getElementById('mainCategoryStep').style.display = 'block';
     }
 
     function goBackToSubCategory() {
-      // Ao voltar para a etapa de subcategoria, garantir o cabeçalho correto
+      // Voltar para o passo 2
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
       document.getElementById('brandStep').style.display = 'none';
       document.getElementById('subCategoryStep').style.display = 'block';

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>M - Meu Perfil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Fonte básica -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* BODY */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background-color: #f0f0f0;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER FIXO */
+    header {
+      background-color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 80px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+    header h1 {
+      color: #fff;
+      font-size: 1.6rem;
+      margin: 0;
+      text-align: center;
+      flex: 1;
+    }
+    .header-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      outline: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+    .header-btn:hover {
+      background-color: #333;
+    }
+    .header-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    /* MAIN */
+    main {
+      flex: 1;
+      padding: 2rem;
+      margin-top: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .profile-stats {
+      margin-top: 2rem;
+      padding: 1.5rem 2rem;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+    .profile-stats p {
+      font-size: 1.2rem;
+      margin: 0.75rem 0;
+    }
+
+    /* FOOTER */
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Botão Voltar -->
+    <a href="{{ url_for('index') }}" class="header-btn" title="Voltar à Página Inicial">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <h1>Meu Perfil</h1>
+    <div style="width: 40px;"></div>
+  </header>
+
+  <main>
+    <div class="profile-stats">
+      <p><strong>Nome:</strong> {{ user.nome }}</p>
+      <hr style="margin: 1rem 0;">
+      <p>Você já enviou <strong>{{ posted_count }}</strong> problema(s).</p>
+      <p>Você já solucionou <strong>{{ solved_count }}</strong> problema(s).</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M</p>
+  </footer>
+</body>
+</html>
