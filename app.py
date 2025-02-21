@@ -1,5 +1,3 @@
-# app.py
-
 import os
 import json
 import re
@@ -28,7 +26,7 @@ app = Flask(__name__)
 # -----------------------------------------------------------
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "CHAVE_SECRETA_PARA_SESSAO_INSEGURA")
 
-# Configuração para evitar cache (útil para sessões e páginas dinâmicas)
+# Evita cache de páginas, útil para conteúdo dinâmico
 @app.after_request
 def add_header(response):
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
@@ -178,6 +176,50 @@ def save_image_with_thumbnail(file_obj, fs_instance):
     return str(original_id), str(thumb_id)
 
 
+def calculate_user_level(posted_count, solved_count):
+    """
+    Exemplo de cálculo simples de nível de usuário,
+    baseado em contagem de problemas postados e resolvidos.
+    """
+    # Pontos = cada problema postado vale 2, resolvido vale 5 (por exemplo)
+    points = posted_count * 2 + solved_count * 5
+
+    # Definir faixas de pontos para níveis
+    if points < 20:
+        level = 1
+        next_level_points = 20  # pontos necessários para chegar ao nível 2
+    elif points < 50:
+        level = 2
+        next_level_points = 50
+    elif points < 100:
+        level = 3
+        next_level_points = 100
+    else:
+        level = 4
+        next_level_points = 999999  # Nível máximo, por exemplo
+
+    remaining_for_next_level = max(0, next_level_points - points)
+
+    # Calcular porcentagem de progresso entre o nível atual e o próximo
+    if level == 1:
+        base_min, base_max = 0, 20
+    elif level == 2:
+        base_min, base_max = 20, 50
+    elif level == 3:
+        base_min, base_max = 50, 100
+    else:
+        # Nível 4 (máximo neste exemplo)
+        base_min, base_max = 100, 100  # evita divisão por zero
+
+    if base_max == base_min:
+        progress_percentage = 100
+    else:
+        progress_percentage = ((points - base_min) / (base_max - base_min)) * 100
+        if progress_percentage > 100:
+            progress_percentage = 100
+
+    return level, points, remaining_for_next_level, progress_percentage
+
 # -----------------------------------------------------------
 # (OPCIONAL) CRIAR ÍNDICE DE TEXTO (se for necessário)
 # -----------------------------------------------------------
@@ -199,10 +241,10 @@ def init_db():
             default_language="portuguese"
         )
 
-
 # -----------------------------------------------------------
 # ROTAS PRINCIPAIS E DE USUÁRIOS
 # -----------------------------------------------------------
+
 @app.route("/")
 def root():
     return redirect(url_for("index"))
@@ -211,16 +253,28 @@ def root():
 def index():
     """
     Agora esta rota aceita GET e POST:
-    - GET: Renderiza a página inicial normalmente.
+    - GET: Renderiza a página inicial normalmente, escolhendo uma imagem de fundo aleatória.
     - POST: Captura o termo de pesquisa e redireciona para /search?q=<termo>.
     """
     need_login = request.args.get("need_login", "0")
+
+    # Lista de possíveis fundos para o background
+    background_images = [
+        "fundo1.png",
+        "fundo2.png",
+        "fundo3.png",
+        "fundo4.png",
+        "fundo5.png"
+    ]
+
+    # Escolhe um arquivo de imagem aleatoriamente
+    random_bg = random.choice(background_images)
 
     if request.method == "POST":
         search_term = request.form.get("search", "").strip()
         return redirect(url_for("search", q=search_term))
 
-    return render_template("index.html", need_login=need_login)
+    return render_template("index.html", need_login=need_login, random_bg=random_bg)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -291,7 +345,8 @@ def register():
             "senha_hash": senha_hash,
             "role": "comum",
             "whatsapp": whatsapp,
-            "maquinas": maquinas
+            "maquinas": maquinas,
+            "profile_image_id": None  # Inicialmente sem foto
         }
         inserted = usuarios_collection.insert_one(novo_usuario)
         new_user_id = str(inserted.inserted_id)
@@ -320,8 +375,8 @@ def search():
         "resultados.html",
         termo_busca=termo_busca,
         selected_category=selected_category,
-        selected_brand=selected_brand,
-        selected_subcategory=selected_subcategory
+        selected_subcategory=selected_subcategory,
+        selected_brand=selected_brand
     )
 
 @app.route("/load_problems", methods=["GET"])
@@ -1351,7 +1406,7 @@ def add_item():
 
 
 # -----------------------------------------------------------
-# NOVA ROTA: PERFIL DO USUÁRIO
+# PERFIL DO USUÁRIO + EDIÇÃO DE PERFIL
 # -----------------------------------------------------------
 @app.route("/perfil", methods=["GET"])
 def perfil():
@@ -1368,12 +1423,94 @@ def perfil():
     # Quantos problemas o usuário solucionou
     solved_count = problemas_collection.count_documents({"solver_id": user_id, "resolvido": True})
 
+    # Calcula nível, pontos e porcentagem
+    user_level, points, remaining_for_next_level, progress_percentage = calculate_user_level(posted_count, solved_count)
+
+    # Exemplo simples de badges:
+    user_badges = []
+    if posted_count >= 1:
+        user_badges.append("Primeira Postagem")
+    if solved_count >= 5:
+        user_badges.append("Solucionador de Ouro")
+
+    # Últimos problemas enviados
+    latest_problems_cursor = problemas_collection.find({"creator_id": user_id}).sort("_id", -1).limit(3)
+    latest_problems = list(latest_problems_cursor)
+    for p in latest_problems:
+        p["_id_str"] = str(p["_id"])
+
     return render_template(
-        "profil.html",
+        "profil.html",  # ou "perfil.html"
         user=user_obj,
         posted_count=posted_count,
-        solved_count=solved_count
+        solved_count=solved_count,
+        user_level=user_level,
+        remaining_for_next_level=remaining_for_next_level,
+        progress_percentage=progress_percentage,
+        user_badges=user_badges,
+        latest_problems=latest_problems
     )
+
+@app.route("/edit_profile", methods=["GET", "POST"])
+def edit_profile():
+    if not user_is_logged_in():
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+    user_obj = usuarios_collection.find_one({"_id": ObjectId(user_id)})
+    if not user_obj:
+        return "Usuário não encontrado.", 404
+
+    if request.method == "POST":
+        novo_nome = request.form.get("nome", "").strip()
+        if novo_nome:
+            usuarios_collection.update_one(
+                {"_id": ObjectId(user_id)},
+                {"$set": {"nome": novo_nome}}
+            )
+            session["username"] = novo_nome  # Atualiza a sessão
+
+        # Upload de foto
+        profile_photo = request.files.get("profile_photo")
+        if profile_photo and profile_photo.filename.strip():
+            photo_data = profile_photo.read()
+            if photo_data:
+                content_type = profile_photo.content_type
+                new_file_id = fs_m.put(
+                    photo_data,
+                    filename=secure_filename(profile_photo.filename),
+                    contentType=content_type
+                )
+                old_photo_id = user_obj.get("profile_image_id")
+                if old_photo_id:
+                    try:
+                        fs_m.delete(ObjectId(old_photo_id))
+                    except:
+                        pass
+                usuarios_collection.update_one(
+                    {"_id": ObjectId(user_id)},
+                    {"$set": {"profile_image_id": str(new_file_id)}}
+                )
+
+        return redirect(url_for("perfil"))
+
+    return render_template("edit_profile.html", user=user_obj)
+
+@app.route("/user_photo/<file_id>")
+def get_user_photo(file_id):
+    """
+    Retorna a imagem de perfil do usuário (salva em GridFS).
+    """
+    try:
+        gridout = fs_m.get(ObjectId(file_id))
+        image_data = gridout.read()
+        content_type = gridout.contentType or "image/jpeg"
+        response = make_response(image_data)
+        response.headers.set('Content-Type', content_type)
+        return response
+    except:
+        return "Foto não encontrada.", 404
+
 
 # -----------------------------------------------------------
 # MAIN

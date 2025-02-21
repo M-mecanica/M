@@ -21,19 +21,28 @@
       box-sizing: border-box;
     }
 
-    /* BODY: imagem de fundo aplicada */
+    /* BODY: agora usamos a variável random_bg para o background */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      /* Define o background com fallback de cor.
-         Ajuste o caminho da imagem para /static/images/fundo.png */
-      background: #f0f0f0 url('/static/images/fundo.WEBP') no-repeat center center fixed;
+      /* Define o background de forma dinâmica, recebendo random_bg via Jinja */
+      background: #f0f0f0 url('{{ url_for("static", filename="images/" ~ random_bg) }}') no-repeat center center fixed;
       background-size: cover;
       color: #333;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
+    }
+
+    /*
+      Em dispositivos móveis, muitos navegadores ignoram o background-attachment: fixed,
+      causando um efeito indesejado ao rolar. Abaixo, forçamos o scroll.
+    */
+    @media (max-width: 768px) {
+      body {
+        background-attachment: scroll;
+      }
     }
 
     /* HEADER */
@@ -350,7 +359,8 @@
       justify-content: center;
     }
     .modal-content {
-      background-color: #fff;
+      /* Alterado para fundo cinza */
+      background-color: #f7f7f7;
       width: 95%;
       max-width: 700px;
       border-radius: 8px;
@@ -446,8 +456,13 @@
       align-items: center;
       gap: 1rem;
     }
+
+    /*
+      Alterado para que os botões das categorias fiquem brancos,
+      conforme solicitado:
+    */
     .btn-categorias {
-      background-color: #f2f2f2;
+      background-color: #fff; /* Botões agora brancos */
       color: #333;
       border: 1px solid #ccc;
       border-radius: 4px;
