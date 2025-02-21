@@ -580,16 +580,14 @@ def unresolved():
 def resolver_form(problem_id):
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
-    if not user_has_role(["solucionador", "mecanico"]):
-        return "Acesso negado (somente solucionadores/mecânicos).", 403
+    # Removido check de "mecanico" — qualquer usuário logado pode resolver
     return render_template("resolver.html", problem_id=problem_id)
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
     if not user_is_logged_in():
         return redirect(url_for("index", need_login=1))
-    if not user_has_role(["solucionador", "mecanico"]):
-        return "Acesso negado (somente solucionadores/mecânicos).", 403
+    # Removido check de "mecanico" — qualquer usuário logado pode resolver
 
     solution_json = request.form.get("solution_data", "")
     try:

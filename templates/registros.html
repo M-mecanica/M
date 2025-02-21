@@ -634,7 +634,7 @@
                 </div>
               </div>
             {% else %}
-              <!-- Se for usuário comum ou mecânico, exibe apenas a função -->
+              <!-- Se for usuário comum, exibe apenas a função -->
               <p><strong>Função:</strong> {{ user["role"] }}</p>
             {% endif %}
           </div>
@@ -662,7 +662,6 @@
           <p>Selecione a nova função para o usuário:</p>
           <select name="role" id="roleSelect">
             <option value="comum">Usuário Comum</option>
-            <option value="mecanico">Mecânico</option>
             <option value="solucionador">Solucionador</option>
           </select>
           <button type="submit" class="btn-confirm">Confirmar</button>
@@ -682,7 +681,6 @@
         <p>Tem certeza de que deseja excluir este usuário?</p>
         <!-- Formulário de exclusão será preenchido dinamicamente via JS -->
         <form id="deleteForm" method="POST">
-          <!-- Caso precise passar um token CSRF ou algo similar, inclua aqui -->
           <button type="submit" class="btn-confirm">Sim, Excluir</button>
           <button type="button" class="btn-cancel" onclick="closeModal('deleteModal')">Cancelar</button>
         </form>
