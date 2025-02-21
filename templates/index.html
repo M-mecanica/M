@@ -21,11 +21,14 @@
       box-sizing: border-box;
     }
 
-    /* BODY: fundo cinza claro e texto base #333 */
+    /* BODY: imagem de fundo aplicada */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      background-color: #f0f0f0;
+      /* Define o background com fallback de cor.
+         Ajuste o caminho da imagem para /static/images/fundo.png */
+      background: #f0f0f0 url('/static/images/fundo.WEBP') no-repeat center center fixed;
+      background-size: cover;
       color: #333;
       display: flex;
       flex-direction: column;
@@ -42,15 +45,15 @@
       padding: 0 2rem;
       height: 80px; /* Tamanho para desktops */
     }
-    /* Para dispositivos mobile, ajusta para um padrão menor (ex: 56px) */
+    /* Para dispositivos mobile */
     @media (max-width: 768px) {
       header {
-        height: 56px; /* Padrão de tamanho da barra superior */
+        height: 56px;
         padding: 0 1rem;
       }
     }
 
-    /* Botões no Header (Menu e Entrar/Perfil) com o mesmo estilo */
+    /* Botões no Header (Menu e Entrar/Perfil) */
     .header-btn {
       background: none;
       border: none;
@@ -59,7 +62,7 @@
       color: #fff;
       display: flex;
       align-items: center;
-      text-decoration: none; /* para o <a> */
+      text-decoration: none;
       padding: 0.5rem 1rem;
       font-size: 1rem;
     }
@@ -78,7 +81,6 @@
     /* MAIN */
     main {
       flex: 1;
-      padding: 3rem 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -88,10 +90,10 @@
 
     /* Logo reduzida */
     .logo-grande {
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
     }
     .logo-grande img {
-      max-width: 150px; /* Tamanho reduzido */
+      max-width: 150px;
       height: auto;
     }
 
@@ -206,14 +208,14 @@
       }
     }
 
-    /* Botão "Selecione o Problema" modificado */
+    /* Botão "Selecione o Problema" */
     .btn-selecione-aqui {
       background-color: #fff;
       color: #333;
       border: 2px solid #ccc;
       border-radius: 0;
-      padding: 0.6rem 1rem;  /* Aumentado um pouquinho */
-      font-size: 1rem;       /* Aumentado um pouquinho */
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
@@ -229,7 +231,7 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     .btn-selecione-aqui svg {
-      width: 28px;  /* Ícone aumentado um pouquinho */
+      width: 28px;
       height: 28px;
       fill: #333;
     }
@@ -358,7 +360,7 @@
       flex-direction: column;
       max-height: 90vh;
       overflow: hidden;
-      border: 1px solid #fff; /* Borda branca fina */
+      border: 1px solid #fff;
     }
     @keyframes modalFadeIn {
       from {
@@ -370,7 +372,7 @@
         transform: translateY(0);
       }
     }
-    /* Barra superior do modal em preto */
+    /* Barra superior do modal */
     .modal-header {
       background-color: #000;
       color: #fff;
@@ -531,27 +533,18 @@
       <img src="{{ url_for('static', filename='images/logo_m_transparente.png') }}" alt="Logo M">
     </div>
 
-    <!-- Barra de Pesquisa com form POST para "/index" -->
+    <!-- Barra de Pesquisa -->
     <form action="{{ url_for('index') }}" method="POST" class="search-container">
-      <!-- Wrapper do input + ícone -->
       <div class="input-wrapper">
         <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M10 2a8 8 0 015.29 13.71l5 5a1 1 0 01-1.42 1.42l-5-5A8 8 0 1110 2zm0 2a6 6 0 100 12 6 6 0 000-12z"/>
         </svg>
-        <input
-          type="text"
-          name="search"
-          placeholder="Pesquise um problema..."
-          autocomplete="off"
-        />
+        <input type="text" name="search" placeholder="Pesquise um problema..." autocomplete="off" />
       </div>
-      <!-- Botão Explorar -->
-      <button type="submit" class="explore-button">
-        🚀 Explorar
-      </button>
+      <button type="submit" class="explore-button">🚀 Explorar</button>
     </form>
 
-    <!-- Botão para abrir Modal de Categoria/Marca em 3 passos com texto modificado -->
+    <!-- Botão para abrir Modal de Categoria/Marca -->
     <div style="margin-bottom: 1rem;">
       <button class="btn-selecione-aqui" onclick="openCategoryModal()">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -585,7 +578,7 @@
       {% if session.role == 'solucionador' %}
       <a href="{{ url_for('listar_usuarios') }}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M13 7a3 3 0 1 0-6 0 3 3 0 0 0 6 0zm-1.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM6 8c0 1.105-.672 2-1.5 2S3 9.105 3 8s.672-2 1.5-2S6 6.895 6 8zm-1.5 1a2.49 2.49 0 0 0 1-.2 3.006 3.006 0 0 1 2.25 2.9.5.5 0 0 1-1 0 2.001 2.001 0 0 0-4 0 .5.5 0 0 1-1 0 3.006 3.006 0 0 1 2.25-2.9c.306.127.641.2 1 .2zm6.5 3c-.273 0-.535-.03-.789-.086a2.001 2.001 0 0 0-3.422 0A3.105 3.105 0 0 1 8 12a3.106 3.106 0 0 1-1.289-.273.5.5 0 0 1 .578-.816 2.001 2.001 0 0 0 3.422 0 .5.5 0 0 1 .578.816A3.106 3.106 0 0 1 11 12c.54 0 1.064-.138 1.289-.273a.5.5 0 0 1 .578.816c-.254.057-.516.086-.789.086z"/>
+          <path d="M13 7a3 3 0 1 0-6 0 3 3 0 0 0 6 0zm-1.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM6 8c0 1.105-.672 2-1.5 2S3 9.105 3 8s.672-2 1.5-2S6 6.895 6 8zm-1.5 1a2.49 2.49 0 0 0 1-.2 3.006 3.006 0 0 1 2.25 2.9.5.5 0 0 1-1 0 2.001 2.001 0 0 0-4 0 .5.5 0 0 1-1 0 3.006 3.006 0 0 1 2.25-2.9c.306.127.641.2 1 .2zm6.5 3c-.273 0-.535-.03-.789-.086a2.001 2.001 0 0 0-3.422 0A3.105 3.105 0 0 1 8 12a3.106 3.106 0 0 1-1.289-.273.5.5 0 0 1 .578-.816 2.001 2.001 0 0 0 3.422 0 .5.5 0 0 1 .578.816c-.254.057-.516.086-.789.086z"/>
         </svg>
         Gerenciar Usuários
       </a>
@@ -731,7 +724,6 @@
 
     // MODAL DE CATEGORIAS (3 passos)
     function openCategoryModal() {
-      // Ao abrir, definir o cabeçalho para seleção de categoria principal
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
       document.getElementById('categoryModal').style.display = 'flex';
       showMainCategories();
@@ -901,7 +893,6 @@
         btn.className = 'btn-categorias';
         btn.innerHTML = `<img src="/static/images/${cat.img}" alt="${cat.name}" style="width:60px;height:60px;margin-right:15px;"> <span>${cat.name}</span>`;
         btn.onclick = () => {
-          // Atualiza para subcategoria
           document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
           document.getElementById('mainCategoryStep').style.display = 'none';
           document.getElementById('subCategoryStep').style.display = 'block';
@@ -926,7 +917,6 @@
         btn.onclick = () => {
           document.getElementById('subCategoryStep').style.display = 'none';
           document.getElementById('brandStep').style.display = 'block';
-          // Atualiza para marca
           document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a marca:";
           document.getElementById('selectedSubCategoryText').innerText = "Subcategoria selecionada: " + sub.name;
           window.selectedSubCatIndex = subIdx;
@@ -944,7 +934,6 @@
       const subCat = categoryData[catIndex].subCategories[subCatIndex];
       const brands = subCat.brands || [];
 
-      // Se não há marcas, mostra apenas o botão de ver problemas
       if (brands.length === 0) {
         const btnVerProblemas = document.createElement('button');
         btnVerProblemas.className = 'btn-categorias';
@@ -959,7 +948,6 @@
         return;
       }
 
-      // Caso tenha marcas
       brands.forEach(brand => {
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
@@ -973,7 +961,6 @@
         brandContainer.appendChild(btn);
       });
 
-      // Botão adicional: Ver todos os problemas dessa subcategoria
       const btnVerTodos = document.createElement('button');
       btnVerTodos.className = 'btn-categorias';
       btnVerTodos.textContent = "Ver todos problemas desta subcategoria";
@@ -987,14 +974,12 @@
     }
 
     function goBackToMainCategory() {
-      // Voltar para o passo 1
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
       document.getElementById('subCategoryStep').style.display = 'none';
       document.getElementById('mainCategoryStep').style.display = 'block';
     }
 
     function goBackToSubCategory() {
-      // Voltar para o passo 2
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
       document.getElementById('brandStep').style.display = 'none';
       document.getElementById('subCategoryStep').style.display = 'block';
