@@ -748,7 +748,7 @@
       resetCategoryModalSteps();
     }
 
-    // Dados de categoria -> subcategoria -> marca
+    // Exemplo de dados de categorias, subcategorias e marcas (agora com imgs "Toyota icon.PNG", etc.):
     const categoryData = [
       {
         name: "Veículos",
@@ -756,23 +756,52 @@
         subCategories: [
           {
             name: "Carros",
-            brands: ["Toyota", "Honda", "Ford", "Fiat", "Volkswagen", "Peugeot", "Chevrolet"]
+            brands: [
+              { name: "Toyota", img: "Toyota icon.PNG" },
+              { name: "Honda", img: "Honda icon.PNG" },
+              { name: "Ford",  img: "Ford icon.PNG" },
+              { name: "Fiat",  img: "Fiat icon.PNG" },
+              { name: "Volkswagen", img: "Volkswagen icon.PNG" },
+              { name: "Peugeot", img: "Peugeot icon.PNG" },
+              { name: "Chevrolet", img: "Chevrolet icon.PNG" }
+            ]
           },
           {
             name: "Motos",
-            brands: ["Yamaha", "Honda", "Harley-Davidson", "Suzuki", "BMW"]
+            brands: [
+              { name: "Yamaha", img: "Yamaha icon.PNG" },
+              { name: "Honda",  img: "Honda icon.PNG" },
+              { name: "Harley-Davidson", img: "Harley icon.PNG" },
+              { name: "Suzuki", img: "Suzuki icon.PNG" },
+              { name: "BMW",    img: "BMW icon.PNG" }
+            ]
           },
           {
             name: "Caminhonetes",
-            brands: ["Toyota Hilux", "Chevrolet S10", "Ford Ranger", "Mitsubishi L200", "Nissan Frontier"]
+            brands: [
+              { name: "Toyota Hilux",   img: "ToyotaHilux icon.PNG" },
+              { name: "Chevrolet S10",  img: "ChevroletS10 icon.PNG" },
+              { name: "Ford Ranger",    img: "FordRanger icon.PNG" },
+              { name: "Mitsubishi L200", img: "MitsubishiL200 icon.PNG" },
+              { name: "Nissan Frontier", img: "NissanFrontier icon.PNG" }
+            ]
           },
           {
             name: "Caminhões",
-            brands: ["Mercedes-Benz", "Volvo", "Scania", "Iveco"]
+            brands: [
+              { name: "Mercedes-Benz", img: "Mercedes icon.PNG" },
+              { name: "Volvo",         img: "Volvo icon.PNG" },
+              { name: "Scania",        img: "Scania icon.PNG" },
+              { name: "Iveco",         img: "Iveco icon.PNG" }
+            ]
           },
           {
             name: "Ônibus",
-            brands: ["Marcopolo", "Volvo", "Mercedes-Benz"]
+            brands: [
+              { name: "Marcopolo",  img: "Marcopolo icon.PNG" },
+              { name: "Volvo",      img: "Volvo icon.PNG" },
+              { name: "Mercedes-Benz", img: "Mercedes icon.PNG" }
+            ]
           }
         ]
       },
@@ -941,7 +970,7 @@
       });
     }
 
-    // Exibir marcas
+    // Exibir marcas (aceitando tanto strings quanto objetos {name, img})
     function showBrands(catIndex, subCatIndex) {
       const brandContainer = document.getElementById('brandContainer');
       brandContainer.innerHTML = '';
@@ -949,6 +978,7 @@
       const subCat = categoryData[catIndex].subCategories[subCatIndex];
       const brands = subCat.brands || [];
 
+      // Se não houver marcas cadastradas (array vazio), só mostra "Ver problemas"
       if (brands.length === 0) {
         const btnVerProblemas = document.createElement('button');
         btnVerProblemas.className = 'btn-categorias';
@@ -963,19 +993,41 @@
         return;
       }
 
+      // Se houver marcas, exibe cada uma
       brands.forEach(brand => {
+        let brandName = "";
+        let brandImg = null;
+        if (typeof brand === 'string') {
+          // Se for apenas string, deixamos sem ícone ou insira um padrão, se quiser
+          brandName = brand;
+        } else {
+          brandName = brand.name;
+          brandImg = brand.img;
+        }
+
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
-        btn.textContent = brand;
+
+        // Se houver imagem de marca, renderiza
+        if (brandImg) {
+          btn.innerHTML = `
+            <img src="/static/images/${brandImg}" alt="${brandName}" style="width:60px;height:60px;margin-right:15px;">
+            <span>${brandName}</span>
+          `;
+        } else {
+          btn.textContent = brandName;
+        }
+
         btn.onclick = () => {
           const catName = categoryData[catIndex].name;
           const subCatName = subCat.name;
-          window.location.href = `/search?category=${encodeURIComponent(catName)}&subcategory=${encodeURIComponent(subCatName)}&brand=${encodeURIComponent(brand)}`;
+          window.location.href = `/search?category=${encodeURIComponent(catName)}&subcategory=${encodeURIComponent(subCatName)}&brand=${encodeURIComponent(brandName)}`;
           closeCategoryModal();
         };
         brandContainer.appendChild(btn);
       });
 
+      // Botão para "Ver todos problemas desta subcategoria"
       const btnVerTodos = document.createElement('button');
       btnVerTodos.className = 'btn-categorias';
       btnVerTodos.textContent = "Ver todos problemas desta subcategoria";
@@ -988,18 +1040,21 @@
       brandContainer.appendChild(btnVerTodos);
     }
 
+    // Voltar para a lista de categorias principais
     function goBackToMainCategory() {
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
       document.getElementById('subCategoryStep').style.display = 'none';
       document.getElementById('mainCategoryStep').style.display = 'block';
     }
 
+    // Voltar para a lista de subcategorias
     function goBackToSubCategory() {
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
       document.getElementById('brandStep').style.display = 'none';
       document.getElementById('subCategoryStep').style.display = 'block';
     }
 
+    // Resetar o modal para o passo inicial
     function resetCategoryModalSteps() {
       document.getElementById('mainCategoryStep').style.display = 'block';
       document.getElementById('subCategoryStep').style.display = 'none';
