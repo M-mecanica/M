@@ -30,7 +30,7 @@
       overflow-x: hidden;
     }
 
-    /* HEADER FIXO – mesmo estilo dos outros arquivos */
+    /* HEADER FIXO */
     header {
       background-color: #000;
       display: flex;
@@ -73,7 +73,7 @@
       fill: currentColor;
     }
 
-    /* MAIN – com margem superior para não ficar oculto pelo header */
+    /* MAIN */
     main {
       flex: 1;
       font-size: 1.25rem;
@@ -86,7 +86,6 @@
       align-items: center;
     }
 
-    /* Título e descrição do problema */
     h2 {
       font-size: 1.8rem;
       margin-bottom: 0.5rem;
@@ -102,7 +101,6 @@
       text-align: center;
     }
 
-    /* Imagem do problema */
     .problem-image {
       display: block;
       margin: 1rem auto;
@@ -115,7 +113,6 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 
-    /* Linha divisória */
     .section-divider {
       border: none;
       border-top: 1px solid #ccc;
@@ -144,6 +141,60 @@
       transform: scale(1.02);
     }
 
+    /* Botão de Envio via WhatsApp */
+    .whatsapp-share-btn {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 0.8rem 1.4rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      margin: 1rem 0.5rem; /* espaço lateral para outros botões */
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      gap: 0.5rem;
+    }
+    .whatsapp-share-btn:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+    .whatsapp-icon {
+      fill: currentColor;
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Botão de Compartilhamento via Facebook */
+    .facebook-share-btn {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 0.8rem 1.4rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      margin: 1rem 0.5rem; /* espaço lateral para outros botões */
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      gap: 0.5rem;
+    }
+    .facebook-share-btn:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+    .facebook-icon {
+      fill: currentColor;
+      width: 20px;
+      height: 20px;
+    }
+
     /* Container da solução */
     .solution-container {
       width: 100%;
@@ -163,7 +214,31 @@
       text-align: center;
     }
 
-    /* Área dos passos */
+    /* Barra de Progresso */
+    .progress-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      height: 20px;
+      background-color: #eee;
+      border-radius: 10px;
+      margin: 0.5rem auto 1rem;
+    }
+    .progress-bar {
+      height: 100%;
+      background-color: #00b300;
+      width: 0%;
+      border-radius: 10px;
+      transition: width 0.4s ease;
+    }
+    .progress-info {
+      text-align: center;
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    /* Passos */
     .steps-output {
       margin-top: 2rem;
       line-height: 1.7;
@@ -177,33 +252,7 @@
       margin-left: auto;
       margin-right: auto;
     }
-    .next-step-container {
-      position: absolute;
-      bottom: 1rem;
-      right: 1rem;
-      display: flex;
-      flex-direction: row;
-      gap: 1rem;
-    }
-    .next-step-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.2rem;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.2s;
-      display: none;
-      text-decoration: none;
-    }
-    .next-step-btn:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
 
-    /* Blocos de passos */
     .step-container {
       margin-bottom: 2rem;
       padding: 1rem 1rem 2rem;
@@ -293,11 +342,92 @@
       transform: scale(1.02);
     }
 
+    /* Botões Consegui/Não Consegui */
+    .feedback-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .feedback-btn {
+      color: #fff;
+      border: none;
+      border-radius: 28px;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      display: inline-block;
+      text-decoration: none;
+    }
+    /* Consegui = verde puxado pro dourado */
+    #btnConsegui {
+      background-color: #b3a125; /* Verde amarelado/dourado */
+    }
+    #btnConsegui:hover {
+      background-color: #9c8e1f;
+      transform: scale(1.02);
+    }
+    /* Não Consegui = vermelho */
+    #btnNaoConsegui {
+      background-color: #dc3545;
+    }
+    #btnNaoConsegui:hover {
+      background-color: #c82333;
+      transform: scale(1.02);
+    }
+
+    .feedback-btn.shake {
+      animation: shake 0.5s;
+    }
+    @keyframes shake {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-3px, 0); }
+      40% { transform: translate(3px, 0); }
+      60% { transform: translate(-3px, 0); }
+      80% { transform: translate(3px, 0); }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* Form de feedback "Não Consegui" */
+    .fail-feedback-form {
+      text-align: center;
+      margin-top: 1rem;
+      display: none;
+    }
+    .fail-feedback-form textarea {
+      width: 100%;
+      max-width: 600px;
+      height: 80px;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      padding: 0.5rem;
+    }
+    .fail-feedback-form button {
+      background-color: #444;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .fail-feedback-form button:hover {
+      background-color: #666;
+    }
+    .fail-feedback-thank {
+      font-size: 0.95rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+
     /* FOOTER */
     footer {
       background-color: #000;
       text-align: center;
       padding: 1rem 2rem;
+      margin-top: auto;
     }
     footer p {
       font-size: 0.9rem;
@@ -369,10 +499,6 @@
         font-size: 0.95rem;
         margin-bottom: 1.5rem;
       }
-      .next-step-btn {
-        font-size: 0.9rem;
-        padding: 0.5rem 1rem;
-      }
       .step-container {
         margin-bottom: 1.5rem;
         padding: 1rem 0.5rem 1rem;
@@ -402,6 +528,13 @@
         font-size: 0.85rem;
         padding: 0.5rem 0.8rem;
       }
+      .feedback-btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.8rem;
+      }
+      .fail-feedback-form textarea {
+        height: 60px;
+      }
     }
   </style>
 </head>
@@ -428,46 +561,76 @@
       <img src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}" alt="Imagem do Problema" class="problem-image" />
     {% endif %}
 
-    <!-- Botão de Compartilhamento via WhatsApp -->
+    <!-- Botões de Compartilhamento via WhatsApp e Facebook -->
     <div style="text-align: center; margin-top: 1rem;">
+      <!-- WhatsApp -->
       <a href="https://wa.me/?text={{ share_msg_encoded }}"
          class="whatsapp-share-btn"
          target="_blank"
          rel="noopener noreferrer">
-        <svg class="whatsapp-icon" width="20" height="20" viewBox="0 0 448 512" fill="#fff" xmlns="http://www.w3.org/2000/svg">
-          <path d="M380.9 97.1C339 55.2 283.2 32 224 32 100.3
-                   32 0 132.3 0 256c0 45.4 11.8 89.3 34.3 128L0 480l100.6
-                   -33.2c37.9 20.8 81 31.8 123.4 31.8h.1c124 0 224.4-100.3
-                   224.6-224.3.1-59.3-23-115.2-67.8-159.2zM224.1
-                   400c-35 0-69.2-9.3-98.6-26.9l-6.9-4.1-58.4 19.3
-                   19.6-57.1-4.5-7c-17.6-28-26.8-60.4-26.8-93.8
-                   0-97.5 79.2-176.8 176.8-176.8 47.2 0 91.6
-                   18.4 124.9 51.7 33.2 33.2 51.5 77.6 51.4
-                   124.7-.2 97.5-79.4 176.7-176.8 176.7zm101.7
-                   -131.5c-5.6-2.8-33.2-16.4-38.4-18.2-5.1-1.9
-                   -8.8-2.8-12.6 2.8-3.7 5.6-14.4 18.2-17.6
-                   21.9-3.2 3.7-6.5 4.2-12.1 1.4-5.6-2.8-23.6
-                   -8.7-45-27.6-16.6-14.7-27.8-32.8-31
-                   -38.4-3.2-5.6-.3-8.6 2.4-11.3 2.5-2.5
-                   5.6-6.5 8.4-9.7s3.7-5.6 5.6-9.3c1.9
-                   -3.7 .9-7-0.5-9.8-1.4-2.8-12.6-30.4-17.3
-                   -41.8-4.5-11-9.1-9.3-12.6-9.5-3.2
-                   -.2-7-.2-10.7-.2s-9.8 1.4-15
-                   6.9c-5.1 5.6-19.7 19.3-19.7
-                   47.1s20.2 54.5 23 58.2c2.8
-                   3.7 39.8 60.7 96.4 85.2 13.4
-                   5.8 23.8 9.3 31.9 11.9
-                   13.4 4.2 25.6 3.6 35.2
-                   2.2 10.7-1.6 33.2-13.5
-                   37.9-26.6 4.7-13.2 4.7
-                   -24.5 3.2-26.6-1.6-2.1
-                   -5.1-3.4-10.7-6.2z"/>
+        <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+          <path d="M380.9 97.1C339 55.2 283.2 32
+                   224 32 100.3 32 0 132.3 0 256c0
+                   45.4 11.8 89.3 34.3 128L0 480l100.6
+                   -33.2c37.9 20.8 81 31.8 123.4
+                   31.8h.1c124 0 224.4-100.3
+                   224.6-224.3.1-59.3-23-115.2
+                   -67.8-159.2zM224.1 400c-35 0-69.2
+                   -9.3-98.6-26.9l-6.9-4.1-58.4
+                   19.3 19.6-57.1-4.5-7c-17.6-28
+                   -26.8-60.4-26.8-93.8 0-97.5
+                   79.2-176.8 176.8-176.8 47.2
+                   0 91.6 18.4 124.9 51.7
+                   33.2 33.2 51.5 77.6 51.4
+                   124.7-.2 97.5-79.4 176.7
+                   -176.8 176.7zm101.7
+                   -131.5c-5.6-2.8-33.2-16.4
+                   -38.4-18.2-5.1-1.9-8.8
+                   -2.8-12.6 2.8-3.7 5.6-14.4
+                   18.2-17.6 21.9-3.2 3.7
+                   -6.5 4.2-12.1 1.4-5.6
+                   -2.8-23.6-8.7-45-27.6
+                   -16.6-14.7-27.8-32.8
+                   -31-38.4-3.2-5.6-.3-8.6
+                   2.4-11.3 2.5-2.5 5.6-6.5
+                   8.4-9.7s3.7-5.6 5.6
+                   -9.3c1.9-3.7.9-7-0.5
+                   -9.8-1.4-2.8-12.6-30.4
+                   -17.3-41.8-4.5-11-9.1
+                   -9.3-12.6-9.5-3.2-.2
+                   -7-.2-10.7-.2s-9.8 1.4
+                   -15 6.9c-5.1 5.6-19.7
+                   19.3-19.7 47.1s20.2
+                   54.5 23 58.2c2.8 3.7
+                   39.8 60.7 96.4 85.2
+                   13.4 5.8 23.8 9.3
+                   31.9 11.9 13.4 4.2
+                   25.6 3.6 35.2 2.2
+                   10.7-1.6 33.2-13.5
+                   37.9-26.6 4.7-13.2
+                   4.7-24.5 3.2-26.6
+                   -1.6-2.1-5.1-3.4
+                   -10.7-6.2z"/>
         </svg>
         Enviar
       </a>
+
+      <!-- Facebook -->
+      <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url_encoded }}&quote={{ share_msg_encoded }}"
+         class="facebook-share-btn"
+         target="_blank"
+         rel="noopener noreferrer">
+        <!-- Ícone do Facebook -->
+        <svg class="facebook-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M9 8H7v4h2v12h5V12h3.642
+                   l.358-4H14V5.772C14 5.346
+                   14.346 5 14.772 5H17V1h-2.228
+                   C11.928 1 9 3.928 9 7.772V8z"/>
+        </svg>
+        Compartilhar
+      </a>
     </div>
 
-    <!-- Linha divisória -->
     <hr class="section-divider" />
 
     <!-- Botão "Editar Solução" (apenas para solucionadores) -->
@@ -484,31 +647,61 @@
          id="solutionContainer"
          data-steps='{{ solucao.get("steps", [])|tojson }}'>
       <h3>Solução:</h3>
-      <!-- Botão para iniciar a animação dos passos (apenas para não-solucionadores) -->
+
+      <!-- Barra de Progresso + Info -->
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-info" id="progressInfo">0 de 0 Passos</div>
+
+      <!-- Botão para iniciar a animação dos passos (apenas para quem não é solucionador) -->
       <button type="button"
               class="show-solution-btn"
               id="btnShowSolution"
               style="display: none;">
         Mostrar Passos
       </button>
+
       <div class="steps-output"></div>
-      <div class="next-step-container">
-        <button type="button" class="next-step-btn" id="btnNextStep">
-          Próximo Passo
+
+      <!-- Botões de Avanço de Passo -->
+      <div class="feedback-buttons" id="feedbackButtons" style="display: none;">
+        <!-- Consegui: emoji + verde/dourado -->
+        <button type="button" class="feedback-btn" id="btnConsegui">
+          ✅ Consegui!
         </button>
-        <button type="button" class="next-step-btn" id="btnToggleSuggestion">
+        <!-- Não Consegui: emoji + vermelho -->
+        <button type="button" class="feedback-btn" id="btnNaoConsegui">
+          ❌ Não Consegui
+        </button>
+      </div>
+
+      <!-- Formulário de feedback "Não Consegui" -->
+      <div class="fail-feedback-form" id="failFeedbackForm">
+        <textarea id="failFeedbackText" placeholder="Descreva o que houve dificuldade..."></textarea>
+        <br>
+        <button type="button" id="btnEnviarFeedback">Enviar Feedback</button>
+        <div class="fail-feedback-thank">
+          Seu feedback nos ajuda a melhorar a plataforma! 😊
+        </div>
+      </div>
+
+      <!-- Botão "Sugerir melhorias" -->
+      <div class="next-step-container" style="right: auto; left: 1rem;">
+        <button type="button" class="next-step-btn" id="btnToggleSuggestion" style="display: none;">
           Sugerir melhorias
         </button>
       </div>
     </div>
 
-    <!-- Formulário de sugestão de melhorias -->
-    <div id="suggestionFormContainer" style="display: none;">
+    <!-- Formulário de sugestão de melhorias (para qualquer um que esteja logado) -->
+    <div id="suggestionFormContainer" style="display: none; margin-top: 1rem; text-align: center;">
       <h4>Envie sua sugestão de melhoria:</h4>
       <form action="{{ url_for('suggest_improvement', problem_id=problema['_id']) }}" method="POST">
         <textarea name="suggestion"
                   rows="5"
-                  placeholder="Descreva sua sugestão..."></textarea>
+                  placeholder="Descreva sua sugestão..."
+                  style="width: 100%; max-width:600px;"></textarea>
         <br>
         <button type="submit"
                 class="show-solution-btn"
@@ -517,26 +710,51 @@
         </button>
       </form>
     </div>
-
-    <!-- Botão "Pesquisar Peças" -->
-    <div style="text-align: center; margin-top: 2rem;">
-      <a href="{{ url_for('item_search') }}"
-         class="show-solution-btn"
-         style="font-size: 1rem; padding: 0.8rem 1.4rem;">
-        Pesquisar Peças
-      </a>
-    </div>
   </main>
 
   <footer>
     <p>© 2025 Plataforma M - MVP</p>
   </footer>
 
+  <!-- Áudio de sucesso -->
+  <audio id="successSound" src="/static/sounds/success.mp3" preload="auto"></audio>
+
+  <!-- Script confetti (pode usar CDN ou outra lib) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
   <script>
     const isSolucionador = {{ 'true' if session.get("role") == "solucionador" else 'false' }};
+    const userIsLoggedIn = {{ 'true' if session.get("user_id") else 'false' }};
+
+    // Função de confetes
+    function showConfetti() {
+      const duration = 2 * 1000; // 2 segundos
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+      function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+        const particleCount = 50 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, {
+          particleCount,
+          origin: {
+            x: randomInRange(0.1, 0.9),
+            y: Math.random() - 0.2
+          }
+        }));
+      }, 250);
+    }
 
     function typeWriter(container, text, index, callback) {
       if (isSolucionador) {
+        // Se for solucionador, exibe tudo de uma vez (sem animação)
         container.textContent = text;
         if (callback) callback();
         return;
@@ -739,60 +957,143 @@
       });
     }
 
+    // Envio do feedback via AJAX
+    function sendStepFeedback(problemId, stepIndex, success, feedbackText, onDone) {
+      if (!userIsLoggedIn) {
+        if (onDone) onDone();
+        return;
+      }
+      const payload = {
+        problem_id: problemId,
+        step_index: stepIndex,
+        success: success,
+        feedback_text: feedbackText
+      };
+      fetch("/submit_step_feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(resp => resp.json())
+      .then(data => {
+        console.log("Feedback Enviado:", data);
+      })
+      .catch(err => console.error("Erro ao enviar feedback:", err))
+      .finally(() => {
+        if (onDone) onDone();
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const solutionContainer = document.getElementById('solutionContainer');
       const stepsData = JSON.parse(solutionContainer.dataset.steps || '[]');
       const stepsOutput = solutionContainer.querySelector('.steps-output');
 
       const btnShowSolution = document.getElementById('btnShowSolution');
-      const btnNextStep = document.getElementById('btnNextStep');
+      const feedbackButtons = document.getElementById('feedbackButtons');
+      const btnConsegui = document.getElementById('btnConsegui');
+      const btnNaoConsegui = document.getElementById('btnNaoConsegui');
+      const failFeedbackForm = document.getElementById('failFeedbackForm');
+      const btnEnviarFeedback = document.getElementById('btnEnviarFeedback');
+      const failFeedbackText = document.getElementById('failFeedbackText');
+
+      const progressBar = document.getElementById('progressBar');
+      const progressInfo = document.getElementById('progressInfo');
       const btnToggleSuggestion = document.getElementById('btnToggleSuggestion');
       const suggestionFormContainer = document.getElementById('suggestionFormContainer');
+      const successSound = document.getElementById('successSound');
 
       let currentStepIndex = 0;
+      let totalSteps = stepsData.length;
       let isSolutionActive = false;
 
-      if (isSolucionador) {
-        renderSolutionNoAnimation(stepsOutput, stepsData);
-        btnToggleSuggestion.style.display = 'inline-block';
-        btnShowSolution.style.display = 'none';
-        btnNextStep.style.display = 'none';
-      } else {
-        btnShowSolution.style.display = 'inline-block';
-
-        function revealCurrentStep() {
-          if (currentStepIndex >= stepsData.length) {
-            btnNextStep.style.display = 'none';
-            btnToggleSuggestion.style.display = 'inline-block';
-            return;
-          }
-          const stepData = stepsData[currentStepIndex];
-          const stepNumber = currentStepIndex + 1;
-
-          revealStep(stepsOutput, stepNumber, stepData, () => {
-            if (currentStepIndex < stepsData.length - 1) {
-              btnNextStep.style.display = 'inline-block';
-            } else {
-              btnNextStep.style.display = 'none';
-              btnToggleSuggestion.style.display = 'inline-block';
-            }
-          });
-        }
-
-        btnShowSolution.addEventListener('click', () => {
-          if (isSolutionActive) return;
-          isSolutionActive = true;
-          btnShowSolution.style.display = 'none';
-          revealCurrentStep();
-        });
-
-        btnNextStep.addEventListener('click', () => {
-          btnNextStep.style.display = 'none';
-          currentStepIndex++;
-          revealCurrentStep();
-        });
+      // Atualiza barra de progresso
+      function updateProgressBar() {
+        const percent = (currentStepIndex / totalSteps) * 100;
+        progressBar.style.width = `${percent}%`;
+        progressInfo.textContent = `${currentStepIndex} de ${totalSteps} Passos`;
       }
 
+      // Mostra passo atual
+      function showCurrentStep() {
+        if (currentStepIndex >= totalSteps) {
+          // Todos concluídos
+          progressBar.style.width = "100%";
+          progressInfo.textContent = `${totalSteps} de ${totalSteps} Passos (Concluídos!)`;
+          feedbackButtons.style.display = "none";
+          btnToggleSuggestion.style.display = 'inline-block';
+          // Mensagem de parabéns
+          const finishMsg = document.createElement('p');
+          finishMsg.style.textAlign = 'center';
+          finishMsg.style.fontSize = '1.1rem';
+          finishMsg.style.color = '#0a0';
+          finishMsg.style.fontWeight = 'bold';
+          finishMsg.textContent = "Parabéns, você concluiu todos os passos!";
+          stepsOutput.appendChild(finishMsg);
+          return;
+        }
+        // Renderiza o passo
+        const stepData = stepsData[currentStepIndex];
+        revealStep(stepsOutput, currentStepIndex + 1, stepData, () => {
+          feedbackButtons.style.display = 'flex';
+          failFeedbackForm.style.display = 'none';
+          failFeedbackText.value = '';
+        });
+        updateProgressBar();
+      }
+
+      // Lidar com "Consegui!"
+      btnConsegui.addEventListener('click', () => {
+        // Efeito de vibração + confete
+        btnConsegui.classList.add('shake');
+        setTimeout(() => {
+          btnConsegui.classList.remove('shake');
+        }, 500);
+
+        showConfetti();
+        if (successSound) {
+          successSound.currentTime = 0;
+          successSound.play().catch(err => console.warn(err));
+        }
+
+        // Envia feedback
+        const problemId = "{{ problema['_id'] }}";
+        sendStepFeedback(problemId, currentStepIndex, true, "", () => {
+          // Avança passo
+          feedbackButtons.style.display = 'none';
+          currentStepIndex++;
+          showCurrentStep();
+        });
+      });
+
+      // Lidar com "Não Consegui"
+      btnNaoConsegui.addEventListener('click', () => {
+        // Efeito vibração
+        btnNaoConsegui.classList.add('shake');
+        setTimeout(() => {
+          btnNaoConsegui.classList.remove('shake');
+        }, 500);
+
+        // Mostra form de feedback
+        failFeedbackForm.style.display = 'block';
+      });
+
+      // Enviar feedback "Não Consegui"
+      btnEnviarFeedback.addEventListener('click', () => {
+        const feedbackVal = failFeedbackText.value.trim();
+        const problemId = "{{ problema['_id'] }}";
+        sendStepFeedback(problemId, currentStepIndex, false, feedbackVal, () => {
+          // Oculta form, avança passo
+          failFeedbackForm.style.display = 'none';
+          feedbackButtons.style.display = 'none';
+          currentStepIndex++;
+          showCurrentStep();
+        });
+      });
+
+      // Botão Sugerir Melhorias
       btnToggleSuggestion.addEventListener('click', () => {
         if (suggestionFormContainer.style.display === 'none') {
           suggestionFormContainer.style.display = 'block';
@@ -800,6 +1101,30 @@
           suggestionFormContainer.style.display = 'none';
         }
       });
+
+      // Se for solucionador, mostra tudo sem animação
+      if (isSolucionador) {
+        renderSolutionNoAnimation(stepsOutput, stepsData);
+        progressBar.style.width = "100%";
+        progressInfo.textContent = `${totalSteps} de ${totalSteps} Passos (Modo Solucionador)`;
+        btnShowSolution.style.display = 'none';
+        feedbackButtons.style.display = 'none';
+        btnToggleSuggestion.style.display = 'inline-block';
+      } else {
+        // Modo normal
+        if (totalSteps === 0) {
+          progressInfo.textContent = "Nenhum passo definido.";
+          return;
+        }
+        btnShowSolution.style.display = 'inline-block';
+
+        btnShowSolution.addEventListener('click', () => {
+          if (isSolutionActive) return;
+          isSolutionActive = true;
+          btnShowSolution.style.display = 'none';
+          showCurrentStep();
+        });
+      }
     });
   </script>
 </body>

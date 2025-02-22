@@ -50,6 +50,9 @@ problem_history_collection = db_m["problem_search_history"]  # Histórico de bus
 problem_view_history_collection = db_m["problem_view_history"]  # Registro de visualizações
 improvement_suggestions_collection = db_m["improvement_suggestions"]  # Sugestões de melhorias
 
+# >>> Nova coleção para feedback de passos <<<
+step_feedback_collection = db_m["step_feedback"]  # Feedbacks de cada passo da solução
+
 # GridFS para armazenar imagens na plataforma M
 fs_m = gridfs.GridFS(db_m)
 
@@ -174,7 +177,6 @@ def save_image_with_thumbnail(file_obj, fs_instance):
     )
 
     return str(original_id), str(thumb_id)
-
 
 def calculate_user_level(posted_count, solved_count):
     """
@@ -358,7 +360,6 @@ def register():
         return redirect(url_for("index"))
 
     return render_template("register.html", erro=None)
-
 
 # -----------------------------------------------------------
 # ROTAS LIGADAS A PROBLEMAS (Plataforma M)
@@ -1013,7 +1014,6 @@ def edit_solution(problem_id):
         erro=None
     )
 
-
 # -----------------------------------------------------------
 # GRIDFS - EXIBIÇÃO DE IMAGENS (PROBLEMAS)
 # -----------------------------------------------------------
@@ -1040,7 +1040,6 @@ def gridfs_image_thumb(file_id):
     except:
         return "Thumbnail não encontrada.", 404
 
-
 # -----------------------------------------------------------
 # GRIDFS - EXIBIÇÃO DE IMAGENS (ITENS) - (MachineZONE)
 # -----------------------------------------------------------
@@ -1055,7 +1054,6 @@ def gridfs_item_image(file_id):
         return response
     except:
         return "Imagem do item não encontrada.", 404
-
 
 # -----------------------------------------------------------
 # HISTÓRICOS
@@ -1163,7 +1161,6 @@ def user_history(user_id):
         problem_searches=problem_searches,
         user_suggestions=user_suggestions
     )
-
 
 # -----------------------------------------------------------
 # PESQUISA DE ITENS (MZ) + Upload de imagem
@@ -1404,7 +1401,6 @@ def add_item():
 
     return render_template("add_item.html")
 
-
 # -----------------------------------------------------------
 # PERFIL DO USUÁRIO + EDIÇÃO DE PERFIL
 # -----------------------------------------------------------
@@ -1510,6 +1506,47 @@ def get_user_photo(file_id):
         return response
     except:
         return "Foto não encontrada.", 404
+
+
+# -----------------------------------------------------------
+# NOVO ENDPOINT - FEEDBACK DE PASSOS DA SOLUÇÃO
+# -----------------------------------------------------------
+@app.route("/submit_step_feedback", methods=["POST"])
+def submit_step_feedback():
+    """
+    Recebe feedback do usuário sobre cada passo da solução.
+    Exemplo de JSON enviado:
+    {
+      "problem_id": "abc123",
+      "step_index": 0,
+      "success": true,
+      "feedback_text": "Algum comentário opcional."
+    }
+    """
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+
+    data = request.get_json()
+    problem_id = data.get("problem_id")
+    step_index = data.get("step_index")
+    success = data.get("success")
+    feedback_text = data.get("feedback_text", "").strip()
+
+    if not problem_id or step_index is None or success is None:
+        return jsonify({"error": "Missing required fields."}), 400
+
+    feedback_document = {
+        "problem_id": problem_id,
+        "step_index": step_index,
+        "success": bool(success),
+        "feedback_text": feedback_text,
+        "user_id": session.get("user_id", None),
+        "created_at": datetime.datetime.utcnow()
+    }
+
+    step_feedback_collection.insert_one(feedback_document)
+
+    return jsonify({"message": "Feedback registrado com sucesso!"}), 200
 
 
 # -----------------------------------------------------------
