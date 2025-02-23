@@ -96,7 +96,7 @@
       }
     }
 
-    /* Botão Voltar (mesmo estilo do antigo) */
+    /* Botão Voltar */
     .header-btn {
       background: none;
       border: none;
@@ -291,6 +291,24 @@
       display: inline;
     }
 
+    /* CONTAINER "NÃO ENCONTROU?" COM MESMA LARGURA E ESTILO DO .problem-item */
+    .not-found-container {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 1rem 1rem 3.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      color: #333;
+      width: 100%;
+      text-align: center;
+    }
+    .not-found-container p {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Botão "Envie o seu problema" */
     .new-problem-btn {
       background-color: #000;
       color: #fff;
@@ -348,6 +366,12 @@
       .problem-image {
         max-width: 280px;
         max-height: 200px;
+      }
+      .not-found-container p {
+        font-size: 1rem;
+      }
+      .not-found-container {
+        padding: 1rem;
       }
     }
 
@@ -500,9 +524,9 @@
       <!-- Spinner de carregamento -->
       <div id="spinner" class="spinner" style="display: none;"></div>
 
-      <!-- Mensagem final com botão para novo problema -->
-      <div style="text-align:center; margin-top: 2rem;">
-        <p style="font-size: 1.2rem; margin-bottom: 1rem;">Não conseguiu encontrar seu problema?</p>
+      <!-- CONTAINER "NÃO ENCONTROU?" (estilo igual ao dos problems) -->
+      <div class="not-found-container">
+        <p>Não conseguiu encontrar seu problema?</p>
         {% if session.get('user_id') %}
           <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
