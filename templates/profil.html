@@ -11,35 +11,76 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
+  <!-- Ícones Material (mesmo que em resultados.html, para manter consistência) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 
   <style>
-    /* Reset básico */
+    /*********************************************
+     * RESET E ESTRUTURA GERAL (MESMO DE resultados.html)
+     *********************************************/
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    /* BODY */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      background-color: #f0f0f0;
       color: #333;
+      background: url("{{ url_for('static', filename='images/' + random_bg) }}") no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TRANSIÇÃO (fade-in) para o conteúdo */
+    #content {
+      transition: opacity 0.5s ease;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      overflow-x: hidden;
+      opacity: 0; /* inicia com opacidade 0 */
     }
 
-    /* HEADER FIXO */
+    /* PRELOADER (mesmo de resultados.html) */
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #333;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /*********************************************
+     * HEADER FIXO (MESMO PADRÃO DE resultados.html)
+     *********************************************/
     header {
       background-color: #000;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 2rem;
-      height: 80px; /* Igual à página de resultados em telas maiores */
+      height: 80px;
       position: fixed;
       top: 0;
       left: 0;
@@ -48,21 +89,12 @@
     }
     @media (max-width: 768px) {
       header {
-        height: 56px; /* Igual à página de resultados em telas menores */
+        height: 56px;
         padding: 0 1rem;
       }
-      header h1 {
-        font-size: 1.3rem;
-      }
     }
-    header h1 {
-      color: #fff;
-      font-size: 1.6rem;
-      margin: 0;
-      text-align: center;
-      flex: 1;
-    }
-    /* Botão Voltar (não alterar conforme solicitado) */
+
+    /* Botão Voltar (mesmo estilo do antigo) */
     .header-btn {
       background: none;
       border: none;
@@ -74,6 +106,7 @@
       text-decoration: none;
       padding: 0.5rem 1rem;
       font-size: 1rem;
+      transition: background-color 0.2s;
     }
     .header-btn:hover {
       background-color: #333;
@@ -84,20 +117,45 @@
       fill: currentColor;
     }
 
-    /* MAIN */
+    header h1 {
+      color: #fff;
+      font-size: 1.6rem;
+      margin: 0;
+      text-align: center;
+      flex: 1;
+    }
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.3rem;
+      }
+    }
+
+    /*********************************************
+     * MAIN (PADRONIZADO COM resultados.html)
+     *********************************************/
     main {
       flex: 1;
+      font-size: 1.25rem;
       padding: 2rem;
-      margin-top: 100px; /* para não ficar atrás do header fixo */
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      margin-top: 140px; /* espaço para header fixo */
       display: flex;
       flex-direction: column;
       align-items: center;
-      max-width: 900px;
-      margin: 100px auto 0; /* centralizar */
-      width: 100%;
+    }
+    @media (max-width: 768px) {
+      main {
+        margin-top: 116px;
+        font-size: 1rem;
+        padding: 1rem;
+      }
     }
 
-    /* Container do Perfil */
+    /*********************************************
+     * CONTAINER DE PERFIL E ELEMENTOS INTERNOS
+     *********************************************/
     .profile-container {
       background-color: #fff;
       border-radius: 8px;
@@ -108,7 +166,6 @@
       text-align: center;
     }
 
-    /* Avatar + Nome */
     .profile-header {
       display: flex;
       flex-direction: column;
@@ -116,7 +173,7 @@
       gap: 0.75rem;
     }
 
-    /* Avatar com width/height fixos para ser circular */
+    /* Avatar (usado como background-image) */
     .avatar {
       width: 120px;
       height: 120px;
@@ -126,17 +183,19 @@
       background-repeat: no-repeat;
       margin-bottom: 1rem;
     }
+
     .profile-name {
       font-size: 1.5rem;
       font-weight: 700;
     }
+
     .profile-level {
       font-size: 1rem;
       color: #666;
       margin-top: 0.5rem;
     }
 
-    /* Stats */
+    /* Cards de estatísticas */
     .stats-cards {
       display: flex;
       gap: 1rem;
@@ -160,7 +219,7 @@
       color: #666;
     }
 
-    /* Barra de progresso e Badges */
+    /* Barra de progresso e conquistas (badges) */
     .progress-bar-container {
       margin: 1.5rem auto;
       width: 80%;
@@ -173,7 +232,7 @@
     }
     .progress-bar-fill {
       background-color: #4caf50;
-      width: 40%;
+      width: 40%; /* controlado no style inline via {{ progress_percentage }}% */
       height: 100%;
       transition: width 0.3s ease;
     }
@@ -211,16 +270,21 @@
     }
     .problem-item h3 {
       margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+      color: #000;
     }
     .problem-item p {
       margin: 0.25rem 0;
+      color: #444;
     }
     .problem-item a {
       color: #0066cc;
       text-decoration: none;
     }
 
-    /* BOTÕES PRETOS E ARREDONDADOS (exceto o "Voltar") */
+    /*********************************************
+     * BOTÕES ESTILIZADOS (SEMELHANTES AO resultados.html)
+     *********************************************/
     .rounded-btn {
       display: inline-block;
       background-color: #000;
@@ -237,13 +301,55 @@
       background-color: #333;
     }
 
-    /* Botão Editar Perfil */
     .edit-profile-btn {
       margin: 1rem auto 0;
     }
 
-    /* Form de upload de foto (estilizando input[type="file"]) */
-    /* Esconde o input e usa um label estilizado como botão */
+    /* Botão "+ Envie o Seu Problema" (exatamente como em resultados.html) */
+    .new-problem-btn {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .new-problem-btn:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+    .new-problem-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      margin-right: 0.4rem;
+    }
+
+    /*********************************************
+     * FORM DE UPLOAD DE FOTO (INPUT FILE)
+     *********************************************/
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+    }
+    .form-group input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
     .form-group input[type="file"] {
       display: none; /* escondemos o input para usar um label customizado */
     }
@@ -261,20 +367,9 @@
       background-color: #333;
     }
 
-    /* FOOTER */
-    footer {
-      background-color: #000;
-      text-align: center;
-      padding: 1rem 2rem;
-      margin-top: 2rem;
-    }
-    footer p {
-      font-size: 0.9rem;
-      color: #fff;
-      margin: 0;
-    }
-
-    /* MODAL (mesmo estilo do index.html) */
+    /*********************************************
+     * MODAL (MESMO ESTILO DE resultados.html)
+     *********************************************/
     .modal {
       display: none;
       position: fixed;
@@ -338,38 +433,15 @@
     }
     .modal-body {
       padding: 2rem;
-      text-align: left;  /* Form fica alinhado à esquerda */
+      text-align: left;
       overflow-y: auto;
       max-height: calc(90vh - 100px);
-    }
-    .modal-text {
-      font-size: 1.5rem;
-      color: #333;
-      margin-bottom: 2rem;
-      line-height: 1.4;
     }
     .modal-footer {
       padding: 2rem;
       border-top: 1px solid #eee;
-      text-align: right;  /* Botão Salvar do lado direito */
+      text-align: right;
     }
-
-    /* Manter estilos do formulário dentro do modal */
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-weight: 600;
-    }
-    .form-group input[type="text"] {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-
     .save-btn {
       background-color: #000;
       color: #fff;
@@ -384,130 +456,129 @@
       background-color: #333;
     }
 
-    /* Estilo para o botão "+ Envie o Seu Problema" (mesmo da resultados.html) */
-    .new-problem-btn {
+    /*********************************************
+     * FOOTER (MESMO DE resultados.html)
+     *********************************************/
+    footer {
       background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.2rem;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
       font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-    .new-problem-btn:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-    .new-problem-btn svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor;
-      margin-right: 0.4rem;
+      color: #fff;
+      margin: 0;
     }
   </style>
 </head>
+
 <body>
-  <header>
-    <!-- Botão Voltar (não modificar) -->
-    <a href="{{ url_for('index') }}" class="header-btn" title="Voltar à Página Inicial">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </a>
-    <h1>Meu Perfil</h1>
-    <div style="width: 40px;"></div>
-  </header>
+  <!-- PRELOADER -->
+  <div id="preloader">
+    <div class="loader"></div>
+  </div>
 
-  <main>
-    <!-- Container de Perfil -->
-    <div class="profile-container">
-      <!-- Avatar e Nome -->
-      <div class="profile-header">
-        {% if user.profile_image_id %}
-        <div class="avatar" style="background-image: url('{{ url_for('get_user_photo', file_id=user.profile_image_id) }}');"></div>
-        {% else %}
-        <div class="avatar" style="background-image: url('/static/images/avatar_placeholder.png');"></div>
-        {% endif %}
+  <!-- CONTEÚDO GERAL (para o fade-in) -->
+  <div id="content">
 
-        <div class="profile-name">{{ user.nome }}</div>
-        <div class="profile-level">Nível: {{ user_level }}</div>
-      </div>
+    <!-- HEADER -->
+    <header>
+      <!-- Botão Voltar (não modificar) -->
+      <a href="{{ url_for('index') }}" class="header-btn" title="Voltar à Página Inicial">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <h1>Meu Perfil</h1>
+      <!-- Espaço para manter centralização do título -->
+      <div style="width: 40px;"></div>
+    </header>
 
-      <!-- Estatísticas (Problemas) -->
-      <div class="stats-cards">
-        <div class="stat-card">
-          <h2>{{ posted_count }}</h2>
-          <p>Problemas Enviados</p>
+    <!-- MAIN -->
+    <main>
+      <!-- Container de Perfil -->
+      <div class="profile-container">
+        <!-- Avatar e Nome -->
+        <div class="profile-header">
+          {% if user.profile_image_id %}
+          <div class="avatar" style="background-image: url('{{ url_for('get_user_photo', file_id=user.profile_image_id) }}');"></div>
+          {% else %}
+          <div class="avatar" style="background-image: url('/static/images/avatar_placeholder.png');"></div>
+          {% endif %}
+
+          <div class="profile-name">{{ user.nome }}</div>
+          <div class="profile-level">Nível: {{ user_level }}</div>
         </div>
-        <div class="stat-card">
-          <h2>{{ solved_count }}</h2>
-          <p>Problemas Resolvidos</p>
+
+        <!-- Estatísticas (Problemas) -->
+        <div class="stats-cards">
+          <div class="stat-card">
+            <h2>{{ posted_count }}</h2>
+            <p>Problemas Enviados</p>
+          </div>
+          <div class="stat-card">
+            <h2>{{ solved_count }}</h2>
+            <p>Problemas Resolvidos</p>
+          </div>
         </div>
-      </div>
 
-      <!-- Barra de progresso: próxima conquista/nível -->
-      <div class="progress-bar-container">
-        <div class="progress-bar-fill" style="width: {{ progress_percentage }}%;"></div>
-      </div>
-      <div class="progress-label">
-        Próximo nível em {{ remaining_for_next_level }} problema(s)!
-      </div>
+        <!-- Barra de progresso: próxima conquista/nível -->
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" style="width: {{ progress_percentage }}%;"></div>
+        </div>
+        <div class="progress-label">
+          Próximo nível em {{ remaining_for_next_level }} problema(s)!
+        </div>
 
-      <!-- Seção de Badges/Conquistas -->
-      <div class="badges-section">
-        {% for badge in user_badges %}
-          <span class="badge">{{ badge }}</span>
-        {% endfor %}
-      </div>
-
-      <!-- Botão para editar o perfil (abre modal) -->
-      <!-- Aplica a classe rounded-btn para ficar preto e arredondado -->
-      <button class="edit-profile-btn rounded-btn" id="openModalBtn">Editar Perfil</button>
-
-      <!-- Últimos Problemas Enviados -->
-      <div class="latest-problems">
-        <h2>Últimos Problemas Enviados</h2>
-        {% if latest_problems and latest_problems|length > 0 %}
-          {% for p in latest_problems %}
-            <div class="problem-item">
-              <h3>{{ p.titulo }}</h3>
-              <p>Descrição: {{ p.descricao[:80] }}{{ "..." if p.descricao|length > 80 else "" }}</p>
-              <p><strong>Status:</strong> {{ "Resolvido" if p.resolvido else "Pendente" }}</p>
-              {% if p.resolvido %}
-                <a href="{{ url_for('exibir_solucao', problem_id=p._id_str) }}">Ver Solução</a>
-              {% else %}
-                <a href="{{ url_for('resolver_form', problem_id=p._id_str) }}">Resolver Agora</a>
-              {% endif %}
-            </div>
+        <!-- Seção de Badges/Conquistas -->
+        <div class="badges-section">
+          {% for badge in user_badges %}
+            <span class="badge">{{ badge }}</span>
           {% endfor %}
-          <!-- Botão "Ver todos" -->
-          <a href="{{ url_for('user_history', user_id=user._id) }}" class="rounded-btn">Ver todos</a>
-        {% else %}
-          <p>Você ainda não postou nenhum problema.</p>
-          <!-- Botão "+ Envie o Seu Problema" -->
-          <a href="{{ url_for('add_problem') }}" class="new-problem-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-            </svg>
-            Envie o Seu Problema
-          </a>
-        {% endif %}
+        </div>
+
+        <!-- Botão para editar o perfil (abre modal) -->
+        <button class="edit-profile-btn rounded-btn" id="openModalBtn">Editar Perfil</button>
+
+        <!-- Últimos Problemas Enviados -->
+        <div class="latest-problems">
+          <h2>Últimos Problemas Enviados</h2>
+          {% if latest_problems and latest_problems|length > 0 %}
+            {% for p in latest_problems %}
+              <div class="problem-item">
+                <h3>{{ p.titulo }}</h3>
+                <p>Descrição: {{ p.descricao[:80] }}{{ "..." if p.descricao|length > 80 else "" }}</p>
+                <p><strong>Status:</strong> {{ "Resolvido" if p.resolvido else "Pendente" }}</p>
+                {% if p.resolvido %}
+                  <a href="{{ url_for('exibir_solucao', problem_id=p._id_str) }}">Ver Solução</a>
+                {% else %}
+                  <a href="{{ url_for('resolver_form', problem_id=p._id_str) }}">Resolver Agora</a>
+                {% endif %}
+              </div>
+            {% endfor %}
+            <!-- Botão "Ver todos" -->
+            <a href="{{ url_for('user_history', user_id=user._id) }}" class="rounded-btn">Ver todos</a>
+          {% else %}
+            <p>Você ainda não postou nenhum problema.</p>
+            <!-- Botão "+ Envie o Seu Problema" -->
+            <a href="{{ url_for('add_problem') }}" class="new-problem-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+              </svg>
+              Envie o Seu Problema
+            </a>
+          {% endif %}
+        </div>
       </div>
-    </div>
-  </main>
+    </main>
 
-  <footer>
-    <p>© 2025 Plataforma M</p>
-  </footer>
+    <!-- FOOTER -->
+    <footer>
+      <p>© 2025 Plataforma M</p>
+    </footer>
+  </div><!-- /#content -->
 
-  <!-- MODAL Editar Perfil (novo estilo) -->
+  <!-- MODAL Editar Perfil -->
   <div class="modal" id="editProfileModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -515,7 +586,7 @@
         <span class="close" id="closeModalBtn">&times;</span>
       </div>
       <div class="modal-body">
-        <!-- Formulário que envia para /edit_profile (ou outra rota) -->
+        <!-- Formulário que envia para /edit_profile -->
         <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
           <div class="form-group">
             <label for="nome">Nome:</label>
@@ -528,7 +599,6 @@
             <input type="file" name="profile_photo" id="profile_photo" accept="image/*">
           </div>
 
-          <!-- Footer do modal: botão Salvar -->
           <div class="modal-footer">
             <button type="submit" class="save-btn">Salvar</button>
           </div>
@@ -537,28 +607,47 @@
     </div>
   </div>
 
+  <!-- SCRIPT INLINE (inclui fade-in, preloader e modal) -->
   <script>
-    // Seleciona elementos
+    /***************************
+     * PRELOADER + FADE-IN
+     ***************************/
+    window.addEventListener('load', function() {
+      const preloader = document.getElementById('preloader');
+      const content = document.getElementById('content');
+      if (preloader) {
+        preloader.style.display = 'none';
+      }
+      if (content) {
+        content.style.opacity = '1';  // faz o fade-in
+      }
+    });
+
+    /***************************
+     * MODAL EDITAR PERFIL
+     ***************************/
     const openModalBtn = document.getElementById('openModalBtn');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const editProfileModal = document.getElementById('editProfileModal');
 
-    // Abre o modal
-    openModalBtn.addEventListener('click', () => {
-      editProfileModal.style.display = 'flex';
-    });
+    if (openModalBtn && closeModalBtn && editProfileModal) {
+      // Abre o modal
+      openModalBtn.addEventListener('click', () => {
+        editProfileModal.style.display = 'flex';
+      });
 
-    // Fecha o modal
-    closeModalBtn.addEventListener('click', () => {
-      editProfileModal.style.display = 'none';
-    });
-
-    // Fecha o modal se o usuário clicar fora do conteúdo (opcional)
-    window.addEventListener('click', (event) => {
-      if (event.target === editProfileModal) {
+      // Fecha o modal (botão X)
+      closeModalBtn.addEventListener('click', () => {
         editProfileModal.style.display = 'none';
-      }
-    });
+      });
+
+      // Fecha o modal se o usuário clicar fora do conteúdo (opcional)
+      window.addEventListener('click', (event) => {
+        if (event.target === editProfileModal) {
+          editProfileModal.style.display = 'none';
+        }
+      });
+    }
   </script>
 
 </body>

@@ -13,1053 +13,247 @@
     rel="stylesheet"
   />
 
-  <style>
-    /* Reset básico */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  <!-- CSS principal (carregado externamente) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 
-    /* BODY: agora usamos a variável random_bg para o background */
+  <!-- Aqui, apenas para o background dinâmico via Jinja -->
+  <style>
+    /* Mantemos apenas o background inline para capturar a variável random_bg */
     body {
-      font-family: 'Roboto', sans-serif;
-      font-size: 1rem;
-      /* Define o background de forma dinâmica, recebendo random_bg via Jinja */
-      background: #f0f0f0 url('{{ url_for("static", filename="images/" ~ random_bg) }}') no-repeat center center fixed;
+      background: #f0f0f0 url('{{ url_for("static", filename="images/" ~ random_bg) }}')
+        no-repeat center center fixed;
       background-size: cover;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+      /* O overflow-x: hidden pode permanecer no body, se desejar */
       overflow-x: hidden;
     }
 
-    /*
-      Em dispositivos móveis, muitos navegadores ignoram o background-attachment: fixed,
-      causando um efeito indesejado ao rolar. Abaixo, forçamos o scroll.
-    */
     @media (max-width: 768px) {
       body {
         background-attachment: scroll;
       }
     }
-
-    /* HEADER */
-    header {
-      background-color: #000;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      height: 80px; /* Tamanho para desktops */
-    }
-    /* Para dispositivos mobile */
-    @media (max-width: 768px) {
-      header {
-        height: 56px;
-        padding: 0 1rem;
-      }
-    }
-
-    /* Botões no Header (Menu e Entrar/Perfil) */
-    .header-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      outline: none;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-    }
-    .header-btn:hover {
-      background-color: #333;
-    }
-    .header-btn svg {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-    }
-    .header-btn span {
-      margin-left: 0.5rem;
-    }
-
-    /* MAIN */
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-
-    /* Logo reduzida */
-    .logo-grande {
-      margin-bottom: 1rem;
-    }
-    .logo-grande img {
-      max-width: 150px;
-      height: auto;
-    }
-
-    /* Container da barra de pesquisa */
-    .search-container {
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto 1.2rem auto;
-      display: flex;
-      align-items: center;
-      gap: 0;
-      flex-wrap: wrap;
-    }
-
-    /* Wrapper do input */
-    .input-wrapper {
-      position: relative;
-      flex: 1;
-      min-width: 240px;
-    }
-
-    .search-icon {
-      position: absolute;
-      top: 50%;
-      left: 1rem;
-      transform: translateY(-50%);
-      pointer-events: none;
-      fill: #000;
-      width: 20px;
-      height: 20px;
-    }
-
-    /* Altura fixa para input e botão */
-    .input-wrapper input[type="text"],
-    .explore-button {
-      height: 3.5rem;
-    }
-
-    /* Campo de pesquisa */
-    .input-wrapper input[type="text"] {
-      width: 100%;
-      padding: 0 1.5rem;
-      padding-left: 3rem;
-      border: 2px solid #999;
-      border-top-left-radius: 32px;
-      border-bottom-left-radius: 32px;
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      border-right: none;
-      background-color: #fff;
-      font-size: 1rem;
-      color: #333;
-      outline: none;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      line-height: 3.5rem;
-    }
-    .input-wrapper input[type="text"]::placeholder {
-      color: #666;
-      font-weight: 500;
-    }
-
-    /* Botão Explorar */
-    .explore-button {
-      background-color: #fff;
-      color: #333;
-      border: 2px solid #999;
-      border-left: 1px solid #999;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-      border-top-right-radius: 32px;
-      border-bottom-right-radius: 32px;
-      padding: 0 1rem;
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      white-space: nowrap;
-    }
-    .explore-button:hover {
-      background-color: #f7f7f7;
-      transform: scale(1.02);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-
-    @media (max-width: 480px) {
-      .search-container {
-        width: 100vw;
-        margin-left: -2rem;
-        margin-right: -2rem;
-        flex-wrap: nowrap;
-        gap: 0;
-        justify-content: flex-start;
-      }
-      .input-wrapper {
-        min-width: 0;
-      }
-      .input-wrapper input[type="text"] {
-        padding-left: 2.4rem;
-        border-radius: 32px 0 0 32px;
-      }
-      .explore-button {
-        padding: 0 0.8rem;
-        border-radius: 0 32px 32px 0;
-      }
-      .search-icon {
-        left: 0.8rem;
-      }
-    }
-
-    /* Botão "Selecione o Problema" */
-    .btn-selecione-aqui {
-      background-color: #fff;
-      color: #333;
-      border: 2px solid #ccc;
-      border-radius: 0;
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .btn-selecione-aqui:hover {
-      background-color: #f7f7f7;
-      transform: scale(1.02);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    .btn-selecione-aqui svg {
-      width: 28px;
-      height: 28px;
-      fill: #333;
-    }
-
-    /* FOOTER */
-    footer {
-      background-color: #000;
-      text-align: center;
-      padding: 1rem 2rem;
-    }
-    footer p {
-      font-size: 0.9rem;
-      color: #fff;
-    }
-
-    /* SIDEBAR */
-    .mobile-sidebar {
-      position: fixed;
-      top: 0;
-      left: -270px;
-      width: 270px;
-      height: 100vh;
-      background-color: #000;
-      display: flex;
-      flex-direction: column;
-      padding: 1rem;
-      transition: left 0.3s ease;
-      z-index: 9999;
-    }
-    .mobile-sidebar.open {
-      left: 0;
-    }
-    .menu-items {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .menu-items a {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 0;
-      padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-    .menu-items a svg {
-      margin-right: 0.4rem;
-      fill: currentColor;
-      width: 18px;
-      height: 18px;
-    }
-    .menu-items a:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-    .sidebar-footer {
-      margin-top: auto;
-      padding-top: 1rem;
-      border-top: 1px solid #333;
-    }
-    .sidebar-footer a {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 0;
-      padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-    .sidebar-footer a:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
-    /* Overlay (fundo escuro) */
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.5);
-      z-index: 9998;
-    }
-    .overlay.open {
-      display: block;
-    }
-
-    /* MODAL */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 9999;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.4);
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      /* Alterado para fundo cinza */
-      background-color: #f7f7f7;
-      width: 95%;
-      max-width: 700px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      animation: modalFadeIn 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      max-height: 90vh;
-      overflow: hidden;
-      border: 1px solid #fff;
-    }
-    @keyframes modalFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    /* Barra superior do modal */
-    .modal-header {
-      background-color: #000;
-      color: #fff;
-      padding: 2rem;
-      position: relative;
-      border-bottom: 1px solid #333;
-    }
-    .modal-header h2 {
-      margin: 0;
-      font-size: 2rem;
-      font-weight: 500;
-    }
-    .close {
-      color: #fff;
-      position: absolute;
-      right: 2rem;
-      top: 2rem;
-      font-size: 2.4rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-    .close:hover {
-      color: #ccc;
-    }
-    .modal-body {
-      padding: 2rem;
-      text-align: center;
-      overflow-y: auto;
-      max-height: calc(90vh - 100px);
-    }
-    .modal-text {
-      font-size: 1.5rem;
-      color: #333;
-      margin-bottom: 2rem;
-      line-height: 1.4;
-    }
-    .modal-footer {
-      padding: 2rem;
-      text-align: center;
-      border-top: 1px solid #eee;
-    }
-
-    /* Botão "locked" no Manual */
-    .locked-button {
-      background-color: #ccc;
-      color: #666;
-      border: none;
-      border-radius: 32px;
-      padding: 1.2rem 2rem;
-      font-size: 1.5rem;
-      cursor: not-allowed;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0.7;
-    }
-    .locked-button svg {
-      width: 28px;
-      height: 28px;
-      fill: currentColor;
-      margin-right: 0.8rem;
-    }
-
-    /* Botões de categorias (em coluna) */
-    #mainCategoryContainer,
-    #subCategoryContainer,
-    #brandContainer {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    /*
-      Alterado para que os botões das categorias fiquem brancos,
-      conforme solicitado:
-    */
-    .btn-categorias {
-      background-color: #fff; /* Botões agora brancos */
-      color: #333;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 1.2rem 2rem;
-      font-size: 1.5rem;
-      font-weight: 500;
-      cursor: pointer;
-      width: 100%;
-      max-width: 380px;
-      margin: 0 auto;
-      transition: background-color 0.2s, transform 0.2s;
-      text-align: left;
-      display: flex;
-      align-items: center;
-    }
-    .btn-categorias:hover {
-      background-color: #e6e6e6;
-      transform: scale(1.02);
-    }
-    .btn-categorias.voltar {
-      background-color: #ddd;
-      border-color: #bbb;
-    }
-    .btn-categorias.voltar:hover {
-      background-color: #ccc;
-    }
-
-    .btn-entrar-preto {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 1.2rem 2.4rem;
-      font-size: 1.5rem;
-      text-decoration: none;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 2rem;
-    }
-    .btn-entrar-preto:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
   </style>
 </head>
 <body>
-  <header>
-    <!-- Botão MENU (Hamburger) -->
-    <button class="header-btn" aria-label="Abrir Menu" title="Abrir Menu" id="hamburgerBtn">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
-      </svg>
-      <span>Menu</span>
-    </button>
 
-    <!-- Se não estiver logado, mostra "Entrar"; se estiver, mostra "Perfil" -->
-    {% if not session.get('user_id') %}
-      <a class="header-btn" href="{{ url_for('login') }}">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
-        </svg>
-        <span>Entrar</span>
-      </a>
-    {% else %}
-      <a class="header-btn" href="{{ url_for('perfil') }}">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
-        </svg>
-        <span>Perfil</span>
-      </a>
-    {% endif %}
-  </header>
+  <!-- PRELOADER -->
+  <div id="preloader">
+    <div class="loader"></div>
+  </div>
 
-  <main>
-    <!-- Logo reduzida -->
-    <div class="logo-grande">
-      <img src="{{ url_for('static', filename='images/logo_m_transparente.png') }}" alt="Logo M">
-    </div>
+  <!--
+    Div principal que conterá toda a página.
+    Adicionamos flex e min-height para que
+    header, main e footer fiquem como no layout antigo
+  -->
+  <div id="content" style="opacity:0; display: flex; flex-direction: column; min-height: 100vh;">
 
-    <!-- Barra de Pesquisa -->
-    <form action="{{ url_for('index') }}" method="POST" class="search-container">
-      <div class="input-wrapper">
-        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M10 2a8 8 0 015.29 13.71l5 5a1 1 0 01-1.42 1.42l-5-5A8 8 0 1110 2zm0 2a6 6 0 100 12 6 6 0 000-12z"/>
-        </svg>
-        <input type="text" name="search" placeholder="Pesquise um problema..." autocomplete="off" />
-      </div>
-      <button type="submit" class="explore-button">🚀 Explorar</button>
-    </form>
-
-    <!-- Botão para abrir Modal de Categoria/Marca -->
-    <div style="margin-bottom: 1rem;">
-      <button class="btn-selecione-aqui" onclick="openCategoryModal()">
+    <header>
+      <!-- Botão MENU (Hamburger) -->
+      <button class="header-btn" aria-label="Abrir Menu" title="Abrir Menu" id="hamburgerBtn">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
         </svg>
-        Selecione o Seu Problema
+        <span>Menu</span>
       </button>
-    </div>
-  </main>
 
-  <!-- Barra Lateral (menu) -->
-  <div class="mobile-sidebar" id="mobileSidebar">
-    <div class="menu-items">
-      <!-- "Envie o seu problema" -->
-      <a href="{% if session.get('user_id') %}{{ url_for('add_problem') }}{% else %}javascript:openLoginModal();{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-        </svg>
-        Envie o seu problema
-      </a>
-
-      <!-- Problemas Não Resolvidos -->
-      <a href="{% if session.get('user_id') %}{{ url_for('unresolved') }}{% else %}javascript:openLoginModal();{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8 5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0 6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"/>
-        </svg>
-        Problemas Não Resolvidos
-      </a>
-
-      <!-- Gerenciar Usuários (se for solucionador) -->
-      {% if session.role == 'solucionador' %}
-      <a href="{{ url_for('listar_usuarios') }}">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M13 7a3 3 0 1 0-6 0 3 3 0 0 0 6 0zm-1.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM6 8c0 1.105-.672 2-1.5 2S3 9.105 3 8s.672-2 1.5-2S6 6.895 6 8zm-1.5 1a2.49 2.49 0 0 0 1-.2 3.006 3.006 0 0 1 2.25 2.9.5.5 0 0 1-1 0 2.001 2.001 0 0 0-4 0 .5.5 0 0 1-1 0 3.006 3.006 0 0 1 2.25-2.9c.306.127.641.2 1 .2zm6.5 3c-.273 0-.535-.03-.789-.086a2.001 2.001 0 0 0-3.422 0A3.105 3.105 0 0 1 8 12a3.106 3.106 0 0 1-1.289-.273.5.5 0 0 1 .578-.816 2.001 2.001 0 0 0 3.422 0 .5.5 0 0 1 .578.816c-.254.057-.516.086-.789.086z"/>
-        </svg>
-        Gerenciar Usuários
-      </a>
-      {% endif %}
-
-      <!-- Logout (só aparece se logado) -->
-      {% if session.get('user_id') %}
-      <a href="{{ url_for('logout') }}">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M9.828 4a.5.5 0 0 1 .354.146l3 3a.5.5 0 0 1 0 .708l-3 3A.5.5 0 0 1 9 10.5V9H5.5a.5.5 0 0 1 0-1H9V5.5a.5.5 0 0 1 .5-.5h.328z"/>
-          <path d="M13 14.5a.5.5 0 0 1-.5.5h-5a2 2 0 0 1-2-2v-1a.5.5 0 0 1 1 0v1a1 1 0 0 0 1 1h5a.5.5 0 0 1 .5.5zm-7-11v-1a2 2 0 0 1 2-2h5a.5.5 0 0 1 0 1h-5a1 1 0 0 0-1 1v1a.5.5 0 0 1-1 0z"/>
-        </svg>
-        Logout
-      </a>
-      {% endif %}
-    </div>
-    <div class="sidebar-footer">
-      {% if session.get('user_id') %}
-      <a href="javascript:openManualModal();">
-        🔒 Manual das soluções impossíveis
-      </a>
-      {% endif %}
-    </div>
-  </div>
-
-  <div class="overlay" id="overlay"></div>
-
-  <footer>
-    <p>© 2025 Plataforma M</p>
-  </footer>
-
-  <!-- MODAL LOGIN -->
-  <div id="loginModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Desbloqueie as funcionalidades do M!</h2>
-        <span class="close" onclick="closeLoginModal()">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p class="modal-text" style="font-size: 1.3rem;">
-          Faça login e aproveite:
-        </p>
-        <ul style="list-style: disc; padding-left: 20px; text-align: left; font-size: 1.2rem; line-height: 1.8rem; color: #333; margin-bottom: 2rem;">
-          <li>Envie seus problemas e obtenha ajuda</li>
-          <li>Acesso completo a soluções de outros usuários</li>
-          <li>Suba no Ranking de Solucionadores resolvendo problemas</li>
-        </ul>
-        <a href="{{ url_for('register') }}" class="btn-entrar-preto">
-          Entrar Agora
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL - Manual das soluções impossíveis -->
-  <div id="manualModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2></h2>
-        <span class="close" onclick="closeManualModal()">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p class="modal-text">
-          🏆 Resolva diferentes problemas para ter acesso a essa área.
-        </p>
-      </div>
-      <div class="modal-footer">
-        <button class="locked-button">
+      <!-- Se não estiver logado, mostra "Entrar"; se estiver, mostra "Perfil" -->
+      {% if not session.get('user_id') %}
+        <a class="header-btn" href="{{ url_for('login') }}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 2a3 3 0 0 0-3 3v2H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-1V5a3 3 0 0 0-3-3zm0 2a1 1 0 0 1 1 1v2H7V5a1 1 0 0 1 1-1z"/>
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
+            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
           </svg>
-          Acesso Bloqueado
+          <span>Entrar</span>
+        </a>
+      {% else %}
+        <a class="header-btn" href="{{ url_for('perfil') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
+            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+          </svg>
+          <span>Perfil</span>
+        </a>
+      {% endif %}
+    </header>
+
+    <main>
+      <!-- Logo reduzida -->
+      <div class="logo-grande">
+        <img src="{{ url_for('static', filename='images/logo_m_transparente.png') }}" alt="Logo M">
+      </div>
+
+      <!-- Barra de Pesquisa -->
+      <form action="{{ url_for('index') }}" method="POST" class="search-container">
+        <div class="input-wrapper">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M10 2a8 8 0 015.29 13.71l5 5a1 1 0 01-1.42 1.42l-5-5A8 8 0 1110 2zm0 2a6 6 0 100 12 6 6 0 000-12z"/>
+          </svg>
+          <input type="text" name="search" placeholder="Pesquise um problema..." autocomplete="off" />
+        </div>
+        <button type="submit" class="explore-button">
+          <img
+            src="{{ url_for('static', filename='images/Fugueti_num_tem_re.png') }}"
+            alt="Foguete"
+            style="width:24px;height:24px;margin-right:0.5rem;"
+          >
+          Explorar
+        </button>
+      </form>
+
+      <!-- Botão para abrir Modal de Categoria/Marca -->
+      <div style="margin-bottom: 1rem;">
+        <button class="btn-selecione-aqui" onclick="openCategoryModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+          </svg>
+          Selecione o Seu Problema
         </button>
       </div>
-    </div>
-  </div>
+    </main>
 
-  <!-- MODAL: 3 Passos (categoria -> subcategoria -> marca) -->
-  <div id="categoryModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Escolha a categoria principal:</h2>
-        <span class="close" onclick="closeCategoryModal()">&times;</span>
+    <!-- Barra Lateral (menu) -->
+    <div class="mobile-sidebar" id="mobileSidebar">
+      <div class="menu-items">
+        <!-- "Envie o seu problema" -->
+        <a href="{% if session.get('user_id') %}{{ url_for('add_problem') }}{% else %}javascript:openLoginModal();{% endif %}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+          </svg>
+          Envie o seu problema
+        </a>
+
+        <!-- Problemas Não Resolvidos -->
+        <a href="{% if session.get('user_id') %}{{ url_for('unresolved') }}{% else %}javascript:openLoginModal();{% endif %}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8 5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0 6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"/>
+          </svg>
+          Problemas Não Resolvidos
+        </a>
+
+        <!-- Gerenciar Usuários (se for solucionador) -->
+        {% if session.role == 'solucionador' %}
+        <a href="{{ url_for('listar_usuarios') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="M13 7a3 3 0 1 0-6 0 3 3 0 0 0 6 0zm-1.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM6 8c0 1.105-.672 2-1.5 2S3 9.105 3 8s.672-2 1.5-2S6 6.895 6 8zm-1.5 1a2.49 2.49 0 0 0 1-.2 3.006 3.006 0 0 1 2.25 2.9.5.5 0 0 1-1 0 2.001 2.001 0 0 0-4 0 .5.5 0 0 1-1 0 3.006 3.006 0 0 1 2.25-2.9c.306.127.641.2 1 .2zm6.5 3c-.273 0-.535-.03-.789-.086a2.001 2.001 0 0 0-3.422 0A3.105 3.105 0 0 1 8 12a3.106 3.106 0 0 1-1.289-.273.5.5 0 0 1 .578-.816 2.001 2.001 0 0 0 3.422 0 .5.5 0 0 1 .578.816c-.254.057-.516.086-.789.086z"/>
+          </svg>
+          Gerenciar Usuários
+        </a>
+        {% endif %}
+
+        <!-- Logout (só aparece se logado) -->
+        {% if session.get('user_id') %}
+        <a href="{{ url_for('logout') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="M9.828 4a.5.5 0 0 1 .354.146l3 3a.5.5 0 0 1 0 .708l-3 3A.5.5 0 0 1 9 10.5V9H5.5a.5.5 0 0 1 0-1H9V5.5a.5.5 0 0 1 .5-.5h.328z"/>
+            <path d="M13 14.5a.5.5 0 0 1-.5.5h-5a2 2 0 0 1-2-2v-1a.5.5 0 0 1 1 0v1a1 1 0 0 0 1 1h5a.5.5 0 0 1 .5.5zm-7-11v-1a2 2 0 0 1 2-2h5a.5.5 0 0 1 0 1h-5a1 1 0 0 0-1 1v1a.5.5 0 0 1-1 0z"/>
+          </svg>
+          Logout
+        </a>
+        {% endif %}
       </div>
-      <div class="modal-body">
-        <!-- Step 1: Lista de Categorias Principais -->
-        <div id="mainCategoryStep" style="display: block;">
-          <div id="mainCategoryContainer"></div>
-        </div>
+      <div class="sidebar-footer">
+        {% if session.get('user_id') %}
+        <a href="javascript:openManualModal();">
+          🔒 Manual das soluções impossíveis
+        </a>
+        {% endif %}
+      </div>
+    </div>
 
-        <!-- Step 2: Subcategoria -->
-        <div id="subCategoryStep" style="display: none;">
-          <p class="modal-text" id="selectedMainCategoryText"></p>
-          <div id="subCategoryContainer"></div>
-          <button class="btn-categorias voltar" onclick="goBackToMainCategory()">Voltar</button>
-        </div>
+    <div class="overlay" id="overlay"></div>
 
-        <!-- Step 3: Marca -->
-        <div id="brandStep" style="display: none;">
-          <p class="modal-text" id="selectedSubCategoryText"></p>
-          <div id="brandContainer"></div>
-          <button class="btn-categorias voltar" onclick="goBackToSubCategory()">Voltar</button>
+    <footer>
+      <p>© 2025 Plataforma M</p>
+    </footer>
+
+    <!-- MODAL LOGIN -->
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Desbloqueie as funcionalidades do M!</h2>
+          <span class="close" onclick="closeLoginModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <p class="modal-text" style="font-size: 1.3rem;">
+            Faça login e aproveite:
+          </p>
+          <ul style="list-style: disc; padding-left: 20px; text-align: left; font-size: 1.2rem; line-height: 1.8rem; color: #333; margin-bottom: 2rem;">
+            <li>Envie seus problemas e obtenha ajuda</li>
+            <li>Acesso completo a soluções de outros usuários</li>
+            <li>Suba no Ranking de Solucionadores resolvendo problemas</li>
+          </ul>
+          <a href="{{ url_for('register') }}" class="btn-entrar-preto">
+            Entrar Agora
+          </a>
         </div>
       </div>
     </div>
-  </div>
 
+    <!-- MODAL - Manual das soluções impossíveis -->
+    <div id="manualModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2></h2>
+          <span class="close" onclick="closeManualModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <p class="modal-text">
+            🏆 Resolva diferentes problemas para ter acesso a essa área.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="locked-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path d="M8 2a3 3 0 0 0-3 3v2H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-1V5a3 3 0 0 0-3-3zm0 2a1 1 0 0 1 1 1v2H7V5a1 1 0 0 1 1-1z"/>
+            </svg>
+            Acesso Bloqueado
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: 3 Passos (categoria -> subcategoria -> marca) -->
+    <div id="categoryModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Escolha a categoria principal:</h2>
+          <span class="close" onclick="closeCategoryModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <!-- Step 1: Lista de Categorias Principais -->
+          <div id="mainCategoryStep" style="display: block;">
+            <div id="mainCategoryContainer"></div>
+          </div>
+
+          <!-- Step 2: Subcategoria -->
+          <div id="subCategoryStep" style="display: none;">
+            <p class="modal-text" id="selectedMainCategoryText"></p>
+            <div id="subCategoryContainer"></div>
+            <button class="btn-categorias voltar" onclick="goBackToMainCategory()">Voltar</button>
+          </div>
+
+          <!-- Step 3: Marca -->
+          <div id="brandStep" style="display: none;">
+            <p class="modal-text" id="selectedSubCategoryText"></p>
+            <div id="brandContainer"></div>
+            <button class="btn-categorias voltar" onclick="goBackToSubCategory()">Voltar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> <!-- Fim do #content -->
+
+  <!-- Pequeno script inline para abrir o Modal de login caso need_login == '1' -->
   <script>
-    // SIDEBAR CONTROLS
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const mobileSidebar = document.getElementById('mobileSidebar');
-    const overlay = document.getElementById('overlay');
-
-    hamburgerBtn.addEventListener('click', () => {
-      mobileSidebar.classList.toggle('open');
-      overlay.classList.toggle('open');
-    });
-    overlay.addEventListener('click', () => {
-      mobileSidebar.classList.remove('open');
-      overlay.classList.remove('open');
-    });
-
-    // MODAL LOGIN
-    function openLoginModal() {
-      document.getElementById('loginModal').style.display = 'flex';
-    }
-    function closeLoginModal() {
-      document.getElementById('loginModal').style.display = 'none';
-    }
     {% if need_login == '1' %}
       window.addEventListener('load', function() {
         openLoginModal();
       });
     {% endif %}
-
-    // MODAL MANUAL
-    function openManualModal() {
-      document.getElementById('manualModal').style.display = 'flex';
-    }
-    function closeManualModal() {
-      document.getElementById('manualModal').style.display = 'none';
-    }
-
-    // MODAL DE CATEGORIAS (3 passos)
-    function openCategoryModal() {
-      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
-      document.getElementById('categoryModal').style.display = 'flex';
-      showMainCategories();
-    }
-    function closeCategoryModal() {
-      document.getElementById('categoryModal').style.display = 'none';
-      resetCategoryModalSteps();
-    }
-
-    // Exemplo de dados de categorias, subcategorias e marcas (agora com imgs "Toyota icon.PNG", etc.):
-    const categoryData = [
-      {
-        name: "Veículos",
-        img: "Carro icon.PNG",
-        subCategories: [
-          {
-            name: "Carros",
-            brands: [
-              { name: "Toyota", img: "Toyota icon.PNG" },
-              { name: "Honda", img: "Honda icon.PNG" },
-              { name: "Ford",  img: "Ford icon.PNG" },
-              { name: "Fiat",  img: "Fiat icon.PNG" },
-              { name: "Volkswagen", img: "Volkswagen icon.PNG" },
-              { name: "Peugeot", img: "Peugeot icon.PNG" },
-              { name: "Chevrolet", img: "Chevrolet icon.PNG" }
-            ]
-          },
-          {
-            name: "Motos",
-            brands: [
-              { name: "Yamaha", img: "Yamaha icon.PNG" },
-              { name: "Honda",  img: "Honda icon.PNG" },
-              { name: "Harley-Davidson", img: "Harley icon.PNG" },
-              { name: "Suzuki", img: "Suzuki icon.PNG" },
-              { name: "BMW",    img: "BMW icon.PNG" }
-            ]
-          },
-          {
-            name: "Caminhonetes",
-            brands: [
-              { name: "Toyota Hilux",   img: "ToyotaHilux icon.PNG" },
-              { name: "Chevrolet S10",  img: "ChevroletS10 icon.PNG" },
-              { name: "Ford Ranger",    img: "FordRanger icon.PNG" },
-              { name: "Mitsubishi L200", img: "MitsubishiL200 icon.PNG" },
-              { name: "Nissan Frontier", img: "NissanFrontier icon.PNG" }
-            ]
-          },
-          {
-            name: "Caminhões",
-            brands: [
-              { name: "Mercedes-Benz", img: "Mercedes icon.PNG" },
-              { name: "Volvo",         img: "Volvo icon.PNG" },
-              { name: "Scania",        img: "Scania icon.PNG" },
-              { name: "Iveco",         img: "Iveco icon.PNG" }
-            ]
-          },
-          {
-            name: "Ônibus",
-            brands: [
-              { name: "Marcopolo",  img: "Marcopolo icon.PNG" },
-              { name: "Volvo",      img: "Volvo icon.PNG" },
-              { name: "Mercedes-Benz", img: "Mercedes icon.PNG" }
-            ]
-          }
-        ]
-      },
-      {
-        name: "Máquinas Agrícolas",
-        img: "Trator icon.PNG",
-        subCategories: [
-          {
-            name: "Tratores",
-            brands: ["John Deere", "Massey Ferguson", "Valtra/Valmet", "New Holland", "Case"]
-          },
-          {
-            name: "Colheitadeiras",
-            brands: ["John Deere", "Case IH", "New Holland"]
-          },
-          {
-            name: "Plantadeiras e Pulverizadores",
-            brands: ["Stara", "Jacto", "Kuhn"]
-          }
-        ]
-      },
-      {
-        name: "Equipamentos Industriais",
-        img: "Empilhadeira icon.PNG",
-        subCategories: [
-          {
-            name: "Motores e Geradores",
-            brands: ["Cummins", "Perkins", "Caterpillar"]
-          },
-          {
-            name: "Máquinas Pesadas",
-            brands: ["Caterpillar", "Komatsu", "Volvo"]
-          },
-          {
-            name: "Empilhadeiras e Guinchos",
-            brands: []
-          }
-        ]
-      },
-      {
-        name: "Eletrônicos e Tecnologia",
-        img: "Celular icon.PNG",
-        subCategories: [
-          {
-            name: "Celulares e Tablets",
-            brands: ["Apple", "Samsung", "Xiaomi", "Motorola"]
-          },
-          {
-            name: "Notebooks e PCs",
-            brands: ["Dell", "Lenovo", "HP", "ASUS", "Acer"]
-          },
-          {
-            name: "Impressoras e Periféricos",
-            brands: []
-          },
-          {
-            name: "Consoles e Videogames",
-            brands: []
-          },
-          {
-            name: "Televisores e Acessórios",
-            brands: ["LG", "Samsung", "Sony", "Philips", "TCL", "Panasonic"]
-          }
-        ]
-      },
-      {
-        name: "Sistemas Hidráulicos e Pneumáticos",
-        img: "Compressor de ar icon.PNG",
-        subCategories: [
-          {
-            name: "Bombas Hidráulicas e Pneumáticas",
-            brands: []
-          },
-          {
-            name: "Compressores de Ar",
-            brands: []
-          },
-          {
-            name: "Cilindros Hidráulicos",
-            brands: []
-          }
-        ]
-      },
-      {
-        name: "Eletrodomésticos e Equipamentos Domésticos",
-        img: "Microondas icon.PNG",
-        subCategories: [
-          {
-            name: "Geladeiras e Freezers",
-            brands: []
-          },
-          {
-            name: "Máquinas de Lavar e Secadoras",
-            brands: []
-          },
-          {
-            name: "Ares-condicionados",
-            brands: []
-          },
-          {
-            name: "Cafeteiras e Eletroportáteis",
-            brands: ["Mondial", "Nespresso", "Dolce Gusto", "Oster", "Cadence", "Britânia"]
-          }
-        ]
-      },
-      {
-        name: "Ferramentas e Manutenção Geral",
-        img: "Ferramentas icon.PNG",
-        subCategories: [
-          {
-            name: "Furadeiras, Parafusadeiras e Esmerilhadeiras",
-            brands: []
-          },
-          {
-            name: "Compressores e Ferramentas Pneumáticas",
-            brands: []
-          },
-          {
-            name: "Equipamentos de Solda e Corte",
-            brands: []
-          }
-        ]
-      }
-    ];
-
-    // Exibir categorias principais
-    function showMainCategories() {
-      const container = document.getElementById('mainCategoryContainer');
-      container.innerHTML = '';
-
-      categoryData.forEach((cat, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'btn-categorias';
-        btn.innerHTML = `<img src="/static/images/${cat.img}" alt="${cat.name}" style="width:60px;height:60px;margin-right:15px;"> <span>${cat.name}</span>`;
-        btn.onclick = () => {
-          document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
-          document.getElementById('mainCategoryStep').style.display = 'none';
-          document.getElementById('subCategoryStep').style.display = 'block';
-          document.getElementById('selectedMainCategoryText').innerText = "Categoria selecionada: " + cat.name;
-          window.selectedMainCatIndex = idx;
-          showSubCategories(idx);
-        };
-        container.appendChild(btn);
-      });
-    }
-
-    // Exibir subcategorias
-    function showSubCategories(catIndex) {
-      const subCatContainer = document.getElementById('subCategoryContainer');
-      subCatContainer.innerHTML = '';
-      const subCats = categoryData[catIndex].subCategories;
-
-      subCats.forEach((sub, subIdx) => {
-        const btn = document.createElement('button');
-        btn.className = 'btn-categorias';
-        btn.textContent = sub.name;
-        btn.onclick = () => {
-          document.getElementById('subCategoryStep').style.display = 'none';
-          document.getElementById('brandStep').style.display = 'block';
-          document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a marca:";
-          document.getElementById('selectedSubCategoryText').innerText = "Subcategoria selecionada: " + sub.name;
-          window.selectedSubCatIndex = subIdx;
-          showBrands(catIndex, subIdx);
-        };
-        subCatContainer.appendChild(btn);
-      });
-    }
-
-    // Exibir marcas (aceitando tanto strings quanto objetos {name, img})
-    function showBrands(catIndex, subCatIndex) {
-      const brandContainer = document.getElementById('brandContainer');
-      brandContainer.innerHTML = '';
-
-      const subCat = categoryData[catIndex].subCategories[subCatIndex];
-      const brands = subCat.brands || [];
-
-      // Se não houver marcas cadastradas (array vazio), só mostra "Ver problemas"
-      if (brands.length === 0) {
-        const btnVerProblemas = document.createElement('button');
-        btnVerProblemas.className = 'btn-categorias';
-        btnVerProblemas.textContent = "Ver problemas desta subcategoria";
-        btnVerProblemas.onclick = () => {
-          const catName = categoryData[catIndex].name;
-          const subCatName = subCat.name;
-          window.location.href = `/search?category=${encodeURIComponent(catName)}&subcategory=${encodeURIComponent(subCatName)}`;
-          closeCategoryModal();
-        };
-        brandContainer.appendChild(btnVerProblemas);
-        return;
-      }
-
-      // Se houver marcas, exibe cada uma
-      brands.forEach(brand => {
-        let brandName = "";
-        let brandImg = null;
-        if (typeof brand === 'string') {
-          // Se for apenas string, deixamos sem ícone ou insira um padrão, se quiser
-          brandName = brand;
-        } else {
-          brandName = brand.name;
-          brandImg = brand.img;
-        }
-
-        const btn = document.createElement('button');
-        btn.className = 'btn-categorias';
-
-        // Se houver imagem de marca, renderiza
-        if (brandImg) {
-          btn.innerHTML = `
-            <img src="/static/images/${brandImg}" alt="${brandName}" style="width:60px;height:60px;margin-right:15px;">
-            <span>${brandName}</span>
-          `;
-        } else {
-          btn.textContent = brandName;
-        }
-
-        btn.onclick = () => {
-          const catName = categoryData[catIndex].name;
-          const subCatName = subCat.name;
-          window.location.href = `/search?category=${encodeURIComponent(catName)}&subcategory=${encodeURIComponent(subCatName)}&brand=${encodeURIComponent(brandName)}`;
-          closeCategoryModal();
-        };
-        brandContainer.appendChild(btn);
-      });
-
-      // Botão para "Ver todos problemas desta subcategoria"
-      const btnVerTodos = document.createElement('button');
-      btnVerTodos.className = 'btn-categorias';
-      btnVerTodos.textContent = "Ver todos problemas desta subcategoria";
-      btnVerTodos.onclick = () => {
-        const catName = categoryData[catIndex].name;
-        const subCatName = subCat.name;
-        window.location.href = `/search?category=${encodeURIComponent(catName)}&subcategory=${encodeURIComponent(subCatName)}`;
-        closeCategoryModal();
-      };
-      brandContainer.appendChild(btnVerTodos);
-    }
-
-    // Voltar para a lista de categorias principais
-    function goBackToMainCategory() {
-      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
-      document.getElementById('subCategoryStep').style.display = 'none';
-      document.getElementById('mainCategoryStep').style.display = 'block';
-    }
-
-    // Voltar para a lista de subcategorias
-    function goBackToSubCategory() {
-      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
-      document.getElementById('brandStep').style.display = 'none';
-      document.getElementById('subCategoryStep').style.display = 'block';
-    }
-
-    // Resetar o modal para o passo inicial
-    function resetCategoryModalSteps() {
-      document.getElementById('mainCategoryStep').style.display = 'block';
-      document.getElementById('subCategoryStep').style.display = 'none';
-      document.getElementById('brandStep').style.display = 'none';
-    }
   </script>
+
+  <!-- JS principal (carregado externamente) com defer (não bloqueia parsing do HTML) -->
+  <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
 </body>
 </html>

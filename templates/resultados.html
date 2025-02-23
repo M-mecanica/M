@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Resultados da Pesquisa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Fonte básica -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
@@ -10,26 +13,69 @@
   />
   <!-- Ícones Material (para a lupa) -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* Reset básico */
+    /* ==========================
+       RESET E ESTRUTURA GERAL
+       ========================== */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      background-color: #f0f0f0;
       color: #333;
+      /* A imagem de fundo é carregada dinamicamente via Jinja,
+         utilizando a variável random_bg que veio da sessão no Flask */
+      background: url("{{ url_for('static', filename='images/' + random_bg) }}") no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TRANSIÇÃO (fade-in) para o conteúdo */
+    #content {
+      transition: opacity 0.5s ease;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      overflow-x: hidden;
+      opacity: 0; /* inicia com opacidade 0 */
     }
-    /* HEADER FIXO */
+
+    /* PRELOADER */
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #333;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* ==========================
+       HEADER FIXO
+       ========================== */
     header {
       background-color: #000;
       display: flex;
@@ -49,14 +95,8 @@
         padding: 0 1rem;
       }
     }
-    header h1 {
-      color: #fff;
-      font-size: 1.6rem;
-      margin: 0;
-      text-align: center;
-      flex: 1;
-    }
-    /* Botão de voltar com o mesmo estilo do menu */
+
+    /* Botão Voltar (mesmo estilo do antigo) */
     .header-btn {
       background: none;
       border: none;
@@ -68,6 +108,7 @@
       text-decoration: none;
       padding: 0.5rem 1rem;
       font-size: 1rem;
+      transition: background-color 0.2s;
     }
     .header-btn:hover {
       background-color: #333;
@@ -77,13 +118,28 @@
       height: 24px;
       fill: currentColor;
     }
-    /* CAMPO DE PESQUISA FIXO */
+
+    header h1 {
+      color: #fff;
+      font-size: 1.6rem;
+      margin: 0;
+      text-align: center;
+      flex: 1;
+    }
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.3rem;
+      }
+    }
+
+    /* ==========================
+       CAMPO DE PESQUISA FIXO
+       ========================== */
     .fixed-search {
       position: fixed;
       top: 80px;
       left: 0;
       right: 0;
-      background-color: #f0f0f0;
       z-index: 999;
       display: flex;
       justify-content: center;
@@ -123,7 +179,10 @@
     .search-container input[type="text"]::placeholder {
       color: #aaa;
     }
-    /* MAIN: espaçamento para não ficar oculto atrás dos elementos fixos */
+
+    /* ==========================
+       MAIN
+       ========================== */
     main {
       flex: 1;
       font-size: 1.25rem;
@@ -131,17 +190,19 @@
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
-      margin-top: 140px; /* 80px (header) + ~60px (campo de pesquisa) */
+      margin-top: 140px; /* espaço para header + campo de busca */
       display: flex;
       flex-direction: column;
       align-items: center;
     }
     @media (max-width: 768px) {
       main {
-        margin-top: 116px; /* 56px + 60px */
+        margin-top: 116px; /* 56px + ~60px */
+        font-size: 1rem;
+        padding: 1rem;
       }
     }
-    /* Container de problemas */
+
     #problem-container {
       width: 100%;
     }
@@ -149,6 +210,7 @@
       width: 100%;
       height: 50px;
     }
+
     .problem-item {
       background-color: #fff;
       border-radius: 8px;
@@ -180,6 +242,7 @@
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
+
     .ver-solucao-btn {
       background-color: #000;
       color: #fff;
@@ -200,6 +263,7 @@
       background-color: #333;
       transform: translateX(-50%) scale(1.02);
     }
+
     .action-btns {
       position: absolute;
       bottom: 1rem;
@@ -226,6 +290,7 @@
     .action-delete-form {
       display: inline;
     }
+
     .new-problem-btn {
       background-color: #000;
       color: #fff;
@@ -252,28 +317,8 @@
       fill: currentColor;
       margin-right: 0.4rem;
     }
-    footer {
-      background-color: #000;
-      text-align: center;
-      padding: 1rem 2rem;
-    }
-    footer p {
-      font-size: 0.9rem;
-      color: #fff;
-    }
+
     @media (max-width: 768px) {
-      header h1 {
-        font-size: 1.3rem;
-      }
-      main {
-        font-size: 1rem;
-        padding: 1rem;
-      }
-      .search-container input[type="text"] {
-        padding: 0.8rem;
-        font-size: 0.9rem;
-        padding-left: 2.5rem;
-      }
       .problem-item {
         margin-bottom: 1.5rem;
         padding-bottom: 4.5rem;
@@ -305,7 +350,23 @@
         max-height: 200px;
       }
     }
-    /* MODAL (mesmo estilo do index.html) */
+
+    /* ==========================
+       FOOTER
+       ========================== */
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+    }
+
+    /* ==========================
+       MODAL LOGIN
+       ========================== */
     .modal {
       display: none;
       position: fixed;
@@ -333,12 +394,10 @@
     }
     @keyframes modalFadeIn {
       from {
-        opacity: 0;
-        transform: translateY(-20px);
+        opacity: 0; transform: translateY(-20px);
       }
       to {
-        opacity: 1;
-        transform: translateY(0);
+        opacity: 1; transform: translateY(0);
       }
     }
     .modal-header {
@@ -400,68 +459,73 @@
     }
   </style>
 </head>
-<body>
-  <!-- Barra superior fixa -->
-  <header>
-    <button class="header-btn" onclick="window.location.href='{{ url_for('index') }}'" aria-label="Voltar">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-    <h1>Resultados da Pesquisa</h1>
-    <div style="width: 40px;"></div>
-  </header>
 
-  <!-- Campo de pesquisa fixo -->
-  <div class="fixed-search">
-    <form action="{{ url_for('search') }}" method="GET" class="search-container" id="searchForm">
-      <span class="material-icons search-icon">search</span>
-      <input type="text" name="q" id="search-input" value="{{ termo_busca }}" autocomplete="off" autofocus />
-      <input type="hidden" name="category" value="{{ selected_category }}">
-      <input type="hidden" name="subcategory" value="{{ selected_subcategory }}">
-      <input type="hidden" name="brand" value="{{ selected_brand }}">
-    </form>
+<body>
+  <!-- PRELOADER -->
+  <div id="preloader">
+    <div class="loader"></div>
   </div>
 
-  <main>
-    {% set termo_busca = termo_busca or '' %}
-    {% set selected_category = selected_category or '' %}
-    {% set selected_brand = selected_brand or '' %}
-    {% set selected_subcategory = selected_subcategory or '' %}
+  <!-- CONTEÚDO GERAL (para o fade-in) -->
+  <div id="content">
 
-    <!-- Container onde os problemas serão injetados via JavaScript -->
-    <div id="problem-container"></div>
+    <!-- HEADER (botão voltar e título) -->
+    <header>
+      <button class="header-btn" onclick="window.location.href='{{ url_for('index') }}'" aria-label="Voltar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
 
-    <!-- Div Sentinela para o Intersection Observer -->
-    <div id="sentinel"></div>
+      <h1>Resultados da Pesquisa</h1>
+      <div style="width: 40px;"></div>
+    </header>
 
-    <!-- Spinner de carregamento -->
-    <div id="spinner" class="spinner" style="display: none;"></div>
-
-    <!-- Mensagem final com botão para novo problema -->
-    <div style="text-align:center; margin-top: 2rem;">
-      <p style="font-size: 1.2rem; margin-bottom: 1rem;">Não conseguiu encontrar seu problema?</p>
-      {% if session.get('user_id') %}
-        <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-          </svg>
-          Envie o seu problema
-        </a>
-      {% else %}
-        <button class="new-problem-btn" onclick="openLoginModal()">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-          </svg>
-          Envie o seu problema
-        </button>
-      {% endif %}
+    <!-- Campo de pesquisa fixo -->
+    <div class="fixed-search">
+      <form action="{{ url_for('search') }}" method="GET" class="search-container" id="searchForm">
+        <span class="material-icons search-icon">search</span>
+        <input type="text" name="q" id="search-input" value="{{ termo_busca }}" autocomplete="off" autofocus />
+        <input type="hidden" name="category" value="{{ selected_category }}">
+        <input type="hidden" name="subcategory" value="{{ selected_subcategory }}">
+        <input type="hidden" name="brand" value="{{ selected_brand }}">
+      </form>
     </div>
-  </main>
 
-  <footer>
-    <p>© 2025 Plataforma M</p>
-  </footer>
+    <!-- MAIN - Lista de problemas -->
+    <main>
+      <div id="problem-container"></div>
+      <div id="sentinel"></div>
+
+      <!-- Spinner de carregamento -->
+      <div id="spinner" class="spinner" style="display: none;"></div>
+
+      <!-- Mensagem final com botão para novo problema -->
+      <div style="text-align:center; margin-top: 2rem;">
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">Não conseguiu encontrar seu problema?</p>
+        {% if session.get('user_id') %}
+          <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            </svg>
+            Envie o seu problema
+          </a>
+        {% else %}
+          <button class="new-problem-btn" onclick="openLoginModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            </svg>
+            Envie o seu problema
+          </button>
+        {% endif %}
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>© 2025 Plataforma M</p>
+    </footer>
+  </div><!-- /#content -->
 
   <!-- MODAL LOGIN -->
   <div id="loginModal" class="modal">
@@ -471,22 +535,46 @@
         <span class="close" onclick="closeLoginModal()">&times;</span>
       </div>
       <div class="modal-body">
-        <p class="modal-text">
-          Faça login e aproveite:
-        </p>
+        <p class="modal-text">Faça login e aproveite:</p>
         <ul style="list-style: disc; padding-left: 20px; text-align: left; font-size: 1.2rem; line-height: 1.8rem; color: #333; margin-bottom: 2rem;">
           <li>Envie seus problemas e obtenha ajuda</li>
           <li>Acesso completo a soluções de outros usuários</li>
           <li>Suba no Ranking de Solucionadores resolvendo problemas</li>
         </ul>
-        <a href="{{ url_for('register') }}" class="btn-entrar-preto">
-          Entrar Agora
-        </a>
+        <a href="{{ url_for('register') }}" class="btn-entrar-preto">Entrar Agora</a>
       </div>
     </div>
   </div>
 
+  <!-- SCRIPT INLINE COM AS FUNÇÕES (Preloader, Fade-in, Carregamento Ajax, etc.) -->
   <script>
+    /***************************
+     *  PRELOADER + FADE-IN
+     ***************************/
+    window.addEventListener('load', function() {
+      const preloader = document.getElementById('preloader');
+      const content = document.getElementById('content');
+      if (preloader) {
+        preloader.style.display = 'none';
+      }
+      if (content) {
+        content.style.opacity = '1';  // faz o fade-in
+      }
+    });
+
+    /***************************
+     * MODAL LOGIN
+     ***************************/
+    function openLoginModal() {
+      document.getElementById('loginModal').style.display = 'flex';
+    }
+    function closeLoginModal() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
+
+    /***************************
+     * BUSCA E CARREGAMENTO DE PROBLEMAS (infinite scroll)
+     ***************************/
     const searchQuery = "{{ termo_busca|safe }}".trim();
     const selectedCategory = "{{ selected_category|safe }}";
     const selectedBrand = "{{ selected_brand|safe }}";
@@ -501,21 +589,21 @@
     let hasMore = true;
 
     window.addEventListener('DOMContentLoaded', () => {
+      // Focar no campo de busca, posicionando o cursor no final
       if (searchInput.value) {
         searchInput.focus();
         searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
       }
+
       loadProblems();
+
       const observer = new IntersectionObserver((entries) => {
         const entry = entries[0];
         if (entry.isIntersecting && hasMore && !loading) {
           currentPage++;
           loadProblems();
         }
-      }, {
-        root: null,
-        threshold: 0.1
-      });
+      }, { root: null, threshold: 0.1 });
       const sentinel = document.getElementById('sentinel');
       observer.observe(sentinel);
     });
@@ -551,7 +639,7 @@
       const div = document.createElement('div');
       div.classList.add('problem-item');
 
-      // Enviado por:
+      // Enviado por
       const creatorEl = document.createElement('p');
       creatorEl.textContent = "Enviado por: " + (problem.creator_name || "Usuário");
       creatorEl.style.fontWeight = "bold";
@@ -587,7 +675,7 @@
       // Se resolvido, exibir solução
       if (problem.resolvido) {
         const solverEl = document.createElement('p');
-        solverEl.textContent = "Resolvido por: " + (problem.solver_name || "Usuário");
+        solverEl.textContent = "Resolvido por: " + (problem.solver_name || "Usuário?");
         solverEl.style.fontStyle = "italic";
         solverEl.style.marginTop = "0.5rem";
         div.appendChild(solverEl);
@@ -640,24 +728,24 @@
       return div;
     }
 
-    function openLoginModal() {
-      document.getElementById('loginModal').style.display = 'flex';
-    }
-    function closeLoginModal() {
-      document.getElementById('loginModal').style.display = 'none';
-    }
+    /***************************
+     * SUBMETER BUSCA
+     ***************************/
     const searchForm = document.getElementById('searchForm');
-    const mainSearchInput = document.getElementById('search-input');
-    searchForm.addEventListener('submit', function () {
-      if (mainSearchInput.value.trim() !== "") {
-        const catInput = searchForm.querySelector('input[name="category"]');
-        const subCatInput = searchForm.querySelector('input[name="subcategory"]');
-        const brandInput = searchForm.querySelector('input[name="brand"]');
-        if (catInput) catInput.disabled = true;
-        if (subCatInput) subCatInput.disabled = true;
-        if (brandInput) brandInput.disabled = true;
-      }
-    });
+    if (searchForm) {
+      const mainSearchInput = document.getElementById('search-input');
+      searchForm.addEventListener('submit', function () {
+        // Se o usuário digitou algo, desabilita os campos hidden de categoria/subcat/brand
+        if (mainSearchInput.value.trim() !== "") {
+          const catInput = searchForm.querySelector('input[name="category"]');
+          const subCatInput = searchForm.querySelector('input[name="subcategory"]');
+          const brandInput = searchForm.querySelector('input[name="brand"]');
+          if (catInput) catInput.disabled = true;
+          if (subCatInput) subCatInput.disabled = true;
+          if (brandInput) brandInput.disabled = true;
+        }
+      });
+    }
   </script>
 </body>
 </html>

@@ -8,6 +8,9 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
+  <!-- Ícones Material (para manter o mesmo design do header de resultados.html) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -18,7 +21,10 @@
       box-sizing: border-box;
     }
 
-    /* BODY */
+    /* BODY apenas com cor de fundo, sem imagem.
+       A imagem agora ficará em um elemento DIV fixo (.fixed-bg) para
+       evitar o problema em dispositivos móveis (principalmente iOS).
+    */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -30,7 +36,22 @@
       overflow-x: hidden;
     }
 
-    /* HEADER FIXO */
+    /* Elemento fixo que segura a imagem de fundo (compatível com mobile/iOS) */
+    .fixed-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: cover;
+      z-index: -1;
+    }
+
+    /* =================================================================
+       HEADER FIXO - mesmo design de resultados.html
+       ================================================================= */
     header {
       background-color: #000;
       display: flex;
@@ -44,14 +65,20 @@
       right: 0;
       z-index: 1000;
     }
+    @media (max-width: 768px) {
+      header {
+        height: 56px;
+        padding: 0 1rem;
+      }
+    }
     header h1 {
       color: #fff;
       font-size: 1.6rem;
       margin: 0;
       text-align: center;
       flex: 1;
-      font-weight: 700;
     }
+    /* Botão de voltar com o mesmo estilo do menu */
     .header-btn {
       background: none;
       border: none;
@@ -73,17 +100,41 @@
       fill: currentColor;
     }
 
-    /* MAIN */
+    /* =================================================================
+       MAIN
+       ================================================================= */
     main {
       flex: 1;
       font-size: 1.25rem;
       padding: 2rem;
       width: 100%;
       max-width: 1200px;
-      margin: 100px auto 0;
+      margin: 100px auto 0; /* Espaço para não ficar atrás do header fixo */
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+
+    /* Informações do criador e solucionador */
+    .creator-info,
+    .solver-info {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    /* Container do problema */
+    .problem-container {
+      width: 100%;
+      margin-top: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 2rem;
+      background-color: #fff;
+      position: relative;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     h2 {
@@ -99,6 +150,8 @@
       font-size: 1.2rem;
       max-width: 1000px;
       text-align: center;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .problem-image {
@@ -121,7 +174,7 @@
       max-width: 1100px;
     }
 
-    /* Botões gerais */
+    /* Botões */
     .show-solution-btn {
       background-color: #000;
       color: #fff;
@@ -141,7 +194,7 @@
       transform: scale(1.02);
     }
 
-    /* Botão de Envio via WhatsApp */
+    /* Botão share WhatsApp */
     .whatsapp-share-btn {
       background-color: #000;
       color: #fff;
@@ -187,7 +240,7 @@
       text-align: center;
     }
 
-    /* Barra de Progresso */
+    /* Barra de progresso dos passos */
     .progress-container {
       position: relative;
       width: 100%;
@@ -195,7 +248,7 @@
       height: 20px;
       background-color: #eee;
       border-radius: 10px;
-      margin: 0.5rem auto 1rem;
+      margin: 1rem auto 0;
     }
     .progress-bar {
       height: 100%;
@@ -208,10 +261,11 @@
       text-align: center;
       font-size: 1rem;
       color: #555;
+      margin-top: 0.5rem;
       margin-bottom: 1rem;
     }
 
-    /* Passos */
+    /* Área de saída dos passos */
     .steps-output {
       margin-top: 2rem;
       line-height: 1.7;
@@ -225,7 +279,6 @@
       margin-left: auto;
       margin-right: auto;
     }
-
     .step-container {
       margin-bottom: 2rem;
       padding: 1rem 1rem 2rem;
@@ -235,6 +288,7 @@
       max-width: 1100px;
       margin-left: auto;
       margin-right: auto;
+      position: relative;
     }
     .step-title-block {
       font-size: 1.4rem;
@@ -261,13 +315,25 @@
       border-radius: 4px;
       margin-top: 0.5rem;
     }
+    .step-check-icon {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      font-size: 2rem;
+      color: #0a0;
+      opacity: 0.8;
+    }
 
-    /* Minipassos */
+    /* Subpassos */
     .mini-steps-block {
       margin-left: 1rem;
       margin-top: 1rem;
       border-left: 3px dashed #333;
       padding-left: 1rem;
+    }
+    .mini-step-container {
+      margin-bottom: 1.5rem;
+      display: none;
     }
     .mini-step-title {
       font-size: 1.2rem;
@@ -315,55 +381,45 @@
       transform: scale(1.02);
     }
 
-    /* Botões Consegui/Não Consegui */
+    /* Botões de feedback (Conseguiu / Não Conseguiu) */
     .feedback-buttons {
       display: flex;
       gap: 1rem;
       justify-content: center;
       margin-top: 1rem;
     }
-    .feedback-btn {
-      color: #fff;
-      border: none;
+    #btnConsegui,
+    #btnNaoConsegui {
+      background-color: #fff;
+      color: #000;
+      border: 1px solid #000;
       border-radius: 28px;
       padding: 0.7rem 1.2rem;
       font-size: 1rem;
       font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.2s, transform 0.2s;
+      transition: transform 0.2s;
       display: inline-block;
       text-decoration: none;
     }
-    /* Consegui = verde puxado pro dourado */
-    #btnConsegui {
-      background-color: #b3a125; /* Verde amarelado/dourado */
-    }
-    #btnConsegui:hover {
-      background-color: #9c8e1f;
-      transform: scale(1.02);
-    }
-    /* Não Consegui = vermelho */
-    #btnNaoConsegui {
-      background-color: #dc3545;
-    }
+    #btnConsegui:hover,
     #btnNaoConsegui:hover {
-      background-color: #c82333;
       transform: scale(1.02);
     }
 
-    .feedback-btn.shake {
+    .shake {
       animation: shake 0.5s;
     }
     @keyframes shake {
       0% { transform: translate(0, 0); }
-      20% { transform: translate(-3px, 0); }
-      40% { transform: translate(3px, 0); }
-      60% { transform: translate(-3px, 0); }
-      80% { transform: translate(3px, 0); }
+      20% { transform: translate(-5px, 0); }
+      40% { transform: translate(5px, 0); }
+      60% { transform: translate(-5px, 0); }
+      80% { transform: translate(5px, 0); }
       100% { transform: translate(0, 0); }
     }
 
-    /* Form de feedback "Não Consegui" */
+    /* Form de feedback de falha */
     .fail-feedback-form {
       text-align: center;
       margin-top: 1rem;
@@ -395,7 +451,51 @@
       margin-top: 0.5rem;
     }
 
-    /* FOOTER */
+    /* Bloco "Essa solução te ajudou?" */
+    .helpful-question p {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #333;
+      font-weight: 500;
+    }
+    .helpful-feedback-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .helpful-question .helpful-btn {
+      background-color: #fff;
+      color: #000;
+      border: 1px solid #000;
+      border-radius: 28px;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s;
+      margin: 0 0.5rem;
+    }
+    .helpful-question .helpful-btn:hover {
+      transform: scale(1.02);
+    }
+    .helpful-btn.selected {
+      background-color: #000;
+      color: #fff;
+    }
+
+    /* Container de feedback da solução */
+    .feedback-container {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      background-color: #fff;
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    /* Rodapé */
     footer {
       background-color: #000;
       text-align: center;
@@ -408,111 +508,112 @@
       margin: 0;
     }
 
-    /* Animação typewriter para cada letra */
-    .letter-construct {
-      display: inline-block;
-      opacity: 0;
-      transform: scale(0) rotate(-10deg);
-      animation: constructAnimation 0.5s forwards;
+    /* Modal de sugestão */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      align-items: center;
+      justify-content: center;
     }
-    @keyframes constructAnimation {
-      0% {
+    .modal-content {
+      background-color: #f7f7f7;
+      width: 95%;
+      max-width: 700px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      animation: modalFadeIn 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+      overflow: hidden;
+      border: 1px solid #fff;
+    }
+    @keyframes modalFadeIn {
+      from {
         opacity: 0;
-        transform: scale(0) rotate(-10deg);
+        transform: translateY(-20px);
       }
-      50% {
-        opacity: 0.5;
-        transform: scale(1.2) rotate(0deg);
-      }
-      80% {
-        transform: scale(0.9);
-      }
-      100% {
+      to {
         opacity: 1;
-        transform: scale(1) rotate(0deg);
+        transform: translateY(0);
       }
+    }
+    .modal-header {
+      background-color: #000;
+      color: #fff;
+      padding: 2rem;
+      position: relative;
+      border-bottom: 1px solid #333;
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 500;
+    }
+    .close {
+      color: #fff;
+      position: absolute;
+      right: 2rem;
+      top: 2rem;
+      font-size: 2.4rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .close:hover {
+      color: #ccc;
+    }
+    .modal-body {
+      padding: 2rem;
+      text-align: center;
+      overflow-y: auto;
+      max-height: calc(90vh - 100px);
     }
 
+    /* =========================
+       Ajustes para Dispositivos Móveis
+       ========================= */
     @media (max-width: 768px) {
-      header {
-        padding: 1.5rem 2rem;
-        height: 56px;
-      }
-      header h1 {
-        font-size: 1.3rem;
-      }
-      .header-btn {
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-      }
+      /* Ajustes para containers ficarem mais próximos das laterais */
       main {
+        padding: 0.5rem;
+        margin: 56px auto 0; /* Ajusta para não ficar atrás do header menor */
+      }
+      .problem-container,
+      .solution-container,
+      .feedback-container {
+        width: 98%;
+        margin: 0.5rem auto;
         padding: 1rem;
-        font-size: 1rem;
-        margin-top: 70px;
       }
-      h2 {
-        font-size: 1.4rem;
+      .step-container,
+      .mini-step-container {
+        margin: 0.5rem auto;
+        padding: 0.5rem;
       }
-      p.description {
-        font-size: 1rem;
-        margin-bottom: 1.5rem;
-      }
-      .show-solution-btn {
-        font-size: 0.9rem;
-        padding: 0.6rem 1rem;
-      }
-      .solution-container {
-        padding: 1rem;
-        margin-top: 1rem;
-      }
-      .solution-container h3 {
-        font-size: 1.2rem;
-      }
-      .steps-output {
-        font-size: 0.95rem;
-        margin-bottom: 1.5rem;
-      }
-      .step-container {
-        margin-bottom: 1.5rem;
-        padding: 1rem 0.5rem 1rem;
-      }
-      .step-title-block {
-        font-size: 1.2rem;
-        margin-bottom: 0.5rem;
-      }
-      .step-description-block {
-        font-size: 1rem;
-        margin-bottom: 0.8rem;
-      }
-      .step-image-block img {
-        max-width: 250px;
-      }
-      .mini-step-title {
-        font-size: 1rem;
-        margin-bottom: 0.3rem;
-      }
-      .mini-step-description {
-        font-size: 0.9rem;
-      }
-      .mini-step-image-block img {
-        max-width: 200px;
-      }
-      .mini-steps-btn {
-        font-size: 0.85rem;
-        padding: 0.5rem 0.8rem;
-      }
-      .feedback-btn {
-        font-size: 0.85rem;
-        padding: 0.5rem 0.8rem;
-      }
-      .fail-feedback-form textarea {
-        height: 60px;
+      .modal-content {
+        width: 98%;
+        max-width: 100%;
       }
     }
   </style>
 </head>
 <body>
+  <!-- Div fixa de fundo, para manter a imagem parada em dispositivos mobile -->
+  <div
+    class="fixed-bg"
+    style="background-image: url('{{ url_for("static", filename="images/" ~ random_bg) }}');"
+  ></div>
+
+  <!-- Barra superior fixa (mesmo design de resultados.html) -->
   <header>
+    <!-- Botão "Voltar" redirecionando para 'search', como no solucao.html original -->
     <button class="header-btn" onclick="window.location.href='{{ url_for('search') }}'" aria-label="Voltar">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
@@ -523,149 +624,151 @@
   </header>
 
   <main>
-    <!-- Título e descrição do problema -->
-    <h2>{{ problema["titulo"] }}</h2>
-    <p class="description">{{ problema["descricao"] }}</p>
+    <!-- Container do problema -->
+    <div class="problem-container">
+      <p class="creator-info">Enviado por: {{ creator_name }}</p>
+      <h2>{{ problema["titulo"] }}</h2>
+      <p class="description">{{ problema["descricao"] }}</p>
 
-    <!-- Imagem do problema, se houver -->
-    {% if problema.problemImageThumb %}
-      <img src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}" alt="Thumbnail do Problema" class="problem-image" />
-    {% elif problema.problemImage %}
-      <img src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}" alt="Imagem do Problema" class="problem-image" />
-    {% endif %}
+      {% if problema.problemImageThumb %}
+        <img
+          src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}"
+          alt="Thumbnail do Problema"
+          class="problem-image"
+        />
+      {% elif problema.problemImage %}
+        <img
+          src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}"
+          alt="Imagem do Problema"
+          class="problem-image"
+        />
+      {% endif %}
 
-    <!-- Botão de Compartilhamento via WhatsApp -->
-    <div style="text-align: center; margin-top: 1rem;">
-      <a href="https://wa.me/?text={{ share_msg_encoded }}"
-         class="whatsapp-share-btn"
-         target="_blank"
-         rel="noopener noreferrer">
-        <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-          <path d="M380.9 97.1C339 55.2 283.2 32
-                   224 32 100.3 32 0 132.3 0 256c0
-                   45.4 11.8 89.3 34.3 128L0 480l100.6
-                   -33.2c37.9 20.8 81 31.8 123.4
-                   31.8h.1c124 0 224.4-100.3
-                   224.6-224.3.1-59.3-23-115.2
-                   -67.8-159.2zM224.1 400c-35 0-69.2
-                   -9.3-98.6-26.9l-6.9-4.1-58.4
-                   19.3 19.6-57.1-4.5-7c-17.6-28
-                   -26.8-60.4-26.8-93.8 0-97.5
-                   79.2-176.8 176.8-176.8 47.2
-                   0 91.6 18.4 124.9 51.7
-                   33.2 33.2 51.5 77.6 51.4
-                   124.7-.2 97.5-79.4 176.7
-                   -176.8 176.7zm101.7
-                   -131.5c-5.6-2.8-33.2-16.4
-                   -38.4-18.2-5.1-1.9-8.8
-                   -2.8-12.6 2.8-3.7 5.6-14.4
-                   18.2-17.6 21.9-3.2 3.7
-                   -6.5 4.2-12.1 1.4-5.6
-                   -2.8-23.6-8.7-45-27.6
-                   -16.6-14.7-27.8-32.8
-                   -31-38.4-3.2-5.6-.3-8.6
-                   2.4-11.3 2.5-2.5 5.6-6.5
-                   8.4-9.7s3.7-5.6 5.6
-                   -9.3c1.9-3.7.9-7-0.5
-                   -9.8-1.4-2.8-12.6-30.4
-                   -17.3-41.8-4.5-11-9.1
-                   -9.3-12.6-9.5-3.2-.2
-                   -7-.2-10.7-.2s-9.8 1.4
-                   -15 6.9c-5.1 5.6-19.7
-                   19.3-19.7 47.1s20.2
-                   54.5 23 58.2c2.8 3.7
-                   39.8 60.7 96.4 85.2
-                   13.4 5.8 23.8 9.3
-                   31.9 11.9 13.4 4.2
-                   25.6 3.6 35.2 2.2
-                   10.7-1.6 33.2-13.5
-                   37.9-26.6 4.7-13.2
-                   4.7-24.5 3.2-26.6
-                   -1.6-2.1-5.1-3.4
-                   -10.7-6.2z"/>
-        </svg>
-        Enviar
-      </a>
+      <div style="text-align: center; margin-top: 1rem;">
+        <a
+          href="https://wa.me/?text={{ share_msg_encoded }}"
+          class="whatsapp-share-btn"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg class="whatsapp-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+            <path d="M380.9 97.1C339 55.2 283.2 32 224 32 100.3 32 0 132.3 0 256c0 45.4 11.8 89.3 34.3 128L0 480l100.6 -33.2c37.9 20.8 81 31.8 123.4 31.8h.1c124 0 224.4-100.3 224.6-224.3.1-59.3-23-115.2 -67.8-159.2zM224.1 400c-35 0-69.2 -9.3-98.6-26.9l-6.9-4.1-58.4 19.3 19.6-57.1-4.5-7c-17.6-28 -26.8-60.4-26.8-93.8 0-97.5 79.2-176.8 176.8-176.8 47.2 0 91.6 18.4 124.9 51.7 33.2 33.2 51.5 77.6 51.4 124.7-.2 97.5-79.4 176.7 -176.8 176.7zm101.7-131.5c-5.6-2.8-33.2-16.4 -38.4-18.2-5.1-1.9-8.8 -2.8-12.6 2.8-3.7 5.6-14.4 18.2-17.6 21.9-3.2 3.7 -6.5 4.2-12.1 1.4-5.6 -2.8-23.6-8.7-45-27.6 -16.6-14.7-27.8-32.8 -31-38.4-3.2-5.6-.3-8.6 2.4-11.3 2.5-2.5 5.6-6.5 8.4-9.7s3.7-5.6 5.6-9.3c1.9-3.7.9-7-0.5 -9.8-1.4-2.8-12.6-30.4 -17.3-41.8-4.5-11-9.1-9.3-12.6-9.5-3.2-.2-7-.2-10.7-.2s-9.8 1.4 -15 6.9c-5.1 5.6-19.7 19.3-19.7 47.1s20.2 54.5 23 58.2c2.8 3.7 39.8 60.7 96.4 85.2 13.4 5.8 23.8 9.3 31.9 11.9 13.4 4.2 25.6 3.6 35.2 2.2 10.7-1.6 33.2-13.5 37.9-26.6 4.7-13.2 4.7-24.5 3.2-26.6 -1.6-2.1-5.1-3.4 -10.7-6.2z"/>
+          </svg>
+          Enviar
+        </a>
+      </div>
     </div>
 
     <hr class="section-divider" />
 
-    <!-- Botão "Editar Solução" (apenas para solucionadores) -->
-    {% if session.get("role") == "solucionador" %}
-      <a href="{{ url_for('edit_solution', problem_id=problema['_id']) }}"
-         class="show-solution-btn"
-         style="margin-bottom: 1.5rem;">
-        Editar Solução
-      </a>
-    {% endif %}
-
-    <!-- Container da Solução -->
-    <div class="solution-container"
-         id="solutionContainer"
-         data-steps='{{ solucao.get("steps", [])|tojson }}'>
+    <!-- Container da solução -->
+    <div
+      class="solution-container"
+      id="solutionContainer"
+      data-steps='{{ solucao.get("steps", [])|tojson }}'
+      data-problem-id="{{ problema['_id'] }}"
+    >
+      <p class="solver-info">Resolvido por: {{ solver_name }}</p>
       <h3>Solução:</h3>
 
-      <!-- Barra de Progresso + Info -->
-      <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
-      </div>
-      <div class="progress-info" id="progressInfo">0 de 0 Passos</div>
-
-      <!-- Botão para iniciar a animação dos passos (apenas para quem não é solucionador) -->
-      <button type="button"
-              class="show-solution-btn"
-              id="btnShowSolution"
-              style="display: none;">
+      <button
+        type="button"
+        class="show-solution-btn"
+        id="btnShowSolution"
+        style="display: none;"
+      >
         Mostrar Passos
       </button>
 
       <div class="steps-output"></div>
 
-      <!-- Botões de Avanço de Passo -->
       <div class="feedback-buttons" id="feedbackButtons" style="display: none;">
-        <!-- Consegui: emoji + verde/dourado -->
         <button type="button" class="feedback-btn" id="btnConsegui">
           ✅ Consegui!
         </button>
-        <!-- Não Consegui: emoji + vermelho -->
         <button type="button" class="feedback-btn" id="btnNaoConsegui">
           ❌ Não Consegui
         </button>
       </div>
 
-      <!-- Formulário de feedback "Não Consegui" -->
       <div class="fail-feedback-form" id="failFeedbackForm">
-        <textarea id="failFeedbackText" placeholder="Descreva o que houve dificuldade..."></textarea>
-        <br>
+        <textarea
+          id="failFeedbackText"
+          placeholder="Descreva o que houve dificuldade..."
+        ></textarea>
+        <br />
         <button type="button" id="btnEnviarFeedback">Enviar Feedback</button>
         <div class="fail-feedback-thank">
           Seu feedback nos ajuda a melhorar a plataforma! 😊
         </div>
       </div>
 
-      <!-- Botão "Sugerir melhorias" -->
-      <div class="next-step-container" style="right: auto; left: 1rem;">
-        <button type="button" class="next-step-btn" id="btnToggleSuggestion" style="display: none;">
-          Sugerir melhorias
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-info" id="progressInfo">0 de 0 Passos</div>
+    </div>
+
+    <!-- Container para feedback da solução -->
+    <div class="feedback-container">
+      <div class="helpful-question">
+        <p>Essa solução te ajudou?</p>
+        <div class="helpful-feedback-buttons">
+          <button
+            type="button"
+            class="helpful-btn {% if user_helpful_feedback == 'SIM' %}selected{% endif %}"
+            id="btnHelpfulSim"
+          >
+            👍 Sim
+          </button>
+          <button
+            type="button"
+            class="helpful-btn {% if user_helpful_feedback == 'NAO' %}selected{% endif %}"
+            id="btnHelpfulNao"
+          >
+            👎 Não
+          </button>
+        </div>
+        <button
+          type="button"
+          class="helpful-btn"
+          id="btnOpenSuggestionModal"
+          style="margin-top: 1rem;"
+        >
+          💡 Sugerir melhorias
         </button>
       </div>
     </div>
 
-    <!-- Formulário de sugestão de melhorias (para qualquer um que esteja logado) -->
-    <div id="suggestionFormContainer" style="display: none; margin-top: 1rem; text-align: center;">
-      <h4>Envie sua sugestão de melhoria:</h4>
-      <form action="{{ url_for('suggest_improvement', problem_id=problema['_id']) }}" method="POST">
-        <textarea name="suggestion"
-                  rows="5"
-                  placeholder="Descreva sua sugestão..."
-                  style="width: 100%; max-width:600px;"></textarea>
-        <br>
-        <button type="submit"
-                class="show-solution-btn"
-                style="margin-top: 0.5rem;">
-          Enviar Sugestão
-        </button>
-      </form>
+    <!-- Modal de sugestão de melhorias -->
+    <div id="suggestionModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Sugerir Melhorias</h2>
+          <span class="close" id="btnCloseSuggestionModal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form
+            action="{{ url_for('suggest_improvement', problem_id=problema['_id']) }}"
+            method="POST"
+          >
+            <textarea
+              name="suggestion"
+              rows="5"
+              placeholder="Descreva sua sugestão..."
+              style="width: 100%; max-width:600px;"
+            ></textarea>
+            <br />
+            <button
+              type="submit"
+              class="show-solution-btn"
+              style="margin-top: 0.5rem;"
+            >
+              Enviar Sugestão
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -673,195 +776,95 @@
     <p>© 2025 Plataforma M - MVP</p>
   </footer>
 
-  <!-- Áudio de sucesso -->
-  <audio id="successSound" src="/static/sounds/success.mp3" preload="auto"></audio>
-
-  <!-- Script confetti (pode usar CDN ou outra lib) -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <audio
+    id="successSound"
+    src="/static/sounds/success.mp3"
+    preload="auto"
+    style="display:none;"
+  ></audio>
 
   <script>
     const isSolucionador = {{ 'true' if session.get("role") == "solucionador" else 'false' }};
     const userIsLoggedIn = {{ 'true' if session.get("user_id") else 'false' }};
 
-    // Função de confetes
-    function showConfetti() {
-      const duration = 2 * 1000; // 2 segundos
-      const animationEnd = Date.now() + duration;
-      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
-
-      function randomInRange(min, max) {
-        return Math.random() * (max - min) + min;
-      }
-
-      const interval = setInterval(function() {
-        const timeLeft = animationEnd - Date.now();
-        if (timeLeft <= 0) {
-          return clearInterval(interval);
-        }
-        const particleCount = 50 * (timeLeft / duration);
-        confetti(Object.assign({}, defaults, {
-          particleCount,
-          origin: {
-            x: randomInRange(0.1, 0.9),
-            y: Math.random() - 0.2
-          }
-        }));
-      }, 250);
-    }
-
-    function typeWriter(container, text, index, callback) {
-      if (isSolucionador) {
-        // Se for solucionador, exibe tudo de uma vez (sem animação)
-        container.textContent = text;
-        if (callback) callback();
-        return;
-      }
-      if (index >= text.length) {
-        if (callback) callback();
-        return;
-      }
-      const currentChar = text.charAt(index);
-      if (currentChar === ' ') {
-        container.appendChild(document.createTextNode(' '));
-        setTimeout(() => {
-          typeWriter(container, text, index + 1, callback);
-        }, 50);
-      } else {
-        let wordContainer;
-        if (index === 0 || text.charAt(index - 1) === ' ') {
-          wordContainer = document.createElement('span');
-          wordContainer.style.whiteSpace = 'nowrap';
-          container.appendChild(wordContainer);
-        } else {
-          wordContainer = container.lastChild;
-        }
-        const span = document.createElement('span');
-        span.classList.add('letter-construct');
-        span.textContent = currentChar;
-        wordContainer.appendChild(span);
-        setTimeout(() => {
-          typeWriter(container, text, index + 1, callback);
-        }, 50);
-      }
-    }
-
-    function createStepContainer() {
-      const stepDiv = document.createElement('div');
-      stepDiv.classList.add('step-container');
-      return stepDiv;
-    }
-
-    function revealStepTitle(stepDiv, stepNumber, title, onFinish) {
+    function revealStepSimple(stepDiv, stepNumber, stepData) {
       const titleBlock = document.createElement('div');
       titleBlock.classList.add('step-title-block');
+      titleBlock.textContent = `Passo ${stepNumber}: ${stepData.stepTitle}`;
       stepDiv.appendChild(titleBlock);
-      const text = `Passo ${stepNumber}: ${title}\n`;
-      typeWriter(titleBlock, text, 0, onFinish);
-    }
 
-    function revealStepDescription(stepDiv, description, imageId, onFinish) {
       const descBlock = document.createElement('div');
       descBlock.classList.add('step-description-block');
+      descBlock.textContent = stepData.stepDescription;
       stepDiv.appendChild(descBlock);
-      typeWriter(descBlock, `${description}\n`, 0, () => {
-        if (imageId && imageId.trim() !== "") {
-          const imageContainer = document.createElement('div');
-          imageContainer.classList.add('step-image-block');
-          const imgEl = document.createElement('img');
-          imgEl.src = `/gridfs_image/${imageId}`;
-          imgEl.alt = "Imagem do Passo";
-          imageContainer.appendChild(imgEl);
-          stepDiv.appendChild(imageContainer);
-        }
-        if (onFinish) onFinish();
-      });
-    }
 
-    function createMiniStepsArea(stepDiv, miniSteps, stepNumber) {
-      const miniStepsWrapper = document.createElement('div');
-      miniStepsWrapper.classList.add('mini-steps-block');
-      stepDiv.appendChild(miniStepsWrapper);
-
-      let currentIndex = 0;
-      let isRevealing = false;
-      const totalMiniSteps = miniSteps.length;
-
-      const showMiniBtn = document.createElement('button');
-      showMiniBtn.type = 'button';
-      showMiniBtn.classList.add('mini-steps-btn');
-      showMiniBtn.textContent = `Mostrar Passo ${stepNumber}.1`;
-
-      const miniStepsOutput = document.createElement('div');
-      miniStepsWrapper.appendChild(miniStepsOutput);
-
-      function revealMiniStep(index) {
-        if (index >= totalMiniSteps) {
-          showMiniBtn.style.display = 'none';
-          isRevealing = false;
-          return;
-        }
-        const sub = miniSteps[index];
-        const subTitle = document.createElement('div');
-        subTitle.classList.add('mini-step-title');
-        miniStepsOutput.appendChild(subTitle);
-
-        const titleText = `Passo ${stepNumber}.${index + 1} - ${sub.miniStepTitle}\n`;
-        typeWriter(subTitle, titleText, 0, () => {
-          const subDesc = document.createElement('div');
-          subDesc.classList.add('mini-step-description');
-          miniStepsOutput.appendChild(subDesc);
-
-          typeWriter(subDesc, `${sub.miniStepDescription}\n`, 0, () => {
-            if (sub.subStepImage && sub.subStepImage.trim() !== "") {
-              const subImgContainer = document.createElement('div');
-              subImgContainer.classList.add('mini-step-image-block');
-              const subImgEl = document.createElement('img');
-              subImgEl.src = `/gridfs_image/${sub.subStepImage}`;
-              subImgEl.alt = "Imagem do Subpasso";
-              subImgContainer.appendChild(subImgEl);
-              miniStepsOutput.appendChild(subImgContainer);
-            }
-            currentIndex++;
-            isRevealing = false;
-            if (currentIndex < totalMiniSteps) {
-              showMiniBtn.textContent = `Mostrar Passo ${stepNumber}.${currentIndex + 1}`;
-              showMiniBtn.style.display = 'inline-block';
-            } else {
-              showMiniBtn.style.display = 'none';
-            }
-          });
-        });
+      if (stepData.stepImage && stepData.stepImage.trim() !== "") {
+        const imageContainer = document.createElement('div');
+        imageContainer.classList.add('step-image-block');
+        const imgEl = document.createElement('img');
+        imgEl.src = `/gridfs_image/${stepData.stepImage}`;
+        imgEl.alt = "Imagem do Passo";
+        imageContainer.appendChild(imgEl);
+        stepDiv.appendChild(imageContainer);
       }
 
-      showMiniBtn.addEventListener('click', () => {
-        if (isRevealing) return;
-        isRevealing = true;
-        showMiniBtn.style.display = 'none';
-        revealMiniStep(currentIndex);
-      });
+      if (stepData.miniSteps && stepData.miniSteps.length > 0) {
+        const miniStepsWrapper = document.createElement('div');
+        miniStepsWrapper.classList.add('mini-steps-block');
+        stepDiv.appendChild(miniStepsWrapper);
 
-      miniStepsWrapper.appendChild(showMiniBtn);
-    }
+        stepData.miniSteps.forEach((sub, subIndex) => {
+          const miniStepContainer = document.createElement('div');
+          miniStepContainer.classList.add('mini-step-container');
 
-    function revealStep(stepsOutput, stepNumber, stepData, onFinish) {
-      const stepDiv = createStepContainer();
-      stepsOutput.appendChild(stepDiv);
+          const subTitle = document.createElement('div');
+          subTitle.classList.add('mini-step-title');
+          subTitle.textContent = `Passo ${stepNumber}.${subIndex + 1} - ${sub.miniStepTitle}`;
+          miniStepContainer.appendChild(subTitle);
 
-      revealStepTitle(stepDiv, stepNumber, stepData.stepTitle, () => {
-        const stepImageId = stepData.stepImage || "";
-        revealStepDescription(stepDiv, stepData.stepDescription, stepImageId, () => {
-          if (stepData.miniSteps && stepData.miniSteps.length > 0) {
-            createMiniStepsArea(stepDiv, stepData.miniSteps, stepNumber);
+          const subDesc = document.createElement('div');
+          subDesc.classList.add('mini-step-description');
+          subDesc.textContent = sub.miniStepDescription;
+          miniStepContainer.appendChild(subDesc);
+
+          if (sub.subStepImage && sub.subStepImage.trim() !== "") {
+            const subImgContainer = document.createElement('div');
+            subImgContainer.classList.add('mini-step-image-block');
+            const subImgEl = document.createElement('img');
+            subImgEl.src = `/gridfs_image/${sub.subStepImage}`;
+            subImgEl.alt = "Imagem do Subpasso";
+            subImgContainer.appendChild(subImgEl);
+            miniStepContainer.appendChild(subImgContainer);
           }
-          if (onFinish) onFinish();
+          miniStepsWrapper.appendChild(miniStepContainer);
         });
-      });
+
+        let currentMiniStepIndex = 0;
+        const btnShowMiniStep = document.createElement('button');
+        btnShowMiniStep.classList.add('mini-steps-btn');
+        btnShowMiniStep.textContent = "Mostrar Passo " + stepNumber + ".1";
+        stepDiv.appendChild(btnShowMiniStep);
+
+        btnShowMiniStep.addEventListener('click', () => {
+          const miniContainers = miniStepsWrapper.querySelectorAll('.mini-step-container');
+          if (currentMiniStepIndex < miniContainers.length) {
+            miniContainers[currentMiniStepIndex].style.display = 'block';
+            currentMiniStepIndex++;
+            if (currentMiniStepIndex < miniContainers.length) {
+              btnShowMiniStep.textContent = `Mostrar subpasso ${stepNumber}.${currentMiniStepIndex + 1}`;
+            } else {
+              btnShowMiniStep.style.display = 'none';
+            }
+          }
+        });
+      }
     }
 
     function renderSolutionNoAnimation(stepsOutput, stepsData) {
       stepsData.forEach((step, index) => {
         const stepDiv = document.createElement('div');
         stepDiv.classList.add('step-container');
+        stepsOutput.appendChild(stepDiv);
 
         const titleBlock = document.createElement('div');
         titleBlock.classList.add('step-title-block');
@@ -884,62 +887,37 @@
         }
 
         if (step.miniSteps && step.miniSteps.length > 0) {
-          const miniWrapper = document.createElement('div');
-          miniWrapper.classList.add('mini-steps-block');
-          step.miniSteps.forEach((substep, subIndex) => {
+          const miniStepsWrapper = document.createElement('div');
+          miniStepsWrapper.classList.add('mini-steps-block');
+          stepDiv.appendChild(miniStepsWrapper);
+
+          step.miniSteps.forEach((sub, subIndex) => {
+            const miniStepContainer = document.createElement('div');
+            miniStepContainer.classList.add('mini-step-container');
+            miniStepContainer.style.display = 'block';
+
             const subTitle = document.createElement('div');
             subTitle.classList.add('mini-step-title');
-            subTitle.textContent = `Passo ${index + 1}.${subIndex + 1} - ${substep.miniStepTitle}`;
-            miniWrapper.appendChild(subTitle);
+            subTitle.textContent = `Passo ${index + 1}.${subIndex + 1} - ${sub.miniStepTitle}`;
+            miniStepContainer.appendChild(subTitle);
 
             const subDesc = document.createElement('div');
             subDesc.classList.add('mini-step-description');
-            subDesc.textContent = substep.miniStepDescription;
-            miniWrapper.appendChild(subDesc);
+            subDesc.textContent = sub.miniStepDescription;
+            miniStepContainer.appendChild(subDesc);
 
-            if (substep.subStepImage && substep.subStepImage.trim() !== "") {
+            if (sub.subStepImage && sub.subStepImage.trim() !== "") {
               const subImgContainer = document.createElement('div');
               subImgContainer.classList.add('mini-step-image-block');
               const subImgEl = document.createElement('img');
-              subImgEl.src = `/gridfs_image/${substep.subStepImage}`;
+              subImgEl.src = `/gridfs_image/${sub.subStepImage}`;
               subImgEl.alt = "Imagem do Subpasso";
               subImgContainer.appendChild(subImgEl);
-              miniWrapper.appendChild(subImgContainer);
+              miniStepContainer.appendChild(subImgContainer);
             }
+            miniStepsWrapper.appendChild(miniStepContainer);
           });
-          stepDiv.appendChild(miniWrapper);
         }
-
-        stepsOutput.appendChild(stepDiv);
-      });
-    }
-
-    // Envio do feedback via AJAX
-    function sendStepFeedback(problemId, stepIndex, success, feedbackText, onDone) {
-      if (!userIsLoggedIn) {
-        if (onDone) onDone();
-        return;
-      }
-      const payload = {
-        problem_id: problemId,
-        step_index: stepIndex,
-        success: success,
-        feedback_text: feedbackText
-      };
-      fetch("/submit_step_feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      })
-      .then(resp => resp.json())
-      .then(data => {
-        console.log("Feedback Enviado:", data);
-      })
-      .catch(err => console.error("Erro ao enviar feedback:", err))
-      .finally(() => {
-        if (onDone) onDone();
       });
     }
 
@@ -947,6 +925,7 @@
       const solutionContainer = document.getElementById('solutionContainer');
       const stepsData = JSON.parse(solutionContainer.dataset.steps || '[]');
       const stepsOutput = solutionContainer.querySelector('.steps-output');
+      const problemID = solutionContainer.dataset.problemId;
 
       const btnShowSolution = document.getElementById('btnShowSolution');
       const feedbackButtons = document.getElementById('feedbackButtons');
@@ -958,30 +937,36 @@
 
       const progressBar = document.getElementById('progressBar');
       const progressInfo = document.getElementById('progressInfo');
-      const btnToggleSuggestion = document.getElementById('btnToggleSuggestion');
-      const suggestionFormContainer = document.getElementById('suggestionFormContainer');
-      const successSound = document.getElementById('successSound');
+
+      const btnOpenSuggestionModal = document.getElementById('btnOpenSuggestionModal');
+      const btnCloseSuggestionModal = document.getElementById('btnCloseSuggestionModal');
+      const suggestionModal = document.getElementById('suggestionModal');
+
+      const btnHelpfulSim = document.getElementById('btnHelpfulSim');
+      const btnHelpfulNao = document.getElementById('btnHelpfulNao');
 
       let currentStepIndex = 0;
       let totalSteps = stepsData.length;
       let isSolutionActive = false;
 
-      // Atualiza barra de progresso
+      if (totalSteps > 0) {
+        progressInfo.textContent = `0 de ${totalSteps} Passos`;
+      } else {
+        progressInfo.textContent = "Nenhum passo definido.";
+      }
+
       function updateProgressBar() {
         const percent = (currentStepIndex / totalSteps) * 100;
         progressBar.style.width = `${percent}%`;
         progressInfo.textContent = `${currentStepIndex} de ${totalSteps} Passos`;
       }
 
-      // Mostra passo atual
       function showCurrentStep() {
         if (currentStepIndex >= totalSteps) {
-          // Todos concluídos
           progressBar.style.width = "100%";
           progressInfo.textContent = `${totalSteps} de ${totalSteps} Passos (Concluídos!)`;
-          feedbackButtons.style.display = "none";
-          btnToggleSuggestion.style.display = 'inline-block';
-          // Mensagem de parabéns
+          feedbackButtons.style.display = 'none';
+
           const finishMsg = document.createElement('p');
           finishMsg.style.textAlign = 'center';
           finishMsg.style.fontSize = '1.1rem';
@@ -991,58 +976,67 @@
           stepsOutput.appendChild(finishMsg);
           return;
         }
-        // Renderiza o passo
-        const stepData = stepsData[currentStepIndex];
-        revealStep(stepsOutput, currentStepIndex + 1, stepData, () => {
-          feedbackButtons.style.display = 'flex';
-          failFeedbackForm.style.display = 'none';
-          failFeedbackText.value = '';
-        });
+
+        const stepDiv = document.createElement('div');
+        stepDiv.classList.add('step-container');
+        stepsOutput.appendChild(stepDiv);
+
+        revealStepSimple(stepDiv, currentStepIndex + 1, stepsData[currentStepIndex]);
+
+        feedbackButtons.style.display = 'flex';
+        failFeedbackForm.style.display = 'none';
+        failFeedbackText.value = '';
+
         updateProgressBar();
       }
 
-      // Lidar com "Consegui!"
       btnConsegui.addEventListener('click', () => {
-        // Efeito de vibração + confete
-        btnConsegui.classList.add('shake');
-        setTimeout(() => {
-          btnConsegui.classList.remove('shake');
-        }, 500);
-
-        showConfetti();
-        if (successSound) {
-          successSound.currentTime = 0;
-          successSound.play().catch(err => console.warn(err));
+        const stepContainers = document.querySelectorAll('.step-container');
+        if (stepContainers[currentStepIndex]) {
+          const checkIcon = document.createElement('div');
+          checkIcon.classList.add('step-check-icon');
+          checkIcon.textContent = '✔';
+          stepContainers[currentStepIndex].appendChild(checkIcon);
         }
-
-        // Envia feedback
-        const problemId = "{{ problema['_id'] }}";
-        sendStepFeedback(problemId, currentStepIndex, true, "", () => {
-          // Avança passo
-          feedbackButtons.style.display = 'none';
-          currentStepIndex++;
-          showCurrentStep();
-        });
+        feedbackButtons.style.display = 'none';
+        currentStepIndex++;
+        showCurrentStep();
       });
 
-      // Lidar com "Não Consegui"
       btnNaoConsegui.addEventListener('click', () => {
-        // Efeito vibração
         btnNaoConsegui.classList.add('shake');
         setTimeout(() => {
           btnNaoConsegui.classList.remove('shake');
         }, 500);
-
-        // Mostra form de feedback
         failFeedbackForm.style.display = 'block';
       });
 
-      // Enviar feedback "Não Consegui"
       btnEnviarFeedback.addEventListener('click', () => {
         const feedbackVal = failFeedbackText.value.trim();
-        const problemId = "{{ problema['_id'] }}";
-        sendStepFeedback(problemId, currentStepIndex, false, feedbackVal, () => {
-          // Oculta form, avança passo
+        if (!userIsLoggedIn) {
+          // Se não estiver logado, simplesmente pula para o próximo passo
+          failFeedbackForm.style.display = 'none';
+          feedbackButtons.style.display = 'none';
+          currentStepIndex++;
+          showCurrentStep();
+          return;
+        }
+        fetch("/submit_step_feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            problem_id: problemID,
+            step_index: currentStepIndex,
+            success: false,
+            feedback_text: feedbackVal
+          })
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          console.log("Feedback Enviado:", data);
+        })
+        .catch(err => console.error("Erro ao enviar feedback:", err))
+        .finally(() => {
           failFeedbackForm.style.display = 'none';
           feedbackButtons.style.display = 'none';
           currentStepIndex++;
@@ -1050,31 +1044,23 @@
         });
       });
 
-      // Botão Sugerir Melhorias
-      btnToggleSuggestion.addEventListener('click', () => {
-        if (suggestionFormContainer.style.display === 'none') {
-          suggestionFormContainer.style.display = 'block';
-        } else {
-          suggestionFormContainer.style.display = 'none';
-        }
-      });
-
-      // Se for solucionador, mostra tudo sem animação
       if (isSolucionador) {
+        // Solucionador vê tudo expandido automaticamente
         renderSolutionNoAnimation(stepsOutput, stepsData);
         progressBar.style.width = "100%";
-        progressInfo.textContent = `${totalSteps} de ${totalSteps} Passos (Modo Solucionador)`;
+        if (totalSteps > 0) {
+          progressInfo.textContent = `${totalSteps} de ${totalSteps} Passos (Modo Solucionador)`;
+        } else {
+          progressInfo.textContent = "Nenhum passo definido.";
+        }
         btnShowSolution.style.display = 'none';
         feedbackButtons.style.display = 'none';
-        btnToggleSuggestion.style.display = 'inline-block';
       } else {
-        // Modo normal
+        // Usuário comum: botão "Mostrar Passos"
         if (totalSteps === 0) {
-          progressInfo.textContent = "Nenhum passo definido.";
           return;
         }
         btnShowSolution.style.display = 'inline-block';
-
         btnShowSolution.addEventListener('click', () => {
           if (isSolutionActive) return;
           isSolutionActive = true;
@@ -1082,6 +1068,57 @@
           showCurrentStep();
         });
       }
+
+      function toggleHelpful(feedbackType) {
+        if (!userIsLoggedIn) {
+          alert("É necessário estar logado para registrar o feedback.");
+          return;
+        }
+        fetch("/toggle_helpful", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            problem_id: problemID,
+            feedback: feedbackType
+          })
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+          btnHelpfulSim.classList.remove("selected");
+          btnHelpfulNao.classList.remove("selected");
+          if (data.feedback === "SIM") {
+            btnHelpfulSim.classList.add("selected");
+          } else if (data.feedback === "NAO") {
+            btnHelpfulNao.classList.add("selected");
+          }
+        })
+        .catch(err => console.error("Erro ao enviar helpful feedback:", err));
+      }
+
+      btnHelpfulSim.addEventListener("click", () => toggleHelpful("SIM"));
+      btnHelpfulNao.addEventListener("click", () => toggleHelpful("NAO"));
+
+      btnOpenSuggestionModal.addEventListener("click", () => {
+        if (!userIsLoggedIn) {
+          alert("É necessário estar logado para enviar sugestões.");
+          return;
+        }
+        suggestionModal.style.display = "flex";
+      });
+
+      btnCloseSuggestionModal.addEventListener("click", () => {
+        suggestionModal.style.display = "none";
+      });
+
+      window.addEventListener("click", (event) => {
+        if (event.target === suggestionModal) {
+          suggestionModal.style.display = "none";
+        }
+      });
     });
   </script>
 </body>
