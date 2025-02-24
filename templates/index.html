@@ -16,14 +16,13 @@
   <!-- CSS principal (carregado externamente) -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 
-  <!-- Aqui, apenas para o background dinâmico via Jinja -->
+  <!-- Aqui, apenas para o background inline via Jinja -->
   <style>
     /* Mantemos apenas o background inline para capturar a variável random_bg */
     body {
       background: #f0f0f0 url('{{ url_for("static", filename="images/" ~ random_bg) }}')
         no-repeat center center fixed;
       background-size: cover;
-      /* O overflow-x: hidden pode permanecer no body, se desejar */
       overflow-x: hidden;
     }
 
@@ -57,8 +56,9 @@
         <span>Menu</span>
       </button>
 
-      <!-- Se não estiver logado, mostra "Entrar"; se estiver, mostra "Perfil" -->
+      <!-- Se não estiver logado, mostra "Entrar" (ou mesmo "Perfil" se estiver) -->
       {% if not session.get('user_id') %}
+        <!-- Troque "Entrar" por qualquer ação que queira; aqui deixamos como login, mas pode ocultar/alterar -->
         <a class="header-btn" href="{{ url_for('login') }}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
@@ -116,7 +116,7 @@
     <div class="mobile-sidebar" id="mobileSidebar">
       <div class="menu-items">
         <!-- "Envie o seu problema" -->
-        <a href="{% if session.get('user_id') %}{{ url_for('add_problem') }}{% else %}javascript:openLoginModal();{% endif %}">
+        <a href="{% if session.get('user_id') %}{{ url_for('add_problem') }}{% else %}{{ url_for('register', next=url_for('add_problem')) }}{% endif %}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
           </svg>
@@ -124,7 +124,7 @@
         </a>
 
         <!-- Problemas Não Resolvidos -->
-        <a href="{% if session.get('user_id') %}{{ url_for('unresolved') }}{% else %}javascript:openLoginModal();{% endif %}">
+        <a href="{% if session.get('user_id') %}{{ url_for('unresolved') }}{% else %}{{ url_for('register', next=url_for('unresolved')) }}{% endif %}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8 5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0 6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"/>
           </svg>
@@ -167,30 +167,7 @@
       <p>© 2025 Plataforma M</p>
     </footer>
 
-    <!-- MODAL LOGIN -->
-    <div id="loginModal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Desbloqueie as funcionalidades do M!</h2>
-          <span class="close" onclick="closeLoginModal()">&times;</span>
-        </div>
-        <div class="modal-body">
-          <p class="modal-text" style="font-size: 1.3rem;">
-            Faça login e aproveite:
-          </p>
-          <ul style="list-style: disc; padding-left: 20px; text-align: left; font-size: 1.2rem; line-height: 1.8rem; color: #333; margin-bottom: 2rem;">
-            <li>Envie seus problemas e obtenha ajuda</li>
-            <li>Acesso completo a soluções de outros usuários</li>
-            <li>Suba no Ranking de Solucionadores resolvendo problemas</li>
-          </ul>
-          <a href="{{ url_for('register') }}" class="btn-entrar-preto">
-            Entrar Agora
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL - Manual das soluções impossíveis -->
+    <!-- MODAL - Manual das soluções impossíveis (permanece, pois não é o modal de "Entrar") -->
     <div id="manualModal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -243,15 +220,6 @@
       </div>
     </div>
   </div> <!-- Fim do #content -->
-
-  <!-- Pequeno script inline para abrir o Modal de login caso need_login == '1' -->
-  <script>
-    {% if need_login == '1' %}
-      window.addEventListener('load', function() {
-        openLoginModal();
-      });
-    {% endif %}
-  </script>
 
   <!-- JS principal (carregado externamente) com defer (não bloqueia parsing do HTML) -->
   <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>

@@ -5,7 +5,7 @@ import unicodedata
 import datetime
 import random
 import secrets
-from urllib.parse import quote
+from urllib.parse import urlparse, quote
 from flask import (
     Flask, render_template, request, redirect,
     url_for, session, jsonify, make_response
@@ -46,13 +46,11 @@ db_m = client_m["m_plataforma"]
 problemas_collection = db_m["problemas"]
 usuarios_collection = db_m["usuarios"]
 history_collection = db_m["search_history"]  # Histórico de buscas de PEÇAS (MachineZONE)
-problem_history_collection = db_m["problem_search_history"]  # Histórico de busca de PROBLEMAS
+problem_history_collection = db_m["problem_search_history"]  # Histórico de buscas de PROBLEMAS
 problem_view_history_collection = db_m["problem_view_history"]  # Registro de visualizações
 improvement_suggestions_collection = db_m["improvement_suggestions"]  # Sugestões de melhorias
 step_feedback_collection = db_m["step_feedback"]  # Feedbacks de cada passo da solução
-
-# >>> Nova coleção para feedback "Sim/Não" na solução <<<
-helpful_feedback_collection = db_m["helpful_feedback"]  # Armazena se o usuário achou a solução útil (Sim ou Não)
+helpful_feedback_collection = db_m["helpful_feedback"]  # Feedback "Sim/Não" na solução
 
 # GridFS para armazenar imagens na plataforma M
 fs_m = gridfs.GridFS(db_m)
@@ -79,7 +77,7 @@ STOPWORDS = {
 }
 
 ITEMS_PER_PAGE = 20  # Usado tanto para itens quanto para problemas
-MZ_WHATSAPP = "5543996436367"  # Número WhatsApp (exemplo)
+MZ_WHATSAPP = "5543996436367"  # Exemplo de telefone
 
 # -----------------------------------------------------------
 # FUNÇÕES AUXILIARES
@@ -187,7 +185,7 @@ def calculate_user_level(posted_count, solved_count):
     # Pontos = cada problema postado vale 2, resolvido vale 5
     points = posted_count * 2 + solved_count * 5
 
-    # Definir faixas de pontos para níveis
+    # Definir faixas de pontos para níveis (exemplo)
     if points < 20:
         level = 1
         next_level_points = 20
@@ -222,7 +220,7 @@ def calculate_user_level(posted_count, solved_count):
     return level, points, remaining_for_next_level, progress_percentage
 
 # -----------------------------------------------------------
-# (OPCIONAL) CRIAR ÍNDICE DE TEXTO (se necessário)
+# CRIAÇÃO DE ÍNDICE DE TEXTO (apenas se necessário)
 # -----------------------------------------------------------
 @app.before_first_request
 def init_db():
@@ -241,7 +239,6 @@ def init_db():
 # -----------------------------------------------------------
 # ROTAS PRINCIPAIS E DE USUÁRIOS
 # -----------------------------------------------------------
-
 @app.route("/")
 def root():
     return redirect(url_for("index"))
@@ -252,8 +249,6 @@ def index():
     - GET: Renderiza a página inicial, escolhendo uma imagem de fundo aleatória.
     - POST: Captura o termo de pesquisa e redireciona para /search?q=<termo>.
     """
-    need_login = request.args.get("need_login", "0")
-
     # Lista de possíveis fundos
     background_images = [
         "fundo1.jpeg",
@@ -270,7 +265,7 @@ def index():
         search_term = request.form.get("search", "").strip()
         return redirect(url_for("search", q=search_term))
 
-    return render_template("index.html", need_login=need_login, random_bg=random_bg)
+    return render_template("index.html", random_bg=random_bg)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -292,9 +287,8 @@ def login():
                 else:
                     return render_template("login.html", erro="Usuário ou senha inválidos.")
             else:
-                # Fallback (sem hash)
+                # Fallback (sem hash) -> migra para hash
                 if usuario.get("senha") == senha:
-                    # Migra para hash
                     new_hash = generate_password_hash(senha)
                     usuarios_collection.update_one(
                         {"_id": usuario["_id"]},
@@ -314,10 +308,20 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("login"))
+    return redirect(url_for("index"))
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    # Vamos remover o domínio do parâmetro "next" se for absoluto,
+    # para evitar loops de redirecionamento no "Voltar".
+    raw_next = request.args.get("next", "")
+    parsed = urlparse(raw_next)
+    if parsed.path:
+        # Monta next_url apenas com path + query
+        next_url = parsed.path + (("?" + parsed.query) if parsed.query else "")
+    else:
+        next_url = ""
+
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
         senha = request.form.get("senha", "").strip()
@@ -326,11 +330,11 @@ def register():
         maquinas = request.form.get("maquinas", "").strip()
 
         if senha != confirmar_senha:
-            return render_template("register.html", erro="As senhas não conferem!")
+            return render_template("register.html", erro="As senhas não conferem!", next_url=next_url)
 
         nome = " ".join(word.capitalize() for word in nome.split())
         if usuarios_collection.find_one({"nome": nome}):
-            return render_template("register.html", erro="Usuário já existe!")
+            return render_template("register.html", erro="Usuário já existe!", next_url=next_url)
 
         senha_hash = generate_password_hash(senha)
         novo_usuario = {
@@ -342,13 +346,20 @@ def register():
             "profile_image_id": None
         }
         inserted = usuarios_collection.insert_one(novo_usuario)
+
+        # Salva na sessão
         session["user_id"] = str(inserted.inserted_id)
         session["username"] = nome
         session["role"] = "comum"
 
-        return redirect(url_for("index"))
+        # Se houver next_url válido, redireciona
+        if next_url:
+            return redirect(next_url)
+        else:
+            return redirect(url_for("index"))
 
-    return render_template("register.html", erro=None)
+    # Renderiza página de cadastro
+    return render_template("register.html", erro=None, next_url=next_url)
 
 # -----------------------------------------------------------
 # ROTAS LIGADAS A PROBLEMAS
@@ -363,7 +374,6 @@ def search():
     selected_subcategory = request.args.get("subcategory", "").strip()
     selected_brand = request.args.get("brand", "").strip()
 
-    # Recupera o fundo salvo na sessão (ou usa um default se não existir)
     random_bg = session.get("random_bg", "fundo1.jpeg")
 
     return render_template(
@@ -402,7 +412,6 @@ def load_problems():
             })
 
     search_tokens = [t for t in normalize_string(search_query).split() if t and t not in STOPWORDS]
-
     filters = {}
     if category:
         filters["category"] = category
@@ -432,6 +441,7 @@ def load_problems():
 
         problems_list = []
         for p in problems:
+            # Criador
             if p.get("creator_custom_name"):
                 creator_name = p["creator_custom_name"]
             else:
@@ -441,6 +451,7 @@ def load_problems():
                 else:
                     creator_name = "Não definido"
 
+            # Solucionador
             solver_name = None
             if p.get("solver_custom_name"):
                 solver_name = p["solver_custom_name"]
@@ -467,7 +478,7 @@ def load_problems():
         return jsonify({"problems": problems_list, "has_more": has_more, "total_count": total_count})
 
     else:
-        # Busca vazia => problemas aleatórios
+        # Se a busca é vazia -> problemas aleatórios
         if page == 1:
             session["displayed_problem_ids"] = []
         displayed_ids = session.get("displayed_problem_ids", [])
@@ -485,7 +496,10 @@ def load_problems():
             return jsonify({"problems": [], "has_more": False, "total_count": 0})
         else:
             fetch_size = min(ITEMS_PER_PAGE, remaining_count)
-            pipeline_sample = [{"$match": random_match_stage}, {"$sample": {"size": fetch_size}}]
+            pipeline_sample = [
+                {"$match": random_match_stage},
+                {"$sample": {"size": fetch_size}}
+            ]
             cursor_sample = problemas_collection.aggregate(pipeline_sample)
             random_problems = list(cursor_sample)
 
@@ -494,9 +508,9 @@ def load_problems():
             session["displayed_problem_ids"] = displayed_ids
 
             has_more = (remaining_count - fetch_size) > 0
-
             problems_list = []
             for p in random_problems:
+                # Criador
                 if p.get("creator_custom_name"):
                     creator_name = p["creator_custom_name"]
                 else:
@@ -506,6 +520,7 @@ def load_problems():
                     else:
                         creator_name = "Não definido"
 
+                # Solucionador
                 solver_name = None
                 if p.get("solver_custom_name"):
                     solver_name = p["solver_custom_name"]
@@ -537,20 +552,16 @@ def load_problems():
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
 
     if request.method == "POST":
         titulo = request.form.get("titulo", "").strip()
         descricao = request.form.get("descricao", "").strip()
 
+        # Gera tags a partir do título
         titulo_normalized = normalize_string(titulo)
         titulo_tokens = [t for t in titulo_normalized.split() if t not in STOPWORDS]
-        tags_str = request.form.get("tags", "").strip()
-        user_tags_raw = tags_str.split()
-        user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
-        user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
-
-        all_tags = list(set(titulo_tokens + user_tags_normalized))
+        all_tags = list(set(titulo_tokens))
 
         category = request.form.get("category", "").strip()
         subCategory = request.form.get("subCategory", "").strip()
@@ -585,7 +596,7 @@ def add_problem():
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
 
     query = {"resolvido": False}
     problemas_nao_resolvidos = list(problemas_collection.find(query))
@@ -602,13 +613,13 @@ def unresolved():
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
     return render_template("resolver.html", problem_id=problem_id)
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
 
     solution_json = request.form.get("solution_data", "")
     try:
@@ -650,9 +661,9 @@ def exibir_solucao(problem_id):
     if not user_is_logged_in():
         token_param = request.args.get("token", "")
         if token_param != problema["share_token"]:
-            return "Acesso negado. Faça login ou utilize o link de compartilhamento.", 403
+            return redirect(url_for("register", next=request.url))
 
-    # Registra visualização
+    # Registra visualização (se logado)
     if user_is_logged_in():
         problem_view_history_collection.update_one(
             {"user_id": session["user_id"], "problem_id": problem_id},
@@ -699,7 +710,7 @@ def exibir_solucao(problem_id):
         "feedback": "SIM"
     })
 
-    # Recupera a imagem de fundo da sessão (ou default)
+    # Fundo da sessão (ou padrão)
     random_bg = session.get("random_bg", "fundo1.jpeg")
 
     return render_template(
@@ -717,7 +728,7 @@ def exibir_solucao(problem_id):
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
         return "Acesso negado (somente solucionador).", 403
 
@@ -725,6 +736,7 @@ def delete_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
+    # Apaga imagens no GridFS, se existirem
     old_file_id = problema.get("problemImage")
     if old_file_id:
         try:
@@ -740,6 +752,7 @@ def delete_problem(problem_id):
 
     problemas_collection.delete_one({"_id": ObjectId(problem_id)})
 
+    # Se estava resolvido, retorna pra /search, senão /unresolved
     if problema["resolvido"]:
         return redirect(url_for("search"))
     else:
@@ -748,7 +761,7 @@ def delete_problem(problem_id):
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
 
     problema = problemas_collection.find_one({"_id": ObjectId(problem_id)})
     if not problema:
@@ -763,7 +776,6 @@ def edit_problem(problem_id):
     if request.method == "POST":
         titulo_novo = request.form.get("titulo", "").strip()
         descricao_nova = request.form.get("descricao", "").strip()
-        tags_str = request.form.get("tags", "").strip()
 
         category = request.form.get("category", "").strip()
         subCategory = request.form.get("subCategory", "").strip()
@@ -787,6 +799,7 @@ def edit_problem(problem_id):
                 all_users=all_users
             )
 
+        # Criador "custom" vs criador "usuário"
         if creator_id == "custom":
             final_creator_id = None
             final_creator_name = creator_custom_name
@@ -794,6 +807,7 @@ def edit_problem(problem_id):
             final_creator_id = creator_id
             final_creator_name = None
 
+        # Solver "custom" vs solver "usuário"
         if solver_id == "custom":
             final_solver_id = None
             final_solver_name = solver_custom_name
@@ -808,11 +822,7 @@ def edit_problem(problem_id):
         titulo_tokens = [t for t in titulo_normalizado.split() if t and t not in STOPWORDS]
         descricao_tokens = [t for t in descricao_normalizado.split() if t and t not in STOPWORDS]
 
-        user_tags_raw = tags_str.split()
-        user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
-        user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
-
-        final_tag_set = set(old_tags) | set(titulo_tokens) | set(descricao_tokens) | set(user_tags_normalized)
+        final_tag_set = set(old_tags) | set(titulo_tokens) | set(descricao_tokens)
         final_tags = list(final_tag_set)
 
         updated_fields = {
@@ -831,6 +841,7 @@ def edit_problem(problem_id):
         delete_image = request.form.get("deleteExistingImage", "false") == "true"
         image_file = request.files.get("problemImage")
 
+        # Se for pedido para deletar a imagem existente
         if delete_image:
             old_file_id = problema.get("problemImage")
             if old_file_id:
@@ -846,6 +857,7 @@ def edit_problem(problem_id):
                     pass
             updated_fields["problemImage"] = None
             updated_fields["problemImageThumb"] = None
+        # Se chegou uma nova imagem
         elif image_file and image_file.filename.strip():
             new_orig_id, new_thumb_id = save_image_with_thumbnail(image_file, fs_m)
             old_file_id = problema.get("problemImage")
@@ -874,7 +886,7 @@ def edit_problem(problem_id):
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
@@ -888,7 +900,7 @@ def edit_user_role(user_id):
 @app.route("/usuarios", methods=["GET"])
 def listar_usuarios():
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
@@ -913,7 +925,7 @@ def listar_usuarios():
 @app.route("/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id):
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
@@ -923,7 +935,7 @@ def delete_user(user_id):
 @app.route("/edit_solution/<problem_id>", methods=["GET", "POST"])
 def edit_solution(problem_id):
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
@@ -938,7 +950,12 @@ def edit_solution(problem_id):
         try:
             new_solution_data = json.loads(new_solution_json)
         except json.JSONDecodeError:
-            return render_template("edit_solution.html", problema=problema, passos=problema.get("solucao", {}).get("steps", []), erro="Erro ao interpretar os dados.")
+            return render_template(
+                "edit_solution.html",
+                problema=problema,
+                passos=problema.get("solucao", {}).get("steps", []),
+                erro="Erro ao interpretar os dados."
+            )
 
         old_solution_data = problema.get("solucao", {})
         old_steps = old_solution_data.get("steps", [])
@@ -997,7 +1014,10 @@ def edit_solution(problem_id):
                 else:
                     substep["subStepImage"] = old_sub_file_id
 
-        problemas_collection.update_one({"_id": ObjectId(problem_id)}, {"$set": {"solucao": new_solution_data}})
+        problemas_collection.update_one(
+            {"_id": ObjectId(problem_id)},
+            {"$set": {"solucao": new_solution_data}}
+        )
         return redirect(url_for("exibir_solucao", problem_id=problem_id))
 
     passos = problema.get("solucao", {}).get("steps", [])
@@ -1050,7 +1070,7 @@ def gridfs_item_image(file_id):
 @app.route("/history_search", methods=["GET"])
 def history_search():
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
@@ -1060,7 +1080,7 @@ def history_search():
 @app.route("/history_problem", methods=["GET"])
 def history_problem():
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
@@ -1117,7 +1137,7 @@ def suggest_improvement(problem_id):
 @app.route("/user_history/<user_id>", methods=["GET"])
 def user_history(user_id):
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
         return "Acesso negado.", 403
 
@@ -1131,9 +1151,9 @@ def user_history(user_id):
 
     viewed_history = list(problem_view_history_collection.find({"user_id": user_id}))
     viewed_problem_ids = [vh["problem_id"] for vh in viewed_history]
-    viewed_problems = list(problemas_collection.find(
-        {"_id": {"$in": [ObjectId(pid) for pid in viewed_problem_ids]}}
-    ))
+    viewed_problems = list(
+        problemas_collection.find({"_id": {"$in": [ObjectId(pid) for pid in viewed_problem_ids]}})
+    )
     for vp in viewed_problems:
         vp["_id_str"] = str(vp["_id"])
 
@@ -1221,13 +1241,14 @@ def load_items():
         )
         items = list(items_cursor)
 
+        # Calcula maior sub-frase para cada item
         for item in items:
             item['largest_sub_phrase_length'] = compute_largest_sub_phrase_length(
                 search_tokens,
                 item.get('matching_phrases', [])
             )
 
-        # Ordenar: matches exatos -> maior sub-match -> alfabético
+        # Ordena: matches exatos -> maior sub-match -> alfabético
         items.sort(
             key=lambda x: (
                 -x['is_phrase_match'],
@@ -1306,7 +1327,7 @@ def load_items():
 @app.route("/upload_item_image/<item_id>", methods=["POST"])
 def upload_item_image(item_id):
     if not user_is_logged_in():
-        return "Acesso negado. Faça login.", 403
+        return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
         return "Acesso negado. Apenas solucionadores podem enviar imagens de itens.", 403
 
@@ -1343,7 +1364,7 @@ def upload_item_image(item_id):
 @app.route("/add_item", methods=["GET", "POST"])
 def add_item():
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("register", next=request.url))
 
     if request.method == "POST":
         description = request.form.get("description", "").strip()
@@ -1395,22 +1416,21 @@ def add_item():
 @app.route("/perfil", methods=["GET"])
 def perfil():
     if not user_is_logged_in():
-        return redirect(url_for("index", need_login=1))
+        return redirect(url_for("register", next=request.url))
 
     user_id = session["user_id"]
     user_obj = usuarios_collection.find_one({"_id": ObjectId(user_id)})
     if not user_obj:
         return "Usuário não encontrado.", 404
 
-    # Fundo aleatório salvo na sessão
     random_bg = session.get("random_bg", "fundo1.jpeg")
 
-    # Quantos problemas enviados
     posted_count = problemas_collection.count_documents({"creator_id": user_id})
-    # Quantos problemas solucionados
     solved_count = problemas_collection.count_documents({"solver_id": user_id, "resolvido": True})
 
-    user_level, points, remaining_for_next_level, progress_percentage = calculate_user_level(posted_count, solved_count)
+    user_level, points, remaining_for_next_level, progress_percentage = calculate_user_level(
+        posted_count, solved_count
+    )
 
     user_badges = []
     if posted_count >= 1:
@@ -1439,7 +1459,7 @@ def perfil():
 @app.route("/edit_profile", methods=["GET", "POST"])
 def edit_profile():
     if not user_is_logged_in():
-        return redirect(url_for("login"))
+        return redirect(url_for("register", next=request.url))
 
     user_id = session["user_id"]
     user_obj = usuarios_collection.find_one({"_id": ObjectId(user_id)})
@@ -1528,6 +1548,7 @@ def toggle_helpful():
     else:
         current_feedback = existing_doc["feedback"]
         if current_feedback == desired_feedback:
+            # Remove o feedback se clicar novamente
             helpful_feedback_collection.delete_one({"_id": existing_doc["_id"]})
             like_count = helpful_feedback_collection.count_documents({
                 "problem_id": problem_id,
@@ -1535,6 +1556,7 @@ def toggle_helpful():
             })
             return jsonify({"status": "removed", "feedback": None, "like_count": like_count})
         else:
+            # Atualiza para o novo feedback
             helpful_feedback_collection.update_one(
                 {"_id": existing_doc["_id"]},
                 {"$set": {"feedback": desired_feedback, "timestamp": datetime.datetime.utcnow()}}

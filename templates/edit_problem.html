@@ -617,7 +617,7 @@
           <button class="btn-categorias voltar" onclick="backToEditMainCategory()">Voltar</button>
         </div>
 
-        <!-- Passo 3: Marcas -->
+        <!-- Passo 3: Marcas (com imagens para as marcas de carro) -->
         <div id="editBrandStep" style="display: none;">
           <p class="modal-text" id="editSelectedSubCategoryText"></p>
           <p class="modal-text">Escolha a marca (ou "Sem marca"):</p>
@@ -658,7 +658,9 @@
     });
 
     // =========================================================================
-    // Modal de Edição de Categoria (3 passos) - Mesmo estilo / conteúdo do index.html
+    // Modal de Edição de Categoria (3 passos)
+    // Adicionamos as imagens das marcas de carro, tal como o estilo de imagens
+    // de categoria que temos no index.html
     // =========================================================================
     const categoryModal = document.getElementById('categoryModal');
 
@@ -671,7 +673,7 @@
       resetCategoryModal();
     }
 
-    // Dados de categorias (mesmo do index.html), incluindo imagens e subcategorias.
+    // Dados de categorias
     const editCategoryData = [
       {
         name: "Veículos",
@@ -821,10 +823,22 @@
       }
     ];
 
+    // Imagens das marcas de carro (apenas para ilustrar)
+    // Ajuste o nome dos arquivos de acordo com as imagens existentes em /static/images
+    const carBrandImages = {
+      "Toyota": "Toyota icon.PNG",
+      "Honda": "Honda icon.PNG",
+      "Ford": "Ford icon.PNG",
+      "Fiat": "Fiat icon.PNG",
+      "Volkswagen": "Volkswagen icon.PNG",
+      "Peugeot": "Peugeot icon.PNG",
+      "Chevrolet": "Chevrolet icon.PNG"
+    };
+
     let selectedMainCatIndex = null;
     let selectedSubCatIndex = null;
 
-    // Step 1: Exibir Categorias Principais (com imagens, tal como index.html)
+    // Step 1: Exibir Categorias Principais (com imagens)
     function showMainCategories() {
       document.getElementById('editMainCategoryStep').style.display = 'block';
       document.getElementById('editSubCategoryStep').style.display = 'none';
@@ -836,7 +850,7 @@
       editCategoryData.forEach((cat, idx) => {
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
-        // Inclui imagem + texto, conforme index.html
+        // Inclui a imagem + texto
         btn.innerHTML = `<img src="/static/images/${cat.img}" alt="${cat.name}" style="width:60px;height:60px;margin-right:15px;"> <span>${cat.name}</span>`;
         btn.onclick = () => {
           selectedMainCatIndex = idx;
@@ -872,7 +886,7 @@
       });
     }
 
-    // Step 3: Exibir Marcas
+    // Step 3: Exibir Marcas (com imagens para as de carro)
     function showBrands(mainCatIndex, subCatIndex) {
       const brandContainer = document.getElementById('editBrandContainer');
       brandContainer.innerHTML = '';
@@ -895,7 +909,15 @@
       brands.forEach(brand => {
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
-        btn.textContent = brand;
+
+        // Se for uma marca de carro que possua imagem (definida no objeto carBrandImages), exibe com a imagem
+        if (carBrandImages[brand]) {
+          btn.innerHTML = `<img src="/static/images/${carBrandImages[brand]}" alt="${brand}" style="width:60px;height:60px;margin-right:15px;"> <span>${brand}</span>`;
+        } else {
+          // Caso não tenha imagem mapeada, exibe apenas texto
+          btn.textContent = brand;
+        }
+
         btn.onclick = () => {
           finalizeCategory(mainCatIndex, subCatIndex, brand);
         };
@@ -921,7 +943,7 @@
       document.getElementById('subCategoryInput').value = subCatName;
       document.getElementById('brandInput').value = brand;
 
-      // Atualiza a exibição
+      // Atualiza a exibição no form
       document.getElementById('displayCategory').textContent = catName;
       document.getElementById('displaySubCategory').textContent = subCatName;
       document.getElementById('displayBrand').textContent = brand || '---';

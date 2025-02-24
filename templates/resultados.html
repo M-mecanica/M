@@ -28,8 +28,6 @@
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
       color: #333;
-      /* A imagem de fundo é carregada dinamicamente via Jinja,
-         utilizando a variável random_bg que veio da sessão no Flask */
       background: url("{{ url_for('static', filename='images/' + random_bg) }}") no-repeat center center fixed;
       background-size: cover;
       overflow-x: hidden;
@@ -387,100 +385,6 @@
       font-size: 0.9rem;
       color: #fff;
     }
-
-    /* ==========================
-       MODAL LOGIN
-       ========================== */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 9999;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.4);
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background-color: #fff;
-      width: 95%;
-      max-width: 700px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      animation: modalFadeIn 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      max-height: 90vh;
-      overflow: hidden;
-      border: 1px solid #fff;
-    }
-    @keyframes modalFadeIn {
-      from {
-        opacity: 0; transform: translateY(-20px);
-      }
-      to {
-        opacity: 1; transform: translateY(0);
-      }
-    }
-    .modal-header {
-      background-color: #000;
-      color: #fff;
-      padding: 2rem;
-      position: relative;
-      border-bottom: 1px solid #333;
-    }
-    .modal-header h2 {
-      margin: 0;
-      font-size: 2rem;
-      font-weight: 500;
-    }
-    .close {
-      color: #fff;
-      position: absolute;
-      right: 2rem;
-      top: 2rem;
-      font-size: 2.4rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-    .close:hover {
-      color: #ccc;
-    }
-    .modal-body {
-      padding: 2rem;
-      text-align: center;
-      overflow-y: auto;
-      max-height: calc(90vh - 100px);
-    }
-    .modal-text {
-      font-size: 1.3rem;
-      color: #333;
-      margin-bottom: 2rem;
-      line-height: 1.4;
-    }
-    .btn-entrar-preto {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.8rem 1.2rem;
-      font-size: 1.5rem;
-      text-decoration: none;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 2rem;
-    }
-    .btn-entrar-preto:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
   </style>
 </head>
 
@@ -518,13 +422,15 @@
 
     <!-- MAIN - Lista de problemas -->
     <main>
+      <!-- Container onde os problemas serão inseridos via JS -->
       <div id="problem-container"></div>
+      <!-- Sentinel (infinite scroll) -->
       <div id="sentinel"></div>
 
       <!-- Spinner de carregamento -->
       <div id="spinner" class="spinner" style="display: none;"></div>
 
-      <!-- CONTAINER "NÃO ENCONTROU?" (estilo igual ao dos problems) -->
+      <!-- CONTAINER "NÃO ENCONTROU?" (mesmo estilo dos problemas) -->
       <div class="not-found-container">
         <p>Não conseguiu encontrar seu problema?</p>
         {% if session.get('user_id') %}
@@ -535,12 +441,17 @@
             Envie o seu problema
           </a>
         {% else %}
-          <button class="new-problem-btn" onclick="openLoginModal()">
+          <!-- Se não estiver logado, redireciona para a página de cadastro -->
+          <a
+            href="{{ url_for('register', next=url_for('add_problem')) }}"
+            class="new-problem-btn"
+            title="Novo Problema"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
               <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
             </svg>
             Envie o seu problema
-          </button>
+          </a>
         {% endif %}
       </div>
     </main>
@@ -550,25 +461,6 @@
       <p>© 2025 Plataforma M</p>
     </footer>
   </div><!-- /#content -->
-
-  <!-- MODAL LOGIN -->
-  <div id="loginModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Desbloqueie as funcionalidades do M!</h2>
-        <span class="close" onclick="closeLoginModal()">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p class="modal-text">Faça login e aproveite:</p>
-        <ul style="list-style: disc; padding-left: 20px; text-align: left; font-size: 1.2rem; line-height: 1.8rem; color: #333; margin-bottom: 2rem;">
-          <li>Envie seus problemas e obtenha ajuda</li>
-          <li>Acesso completo a soluções de outros usuários</li>
-          <li>Suba no Ranking de Solucionadores resolvendo problemas</li>
-        </ul>
-        <a href="{{ url_for('register') }}" class="btn-entrar-preto">Entrar Agora</a>
-      </div>
-    </div>
-  </div>
 
   <!-- SCRIPT INLINE COM AS FUNÇÕES (Preloader, Fade-in, Carregamento Ajax, etc.) -->
   <script>
@@ -587,16 +479,6 @@
     });
 
     /***************************
-     * MODAL LOGIN
-     ***************************/
-    function openLoginModal() {
-      document.getElementById('loginModal').style.display = 'flex';
-    }
-    function closeLoginModal() {
-      document.getElementById('loginModal').style.display = 'none';
-    }
-
-    /***************************
      * BUSCA E CARREGAMENTO DE PROBLEMAS (infinite scroll)
      ***************************/
     const searchQuery = "{{ termo_busca|safe }}".trim();
@@ -613,7 +495,7 @@
     let hasMore = true;
 
     window.addEventListener('DOMContentLoaded', () => {
-      // Focar no campo de busca, posicionando o cursor no final
+      // Se já tem algo digitado, focar no campo de busca e colocar o cursor no fim
       if (searchInput.value) {
         searchInput.focus();
         searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
@@ -628,6 +510,7 @@
           loadProblems();
         }
       }, { root: null, threshold: 0.1 });
+
       const sentinel = document.getElementById('sentinel');
       observer.observe(sentinel);
     });
@@ -646,11 +529,16 @@
         const data = await response.json();
         hasMore = data.has_more;
         const fragment = document.createDocumentFragment();
+
+        // Renderizar cada problema
         data.problems.forEach(problem => {
           const problemEl = createProblemElement(problem);
           fragment.appendChild(problemEl);
         });
+
+        // Adicionar ao container
         problemContainer.appendChild(fragment);
+
       } catch (error) {
         console.error(error);
       } finally {
@@ -696,7 +584,7 @@
         div.appendChild(imgEl);
       }
 
-      // Se resolvido, exibir solução
+      // Se resolvido, exibir "Veja a Solução"
       if (problem.resolvido) {
         const solverEl = document.createElement('p');
         solverEl.textContent = "Resolvido por: " + (problem.solver_name || "Usuário?");
@@ -705,18 +593,24 @@
         div.appendChild(solverEl);
 
         {% if session.get('user_id') %}
-        const solucaoLink = document.createElement('a');
-        solucaoLink.href = "{{ url_for('exibir_solucao', problem_id='__ID__') }}"
-          .replace('__ID__', problem._id);
-        solucaoLink.classList.add('ver-solucao-btn');
-        solucaoLink.textContent = 'Veja a Solução';
-        div.appendChild(solucaoLink);
+          // Se estiver logado, vai direto para a solução
+          const solucaoLink = document.createElement('a');
+          solucaoLink.href = "{{ url_for('exibir_solucao', problem_id='__ID__') }}"
+            .replace('__ID__', problem._id);
+          solucaoLink.classList.add('ver-solucao-btn');
+          solucaoLink.textContent = 'Veja a Solução';
+          div.appendChild(solucaoLink);
         {% else %}
-        const solucaoBtn = document.createElement('button');
-        solucaoBtn.classList.add('ver-solucao-btn');
-        solucaoBtn.textContent = 'Veja a Solução';
-        solucaoBtn.addEventListener('click', openLoginModal);
-        div.appendChild(solucaoBtn);
+          // Se não estiver logado, direcionar para página de cadastro
+          const solucaoLink = document.createElement('a');
+          solucaoLink.href = "{{ url_for('register') }}?next="
+            + encodeURIComponent(
+                "{{ url_for('exibir_solucao', problem_id='__ID__') }}"
+                .replace('__ID__', problem._id)
+            );
+          solucaoLink.classList.add('ver-solucao-btn');
+          solucaoLink.textContent = 'Veja a Solução';
+          div.appendChild(solucaoLink);
         {% endif %}
       }
 
