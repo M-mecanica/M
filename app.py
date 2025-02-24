@@ -94,14 +94,23 @@ def user_has_role(roles_permitidos):
 
 def normalize_string(s):
     """
-    Remove acentos e deixa tudo em minúsculo, sem espaços extras.
-    Ex.: 'Rolamento grande' -> 'rolamento grande'
+    Remove acentos, pontuação (parênteses, vírgulas, pontos etc.) e deixa tudo em minúsculo,
+    sem espaços extras.
+    Ex.: 'Rolamento grande, (modelo X)' -> 'rolamento grande modelo x'
     """
+    # Remover acentos
     normalized = ''.join(
         c for c in unicodedata.normalize('NFKD', s)
         if not unicodedata.combining(c)
     )
-    return re.sub(r'\s+', ' ', normalized.strip().lower())
+    # Converter para minúsculo
+    normalized = normalized.lower()
+    # Remover pontuação que não seja letras/números/espaços
+    # Ajuste aqui para garantir que "final," -> "final"
+    normalized = re.sub(r'[^a-z0-9\s]', '', normalized)
+    # Remover espaços extras
+    normalized = re.sub(r'\s+', ' ', normalized).strip()
+    return normalized
 
 def generate_sub_phrases(tokens):
     """
@@ -561,7 +570,7 @@ def add_problem():
         titulo = request.form.get("titulo", "").strip()
         descricao = request.form.get("descricao", "").strip()
 
-        # Gera tags a partir do título
+        # Gera tags a partir do título (já removendo acentos/pontuação)
         titulo_normalized = normalize_string(titulo)
         titulo_tokens = [t for t in titulo_normalized.split() if t not in STOPWORDS]
         all_tags = list(set(titulo_tokens))
@@ -795,6 +804,12 @@ def edit_problem(problem_id):
         solver_id = request.form.get("solver_id", "")
         solver_custom_name = request.form.get("solver_custom_name", "").strip()
 
+        # NOVO: campo tags do formulário
+        tags_raw = request.form.get("tags", "").strip()
+        # Normalizar e remover pontuação
+        tags_normalized = normalize_string(tags_raw)
+        tags_tokens = [t for t in tags_normalized.split() if t and t not in STOPWORDS]
+
         if solver_id in ("", "None"):
             solver_id = None
         if creator_id in ("", "None"):
@@ -831,7 +846,11 @@ def edit_problem(problem_id):
         titulo_tokens = [t for t in titulo_normalizado.split() if t and t not in STOPWORDS]
         descricao_tokens = [t for t in descricao_normalizado.split() if t and t not in STOPWORDS]
 
-        final_tag_set = set(old_tags) | set(titulo_tokens) | set(descricao_tokens)
+        # Unificar tags antigas + novas do form + tokens do título + tokens da descrição
+        # Se quisermos normalizar também as tags antigas (caso tivessem pontuação), podemos fazer:
+        normalized_old_tags = [normalize_string(t) for t in old_tags]
+
+        final_tag_set = set(normalized_old_tags) | set(tags_tokens) | set(titulo_tokens) | set(descricao_tokens)
         final_tags = list(final_tag_set)
 
         updated_fields = {
@@ -1379,12 +1398,13 @@ def add_item():
         description = request.form.get("description", "").strip()
         tags_str = request.form.get("tags", "").strip()
         user_tags_raw = tags_str.split() if tags_str else []
-        user_tags_normalized = [normalize_string(t) for t in user_tags_raw if t.strip()]
-        user_tags_normalized = [t for t in user_tags_normalized if t not in STOPWORDS]
+        # Normalizar e remover pontuação
+        user_tags_normalized = normalize_string(" ".join(user_tags_raw))
+        final_user_tags = [t for t in user_tags_normalized.split() if t and t not in STOPWORDS]
 
         description_normalized = normalize_string(description)
         description_tokens = [t for t in description_normalized.split() if t and t not in STOPWORDS]
-        all_tags = list(set(user_tags_normalized + description_tokens))
+        all_tags = list(set(final_user_tags + description_tokens))
 
         price = request.form.get("price", "0").strip()
         try:

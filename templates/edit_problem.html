@@ -235,7 +235,7 @@
     }
 
     /* =========================================================================
-       MODAL DE CATEGORIAS (3 passos) - atualizado para ficar igual ao script.js
+       MODAL DE CATEGORIAS (3 passos)
        ========================================================================= */
     .modal {
       display: none;
@@ -310,7 +310,6 @@
       line-height: 1.4;
     }
 
-    /* Botões de categorias (em coluna) */
     #editMainCategoryContainer,
     #editSubCategoryContainer,
     #editBrandContainer {
@@ -319,7 +318,6 @@
       align-items: center;
       gap: 1rem;
     }
-
     .btn-categorias {
       background-color: #f2f2f2;
       color: #333;
@@ -456,11 +454,15 @@
 
         <!-- Tags -->
         <div class="form-group">
-          <label for="tags">Tags (separe por espaço):</label>
+          <label for="tags">
+            Tags (separe por espaço): <br>
+            <small>(Pontuação será removida automaticamente)</small>
+          </label>
           <input
             type="text"
             name="tags"
             id="tags"
+            oninput="sanitizeTagsInput()"
             value="{% if problema.tags %}{{ ' '.join(problema.tags) }}{% endif %}"
           >
         </div>
@@ -676,7 +678,22 @@
     });
 
     // =========================================================================
-    // Modal de Edição de Categoria (3 passos) - Ajustado para o estilo do script
+    // Função para remover acentos E pontuação do campo "tags" na digitação
+    // (apenas client-side; o back-end também faz sanitização)
+    // =========================================================================
+    function sanitizeTagsInput() {
+      const input = document.getElementById('tags');
+      // Remove acentos
+      let text = input.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      // Remove pontuação (qualquer caractere que não seja letra, número, espaço)
+      text = text.replace(/[^a-zA-Z0-9\s]/g, "");
+      // Converte para minúsculo
+      text = text.toLowerCase();
+      input.value = text;
+    }
+
+    // =========================================================================
+    // Modal de Edição de Categoria (3 passos)
     // =========================================================================
     const categoryModal = document.getElementById('categoryModal');
 
@@ -952,7 +969,6 @@
       }
 
       brands.forEach(brand => {
-        // Se o brand for apenas string
         let brandName = "";
         let brandImg = null;
 
