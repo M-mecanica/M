@@ -215,7 +215,9 @@
       <div class="erro">{{ erro }}</div>
     {% endif %}
 
+    <!-- Note que passamos "next={{ next_url }}" na rota, para manter o parâmetro -->
     <form action="{{ url_for('register', next=next_url) }}" method="POST" autocomplete="off">
+
       <label for="nome">Nome completo:</label>
       <input
         type="text"

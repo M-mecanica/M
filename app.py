@@ -312,8 +312,10 @@ def logout():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    # Vamos remover o domínio do parâmetro "next" se for absoluto,
-    # para evitar loops de redirecionamento no "Voltar".
+    """
+    Se a rota foi chamada com ?next=<URL>, guardamos essa URL para redirecionar
+    depois do cadastro bem-sucedido.
+    """
     raw_next = request.args.get("next", "")
     parsed = urlparse(raw_next)
     if parsed.path:
@@ -551,6 +553,7 @@ def load_problems():
 
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
+    # SE NÃO ESTIVER LOGADO, REDIRECIONA PARA O CADASTRO COM O next=request.url
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
 
@@ -595,6 +598,7 @@ def add_problem():
 
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
+    # SE NÃO ESTIVER LOGADO, REDIRECIONA PARA O CADASTRO COM O next=request.url
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
 
@@ -612,12 +616,14 @@ def unresolved():
 
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
+    # SE NÃO ESTIVER LOGADO, REDIRECIONA
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
     return render_template("resolver.html", problem_id=problem_id)
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
+    # SE NÃO ESTIVER LOGADO, REDIRECIONA
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
 
@@ -727,8 +733,10 @@ def exibir_solucao(problem_id):
 
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
+    # SE NÃO ESTIVER LOGADO, REDIRECIONA
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
+    # Verifica se o usuário tem papel 'solucionador' para poder deletar
     if not user_has_role(["solucionador"]):
         return "Acesso negado (somente solucionador).", 403
 
@@ -767,6 +775,7 @@ def edit_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
+    # Permissão: criador do problema OU solucionador
     can_edit = (session["user_id"] == problema.get("creator_id")) or user_has_role(["solucionador"])
     if not can_edit:
         return "Acesso negado.", 403

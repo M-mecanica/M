@@ -58,175 +58,167 @@ function closeCategoryModal() {
 const categoryData = [
   {
     name: "Veículos",
-    img: "Carro icon.PNG",
+    img: "carro_icon.png",
     subCategories: [
       {
         name: "Carros",
-        brands: [
-          { name: "Toyota", img: "Toyota icon.PNG" },
-          { name: "Honda", img: "Honda icon.PNG" },
-          { name: "Ford",  img: "Ford icon.PNG" },
-          { name: "Fiat",  img: "Fiat icon.PNG" },
-          { name: "Volkswagen", img: "Volkswagen icon.PNG" },
-          { name: "Peugeot", img: "Peugeot icon.PNG" },
-          { name: "Chevrolet", img: "Chevrolet icon.PNG" }
-        ]
+        img: "carro_icon.png",
+        brands: ["Toyota", "Honda", "Ford", "Fiat", "Volkswagen", "Peugeot", "Chevrolet"]
       },
       {
         name: "Motos",
-        brands: [
-          { name: "Yamaha", img: "Yamaha icon.PNG" },
-          { name: "Honda",  img: "Honda icon.PNG" },
-          { name: "Harley-Davidson", img: "Harley icon.PNG" },
-          { name: "Suzuki", img: "Suzuki icon.PNG" },
-          { name: "BMW",    img: "BMW icon.PNG" }
-        ]
+        img: "moto_icon.png",
+        brands: ["Yamaha", "Honda", "Harley-Davidson", "Suzuki", "BMW"]
       },
       {
         name: "Caminhonetes",
-        brands: [
-          { name: "Toyota Hilux",   img: "ToyotaHilux icon.PNG" },
-          { name: "Chevrolet S10",  img: "ChevroletS10 icon.PNG" },
-          { name: "Ford Ranger",    img: "FordRanger icon.PNG" },
-          { name: "Mitsubishi L200", img: "MitsubishiL200 icon.PNG" },
-          { name: "Nissan Frontier", img: "NissanFrontier icon.PNG" }
-        ]
+        img: "caminhonete_icon.png",
+        brands: ["Toyota", "Chevrolet", "Ford", "Mitsubishi", "Nissan"]
       },
       {
         name: "Caminhões",
-        brands: [
-          { name: "Mercedes-Benz", img: "Mercedes icon.PNG" },
-          { name: "Volvo",         img: "Volvo icon.PNG" },
-          { name: "Scania",        img: "Scania icon.PNG" },
-          { name: "Iveco",         img: "Iveco icon.PNG" }
-        ]
+        img: "caminhao_icon.png",
+        brands: ["Mercedes-Benz", "Volvo", "Scania", "Iveco"]
       },
       {
         name: "Ônibus",
-        brands: [
-          { name: "Marcopolo",  img: "Marcopolo icon.PNG" },
-          { name: "Volvo",      img: "Volvo icon.PNG" },
-          { name: "Mercedes-Benz", img: "Mercedes icon.PNG" }
-        ]
+        img: "onibus_icon.png",
+        brands: ["Marcopolo", "Volvo", "Mercedes-Benz"]
       }
     ]
   },
   {
     name: "Máquinas Agrícolas",
-    img: "Trator icon.PNG",
+    img: "trator_icon.png",
     subCategories: [
       {
         name: "Tratores",
+        img: "trator_icon.png",
         brands: ["John Deere", "Massey Ferguson", "Valtra/Valmet", "New Holland", "Case"]
       },
       {
         name: "Colheitadeiras",
-        brands: ["John Deere", "Case IH", "New Holland"]
+        img: "colheitadeira_icon.png",
+        brands: ["John Deere", "Case", "New Holland"]
       },
       {
         name: "Plantadeiras e Pulverizadores",
+        img: "plantadeira_icon.png",
         brands: ["Stara", "Jacto", "Kuhn"]
       }
     ]
   },
   {
     name: "Equipamentos Industriais",
-    img: "Empilhadeira icon.PNG",
+    img: "empilhadeira_icon.png",
     subCategories: [
       {
         name: "Motores e Geradores",
+        img: "motor_icon.png",
         brands: ["Cummins", "Perkins", "Caterpillar"]
       },
       {
         name: "Máquinas Pesadas",
+        img: "escavadeira_icon.png",
         brands: ["Caterpillar", "Komatsu", "Volvo"]
       },
       {
         name: "Empilhadeiras e Guinchos",
+        img: "empilhadeira_icon.png",
         brands: []
       }
     ]
   },
   {
     name: "Eletrônicos e Tecnologia",
-    img: "Celular icon.PNG",
+    img: "celular_icon.png",
     subCategories: [
       {
         name: "Celulares e Tablets",
+        img: "celular_icon.png",
         brands: ["Apple", "Samsung", "Xiaomi", "Motorola"]
       },
       {
         name: "Notebooks e PCs",
+        img: "notebook_icon.png",
         brands: ["Dell", "Lenovo", "HP", "ASUS", "Acer"]
       },
       {
         name: "Impressoras e Periféricos",
+        img: "impressora_icon.png",
         brands: []
       },
       {
         name: "Consoles e Videogames",
+        img: "controle_videogame_icon.png",
         brands: []
       },
       {
         name: "Televisores e Acessórios",
+        img: "tv_icon.png",
         brands: ["LG", "Samsung", "Sony", "Philips", "TCL", "Panasonic"]
       }
     ]
   },
   {
     name: "Sistemas Hidráulicos e Pneumáticos",
-    img: "Compressor de ar icon.PNG",
+    img: "compressor_de_ar_icon.png",
     subCategories: [
       {
         name: "Bombas Hidráulicas e Pneumáticas",
+        img: "bomba_hidraulica_icon.png",
         brands: []
       },
       {
         name: "Compressores de Ar",
+        img: "compressor_de_ar_icon.png",
         brands: []
       },
       {
         name: "Cilindros Hidráulicos",
+        img: "cilindro_hidraulico_icon.png",
         brands: []
       }
     ]
   },
   {
     name: "Eletrodomésticos e Equipamentos Domésticos",
-    img: "Microondas icon.PNG",
+    img: "microondas_icon.png",
     subCategories: [
       {
         name: "Geladeiras e Freezers",
+        img: "geladeira_icon.png",
         brands: []
       },
       {
         name: "Máquinas de Lavar e Secadoras",
+        img: "maquina_de_lava_icon.png",
         brands: []
       },
       {
-        name: "Ares-condicionados",
+        name: "Ar-condicionado",
+        img: "ar_condicionado_icon.png",
         brands: []
       },
       {
         name: "Cafeteiras e Eletroportáteis",
+        img: "cafeteira_icon.png",
         brands: ["Mondial", "Nespresso", "Dolce Gusto", "Oster", "Cadence", "Britânia"]
       }
     ]
   },
   {
     name: "Ferramentas e Manutenção Geral",
-    img: "Ferramentas icon.PNG",
+    img: "ferramentas_icon.png",
     subCategories: [
       {
         name: "Furadeiras, Parafusadeiras e Esmerilhadeiras",
-        brands: []
-      },
-      {
-        name: "Compressores e Ferramentas Pneumáticas",
+        img: "furadeira_icon.png",
         brands: []
       },
       {
         name: "Equipamentos de Solda e Corte",
+        img: "equipamentos_solda_e_corte_icon.png",
         brands: []
       }
     ]
@@ -259,7 +251,7 @@ function showMainCategories() {
   });
 }
 
-// Exibir subcategorias
+// Exibir subcategorias (agora com imagem, se existir)
 function showSubCategories(catIndex) {
   const subCatContainer = document.getElementById('subCategoryContainer');
   if (!subCatContainer) return;
@@ -269,7 +261,19 @@ function showSubCategories(catIndex) {
   subCats.forEach((sub, subIdx) => {
     const btn = document.createElement('button');
     btn.className = 'btn-categorias';
-    btn.textContent = sub.name;
+
+    // Se a subcategoria tiver imagem definida
+    if (sub.img) {
+      btn.innerHTML = `
+        <img src="/static/images/${sub.img}" alt="${sub.name}"
+             style="width:60px;height:60px;margin-right:15px;">
+        <span>${sub.name}</span>
+      `;
+    } else {
+      // Se não tiver imagem, só texto
+      btn.textContent = sub.name;
+    }
+
     btn.onclick = () => {
       document.getElementById('subCategoryStep').style.display = 'none';
       document.getElementById('brandStep').style.display = 'block';
@@ -314,6 +318,7 @@ function showBrands(catIndex, subCatIndex) {
       // Se for apenas string, sem ícone
       brandName = brand;
     } else {
+      // Caso queira implementar objetos de marca com name e img
       brandName = brand.name;
       brandImg = brand.img;
     }

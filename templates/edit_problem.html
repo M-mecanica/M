@@ -1,4 +1,3 @@
-<!-- edit_problem.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -236,7 +235,7 @@
     }
 
     /* =========================================================================
-       MODAL (Mesmo estilo do index.html)
+       MODAL DE CATEGORIAS (3 passos) - atualizado para ficar igual ao script.js
        ========================================================================= */
     .modal {
       display: none;
@@ -321,7 +320,6 @@
       gap: 1rem;
     }
 
-    /* Mesmo estilo de botão de categoria usado no index.html */
     .btn-categorias {
       background-color: #f2f2f2;
       color: #333;
@@ -342,6 +340,11 @@
     .btn-categorias:hover {
       background-color: #e6e6e6;
       transform: scale(1.02);
+    }
+    .btn-categorias img {
+      width: 60px;
+      height: 60px;
+      margin-right: 15px;
     }
     .btn-categorias.voltar {
       background-color: #ddd;
@@ -482,9 +485,24 @@
         </div>
 
         <!-- Inputs ocultos para category, subCategory, brand -->
-        <input type="hidden" name="category" id="categoryInput" value="{{ problema.category if problema.category else '' }}">
-        <input type="hidden" name="subCategory" id="subCategoryInput" value="{{ problema.subCategory if problema.subCategory else '' }}">
-        <input type="hidden" name="brand" id="brandInput" value="{{ problema.brand if problema.brand else '' }}">
+        <input
+          type="hidden"
+          name="category"
+          id="categoryInput"
+          value="{{ problema.category if problema.category else '' }}"
+        >
+        <input
+          type="hidden"
+          name="subCategory"
+          id="subCategoryInput"
+          value="{{ problema.subCategory if problema.subCategory else '' }}"
+        >
+        <input
+          type="hidden"
+          name="brand"
+          id="brandInput"
+          value="{{ problema.brand if problema.brand else '' }}"
+        >
 
         <!-- Imagem existente (se houver) -->
         {% if problema.problemImage %}
@@ -599,7 +617,7 @@
   <div id="categoryModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Selecione a Categoria</h2>
+        <h2>Escolha a categoria principal:</h2>
         <span class="close" onclick="closeCategoryModal()">&times;</span>
       </div>
       <div class="modal-body">
@@ -617,10 +635,10 @@
           <button class="btn-categorias voltar" onclick="backToEditMainCategory()">Voltar</button>
         </div>
 
-        <!-- Passo 3: Marcas (com imagens para as marcas de carro) -->
+        <!-- Passo 3: Marcas -->
         <div id="editBrandStep" style="display: none;">
           <p class="modal-text" id="editSelectedSubCategoryText"></p>
-          <p class="modal-text">Escolha a marca (ou "Sem marca"):</p>
+          <p class="modal-text">Selecione a marca (ou "Sem marca"):</p>
           <div id="editBrandContainer"></div>
           <button class="btn-categorias voltar" onclick="backToEditSubCategory()">Voltar</button>
         </div>
@@ -658,13 +676,12 @@
     });
 
     // =========================================================================
-    // Modal de Edição de Categoria (3 passos)
-    // Adicionamos as imagens das marcas de carro, tal como o estilo de imagens
-    // de categoria que temos no index.html
+    // Modal de Edição de Categoria (3 passos) - Ajustado para o estilo do script
     // =========================================================================
     const categoryModal = document.getElementById('categoryModal');
 
     function openCategoryModal() {
+      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
       categoryModal.style.display = 'flex';
       showMainCategories();
     }
@@ -673,172 +690,181 @@
       resetCategoryModal();
     }
 
-    // Dados de categorias
-    const editCategoryData = [
+    // Dados de categorias, subcategorias e marcas
+    const categoryData = [
       {
         name: "Veículos",
-        img: "Carro icon.PNG",
+        img: "carro_icon.png",
         subCategories: [
           {
             name: "Carros",
+            img: "carro_icon.png",
             brands: ["Toyota", "Honda", "Ford", "Fiat", "Volkswagen", "Peugeot", "Chevrolet"]
           },
           {
             name: "Motos",
+            img: "moto_icon.png",
             brands: ["Yamaha", "Honda", "Harley-Davidson", "Suzuki", "BMW"]
           },
           {
             name: "Caminhonetes",
-            brands: ["Toyota Hilux", "Chevrolet S10", "Ford Ranger", "Mitsubishi L200", "Nissan Frontier"]
+            img: "caminhonete_icon.png",
+            brands: ["Toyota", "Chevrolet", "Ford", "Mitsubishi", "Nissan"]
           },
           {
             name: "Caminhões",
+            img: "caminhao_icon.png",
             brands: ["Mercedes-Benz", "Volvo", "Scania", "Iveco"]
           },
           {
             name: "Ônibus",
+            img: "onibus_icon.png",
             brands: ["Marcopolo", "Volvo", "Mercedes-Benz"]
           }
         ]
       },
       {
         name: "Máquinas Agrícolas",
-        img: "Trator icon.PNG",
+        img: "trator_icon.png",
         subCategories: [
           {
             name: "Tratores",
+            img: "trator_icon.png",
             brands: ["John Deere", "Massey Ferguson", "Valtra/Valmet", "New Holland", "Case"]
           },
           {
             name: "Colheitadeiras",
-            brands: ["John Deere", "Case IH", "New Holland"]
+            img: "colheitadeira_icon.png",
+            brands: ["John Deere", "Case", "New Holland"]
           },
           {
             name: "Plantadeiras e Pulverizadores",
+            img: "plantadeira_icon.png",
             brands: ["Stara", "Jacto", "Kuhn"]
           }
         ]
       },
       {
         name: "Equipamentos Industriais",
-        img: "Empilhadeira icon.PNG",
+        img: "empilhadeira_icon.png",
         subCategories: [
           {
             name: "Motores e Geradores",
+            img: "motor_icon.png",
             brands: ["Cummins", "Perkins", "Caterpillar"]
           },
           {
             name: "Máquinas Pesadas",
+            img: "escavadeira_icon.png",
             brands: ["Caterpillar", "Komatsu", "Volvo"]
           },
           {
             name: "Empilhadeiras e Guinchos",
+            img: "empilhadeira_icon.png",
             brands: []
           }
         ]
       },
       {
         name: "Eletrônicos e Tecnologia",
-        img: "Celular icon.PNG",
+        img: "celular_icon.png",
         subCategories: [
           {
             name: "Celulares e Tablets",
+            img: "celular_icon.png",
             brands: ["Apple", "Samsung", "Xiaomi", "Motorola"]
           },
           {
             name: "Notebooks e PCs",
+            img: "notebook_icon.png",
             brands: ["Dell", "Lenovo", "HP", "ASUS", "Acer"]
           },
           {
             name: "Impressoras e Periféricos",
+            img: "impressora_icon.png",
             brands: []
           },
           {
             name: "Consoles e Videogames",
+            img: "controle_videogame_icon.png",
             brands: []
           },
           {
             name: "Televisores e Acessórios",
+            img: "tv_icon.png",
             brands: ["LG", "Samsung", "Sony", "Philips", "TCL", "Panasonic"]
           }
         ]
       },
       {
         name: "Sistemas Hidráulicos e Pneumáticos",
-        img: "Compressor de ar icon.PNG",
+        img: "compressor_de_ar_icon.png",
         subCategories: [
           {
             name: "Bombas Hidráulicas e Pneumáticas",
+            img: "bomba_hidraulica_icon.png",
             brands: []
           },
           {
             name: "Compressores de Ar",
+            img: "compressor_de_ar_icon.png",
             brands: []
           },
           {
             name: "Cilindros Hidráulicos",
+            img: "cilindro_hidraulico_icon.png",
             brands: []
           }
         ]
       },
       {
         name: "Eletrodomésticos e Equipamentos Domésticos",
-        img: "Microondas icon.PNG",
+        img: "microondas_icon.png",
         subCategories: [
           {
             name: "Geladeiras e Freezers",
+            img: "geladeira_icon.png",
             brands: []
           },
           {
             name: "Máquinas de Lavar e Secadoras",
+            img: "maquina_de_lava_icon.png",
             brands: []
           },
           {
-            name: "Ares-condicionados",
+            name: "Ar-condicionado",
+            img: "ar_condicionado_icon.png",
             brands: []
           },
           {
             name: "Cafeteiras e Eletroportáteis",
+            img: "cafeteira_icon.png",
             brands: ["Mondial", "Nespresso", "Dolce Gusto", "Oster", "Cadence", "Britânia"]
           }
         ]
       },
       {
         name: "Ferramentas e Manutenção Geral",
-        img: "Ferramentas icon.PNG",
+        img: "ferramentas_icon.png",
         subCategories: [
           {
             name: "Furadeiras, Parafusadeiras e Esmerilhadeiras",
-            brands: []
-          },
-          {
-            name: "Compressores e Ferramentas Pneumáticas",
+            img: "furadeira_icon.png",
             brands: []
           },
           {
             name: "Equipamentos de Solda e Corte",
+            img: "equipamentos_solda_e_corte_icon.png",
             brands: []
           }
         ]
       }
     ];
 
-    // Imagens das marcas de carro (apenas para ilustrar)
-    // Ajuste o nome dos arquivos de acordo com as imagens existentes em /static/images
-    const carBrandImages = {
-      "Toyota": "Toyota icon.PNG",
-      "Honda": "Honda icon.PNG",
-      "Ford": "Ford icon.PNG",
-      "Fiat": "Fiat icon.PNG",
-      "Volkswagen": "Volkswagen icon.PNG",
-      "Peugeot": "Peugeot icon.PNG",
-      "Chevrolet": "Chevrolet icon.PNG"
-    };
-
     let selectedMainCatIndex = null;
     let selectedSubCatIndex = null;
 
-    // Step 1: Exibir Categorias Principais (com imagens)
+    // Step 1: Exibir Categorias Principais
     function showMainCategories() {
       document.getElementById('editMainCategoryStep').style.display = 'block';
       document.getElementById('editSubCategoryStep').style.display = 'none';
@@ -847,11 +873,17 @@
       const container = document.getElementById('editMainCategoryContainer');
       container.innerHTML = '';
 
-      editCategoryData.forEach((cat, idx) => {
+      categoryData.forEach((cat, idx) => {
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
-        // Inclui a imagem + texto
-        btn.innerHTML = `<img src="/static/images/${cat.img}" alt="${cat.name}" style="width:60px;height:60px;margin-right:15px;"> <span>${cat.name}</span>`;
+        btn.innerHTML = `
+          <img
+            src="/static/images/${cat.img}"
+            alt="${cat.name}"
+            style="width:60px;height:60px;margin-right:15px;"
+          >
+          <span>${cat.name}</span>
+        `;
         btn.onclick = () => {
           selectedMainCatIndex = idx;
           document.getElementById('editMainCategoryStep').style.display = 'none';
@@ -868,12 +900,25 @@
     function showSubCategories(mainCatIndex) {
       const subCatContainer = document.getElementById('editSubCategoryContainer');
       subCatContainer.innerHTML = '';
-      const subCats = editCategoryData[mainCatIndex].subCategories;
 
+      const subCats = categoryData[mainCatIndex].subCategories;
       subCats.forEach((sub, subIdx) => {
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
-        btn.textContent = sub.name;
+
+        if (sub.img) {
+          btn.innerHTML = `
+            <img
+              src="/static/images/${sub.img}"
+              alt="${sub.name}"
+              style="width:60px;height:60px;margin-right:15px;"
+            >
+            <span>${sub.name}</span>
+          `;
+        } else {
+          btn.textContent = sub.name;
+        }
+
         btn.onclick = () => {
           selectedSubCatIndex = subIdx;
           document.getElementById('editSubCategoryStep').style.display = 'none';
@@ -886,12 +931,12 @@
       });
     }
 
-    // Step 3: Exibir Marcas (com imagens para as de carro)
+    // Step 3: Exibir Marcas
     function showBrands(mainCatIndex, subCatIndex) {
       const brandContainer = document.getElementById('editBrandContainer');
       brandContainer.innerHTML = '';
 
-      const subCat = editCategoryData[mainCatIndex].subCategories[subCatIndex];
+      const subCat = categoryData[mainCatIndex].subCategories[subCatIndex];
       const brands = subCat.brands || [];
 
       // Se não houver marcas, permitir "Sem marca"
@@ -907,19 +952,36 @@
       }
 
       brands.forEach(brand => {
+        // Se o brand for apenas string
+        let brandName = "";
+        let brandImg = null;
+
+        if (typeof brand === 'string') {
+          brandName = brand;
+        } else {
+          // Caso seja um objeto { name, img }
+          brandName = brand.name;
+          brandImg = brand.img;
+        }
+
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
 
-        // Se for uma marca de carro que possua imagem (definida no objeto carBrandImages), exibe com a imagem
-        if (carBrandImages[brand]) {
-          btn.innerHTML = `<img src="/static/images/${carBrandImages[brand]}" alt="${brand}" style="width:60px;height:60px;margin-right:15px;"> <span>${brand}</span>`;
+        if (brandImg) {
+          btn.innerHTML = `
+            <img
+              src="/static/images/${brandImg}"
+              alt="${brandName}"
+              style="width:60px;height:60px;margin-right:15px;"
+            >
+            <span>${brandName}</span>
+          `;
         } else {
-          // Caso não tenha imagem mapeada, exibe apenas texto
-          btn.textContent = brand;
+          btn.textContent = brandName;
         }
 
         btn.onclick = () => {
-          finalizeCategory(mainCatIndex, subCatIndex, brand);
+          finalizeCategory(mainCatIndex, subCatIndex, brandName);
         };
         brandContainer.appendChild(btn);
       });
@@ -935,29 +997,29 @@
     }
 
     // Definir valores no formulário
-    function finalizeCategory(catIndex, subIndex, brand) {
-      const catName = editCategoryData[catIndex].name;
-      const subCatName = editCategoryData[catIndex].subCategories[subIndex].name;
+    function finalizeCategory(catIndex, subIndex, brandName) {
+      const catName = categoryData[catIndex].name;
+      const subCatName = categoryData[catIndex].subCategories[subIndex].name;
 
       document.getElementById('categoryInput').value = catName;
       document.getElementById('subCategoryInput').value = subCatName;
-      document.getElementById('brandInput').value = brand;
+      document.getElementById('brandInput').value = brandName;
 
-      // Atualiza a exibição no form
+      // Atualiza exibição
       document.getElementById('displayCategory').textContent = catName;
       document.getElementById('displaySubCategory').textContent = subCatName;
-      document.getElementById('displayBrand').textContent = brand || '---';
+      document.getElementById('displayBrand').textContent = brandName || '---';
 
       closeCategoryModal();
     }
 
-    // Voltar do Step 2 p/ Step 1
+    // Voltar do Step 2 para Step 1
     function backToEditMainCategory() {
       document.getElementById('editSubCategoryStep').style.display = 'none';
       document.getElementById('editMainCategoryStep').style.display = 'block';
     }
 
-    // Voltar do Step 3 p/ Step 2
+    // Voltar do Step 3 para Step 2
     function backToEditSubCategory() {
       document.getElementById('editBrandStep').style.display = 'none';
       document.getElementById('editSubCategoryStep').style.display = 'block';
