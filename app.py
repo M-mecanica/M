@@ -106,7 +106,6 @@ def normalize_string(s):
     # Converter para minúsculo
     normalized = normalized.lower()
     # Remover pontuação que não seja letras/números/espaços
-    # Ajuste aqui para garantir que "final," -> "final"
     normalized = re.sub(r'[^a-z0-9\s]', '', normalized)
     # Remover espaços extras
     normalized = re.sub(r'\s+', ' ', normalized).strip()
@@ -847,9 +846,7 @@ def edit_problem(problem_id):
         descricao_tokens = [t for t in descricao_normalizado.split() if t and t not in STOPWORDS]
 
         # Unificar tags antigas + novas do form + tokens do título + tokens da descrição
-        # Se quisermos normalizar também as tags antigas (caso tivessem pontuação), podemos fazer:
         normalized_old_tags = [normalize_string(t) for t in old_tags]
-
         final_tag_set = set(normalized_old_tags) | set(tags_tokens) | set(titulo_tokens) | set(descricao_tokens)
         final_tags = list(final_tag_set)
 
