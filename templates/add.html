@@ -51,9 +51,11 @@
       font-size: 1.6rem;
       margin: 0;
       text-align: center;
-      flex: 1;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
-    /* Botão de voltar com o mesmo estilo do menu */
+    /* Botão de voltar + Entrar/Perfil */
     .header-btn {
       background: none;
       border: none;
@@ -65,6 +67,7 @@
       text-decoration: none;
       padding: 0.5rem 1rem;
       font-size: 1rem;
+      transition: background-color 0.2s;
     }
     .header-btn:hover {
       background-color: #333;
@@ -73,6 +76,9 @@
       width: 24px;
       height: 24px;
       fill: currentColor;
+    }
+    .header-btn span {
+      margin-left: 0.5rem;
     }
 
     /* MAIN: espaçamento para não ficar oculto atrás do header */
@@ -258,7 +264,7 @@
       margin: 0;
     }
 
-    /* MODAL DE CATEGORIAS (3 passos) - atualizado para ficar igual ao script.js */
+    /* MODAL DE CATEGORIAS (3 passos) */
     .modal {
       display: none;
       position: fixed;
@@ -328,8 +334,6 @@
       margin-bottom: 1rem;
       line-height: 1.4;
     }
-
-    /* Botões de categorias */
     .btn-categorias {
       background-color: #f2f2f2;
       color: #333;
@@ -402,15 +406,35 @@
   </style>
 </head>
 <body>
-  <!-- Barra superior fixa com botão de voltar -->
+  <!-- Barra superior fixa com botão de voltar + botão Entrar/Perfil -->
   <header>
+    <!-- Botão "Voltar" -->
     <button class="header-btn" onclick="window.location.href='{{ url_for('index') }}'" aria-label="Voltar">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
+
     <h1>Registrar Novo Problema</h1>
-    <div style="width: 40px;"></div>
+
+    <!-- Botão Entrar / Perfil (mesma lógica das outras páginas) -->
+    {% if not session.get('user_id') %}
+      <a class="header-btn" href="{{ url_for('login') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
+          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+        </svg>
+        <span>Entrar</span>
+      </a>
+    {% else %}
+      <a class="header-btn" href="{{ url_for('perfil') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
+          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+        </svg>
+        <span>Perfil</span>
+      </a>
+    {% endif %}
   </header>
 
   <main>
@@ -535,7 +559,6 @@
 
     // ======== DADOS E FUNÇÕES PARA CATEGORIAS (BASEADO NO SCRIPT ORIGINAL) ========
 
-    /* MODAL DE CATEGORIAS (3 passos) */
     function openCategoryModal() {
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
       document.getElementById('categoryModal').style.display = 'flex';
@@ -717,7 +740,6 @@
       }
     ];
 
-    // Exibir categorias principais
     function showMainCategories() {
       const container = document.getElementById('mainCategoryContainer');
       if (!container) return;
@@ -743,7 +765,6 @@
       });
     }
 
-    // Exibir subcategorias (agora com imagem, se existir)
     function showSubCategories(catIndex) {
       const subCatContainer = document.getElementById('subCategoryContainer');
       if (!subCatContainer) return;
@@ -776,7 +797,6 @@
       });
     }
 
-    // Exibir marcas (aceitando tanto strings quanto objetos {name, img})
     function showBrands(catIndex, subCatIndex) {
       const brandContainer = document.getElementById('brandContainer');
       if (!brandContainer) return;
@@ -785,7 +805,6 @@
       const subCat = categoryData[catIndex].subCategories[subCatIndex];
       const brands = subCat.brands || [];
 
-      // Se não houver marcas cadastradas (array vazio), exibe opção "Sem marca"
       if (brands.length === 0) {
         const noBrandBtn = document.createElement('button');
         noBrandBtn.className = 'btn-categorias';
@@ -797,7 +816,6 @@
         return;
       }
 
-      // Se houver marcas, exibe cada uma
       brands.forEach(brand => {
         let brandName = "";
         let brandImg = null;
@@ -827,7 +845,6 @@
         brandContainer.appendChild(btn);
       });
 
-      // Botão "Sem marca"
       const noBrandBtn = document.createElement('button');
       noBrandBtn.className = 'btn-categorias';
       noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
@@ -837,17 +854,14 @@
       brandContainer.appendChild(noBrandBtn);
     }
 
-    // Função para finalizar a seleção da categoria (atualiza campos e fecha modal)
     function finalizeCategory(catIndex, subIndex, brandName) {
       const catName = categoryData[catIndex].name;
       const subCatName = categoryData[catIndex].subCategories[subIndex].name;
 
-      // Atualiza os inputs escondidos
       document.getElementById('categoryInput').value = catName;
       document.getElementById('subCategoryInput').value = subCatName;
       document.getElementById('brandInput').value = brandName;
 
-      // Atualiza a exibição dos valores na página
       document.getElementById('displayCategory').textContent = catName;
       document.getElementById('displaySubCategory').textContent = subCatName;
       document.getElementById('displayBrand').textContent = brandName || '---';
@@ -855,21 +869,18 @@
       closeCategoryModal();
     }
 
-    // Voltar para a lista de categorias principais
     function goBackToMainCategory() {
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
       document.getElementById('subCategoryStep').style.display = 'none';
       document.getElementById('mainCategoryStep').style.display = 'block';
     }
 
-    // Voltar para a lista de subcategorias
     function goBackToSubCategory() {
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
       document.getElementById('brandStep').style.display = 'none';
       document.getElementById('subCategoryStep').style.display = 'block';
     }
 
-    // Resetar o modal para o passo inicial
     function resetCategoryModalSteps() {
       document.getElementById('mainCategoryStep').style.display = 'block';
       document.getElementById('subCategoryStep').style.display = 'none';

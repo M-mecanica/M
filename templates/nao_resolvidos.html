@@ -17,6 +17,7 @@
       padding: 0;
       box-sizing: border-box;
     }
+
     /* BODY */
     body {
       font-family: 'Roboto', sans-serif;
@@ -28,6 +29,7 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
+
     /* HEADER FIXO */
     header {
       background-color: #000;
@@ -47,7 +49,9 @@
       font-size: 1.6rem;
       margin: 0;
       text-align: center;
-      flex: 1;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
     .header-btn {
       background: none;
@@ -60,6 +64,7 @@
       text-decoration: none;
       padding: 0.5rem 1rem;
       font-size: 1rem;
+      transition: background-color 0.2s;
     }
     .header-btn:hover {
       background-color: #333;
@@ -69,6 +74,10 @@
       height: 24px;
       fill: currentColor;
     }
+    .header-btn span {
+      margin-left: 0.5rem;
+    }
+
     /* MAIN */
     main {
       flex: 1;
@@ -81,11 +90,13 @@
       flex-direction: column;
       align-items: center;
     }
+
     /* Container dos resultados */
     .result-container {
       width: 100%;
       margin-top: 1rem;
     }
+
     /* Cada problema */
     .problem-item {
       background-color: #fff;
@@ -116,12 +127,14 @@
       border-radius: 6px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+
     .no-results {
       text-align: center;
       margin-top: 2rem;
       color: #666;
       font-size: 1.2rem;
     }
+
     /* Botão "Resolver" */
     .resolver-btn {
       background-color: #000;
@@ -143,6 +156,7 @@
       background-color: #333;
       transform: translateX(-50%) scale(1.02);
     }
+
     /* Botões de ação no canto inferior direito */
     .action-btns {
       position: absolute;
@@ -167,6 +181,7 @@
       background-color: #333;
       transform: scale(1.02);
     }
+
     /* Botão "Novo Problema" */
     .new-problem-btn {
       background-color: #000;
@@ -194,6 +209,7 @@
       fill: currentColor;
       margin-right: 0.4rem;
     }
+
     /* FOOTER */
     footer {
       background-color: #000;
@@ -209,6 +225,7 @@
     @media (max-width: 768px) {
       header {
         padding: 1.5rem 2rem;
+        height: 56px;
       }
       header h1 {
         font-size: 1.3rem;
@@ -253,13 +270,33 @@
 </head>
 <body>
   <header>
+    <!-- Botão "Voltar" -->
     <a href="{{ url_for('index') }}" class="header-btn" title="Voltar à Página Inicial">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </a>
+
     <h1>Problemas Não Resolvidos</h1>
-    <div style="width: 40px;"></div>
+
+    <!-- Botão Entrar / Perfil -->
+    {% if not session.get('user_id') %}
+      <a class="header-btn" href="{{ url_for('login') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
+          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+        </svg>
+        <span>Entrar</span>
+      </a>
+    {% else %}
+      <a class="header-btn" href="{{ url_for('perfil') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
+          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+        </svg>
+        <span>Perfil</span>
+      </a>
+    {% endif %}
   </header>
 
   <main>
@@ -269,24 +306,39 @@
         <div class="problem-item">
           <h2>{{ problema["titulo"] }}</h2>
           <p>{{ problema["descricao"] }}</p>
+
           {% if problema.problemImageThumb %}
             <div class="problem-image-container">
-              <img src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}" alt="Imagem do problema" class="problem-image" />
+              <img
+                src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}"
+                alt="Imagem do problema"
+                class="problem-image"
+              />
             </div>
           {% endif %}
+
           <p>Enviado por: {{ problema["creator_name"] }}</p>
 
-          <!-- Agora, qualquer usuário logado pode resolver -->
+          <!-- Qualquer usuário logado pode resolver -->
           <form action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}" method="GET">
             <button type="submit" class="resolver-btn">Resolver</button>
           </form>
 
           <div class="action-btns">
             {% if session.role == "solucionador" or session["user_id"] == problema["creator_id"] %}
-              <a href="{{ url_for('edit_problem', problem_id=problema['_id_str']) }}" class="action-btn">Editar</a>
+              <a
+                href="{{ url_for('edit_problem', problem_id=problema['_id_str']) }}"
+                class="action-btn"
+              >
+                Editar
+              </a>
             {% endif %}
             {% if session.role == "solucionador" %}
-              <form action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja remover este problema?');">
+              <form
+                action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}"
+                method="POST"
+                onsubmit="return confirm('Tem certeza que deseja remover este problema?');"
+              >
                 <button type="submit" class="action-btn">Remover</button>
               </form>
             {% endif %}
@@ -299,7 +351,9 @@
         <p>Não há problemas não resolvidos.</p>
         <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
+            0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
+            0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
           </svg>
           Novo Problema
         </a>

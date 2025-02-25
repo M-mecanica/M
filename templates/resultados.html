@@ -87,14 +87,27 @@
       right: 0;
       z-index: 1000;
     }
+    /* Centralizando o título horizontalmente */
+    header h1 {
+      color: #fff;
+      font-size: 1.6rem;
+      margin: 0;
+      text-align: center;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
     @media (max-width: 768px) {
       header {
         height: 56px;
         padding: 0 1rem;
       }
+      header h1 {
+        font-size: 1.3rem;
+      }
     }
 
-    /* Botão Voltar */
+    /* Botão no Header (Voltar / Entrar / Perfil) */
     .header-btn {
       background: none;
       border: none;
@@ -116,18 +129,8 @@
       height: 24px;
       fill: currentColor;
     }
-
-    header h1 {
-      color: #fff;
-      font-size: 1.6rem;
-      margin: 0;
-      text-align: center;
-      flex: 1;
-    }
-    @media (max-width: 768px) {
-      header h1 {
-        font-size: 1.3rem;
-      }
+    .header-btn span {
+      margin-left: 0.5rem;
     }
 
     /* ==========================
@@ -397,16 +400,36 @@
   <!-- CONTEÚDO GERAL (para o fade-in) -->
   <div id="content">
 
-    <!-- HEADER (botão voltar e título) -->
+    <!-- HEADER (botão voltar, título e botão Entrar/Perfil) -->
     <header>
+      <!-- Botão Voltar -->
       <button class="header-btn" onclick="window.location.href='{{ url_for('index') }}'" aria-label="Voltar">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
 
+      <!-- Título -->
       <h1>Resultados da Pesquisa</h1>
-      <div style="width: 40px;"></div>
+
+      <!-- Botão Entrar / Perfil (mesma lógica do index.html) -->
+      {% if not session.get('user_id') %}
+        <a class="header-btn" href="{{ url_for('login') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
+            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+          </svg>
+          <span>Entrar</span>
+        </a>
+      {% else %}
+        <a class="header-btn" href="{{ url_for('perfil') }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
+            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+          </svg>
+          <span>Perfil</span>
+        </a>
+      {% endif %}
     </header>
 
     <!-- Campo de pesquisa fixo -->
