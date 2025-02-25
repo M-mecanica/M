@@ -29,9 +29,22 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "CHAVE_SECRETA_PARA_SESSAO_I
 # Evita cache de páginas, útil para conteúdo dinâmico
 @app.after_request
 def add_header(response):
-    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
+    """
+    Ajustaremos a política de cache especificamente para a rota /search,
+    permitindo que o navegador guarde o estado da página e restaure o scroll
+    ao usar window.history.back().
+    As outras rotas continuam sem cache.
+    """
+    if request.endpoint == 'search':
+        # Liberar cache apenas para a rota /search
+        # Caso queira apenas permitir BFS Cache, mas não cache no disco,
+        # poderíamos usar algo mais sutil. Aqui, deixarei sem nenhum Cache-Control
+        # para que o browser guarde no history adequadamente.
+        pass
+    else:
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
     return response
 
 # -----------------------------------------------------------
@@ -94,9 +107,8 @@ def user_has_role(roles_permitidos):
 
 def normalize_string(s):
     """
-    Remove acentos, pontuação (parênteses, vírgulas, pontos etc.) e deixa tudo em minúsculo,
+    Remove acentos, pontuação e deixa tudo em minúsculo,
     sem espaços extras.
-    Ex.: 'Rolamento grande, (modelo X)' -> 'rolamento grande modelo x'
     """
     # Remover acentos
     normalized = ''.join(
@@ -141,11 +153,11 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
 
 def create_thumbnail(image_bytes, max_size=(300, 300)):
     """
-    Cria um thumbnail a partir dos bytes de imagem (arquivo original).
+    Cria um thumbnail a partir dos bytes de imagem.
     Retorna os bytes do thumbnail em formato JPEG.
     """
     img = Image.open(io.BytesIO(image_bytes))
-    img.thumbnail(max_size)  # Reduz a imagem mantendo a proporção
+    img.thumbnail(max_size)
     output = io.BytesIO()
     img.save(output, format="JPEG", quality=85)
     output.seek(0)
@@ -155,7 +167,6 @@ def save_image_with_thumbnail(file_obj, fs_instance):
     """
     Salva a imagem original e o thumbnail no GridFS (fs_instance).
     Retorna (original_id, thumb_id).
-    Se não houver arquivo ou estiver vazio, retorna (None, None).
     """
     if not file_obj or file_obj.filename.strip() == "":
         return None, None
@@ -187,7 +198,7 @@ def save_image_with_thumbnail(file_obj, fs_instance):
 
 def calculate_user_level(posted_count, solved_count):
     """
-    Exemplo de cálculo simples de nível de usuário,
+    Cálculo simples de nível de usuário,
     baseado em contagem de problemas postados e resolvidos.
     """
     # Pontos = cada problema postado vale 2, resolvido vale 5
@@ -209,6 +220,7 @@ def calculate_user_level(posted_count, solved_count):
 
     remaining_for_next_level = max(0, next_level_points - points)
 
+    # Cálculo de progresso dentro do nível
     if level == 1:
         base_min, base_max = 0, 20
     elif level == 2:
@@ -254,11 +266,10 @@ def root():
 @app.route("/index", methods=["GET", "POST"])
 def index():
     """
-    - GET: Renderiza a página inicial, escolhendo uma imagem de fundo aleatória.
+    - GET: Renderiza a página inicial, escolhendo um fundo aleatório.
     - POST: Captura o termo de pesquisa e redireciona para /search?q=<termo>.
     """
-    # Lista de possíveis fundos
-    background_images = [
+    backgrounds = [
         "fundo1.jpeg",
         "fundo2.png",
         "fundo3.png",
@@ -266,8 +277,8 @@ def index():
         "fundo5.png",
         "fundo6.jpeg"
     ]
-    random_bg = random.choice(background_images)
-    session["random_bg"] = random_bg  # Salva na sessão
+    random_bg = random.choice(backgrounds)
+    session["random_bg"] = random_bg
 
     if request.method == "POST":
         search_term = request.form.get("search", "").strip()
@@ -321,13 +332,12 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """
-    Se a rota foi chamada com ?next=<URL>, guardamos essa URL para redirecionar
-    depois do cadastro bem-sucedido.
+    Se chamado com ?next=<URL>, guardamos para redirecionar
+    após cadastro.
     """
     raw_next = request.args.get("next", "")
     parsed = urlparse(raw_next)
     if parsed.path:
-        # Monta next_url apenas com path + query
         next_url = parsed.path + (("?" + parsed.query) if parsed.query else "")
     else:
         next_url = ""
@@ -357,18 +367,15 @@ def register():
         }
         inserted = usuarios_collection.insert_one(novo_usuario)
 
-        # Salva na sessão
         session["user_id"] = str(inserted.inserted_id)
         session["username"] = nome
         session["role"] = "comum"
 
-        # Se houver next_url válido, redireciona
         if next_url:
             return redirect(next_url)
         else:
             return redirect(url_for("index"))
 
-    # Renderiza página de cadastro
     return render_template("register.html", erro=None, next_url=next_url)
 
 # -----------------------------------------------------------
@@ -377,21 +384,21 @@ def register():
 @app.route("/search", methods=["GET"])
 def search():
     """
-    Rota para a página de resultados, mantendo o mesmo fundo que foi salvo na sessão.
+    Página de resultados.
     """
     termo_busca = request.args.get("q", "").strip()
-    selected_category = request.args.get("category", "").strip()
-    selected_subcategory = request.args.get("subcategory", "").strip()
-    selected_brand = request.args.get("brand", "").strip()
+    category = request.args.get("category", "").strip()
+    subcategory = request.args.get("subcategory", "").strip()
+    brand = request.args.get("brand", "").strip()
 
     random_bg = session.get("random_bg", "fundo1.jpeg")
 
     return render_template(
         "resultados.html",
         termo_busca=termo_busca,
-        selected_category=selected_category,
-        selected_subcategory=selected_subcategory,
-        selected_brand=selected_brand,
+        selected_category=category,
+        selected_subcategory=subcategory,
+        selected_brand=brand,
         random_bg=random_bg
     )
 
@@ -488,7 +495,7 @@ def load_problems():
         return jsonify({"problems": problems_list, "has_more": has_more, "total_count": total_count})
 
     else:
-        # Se a busca é vazia -> problemas aleatórios
+        # Busca vazia -> problemas aleatórios
         if page == 1:
             session["displayed_problem_ids"] = []
         displayed_ids = session.get("displayed_problem_ids", [])
@@ -561,7 +568,6 @@ def load_problems():
 
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
-    # SE NÃO ESTIVER LOGADO, REDIRECIONA PARA O CADASTRO COM O next=request.url
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
 
@@ -569,7 +575,6 @@ def add_problem():
         titulo = request.form.get("titulo", "").strip()
         descricao = request.form.get("descricao", "").strip()
 
-        # Gera tags a partir do título (já removendo acentos/pontuação)
         titulo_normalized = normalize_string(titulo)
         titulo_tokens = [t for t in titulo_normalized.split() if t not in STOPWORDS]
         all_tags = list(set(titulo_tokens))
@@ -606,7 +611,6 @@ def add_problem():
 
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
-    # SE NÃO ESTIVER LOGADO, REDIRECIONA PARA O CADASTRO COM O next=request.url
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
 
@@ -624,14 +628,12 @@ def unresolved():
 
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
-    # SE NÃO ESTIVER LOGADO, REDIRECIONA
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
     return render_template("resolver.html", problem_id=problem_id)
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
-    # SE NÃO ESTIVER LOGADO, REDIRECIONA
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
 
@@ -662,7 +664,7 @@ def exibir_solucao(problem_id):
     if not problema.get("resolvido"):
         return "Ainda não resolvido.", 400
 
-    # Gera share_token se não existir
+    # share_token
     if "share_token" not in problema:
         new_token = secrets.token_urlsafe(16)
         problemas_collection.update_one(
@@ -677,7 +679,7 @@ def exibir_solucao(problem_id):
         if token_param != problema["share_token"]:
             return redirect(url_for("register", next=request.url))
 
-    # Registra visualização (se logado)
+    # Registra visualização se logado
     if user_is_logged_in():
         problem_view_history_collection.update_one(
             {"user_id": session["user_id"], "problem_id": problem_id},
@@ -724,7 +726,6 @@ def exibir_solucao(problem_id):
         "feedback": "SIM"
     })
 
-    # Fundo da sessão (ou padrão)
     random_bg = session.get("random_bg", "fundo1.jpeg")
 
     return render_template(
@@ -741,10 +742,8 @@ def exibir_solucao(problem_id):
 
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
-    # SE NÃO ESTIVER LOGADO, REDIRECIONA
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
-    # Verifica se o usuário tem papel 'solucionador' para poder deletar
     if not user_has_role(["solucionador"]):
         return "Acesso negado (somente solucionador).", 403
 
@@ -752,7 +751,7 @@ def delete_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    # Apaga imagens no GridFS, se existirem
+    # Deleta imagens do GridFS
     old_file_id = problema.get("problemImage")
     if old_file_id:
         try:
@@ -768,7 +767,6 @@ def delete_problem(problem_id):
 
     problemas_collection.delete_one({"_id": ObjectId(problem_id)})
 
-    # Se estava resolvido, retorna pra /search, senão /unresolved
     if problema["resolvido"]:
         return redirect(url_for("search"))
     else:
@@ -783,7 +781,7 @@ def edit_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    # Permissão: criador do problema OU solucionador
+    # Permissão: criador OU solucionador
     can_edit = (session["user_id"] == problema.get("creator_id")) or user_has_role(["solucionador"])
     if not can_edit:
         return "Acesso negado.", 403
@@ -803,9 +801,7 @@ def edit_problem(problem_id):
         solver_id = request.form.get("solver_id", "")
         solver_custom_name = request.form.get("solver_custom_name", "").strip()
 
-        # NOVO: campo tags do formulário
         tags_raw = request.form.get("tags", "").strip()
-        # Normalizar e remover pontuação
         tags_normalized = normalize_string(tags_raw)
         tags_tokens = [t for t in tags_normalized.split() if t and t not in STOPWORDS]
 
@@ -822,7 +818,6 @@ def edit_problem(problem_id):
                 all_users=all_users
             )
 
-        # Criador "custom" vs criador "usuário"
         if creator_id == "custom":
             final_creator_id = None
             final_creator_name = creator_custom_name
@@ -830,7 +825,6 @@ def edit_problem(problem_id):
             final_creator_id = creator_id
             final_creator_name = None
 
-        # Solver "custom" vs solver "usuário"
         if solver_id == "custom":
             final_solver_id = None
             final_solver_name = solver_custom_name
@@ -845,9 +839,7 @@ def edit_problem(problem_id):
         titulo_tokens = [t for t in titulo_normalizado.split() if t and t not in STOPWORDS]
         descricao_tokens = [t for t in descricao_normalizado.split() if t and t not in STOPWORDS]
 
-        # Unificar tags antigas + novas do form + tokens do título + tokens da descrição
-        normalized_old_tags = [normalize_string(t) for t in old_tags]
-        final_tag_set = set(normalized_old_tags) | set(tags_tokens) | set(titulo_tokens) | set(descricao_tokens)
+        final_tag_set = set(old_tags) | set(tags_tokens) | set(titulo_tokens) | set(descricao_tokens)
         final_tags = list(final_tag_set)
 
         updated_fields = {
@@ -866,7 +858,6 @@ def edit_problem(problem_id):
         delete_image = request.form.get("deleteExistingImage", "false") == "true"
         image_file = request.files.get("problemImage")
 
-        # Se for pedido para deletar a imagem existente
         if delete_image:
             old_file_id = problema.get("problemImage")
             if old_file_id:
@@ -882,7 +873,6 @@ def edit_problem(problem_id):
                     pass
             updated_fields["problemImage"] = None
             updated_fields["problemImageThumb"] = None
-        # Se chegou uma nova imagem
         elif image_file and image_file.filename.strip():
             new_orig_id, new_thumb_id = save_image_with_thumbnail(image_file, fs_m)
             old_file_id = problema.get("problemImage")
@@ -1075,7 +1065,7 @@ def gridfs_image_thumb(file_id):
         return "Thumbnail não encontrada.", 404
 
 # -----------------------------------------------------------
-# GRIDFS - EXIBIÇÃO DE IMAGENS (ITENS) - (MachineZONE)
+# GRIDFS - IMAGENS (ITENS) - MachineZONE
 # -----------------------------------------------------------
 @app.route("/gridfs_item_image/<file_id>", methods=["GET"])
 def gridfs_item_image(file_id):
@@ -1266,14 +1256,12 @@ def load_items():
         )
         items = list(items_cursor)
 
-        # Calcula maior sub-frase para cada item
         for item in items:
             item['largest_sub_phrase_length'] = compute_largest_sub_phrase_length(
                 search_tokens,
                 item.get('matching_phrases', [])
             )
 
-        # Ordena: matches exatos -> maior sub-match -> alfabético
         items.sort(
             key=lambda x: (
                 -x['is_phrase_match'],
@@ -1301,7 +1289,6 @@ def load_items():
             'has_more': has_more,
             'total_items': total_items
         })
-
     else:
         if page == 1:
             session["displayed_item_ids"] = []
@@ -1354,7 +1341,7 @@ def upload_item_image(item_id):
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
-        return "Acesso negado. Apenas solucionadores podem enviar imagens de itens.", 403
+        return "Acesso negado.", 403
 
     item = itens_collection.find_one({"_id": ObjectId(item_id)})
     if not item:
@@ -1395,7 +1382,6 @@ def add_item():
         description = request.form.get("description", "").strip()
         tags_str = request.form.get("tags", "").strip()
         user_tags_raw = tags_str.split() if tags_str else []
-        # Normalizar e remover pontuação
         user_tags_normalized = normalize_string(" ".join(user_tags_raw))
         final_user_tags = [t for t in user_tags_normalized.split() if t and t not in STOPWORDS]
 
@@ -1437,7 +1423,7 @@ def add_item():
     return render_template("add_item.html")
 
 # -----------------------------------------------------------
-# PERFIL DO USUÁRIO + EDIÇÃO DE PERFIL
+# PERFIL
 # -----------------------------------------------------------
 @app.route("/perfil", methods=["GET"])
 def perfil():
@@ -1539,7 +1525,7 @@ def get_user_photo(file_id):
         return "Foto não encontrada.", 404
 
 # -----------------------------------------------------------
-# FEEDBACK "SIM/NAO" (ESTILO LIKE/DISLIKE)
+# FEEDBACK "SIM/NAO" (LIKE/DISLIKE)
 # -----------------------------------------------------------
 @app.route("/toggle_helpful", methods=["POST"])
 def toggle_helpful():
@@ -1548,7 +1534,7 @@ def toggle_helpful():
 
     data = request.get_json()
     problem_id = data.get("problem_id")
-    desired_feedback = data.get("feedback")  # "SIM" ou "NAO"
+    desired_feedback = data.get("feedback")
 
     if not problem_id or not desired_feedback:
         return jsonify({"error": "Dados incompletos."}), 400
@@ -1574,7 +1560,6 @@ def toggle_helpful():
     else:
         current_feedback = existing_doc["feedback"]
         if current_feedback == desired_feedback:
-            # Remove o feedback se clicar novamente
             helpful_feedback_collection.delete_one({"_id": existing_doc["_id"]})
             like_count = helpful_feedback_collection.count_documents({
                 "problem_id": problem_id,
@@ -1582,7 +1567,6 @@ def toggle_helpful():
             })
             return jsonify({"status": "removed", "feedback": None, "like_count": like_count})
         else:
-            # Atualiza para o novo feedback
             helpful_feedback_collection.update_one(
                 {"_id": existing_doc["_id"]},
                 {"$set": {"feedback": desired_feedback, "timestamp": datetime.datetime.utcnow()}}
@@ -1594,7 +1578,7 @@ def toggle_helpful():
             return jsonify({"status": "updated", "feedback": desired_feedback, "like_count": like_count})
 
 # -----------------------------------------------------------
-# SUBMIT FEEDBACK PARA PASSO ESPECÍFICO (EXEMPLO)
+# FEEDBACK DE PASSO ESPECÍFICO
 # -----------------------------------------------------------
 @app.route("/submit_step_feedback", methods=["POST"])
 def submit_step_feedback():

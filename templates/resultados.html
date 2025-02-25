@@ -412,7 +412,7 @@
       <!-- Título -->
       <h1>Resultados da Pesquisa</h1>
 
-      <!-- Botão Entrar / Perfil (mesma lógica do index.html) -->
+      <!-- Botão Entrar / Perfil -->
       {% if not session.get('user_id') %}
         <a class="header-btn" href="{{ url_for('login') }}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -436,7 +436,14 @@
     <div class="fixed-search">
       <form action="{{ url_for('search') }}" method="GET" class="search-container" id="searchForm">
         <span class="material-icons search-icon">search</span>
-        <input type="text" name="q" id="search-input" value="{{ termo_busca }}" autocomplete="off" autofocus />
+        <input
+          type="text"
+          name="q"
+          id="search-input"
+          value="{{ termo_busca }}"
+          autocomplete="off"
+          autofocus
+        />
         <input type="hidden" name="category" value="{{ selected_category }}">
         <input type="hidden" name="subcategory" value="{{ selected_subcategory }}">
         <input type="hidden" name="brand" value="{{ selected_brand }}">
@@ -447,6 +454,7 @@
     <main>
       <!-- Container onde os problemas serão inseridos via JS -->
       <div id="problem-container"></div>
+
       <!-- Sentinel (infinite scroll) -->
       <div id="sentinel"></div>
 
@@ -485,10 +493,9 @@
     </footer>
   </div><!-- /#content -->
 
-  <!-- SCRIPT INLINE COM AS FUNÇÕES (Preloader, Fade-in, Carregamento Ajax, etc.) -->
   <script>
     /***************************
-     *  PRELOADER + FADE-IN
+     * PRELOADER + FADE-IN
      ***************************/
     window.addEventListener('load', function() {
       const preloader = document.getElementById('preloader');
@@ -502,30 +509,75 @@
     });
 
     /***************************
-     * BUSCA E CARREGAMENTO DE PROBLEMAS (infinite scroll)
+     * VARIÁVEIS GLOBAIS
      ***************************/
     const searchQuery = "{{ termo_busca|safe }}".trim();
     const selectedCategory = "{{ selected_category|safe }}";
     const selectedBrand = "{{ selected_brand|safe }}";
     const selectedSubcategory = "{{ selected_subcategory|safe }}";
 
+    // Para controle de infinite scroll e restauro de estado
+    let currentPage = 1;
+    let loading = false;
+    let hasMore = true;
+    let loadedProblems = []; // guardamos todos os problemas carregados
+
     const problemContainer = document.getElementById('problem-container');
     const spinner = document.getElementById('spinner');
     const searchInput = document.getElementById('search-input');
 
-    let currentPage = 1;
-    let loading = false;
-    let hasMore = true;
+    /***************************
+     * RESTAURAR ESTADO SE EXISTIR NO sessionStorage
+     ***************************/
+    let restoredState = false;
+    const storedData = sessionStorage.getItem('mSearchState');
+    if (storedData) {
+      try {
+        const parsed = JSON.parse(storedData);
+        // Checar se é o mesmo termo de busca e mesmos filtros
+        if (
+          parsed.searchQuery === searchQuery &&
+          parsed.selectedCategory === selectedCategory &&
+          parsed.selectedSubcategory === selectedSubcategory &&
+          parsed.selectedBrand === selectedBrand
+        ) {
+          currentPage = parsed.currentPage;
+          hasMore = parsed.hasMore;
+          loadedProblems = parsed.loadedProblems || [];
+          restoredState = true;
 
+          // Recriar o DOM
+          loadedProblems.forEach(problem => {
+            const el = createProblemElement(problem);
+            problemContainer.appendChild(el);
+          });
+
+          // Restaurar rolagem
+          setTimeout(() => {
+            window.scrollTo(0, parsed.scrollPosition || 0);
+          }, 50);
+        }
+      } catch (err) {
+        console.error('Erro ao restaurar sessionStorage:', err);
+      }
+    }
+
+    /***************************
+     * EVENTO DE SCROLL INFINITO
+     ***************************/
     window.addEventListener('DOMContentLoaded', () => {
-      // Se já tem algo digitado, focar no campo de busca e colocar o cursor no fim
+      // Se já tem algo digitado, focar no fim do input
       if (searchInput.value) {
         searchInput.focus();
         searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
       }
 
-      loadProblems();
+      // Se não restauramos nenhum estado, vamos carregar normalmente
+      if (!restoredState) {
+        loadProblems();
+      }
 
+      // Observer do sentinel
       const observer = new IntersectionObserver((entries) => {
         const entry = entries[0];
         if (entry.isIntersecting && hasMore && !loading) {
@@ -538,6 +590,9 @@
       observer.observe(sentinel);
     });
 
+    /***************************
+     * FUNÇÃO PRINCIPAL DE CARREGAR PROBLEMAS
+     ***************************/
     async function loadProblems() {
       loading = true;
       spinner.style.display = 'block';
@@ -549,18 +604,14 @@
           + `&brand=${encodeURIComponent(selectedBrand)}`;
         const response = await fetch(url);
         if (!response.ok) throw new Error('Erro ao carregar problemas');
+
         const data = await response.json();
         hasMore = data.has_more;
-        const fragment = document.createDocumentFragment();
-
-        // Renderizar cada problema
         data.problems.forEach(problem => {
+          loadedProblems.push(problem); // guarde no array global
           const problemEl = createProblemElement(problem);
-          fragment.appendChild(problemEl);
+          problemContainer.appendChild(problemEl);
         });
-
-        // Adicionar ao container
-        problemContainer.appendChild(fragment);
 
       } catch (error) {
         console.error(error);
@@ -570,6 +621,9 @@
       }
     }
 
+    /***************************
+     * CRIA O ELEMENTO DE UM PROBLEMA
+     ***************************/
     function createProblemElement(problem) {
       const div = document.createElement('div');
       div.classList.add('problem-item');
@@ -616,21 +670,25 @@
         div.appendChild(solverEl);
 
         {% if session.get('user_id') %}
-          // Se estiver logado, vai direto para a solução
+          // Link para a solução (logado)
           const solucaoLink = document.createElement('a');
           solucaoLink.href = "{{ url_for('exibir_solucao', problem_id='__ID__') }}"
             .replace('__ID__', problem._id);
           solucaoLink.classList.add('ver-solucao-btn');
           solucaoLink.textContent = 'Veja a Solução';
+
+          // Antes de redirecionar, salvamos o estado
+          solucaoLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveStateAndGo(solucaoLink.href);
+          });
+
           div.appendChild(solucaoLink);
         {% else %}
-          // Se não estiver logado, direcionar para página de cadastro
+          // Se não estiver logado, direcionar para cadastro com ?next=...
           const solucaoLink = document.createElement('a');
-          solucaoLink.href = "{{ url_for('register') }}?next="
-            + encodeURIComponent(
-                "{{ url_for('exibir_solucao', problem_id='__ID__') }}"
-                .replace('__ID__', problem._id)
-            );
+          const nextUrl = "{{ url_for('exibir_solucao', problem_id='__ID__') }}".replace('__ID__', problem._id);
+          solucaoLink.href = "{{ url_for('register') }}?next=" + encodeURIComponent(nextUrl);
           solucaoLink.classList.add('ver-solucao-btn');
           solucaoLink.textContent = 'Veja a Solução';
           div.appendChild(solucaoLink);
@@ -670,14 +728,38 @@
     }
 
     /***************************
-     * SUBMETER BUSCA
+     * SALVAR ESTADO E IR PARA A SOLUÇÃO
+     ***************************/
+    function saveStateAndGo(url) {
+      // Obter posição de rolagem
+      const scrollPos = window.scrollY || document.documentElement.scrollTop;
+
+      // Montar objeto de estado
+      const stateObj = {
+        searchQuery: searchQuery,
+        selectedCategory: selectedCategory,
+        selectedSubcategory: selectedSubcategory,
+        selectedBrand: selectedBrand,
+        currentPage: currentPage,
+        hasMore: hasMore,
+        scrollPosition: scrollPos,
+        loadedProblems: loadedProblems
+      };
+
+      sessionStorage.setItem('mSearchState', JSON.stringify(stateObj));
+
+      // Agora redireciona
+      window.location.href = url;
+    }
+
+    /***************************
+     * SUBMETER NOVA BUSCA
      ***************************/
     const searchForm = document.getElementById('searchForm');
     if (searchForm) {
-      const mainSearchInput = document.getElementById('search-input');
       searchForm.addEventListener('submit', function () {
         // Se o usuário digitou algo, desabilita os campos hidden de categoria/subcat/brand
-        if (mainSearchInput.value.trim() !== "") {
+        if (searchInput.value.trim() !== "") {
           const catInput = searchForm.querySelector('input[name="category"]');
           const subCatInput = searchForm.querySelector('input[name="subcategory"]');
           const brandInput = searchForm.querySelector('input[name="brand"]');
@@ -685,6 +767,9 @@
           if (subCatInput) subCatInput.disabled = true;
           if (brandInput) brandInput.disabled = true;
         }
+
+        // Limpamos qualquer state anterior, pois é uma nova busca
+        sessionStorage.removeItem('mSearchState');
       });
     }
   </script>
