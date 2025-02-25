@@ -273,7 +273,8 @@
     <!-- Botão "Voltar" -->
     <a href="{{ url_for('index') }}" class="header-btn" title="Voltar à Página Inicial">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2"
+              fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </a>
 
@@ -307,10 +308,11 @@
           <h2>{{ problema["titulo"] }}</h2>
           <p>{{ problema["descricao"] }}</p>
 
-          {% if problema.problemImageThumb %}
+          <!-- Exibir imagem original, se existir -->
+          {% if problema.problemImage %}
             <div class="problem-image-container">
               <img
-                src="{{ url_for('gridfs_image_thumb', file_id=problema.problemImageThumb) }}"
+                src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}"
                 alt="Imagem do problema"
                 class="problem-image"
               />

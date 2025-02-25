@@ -55,7 +55,6 @@
       left: 50%;
       transform: translateX(-50%);
     }
-    /* Botão de voltar + Entrar/Perfil */
     .header-btn {
       background: none;
       border: none;
@@ -80,8 +79,6 @@
     .header-btn span {
       margin-left: 0.5rem;
     }
-
-    /* MAIN: espaçamento para não ficar oculto atrás do header */
     main {
       margin-top: 100px;
       flex: 1;
@@ -94,15 +91,12 @@
       flex-direction: column;
       align-items: center;
     }
-
     .page-title {
       font-size: 1.6rem;
       margin-bottom: 2rem;
       color: #000;
       text-align: center;
     }
-
-    /* Container do formulário */
     .form-container {
       background-color: #fff;
       border: 1px solid #ccc;
@@ -112,25 +106,21 @@
       max-width: 600px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-
     .erro {
       color: #d00;
       margin-bottom: 1rem;
       font-weight: bold;
     }
-
     form {
       display: flex;
       flex-direction: column;
       width: 100%;
     }
-
     label {
       font-weight: 500;
       margin-bottom: 0.5rem;
       color: #555;
     }
-
     input[type="text"],
     textarea {
       margin-bottom: 1.5rem;
@@ -147,12 +137,9 @@
     textarea:focus {
       border-color: #aaa;
     }
-
     textarea {
       resize: none;
     }
-
-    /* Botão "Definir Categoria" */
     .btn-definir-cat {
       background-color: #000;
       color: #fff;
@@ -179,7 +166,6 @@
       width: 16px;
       height: 16px;
     }
-
     .cat-display {
       margin-top: -1rem;
       margin-bottom: 1.5rem;
@@ -190,8 +176,6 @@
       border-radius: 4px;
       border: 1px solid #ddd;
     }
-
-    /* Botão de Submit */
     input[type="submit"] {
       background-color: #000;
       color: #fff;
@@ -207,8 +191,6 @@
       background-color: #333;
       transform: scale(1.02);
     }
-
-    /* Botão de Upload Personalizado */
     .upload-btn {
       display: inline-flex;
       align-items: center;
@@ -238,8 +220,6 @@
     #problemImage {
       display: none;
     }
-
-    /* Pré-visualização da imagem */
     #previewContainer {
       margin-bottom: 1.5rem;
       text-align: center;
@@ -252,7 +232,6 @@
       display: none;
       margin-top: 1rem;
     }
-
     footer {
       background-color: #000;
       text-align: center;
@@ -263,8 +242,6 @@
       color: #fff;
       margin: 0;
     }
-
-    /* MODAL DE CATEGORIAS (3 passos) */
     .modal {
       display: none;
       position: fixed;
@@ -368,7 +345,6 @@
     .btn-categorias.voltar:hover {
       background-color: #ccc;
     }
-
     @media (max-width: 768px) {
       header h1 {
         font-size: 1.3rem;
@@ -406,18 +382,13 @@
   </style>
 </head>
 <body>
-  <!-- Barra superior fixa com botão de voltar + botão Entrar/Perfil -->
   <header>
-    <!-- Botão "Voltar" -->
     <button class="header-btn" onclick="window.location.href='{{ url_for('index') }}'" aria-label="Voltar">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
-
     <h1>Registrar Novo Problema</h1>
-
-    <!-- Botão Entrar / Perfil (mesma lógica das outras páginas) -->
     {% if not session.get('user_id') %}
       <a class="header-btn" href="{{ url_for('login') }}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -439,22 +410,16 @@
 
   <main>
     <h2 class="page-title">Informe os detalhes do problema</h2>
-
     <div class="form-container">
       {% if erro %}
         <div class="erro">{{ erro }}</div>
       {% endif %}
-      <!-- IMPORTANTE: multipart/form-data para envio de arquivos -->
       <form action="{{ url_for('add_problem') }}" method="POST" enctype="multipart/form-data">
-        <!-- Título -->
         <label for="titulo">Título do Problema</label>
         <input type="text" id="titulo" name="titulo" required />
-
-        <!-- Descrição -->
         <label for="descricao">Descrição do Problema</label>
         <textarea id="descricao" name="descricao" rows="5" required></textarea>
 
-        <!-- Botão para selecionar Categoria -->
         <button type="button" class="btn-definir-cat" onclick="openCategoryModal()">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
@@ -462,20 +427,15 @@
           </svg>
           Definir Categoria
         </button>
-
-        <!-- Exibição da categoria escolhida -->
         <div class="cat-display">
           Categoria Principal: <span id="displayCategory">---</span><br>
           Subcategoria: <span id="displaySubCategory">---</span><br>
           Marca: <span id="displayBrand">---</span>
         </div>
-
-        <!-- Campos ocultos para envio -->
         <input type="hidden" name="category" id="categoryInput" />
         <input type="hidden" name="subCategory" id="subCategoryInput" />
         <input type="hidden" name="brand" id="brandInput" />
 
-        <!-- Botão de upload personalizado e pré-visualização -->
         <label class="upload-btn" for="problemImage">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <path d="M.5 9.5a.5.5 0 0 1 .5-.5h2V7.707l-1.146 1.147a.5.5 0 0 1-.708-.708l2-2
@@ -493,8 +453,6 @@
         <div id="previewContainer">
           <img id="previewImage" alt="Pré-visualização da imagem" />
         </div>
-
-        <!-- Botão Submit -->
         <input type="submit" value="Enviar Problema" />
       </form>
     </div>
@@ -504,7 +462,6 @@
     <p>© 2025 Plataforma M</p>
   </footer>
 
-  <!-- MODAL: Seleção de Categoria (3 passos) -->
   <div id="categoryModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -512,21 +469,16 @@
         <span class="close" onclick="closeCategoryModal()">&times;</span>
       </div>
       <div class="modal-body">
-        <!-- Passo 1: Categorias principais -->
         <div id="mainCategoryStep" style="display: block;">
           <p class="modal-text">Selecione a categoria principal:</p>
           <div id="mainCategoryContainer"></div>
         </div>
-
-        <!-- Passo 2: Subcategorias -->
         <div id="subCategoryStep" style="display: none;">
           <p class="modal-text" id="selectedMainCategoryText"></p>
           <p class="modal-text">Selecione a subcategoria:</p>
           <div id="subCategoryContainer"></div>
           <button class="btn-categorias voltar" onclick="goBackToMainCategory()">Voltar</button>
         </div>
-
-        <!-- Passo 3: Marcas -->
         <div id="brandStep" style="display: none;">
           <p class="modal-text" id="selectedSubCategoryText"></p>
           <p class="modal-text">Selecione a marca (ou "Sem marca"):</p>
@@ -538,7 +490,6 @@
   </div>
 
   <script>
-    // ======== PRÉ-VISUALIZAÇÃO DE IMAGEM ========
     const problemImageInput = document.getElementById('problemImage');
     const previewImage = document.getElementById('previewImage');
 
@@ -557,8 +508,6 @@
       }
     });
 
-    // ======== DADOS E FUNÇÕES PARA CATEGORIAS (BASEADO NO SCRIPT ORIGINAL) ========
-
     function openCategoryModal() {
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
       document.getElementById('categoryModal').style.display = 'flex';
@@ -569,7 +518,6 @@
       resetCategoryModalSteps();
     }
 
-    // Exemplo de dados de categorias, subcategorias e marcas
     const categoryData = [
       {
         name: "Veículos",
@@ -774,7 +722,6 @@
       subCats.forEach((sub, subIdx) => {
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
-
         if (sub.img) {
           btn.innerHTML = `
             <img src="/static/images/${sub.img}" alt="${sub.name}"
@@ -784,7 +731,6 @@
         } else {
           btn.textContent = sub.name;
         }
-
         btn.onclick = () => {
           document.getElementById('subCategoryStep').style.display = 'none';
           document.getElementById('brandStep').style.display = 'block';

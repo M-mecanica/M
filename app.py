@@ -16,8 +16,9 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import gridfs
 
-from PIL import Image
-import io
+# Removido PIL e io pois não vamos mais criar thumbnails
+# from PIL import Image
+# import io
 
 app = Flask(__name__)
 
@@ -29,17 +30,7 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "CHAVE_SECRETA_PARA_SESSAO_I
 # Evita cache de páginas, útil para conteúdo dinâmico
 @app.after_request
 def add_header(response):
-    """
-    Ajustaremos a política de cache especificamente para a rota /search,
-    permitindo que o navegador guarde o estado da página e restaure o scroll
-    ao usar window.history.back().
-    As outras rotas continuam sem cache.
-    """
     if request.endpoint == 'search':
-        # Liberar cache apenas para a rota /search
-        # Caso queira apenas permitir BFS Cache, mas não cache no disco,
-        # poderíamos usar algo mais sutil. Aqui, deixarei sem nenhum Cache-Control
-        # para que o browser guarde no history adequadamente.
         pass
     else:
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
@@ -55,15 +46,14 @@ client_m = MongoClient(
 )
 db_m = client_m["m_plataforma"]
 
-# Coleções do M
 problemas_collection = db_m["problemas"]
 usuarios_collection = db_m["usuarios"]
-history_collection = db_m["search_history"]  # Histórico de buscas de PEÇAS (MachineZONE)
-problem_history_collection = db_m["problem_search_history"]  # Histórico de buscas de PROBLEMAS
-problem_view_history_collection = db_m["problem_view_history"]  # Registro de visualizações
-improvement_suggestions_collection = db_m["improvement_suggestions"]  # Sugestões de melhorias
-step_feedback_collection = db_m["step_feedback"]  # Feedbacks de cada passo da solução
-helpful_feedback_collection = db_m["helpful_feedback"]  # Feedback "Sim/Não" na solução
+history_collection = db_m["search_history"]
+problem_history_collection = db_m["problem_search_history"]
+problem_view_history_collection = db_m["problem_view_history"]
+improvement_suggestions_collection = db_m["improvement_suggestions"]
+step_feedback_collection = db_m["step_feedback"]
+helpful_feedback_collection = db_m["helpful_feedback"]
 
 # GridFS para armazenar imagens na plataforma M
 fs_m = gridfs.GridFS(db_m)
@@ -89,8 +79,8 @@ STOPWORDS = {
     "os", "um", "uma", "uns", "umas"
 }
 
-ITEMS_PER_PAGE = 20  # Usado tanto para itens quanto para problemas
-MZ_WHATSAPP = "5543996436367"  # Exemplo de telefone
+ITEMS_PER_PAGE = 20
+MZ_WHATSAPP = "5543996436367"
 
 # -----------------------------------------------------------
 # FUNÇÕES AUXILIARES
@@ -110,16 +100,12 @@ def normalize_string(s):
     Remove acentos, pontuação e deixa tudo em minúsculo,
     sem espaços extras.
     """
-    # Remover acentos
     normalized = ''.join(
         c for c in unicodedata.normalize('NFKD', s)
         if not unicodedata.combining(c)
     )
-    # Converter para minúsculo
     normalized = normalized.lower()
-    # Remover pontuação que não seja letras/números/espaços
     normalized = re.sub(r'[^a-z0-9\s]', '', normalized)
-    # Remover espaços extras
     normalized = re.sub(r'\s+', ' ', normalized).strip()
     return normalized
 
@@ -137,9 +123,6 @@ def generate_sub_phrases(tokens):
     return sub_phrases
 
 def compute_largest_sub_phrase_length(search_tokens, item_phrases):
-    """
-    Verifica a maior sub-frase (em nº de tokens) presente em 'item_phrases'.
-    """
     if not item_phrases:
         return 0
     all_sub_phrases = generate_sub_phrases(search_tokens)
@@ -151,60 +134,32 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
                 largest_length = num_tokens
     return largest_length
 
-def create_thumbnail(image_bytes, max_size=(300, 300)):
+def save_image(file_obj, fs_instance):
     """
-    Cria um thumbnail a partir dos bytes de imagem.
-    Retorna os bytes do thumbnail em formato JPEG.
-    """
-    img = Image.open(io.BytesIO(image_bytes))
-    img.thumbnail(max_size)
-    output = io.BytesIO()
-    img.save(output, format="JPEG", quality=85)
-    output.seek(0)
-    return output.read()
-
-def save_image_with_thumbnail(file_obj, fs_instance):
-    """
-    Salva a imagem original e o thumbnail no GridFS (fs_instance).
-    Retorna (original_id, thumb_id).
+    Armazena apenas a imagem original no GridFS (fs_instance).
+    Retorna o ID em string ou (None) se não houver imagem válida.
     """
     if not file_obj or file_obj.filename.strip() == "":
-        return None, None
+        return None
 
     file_data = file_obj.read()
     if not file_data:
-        return None, None
+        return None
 
     content_type = file_obj.content_type
     filename = secure_filename(file_obj.filename)
 
-    # Armazena imagem original
+    # Armazena a imagem original diretamente
     original_id = fs_instance.put(
         file_data,
         filename=filename,
         contentType=content_type
     )
 
-    # Gera e armazena thumbnail
-    thumb_data = create_thumbnail(file_data)
-    thumb_filename = "thumb_" + filename
-    thumb_id = fs_instance.put(
-        thumb_data,
-        filename=thumb_filename,
-        contentType="image/jpeg"
-    )
-
-    return str(original_id), str(thumb_id)
+    return str(original_id)
 
 def calculate_user_level(posted_count, solved_count):
-    """
-    Cálculo simples de nível de usuário,
-    baseado em contagem de problemas postados e resolvidos.
-    """
-    # Pontos = cada problema postado vale 2, resolvido vale 5
     points = posted_count * 2 + solved_count * 5
-
-    # Definir faixas de pontos para níveis (exemplo)
     if points < 20:
         level = 1
         next_level_points = 20
@@ -216,11 +171,10 @@ def calculate_user_level(posted_count, solved_count):
         next_level_points = 100
     else:
         level = 4
-        next_level_points = 999999  # Nível máximo (exemplo)
+        next_level_points = 999999
 
     remaining_for_next_level = max(0, next_level_points - points)
 
-    # Cálculo de progresso dentro do nível
     if level == 1:
         base_min, base_max = 0, 20
     elif level == 2:
@@ -228,7 +182,7 @@ def calculate_user_level(posted_count, solved_count):
     elif level == 3:
         base_min, base_max = 50, 100
     else:
-        base_min, base_max = 100, 100  # evita divisão por zero no nível máximo
+        base_min, base_max = 100, 100
 
     if base_max == base_min:
         progress_percentage = 100
@@ -265,10 +219,6 @@ def root():
 
 @app.route("/index", methods=["GET", "POST"])
 def index():
-    """
-    - GET: Renderiza a página inicial, escolhendo um fundo aleatório.
-    - POST: Captura o termo de pesquisa e redireciona para /search?q=<termo>.
-    """
     backgrounds = [
         "fundo1.jpeg",
         "fundo2.png",
@@ -297,7 +247,6 @@ def login():
         if usuario:
             stored_hash = usuario.get("senha_hash")
             if stored_hash:
-                # Verifica hash
                 if check_password_hash(stored_hash, senha):
                     session["user_id"] = str(usuario["_id"])
                     session["username"] = usuario["nome"]
@@ -331,10 +280,6 @@ def logout():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """
-    Se chamado com ?next=<URL>, guardamos para redirecionar
-    após cadastro.
-    """
     raw_next = request.args.get("next", "")
     parsed = urlparse(raw_next)
     if parsed.path:
@@ -383,9 +328,6 @@ def register():
 # -----------------------------------------------------------
 @app.route("/search", methods=["GET"])
 def search():
-    """
-    Página de resultados.
-    """
     termo_busca = request.args.get("q", "").strip()
     category = request.args.get("category", "").strip()
     subcategory = request.args.get("subcategory", "").strip()
@@ -411,7 +353,6 @@ def load_problems():
     subcategory = request.args.get("subcategory", "").strip()
     brand = request.args.get("brand", "").strip()
 
-    # Log de pesquisa
     if search_query:
         if user_is_logged_in():
             problem_history_collection.insert_one({
@@ -483,7 +424,6 @@ def load_problems():
                 "descricao": p.get("descricao", ""),
                 "resolvido": p.get("resolvido", False),
                 "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
-                "problemImageThumb": str(p["problemImageThumb"]) if p.get("problemImageThumb") else None,
                 "creator_name": creator_name,
                 "solver_name": solver_name,
                 "category": p.get("category", ""),
@@ -527,7 +467,6 @@ def load_problems():
             has_more = (remaining_count - fetch_size) > 0
             problems_list = []
             for p in random_problems:
-                # Criador
                 if p.get("creator_custom_name"):
                     creator_name = p["creator_custom_name"]
                 else:
@@ -537,7 +476,6 @@ def load_problems():
                     else:
                         creator_name = "Não definido"
 
-                # Solucionador
                 solver_name = None
                 if p.get("solver_custom_name"):
                     solver_name = p["solver_custom_name"]
@@ -552,7 +490,6 @@ def load_problems():
                     "descricao": p.get("descricao", ""),
                     "resolvido": p.get("resolvido", False),
                     "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
-                    "problemImageThumb": str(p["problemImageThumb"]) if p.get("problemImageThumb") else None,
                     "creator_name": creator_name,
                     "solver_name": solver_name,
                     "category": p.get("category", ""),
@@ -584,7 +521,7 @@ def add_problem():
         brand = request.form.get("brand", "").strip()
 
         image_file = request.files.get("problemImage")
-        original_id, thumb_id = save_image_with_thumbnail(image_file, fs_m)
+        original_id = save_image(image_file, fs_m)
 
         if titulo and descricao:
             problema = {
@@ -597,7 +534,6 @@ def add_problem():
                 "solver_id": None,
                 "solver_custom_name": None,
                 "problemImage": original_id,
-                "problemImageThumb": thumb_id,
                 "category": category,
                 "subCategory": subCategory,
                 "brand": brand
@@ -664,7 +600,6 @@ def exibir_solucao(problem_id):
     if not problema.get("resolvido"):
         return "Ainda não resolvido.", 400
 
-    # share_token
     if "share_token" not in problema:
         new_token = secrets.token_urlsafe(16)
         problemas_collection.update_one(
@@ -687,7 +622,6 @@ def exibir_solucao(problem_id):
             upsert=True
         )
 
-    # Criador
     if problema.get("creator_custom_name"):
         creator_name = problema["creator_custom_name"]
     else:
@@ -697,7 +631,6 @@ def exibir_solucao(problem_id):
         else:
             creator_name = "Desconhecido"
 
-    # Solucionador
     if problema.get("solver_custom_name"):
         solver_name = problema["solver_custom_name"]
     else:
@@ -751,17 +684,10 @@ def delete_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    # Deleta imagens do GridFS
     old_file_id = problema.get("problemImage")
     if old_file_id:
         try:
             fs_m.delete(ObjectId(old_file_id))
-        except:
-            pass
-    old_thumb_id = problema.get("problemImageThumb")
-    if old_thumb_id:
-        try:
-            fs_m.delete(ObjectId(old_thumb_id))
         except:
             pass
 
@@ -781,7 +707,6 @@ def edit_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    # Permissão: criador OU solucionador
     can_edit = (session["user_id"] == problema.get("creator_id")) or user_has_role(["solucionador"])
     if not can_edit:
         return "Acesso negado.", 403
@@ -865,30 +790,16 @@ def edit_problem(problem_id):
                     fs_m.delete(ObjectId(old_file_id))
                 except:
                     pass
-            old_thumb_id = problema.get("problemImageThumb")
-            if old_thumb_id:
-                try:
-                    fs_m.delete(ObjectId(old_thumb_id))
-                except:
-                    pass
             updated_fields["problemImage"] = None
-            updated_fields["problemImageThumb"] = None
         elif image_file and image_file.filename.strip():
-            new_orig_id, new_thumb_id = save_image_with_thumbnail(image_file, fs_m)
+            new_orig_id = save_image(image_file, fs_m)
             old_file_id = problema.get("problemImage")
             if old_file_id:
                 try:
                     fs_m.delete(ObjectId(old_file_id))
                 except:
                     pass
-            old_thumb_id = problema.get("problemImageThumb")
-            if old_thumb_id:
-                try:
-                    fs_m.delete(ObjectId(old_thumb_id))
-                except:
-                    pass
             updated_fields["problemImage"] = new_orig_id
-            updated_fields["problemImageThumb"] = new_thumb_id
 
         problemas_collection.update_one(
             {"_id": ObjectId(problem_id)},
@@ -976,6 +887,7 @@ def edit_solution(problem_id):
         old_steps = old_solution_data.get("steps", [])
         steps = new_solution_data.get("steps", [])
 
+        # Ajuste de imagens de passo e subpasso (se necessário)
         for i, step in enumerate(steps):
             delete_step = request.form.get(f"deleteExistingStepImage_{i}", "false") == "true"
             step_image_file = request.files.get(f"stepImage_{i}")
@@ -991,13 +903,13 @@ def edit_solution(problem_id):
                     pass
                 step["stepImage"] = None
             elif step_image_file and step_image_file.filename.strip():
-                orig_id, thumb_id = save_image_with_thumbnail(step_image_file, fs_m)
+                new_id = save_image(step_image_file, fs_m)
                 if old_file_id:
                     try:
                         fs_m.delete(ObjectId(old_file_id))
                     except:
                         pass
-                step["stepImage"] = orig_id
+                step["stepImage"] = new_id
             else:
                 step["stepImage"] = old_file_id
 
@@ -1019,13 +931,13 @@ def edit_solution(problem_id):
                         pass
                     substep["subStepImage"] = None
                 elif substep_file and substep_file.filename.strip():
-                    orig_sub_id, thumb_sub_id = save_image_with_thumbnail(substep_file, fs_m)
+                    new_sub_id = save_image(substep_file, fs_m)
                     if old_sub_file_id:
                         try:
                             fs_m.delete(ObjectId(old_sub_file_id))
                         except:
                             pass
-                    substep["subStepImage"] = orig_sub_id
+                    substep["subStepImage"] = new_sub_id
                 else:
                     substep["subStepImage"] = old_sub_file_id
 
@@ -1052,17 +964,6 @@ def gridfs_image(file_id):
         return response
     except:
         return "Imagem não encontrada.", 404
-
-@app.route("/gridfs_image_thumb/<file_id>", methods=["GET"])
-def gridfs_image_thumb(file_id):
-    try:
-        gridout = fs_m.get(ObjectId(file_id))
-        image_data = gridout.read()
-        response = make_response(image_data)
-        response.headers.set('Content-Type', "image/jpeg")
-        return response
-    except:
-        return "Thumbnail não encontrada.", 404
 
 # -----------------------------------------------------------
 # GRIDFS - IMAGENS (ITENS) - MachineZONE
@@ -1406,7 +1307,7 @@ def add_item():
             stock_eld = 0
 
         image_file = request.files.get("itemImage")
-        original_id, thumb_id = save_image_with_thumbnail(image_file, fs_mz)
+        original_id = save_image(image_file, fs_mz)
 
         new_item = {
             "description": description,
@@ -1414,8 +1315,7 @@ def add_item():
             "price": price,
             "stock_mz": stock_mz,
             "stock_eld": stock_eld,
-            "itemImage": original_id,
-            "itemImageThumb": thumb_id
+            "itemImage": original_id
         }
         itens_collection.insert_one(new_item)
         return redirect(url_for("item_search"))
@@ -1489,11 +1389,11 @@ def edit_profile():
 
         profile_photo = request.files.get("profile_photo")
         if profile_photo and profile_photo.filename.strip():
-            photo_data = profile_photo.read()
-            if photo_data:
+            file_data = profile_photo.read()
+            if file_data:
                 content_type = profile_photo.content_type
                 new_file_id = fs_m.put(
-                    photo_data,
+                    file_data,
                     filename=secure_filename(profile_photo.filename),
                     contentType=content_type
                 )
