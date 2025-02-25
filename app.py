@@ -16,10 +16,6 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import gridfs
 
-# Removido PIL e io pois não vamos mais criar thumbnails
-# from PIL import Image
-# import io
-
 app = Flask(__name__)
 
 # -----------------------------------------------------------
@@ -149,7 +145,7 @@ def save_image(file_obj, fs_instance):
     content_type = file_obj.content_type
     filename = secure_filename(file_obj.filename)
 
-    # Armazena a imagem original diretamente
+    # Armazena a imagem original
     original_id = fs_instance.put(
         file_data,
         filename=filename,
@@ -353,6 +349,16 @@ def load_problems():
     subcategory = request.args.get("subcategory", "").strip()
     brand = request.args.get("brand", "").strip()
 
+    # Força somente problemas resolvidos
+    filters = {"resolvido": True}
+
+    if category:
+        filters["category"] = category
+    if subcategory:
+        filters["subCategory"] = subcategory
+    if brand:
+        filters["brand"] = brand
+
     if search_query:
         if user_is_logged_in():
             problem_history_collection.insert_one({
@@ -369,81 +375,79 @@ def load_problems():
                 "searched_at": datetime.datetime.utcnow()
             })
 
-    search_tokens = [t for t in normalize_string(search_query).split() if t and t not in STOPWORDS]
-    filters = {}
-    if category:
-        filters["category"] = category
-    if subcategory:
-        filters["subCategory"] = subcategory
-    if brand:
-        filters["brand"] = brand
+        search_tokens = [t for t in normalize_string(search_query).split() if t and t not in STOPWORDS]
+        if search_tokens:
+            skip = (page - 1) * ITEMS_PER_PAGE
+            match_stage = {"$and": [{"tags": {"$all": search_tokens}}]}
 
-    if search_tokens:
-        skip = (page - 1) * ITEMS_PER_PAGE
-        match_stage = {"$and": [{"tags": {"$all": search_tokens}}]}
-        if filters:
+            # Adicionando o filtro de resolvido e demais filtros
             for key, val in filters.items():
                 match_stage["$and"].append({key: val})
 
-        count_pipeline = [{"$match": match_stage}, {"$count": "total"}]
-        count_result = list(problemas_collection.aggregate(count_pipeline))
-        total_count = count_result[0]["total"] if count_result else 0
+            count_pipeline = [{"$match": match_stage}, {"$count": "total"}]
+            count_result = list(problemas_collection.aggregate(count_pipeline))
+            total_count = count_result[0]["total"] if count_result else 0
 
-        pipeline_fetch = [
-            {"$match": match_stage},
-            {"$skip": skip},
-            {"$limit": ITEMS_PER_PAGE}
-        ]
-        problems_cursor = problemas_collection.aggregate(pipeline_fetch)
-        problems = list(problems_cursor)
+            pipeline_fetch = [
+                {"$match": match_stage},
+                {"$skip": skip},
+                {"$limit": ITEMS_PER_PAGE}
+            ]
+            problems_cursor = problemas_collection.aggregate(pipeline_fetch)
+            problems = list(problems_cursor)
 
-        problems_list = []
-        for p in problems:
-            # Criador
-            if p.get("creator_custom_name"):
-                creator_name = p["creator_custom_name"]
-            else:
-                if p.get("creator_id"):
-                    c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
-                    creator_name = c_user["nome"] if c_user else "Usuário?"
+            problems_list = []
+            for p in problems:
+                # Criador
+                if p.get("creator_custom_name"):
+                    creator_name = p["creator_custom_name"]
                 else:
-                    creator_name = "Não definido"
+                    if p.get("creator_id"):
+                        c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
+                        creator_name = c_user["nome"] if c_user else "Usuário?"
+                    else:
+                        creator_name = "Não definido"
 
-            # Solucionador
-            solver_name = None
-            if p.get("solver_custom_name"):
-                solver_name = p["solver_custom_name"]
-            else:
-                if p.get("solver_id"):
-                    s_user = usuarios_collection.find_one({"_id": ObjectId(p["solver_id"])})
-                    solver_name = s_user["nome"] if s_user else "Usuário?"
+                # Solucionador
+                solver_name = None
+                if p.get("solver_custom_name"):
+                    solver_name = p["solver_custom_name"]
+                else:
+                    if p.get("solver_id"):
+                        s_user = usuarios_collection.find_one({"_id": ObjectId(p["solver_id"])})
+                        solver_name = s_user["nome"] if s_user else "Usuário?"
 
-            problems_list.append({
-                "_id": str(p["_id"]),
-                "titulo": p.get("titulo", ""),
-                "descricao": p.get("descricao", ""),
-                "resolvido": p.get("resolvido", False),
-                "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
-                "creator_name": creator_name,
-                "solver_name": solver_name,
-                "category": p.get("category", ""),
-                "subCategory": p.get("subCategory", ""),
-                "brand": p.get("brand", "")
-            })
+                problems_list.append({
+                    "_id": str(p["_id"]),
+                    "titulo": p.get("titulo", ""),
+                    "descricao": p.get("descricao", ""),
+                    "resolvido": p.get("resolvido", False),
+                    "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
+                    "creator_name": creator_name,
+                    "solver_name": solver_name,
+                    "category": p.get("category", ""),
+                    "subCategory": p.get("subCategory", ""),
+                    "brand": p.get("brand", "")
+                })
 
-        has_more = (skip + ITEMS_PER_PAGE) < total_count
-        return jsonify({"problems": problems_list, "has_more": has_more, "total_count": total_count})
+            has_more = (skip + ITEMS_PER_PAGE) < total_count
+            return jsonify({"problems": problems_list, "has_more": has_more, "total_count": total_count})
+
+        else:
+            # Caso haja texto, mas só stopwords, retorna vazio
+            return jsonify({"problems": [], "has_more": False, "total_count": 0})
 
     else:
-        # Busca vazia -> problemas aleatórios
+        # Busca vazia -> problemas aleatórios (somente resolvidos agora)
         if page == 1:
             session["displayed_problem_ids"] = []
         displayed_ids = session.get("displayed_problem_ids", [])
         displayed_object_ids = [ObjectId(x) for x in displayed_ids]
 
         random_match_stage = {"_id": {"$nin": displayed_object_ids}}
-        if filters:
-            random_match_stage.update(filters)
+        # Insere também a condição de problemas resolvidos
+        for key, val in filters.items():
+            random_match_stage[key] = val
 
         pipeline_count = [{"$match": random_match_stage}, {"$count": "remaining_count"}]
         count_res = list(problemas_collection.aggregate(pipeline_count))
@@ -700,6 +704,13 @@ def delete_problem(problem_id):
 
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
+    """
+    Rota antiga, ainda existente para editar problemas
+    (por exemplo, problemas já resolvidos, se permitido).
+    OBS: Essa rota permanece no sistema, mas agora temos
+    também a rota /edit_your_problem para editar problemas
+    não resolvidos de um usuário.
+    """
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
 
@@ -809,6 +820,105 @@ def edit_problem(problem_id):
 
     return render_template("edit_problem.html", problema=problema, erro=None, all_users=all_users)
 
+@app.route("/edit_your_problem/<problem_id>", methods=["GET", "POST"])
+def edit_your_problem(problem_id):
+    """
+    Nova rota para editar problemas NÃO RESOLVIDOS.
+    Usará o template 'edit_your_problem.html'.
+    """
+    if not user_is_logged_in():
+        return redirect(url_for("register", next=request.url))
+
+    problema = problemas_collection.find_one({"_id": ObjectId(problem_id)})
+    if not problema:
+        return "Problema não encontrado.", 404
+
+    # Verifica se o problema está resolvido
+    if problema.get("resolvido", False):
+        return "Este problema já foi resolvido. Use a rota de edição geral.", 400
+
+    # Verifica se o usuário pode editar (criador ou solucionador)
+    can_edit = (session["user_id"] == problema.get("creator_id")) or user_has_role(["solucionador"])
+    if not can_edit:
+        return "Acesso negado. Somente o criador ou um solucionador podem editar.", 403
+
+    if request.method == "POST":
+        titulo_novo = request.form.get("titulo", "").strip()
+        descricao_nova = request.form.get("descricao", "").strip()
+
+        category = request.form.get("category", "").strip()
+        subCategory = request.form.get("subCategory", "").strip()
+        brand = request.form.get("brand", "").strip()
+
+        tags_raw = request.form.get("tags", "").strip()
+        tags_normalized = normalize_string(tags_raw)
+        tags_tokens = [t for t in tags_normalized.split() if t and t not in STOPWORDS]
+
+        if not titulo_novo or not descricao_nova:
+            return render_template(
+                "edit_your_problem.html",
+                problema=problema,
+                erro="Preencha todos os campos."
+            )
+
+        # Manter as informações de solver como estão, pois não pode ser alterado aqui
+        old_solver_id = problema.get("solver_id")
+        old_solver_custom_name = problema.get("solver_custom_name")
+
+        old_tags = problema.get("tags", [])
+        titulo_normalizado = normalize_string(titulo_novo)
+        descricao_normalizado = normalize_string(descricao_nova)
+
+        titulo_tokens = [t for t in titulo_normalizado.split() if t and t not in STOPWORDS]
+        descricao_tokens = [t for t in descricao_normalizado.split() if t and t not in STOPWORDS]
+
+        final_tag_set = set(old_tags) | set(tags_tokens) | set(titulo_tokens) | set(descricao_tokens)
+        final_tags = list(final_tag_set)
+
+        updated_fields = {
+            "titulo": titulo_novo,
+            "descricao": descricao_nova,
+            "tags": final_tags,
+            "category": category,
+            "subCategory": subCategory,
+            "brand": brand
+        }
+
+        delete_image = request.form.get("deleteExistingImage", "false") == "true"
+        image_file = request.files.get("problemImage")
+
+        if delete_image:
+            old_file_id = problema.get("problemImage")
+            if old_file_id:
+                try:
+                    fs_m.delete(ObjectId(old_file_id))
+                except:
+                    pass
+            updated_fields["problemImage"] = None
+        elif image_file and image_file.filename.strip():
+            new_orig_id = save_image(image_file, fs_m)
+            old_file_id = problema.get("problemImage")
+            if old_file_id:
+                try:
+                    fs_m.delete(ObjectId(old_file_id))
+                except:
+                    pass
+            updated_fields["problemImage"] = new_orig_id
+
+        # Caso já tenha um solver definido (acidentalmente), mantemos:
+        if old_solver_id:
+            updated_fields["solver_id"] = old_solver_id
+        if old_solver_custom_name:
+            updated_fields["solver_custom_name"] = old_solver_custom_name
+
+        problemas_collection.update_one(
+            {"_id": ObjectId(problem_id)},
+            {"$set": updated_fields}
+        )
+        return redirect(url_for("unresolved"))
+
+    return render_template("edit_your_problem.html", problema=problema, erro=None)
+
 @app.route("/edit_user_role/<user_id>", methods=["POST"])
 def edit_user_role(user_id):
     if not user_is_logged_in():
@@ -887,7 +997,7 @@ def edit_solution(problem_id):
         old_steps = old_solution_data.get("steps", [])
         steps = new_solution_data.get("steps", [])
 
-        # Ajuste de imagens de passo e subpasso (se necessário)
+        # Ajuste de imagens de passo e subpasso
         for i, step in enumerate(steps):
             delete_step = request.form.get(f"deleteExistingStepImage_{i}", "false") == "true"
             step_image_file = request.files.get(f"stepImage_{i}")

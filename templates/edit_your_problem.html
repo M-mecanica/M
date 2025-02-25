@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editar Problema (Não Resolvido)</title>
+  <!-- Responsividade em dispositivos móveis -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonte básica -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* =========================================================================
+       RESET BÁSICO
+       ========================================================================= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* =========================================================================
+       BODY / FONTES / CORES GERAIS
+       ========================================================================= */
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      background-color: #f0f0f0;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* =========================================================================
+       HEADER PRETO COM BOTÃO DE VOLTAR
+       ========================================================================= */
+    header {
+      background-color: #000;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+    .btn-voltar-inicio {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 0.7rem 1.2rem;
+      font-size: 2rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-voltar-inicio:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+    header h1 {
+      color: #fff;
+      font-size: 1.4rem;
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    /* =========================================================================
+       MAIN
+       ========================================================================= */
+    main {
+      flex: 1;
+      font-size: 1rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* =========================================================================
+       CONTAINER DO FORMULÁRIO
+       ========================================================================= */
+    .form-container {
+      width: 100%;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 1rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .erro {
+      color: #c00;
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+
+    /* =========================================================================
+       FORMULÁRIO
+       ========================================================================= */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      font-family: 'Roboto', sans-serif;
+      box-sizing: border-box;
+      color: #333;
+      outline: none;
+    }
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #999;
+    }
+    textarea {
+      min-height: 120px;
+      resize: none;
+    }
+
+    .existing-image {
+      display: block;
+      max-width: 100%;
+      margin-top: 0.5rem;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .delete-label {
+      display: inline-block;
+      margin-top: 0.5rem;
+      cursor: pointer;
+    }
+    .delete-label input[type="checkbox"] {
+      margin-right: 0.4rem;
+    }
+
+    /* Botões Salvar/Cancelar */
+    .btn-salvar,
+    .btn-cancelar {
+      border: none;
+      border-radius: 32px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .btn-salvar {
+      background-color: #000;
+      color: #fff;
+      margin-right: 0.5rem;
+    }
+    .btn-salvar:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+    .btn-cancelar {
+      background-color: #999;
+      color: #fff;
+    }
+    .btn-cancelar:hover {
+      background-color: #666;
+      transform: scale(1.02);
+    }
+
+    /* Botão que abre o modal de seleção de categoria/subcategoria/marca */
+    .btn-categorias-abrir-modal {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .btn-categorias-abrir-modal:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+
+    .category-display {
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0.75rem;
+      font-size: 0.95rem;
+      color: #444;
+      margin-top: -0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* =========================================================================
+       FOOTER
+       ========================================================================= */
+    footer {
+      background-color: #000;
+      color: #fff;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+      margin: 0;
+    }
+
+    /* =========================================================================
+       MODAL DE CATEGORIAS (3 passos)
+       ========================================================================= */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background-color: #fff;
+      width: 95%;
+      max-width: 700px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      animation: modalFadeIn 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+      overflow: hidden;
+      border: 1px solid #fff; /* Borda branca fina */
+    }
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .modal-header {
+      background-color: #000;
+      color: #fff;
+      padding: 2rem;
+      position: relative;
+      border-bottom: 1px solid #333;
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 500;
+    }
+    .close {
+      color: #fff;
+      position: absolute;
+      right: 2rem;
+      top: 2rem;
+      font-size: 2.4rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .close:hover {
+      color: #ccc;
+    }
+    .modal-body {
+      padding: 2rem;
+      text-align: center;
+      overflow-y: auto;
+      max-height: calc(90vh - 100px);
+    }
+    .modal-text {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 2rem;
+      line-height: 1.4;
+    }
+
+    #editMainCategoryContainer,
+    #editSubCategoryContainer,
+    #editBrandContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .btn-categorias {
+      background-color: #f2f2f2;
+      color: #333;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 1.2rem 2rem;
+      font-size: 1.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+      transition: background-color 0.2s, transform 0.2s;
+      text-align: left;
+      display: flex;
+      align-items: center;
+    }
+    .btn-categorias:hover {
+      background-color: #e6e6e6;
+      transform: scale(1.02);
+    }
+    .btn-categorias img {
+      width: 60px;
+      height: 60px;
+      margin-right: 15px;
+    }
+    .btn-categorias.voltar {
+      background-color: #ddd;
+      border-color: #bbb;
+      justify-content: center;
+    }
+    .btn-categorias.voltar:hover {
+      background-color: #ccc;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      header h1 {
+        font-size: 1.2rem;
+      }
+      .btn-voltar-inicio {
+        padding: 0.5rem 1rem;
+      }
+      main {
+        font-size: 1rem;
+        padding: 1rem;
+      }
+      .form-container {
+        padding: 1rem;
+      }
+      .form-group {
+        margin-bottom: 1rem;
+      }
+      .btn-salvar,
+      .btn-cancelar {
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+      }
+      .btn-categorias-abrir-modal {
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+      }
+      .existing-image {
+        max-width: 100%;
+      }
+
+      /* Ajustes do modal */
+      .modal-content {
+        width: 95%;
+      }
+      .modal-header {
+        padding: 1rem;
+      }
+      .modal-header h2 {
+        font-size: 1.4rem;
+      }
+      .close {
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.8rem;
+      }
+      .modal-body {
+        padding: 1rem;
+      }
+      .modal-text {
+        font-size: 1rem;
+      }
+      .btn-categorias {
+        font-size: 1rem;
+        padding: 0.8rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Botão "Voltar" para lista de problemas não resolvidos -->
+    <a href="{{ url_for('unresolved') }}" class="btn-voltar-inicio" title="Voltar">&#x2B05;</a>
+    <h1>Editar Problema (Não Resolvido)</h1>
+    <div style="width: 2rem;"></div>
+  </header>
+
+  <main>
+    <div class="form-container">
+      {% if erro %}
+        <p class="erro">{{ erro }}</p>
+      {% endif %}
+
+      <!-- enctype multipart/form-data para upload de arquivo -->
+      <form method="POST" action="" enctype="multipart/form-data">
+
+        <!-- Título -->
+        <div class="form-group">
+          <label for="titulo">Título do Problema:</label>
+          <input
+            type="text"
+            name="titulo"
+            id="titulo"
+            value="{{ problema.titulo }}"
+            required
+          >
+        </div>
+
+        <!-- Descrição -->
+        <div class="form-group">
+          <label for="descricao">Descrição detalhada:</label>
+          <textarea
+            name="descricao"
+            id="descricao"
+            required
+          >{{ problema.descricao }}</textarea>
+        </div>
+
+        <!-- Tags -->
+        <div class="form-group">
+          <label for="tags">
+            Tags (separe por espaço):
+            <br><small>(Pontuação e acentos serão removidos)</small>
+          </label>
+          <input
+            type="text"
+            name="tags"
+            id="tags"
+            oninput="sanitizeTagsInput()"
+            value="{% if problema.tags %}{{ ' '.join(problema.tags) }}{% endif %}"
+          >
+        </div>
+
+        <!-- Botão para abrir modal de seleção de categoria/subcategoria/marca -->
+        <div class="form-group">
+          <label>Categorias/Marca:</label>
+          <button type="button" class="btn-categorias-abrir-modal" onclick="openCategoryModal()">
+            Definir/Alterar Categoria
+          </button>
+          <div class="category-display">
+            Categoria Principal: <span id="displayCategory">
+              {{ problema.category if problema.category else '---' }}
+            </span><br>
+            Subcategoria: <span id="displaySubCategory">
+              {{ problema.subCategory if problema.subCategory else '---' }}
+            </span><br>
+            Marca: <span id="displayBrand">
+              {{ problema.brand if problema.brand else '---' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Inputs ocultos para category, subCategory, brand -->
+        <input
+          type="hidden"
+          name="category"
+          id="categoryInput"
+          value="{{ problema.category if problema.category else '' }}"
+        >
+        <input
+          type="hidden"
+          name="subCategory"
+          id="subCategoryInput"
+          value="{{ problema.subCategory if problema.subCategory else '' }}"
+        >
+        <input
+          type="hidden"
+          name="brand"
+          id="brandInput"
+          value="{{ problema.brand if problema.brand else '' }}"
+        >
+
+        <!-- Exibir imagem existente, se houver -->
+        {% if problema.problemImage %}
+          <div class="form-group">
+            <label>Imagem Atual:</label>
+            <img
+              src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}"
+              alt="Imagem do Problema"
+              class="existing-image"
+            >
+            <label for="deleteExistingImage" class="delete-label">
+              <input
+                type="checkbox"
+                name="deleteExistingImage"
+                id="deleteExistingImage"
+                value="true"
+              >
+              Deletar imagem existente
+            </label>
+          </div>
+        {% endif %}
+
+        <!-- Nova imagem (opcional) -->
+        <div class="form-group">
+          <label for="problemImage">Nova Imagem (opcional):</label>
+          <input
+            type="file"
+            name="problemImage"
+            id="problemImage"
+            accept="image/*"
+          >
+        </div>
+
+        <!-- OBS: Solver não pode ser alterado aqui, pois o problema não está resolvido -->
+
+        <!-- BOTÕES -->
+        <button type="submit" class="btn-salvar">Salvar Alterações</button>
+        <a href="{{ url_for('unresolved') }}" class="btn-cancelar">Cancelar</a>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 Plataforma M</p>
+  </footer>
+
+  <!-- MODAL: SELEÇÃO DE CATEGORIA (3 PASSOS) -->
+  <div id="categoryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Escolha a categoria principal:</h2>
+        <span class="close" onclick="closeCategoryModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <!-- Passo 1: Lista de categorias principais -->
+        <div id="editMainCategoryStep" style="display: block;">
+          <p class="modal-text">Escolha a categoria principal:</p>
+          <div id="editMainCategoryContainer"></div>
+        </div>
+
+        <!-- Passo 2: Subcategorias -->
+        <div id="editSubCategoryStep" style="display: none;">
+          <p class="modal-text" id="editSelectedMainCategoryText"></p>
+          <p class="modal-text">Escolha a subcategoria:</p>
+          <div id="editSubCategoryContainer"></div>
+          <button class="btn-categorias voltar" onclick="backToEditMainCategory()">Voltar</button>
+        </div>
+
+        <!-- Passo 3: Marcas -->
+        <div id="editBrandStep" style="display: none;">
+          <p class="modal-text" id="editSelectedSubCategoryText"></p>
+          <p class="modal-text">Selecione a marca (ou "Sem marca"):</p>
+          <div id="editBrandContainer"></div>
+          <button class="btn-categorias voltar" onclick="backToEditSubCategory()">Voltar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // Função para remover acentos E pontuação do campo "tags" na digitação
+    // (apenas client-side; o back-end também faz sanitização)
+    // =========================================================================
+    function sanitizeTagsInput() {
+      const input = document.getElementById('tags');
+      // Remove acentos
+      let text = input.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      // Remove pontuação (qualquer caractere que não seja letra, número, espaço)
+      text = text.replace(/[^a-zA-Z0-9\s]/g, "");
+      // Converte para minúsculo
+      text = text.toLowerCase();
+      input.value = text;
+    }
+
+    // =========================================================================
+    // Modal de Edição de Categoria (3 passos)
+    // =========================================================================
+    const categoryModal = document.getElementById('categoryModal');
+
+    function openCategoryModal() {
+      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
+      categoryModal.style.display = 'flex';
+      showMainCategories();
+    }
+    function closeCategoryModal() {
+      categoryModal.style.display = 'none';
+      resetCategoryModal();
+    }
+
+    // Dados de categorias, subcategorias e marcas (exemplo simplificado)
+    const categoryData = [
+      {
+        name: "Veículos",
+        img: "carro_icon.png",
+        subCategories: [
+          {
+            name: "Carros",
+            img: "carro_icon.png",
+            brands: ["Toyota", "Honda", "Ford", "Fiat", "Volkswagen", "Peugeot", "Chevrolet"]
+          },
+          {
+            name: "Motos",
+            img: "moto_icon.png",
+            brands: ["Yamaha", "Honda", "Harley-Davidson", "Suzuki", "BMW"]
+          },
+          {
+            name: "Caminhonetes",
+            img: "caminhonete_icon.png",
+            brands: ["Toyota", "Chevrolet", "Ford", "Mitsubishi", "Nissan"]
+          },
+          {
+            name: "Caminhões",
+            img: "caminhao_icon.png",
+            brands: ["Mercedes-Benz", "Volvo", "Scania", "Iveco"]
+          },
+          {
+            name: "Ônibus",
+            img: "onibus_icon.png",
+            brands: ["Marcopolo", "Volvo", "Mercedes-Benz"]
+          }
+        ]
+      },
+      {
+        name: "Máquinas Agrícolas",
+        img: "trator_icon.png",
+        subCategories: [
+          {
+            name: "Tratores",
+            img: "trator_icon.png",
+            brands: ["John Deere", "Massey Ferguson", "Valtra/Valmet", "New Holland", "Case"]
+          },
+          {
+            name: "Colheitadeiras",
+            img: "colheitadeira_icon.png",
+            brands: ["John Deere", "Case", "New Holland"]
+          },
+          {
+            name: "Plantadeiras e Pulverizadores",
+            img: "plantadeira_icon.png",
+            brands: ["Stara", "Jacto", "Kuhn"]
+          }
+        ]
+      },
+      {
+        name: "Equipamentos Industriais",
+        img: "empilhadeira_icon.png",
+        subCategories: [
+          {
+            name: "Motores e Geradores",
+            img: "motor_icon.png",
+            brands: ["Cummins", "Perkins", "Caterpillar"]
+          },
+          {
+            name: "Máquinas Pesadas",
+            img: "escavadeira_icon.png",
+            brands: ["Caterpillar", "Komatsu", "Volvo"]
+          },
+          {
+            name: "Empilhadeiras e Guinchos",
+            img: "empilhadeira_icon.png",
+            brands: []
+          }
+        ]
+      },
+      {
+        name: "Eletrônicos e Tecnologia",
+        img: "celular_icon.png",
+        subCategories: [
+          {
+            name: "Celulares e Tablets",
+            img: "celular_icon.png",
+            brands: ["Apple", "Samsung", "Xiaomi", "Motorola"]
+          },
+          {
+            name: "Notebooks e PCs",
+            img: "notebook_icon.png",
+            brands: ["Dell", "Lenovo", "HP", "ASUS", "Acer"]
+          },
+          {
+            name: "Impressoras e Periféricos",
+            img: "impressora_icon.png",
+            brands: []
+          },
+          {
+            name: "Consoles e Videogames",
+            img: "controle_videogame_icon.png",
+            brands: []
+          },
+          {
+            name: "Televisores e Acessórios",
+            img: "tv_icon.png",
+            brands: ["LG", "Samsung", "Sony", "Philips", "TCL", "Panasonic"]
+          }
+        ]
+      },
+      {
+        name: "Sistemas Hidráulicos e Pneumáticos",
+        img: "compressor_de_ar_icon.png",
+        subCategories: [
+          {
+            name: "Bombas Hidráulicas e Pneumáticas",
+            img: "bomba_hidraulica_icon.png",
+            brands: []
+          },
+          {
+            name: "Compressores de Ar",
+            img: "compressor_de_ar_icon.png",
+            brands: []
+          },
+          {
+            name: "Cilindros Hidráulicos",
+            img: "cilindro_hidraulico_icon.png",
+            brands: []
+          }
+        ]
+      },
+      {
+        name: "Eletrodomésticos e Equipamentos Domésticos",
+        img: "microondas_icon.png",
+        subCategories: [
+          {
+            name: "Geladeiras e Freezers",
+            img: "geladeira_icon.png",
+            brands: []
+          },
+          {
+            name: "Máquinas de Lavar e Secadoras",
+            img: "maquina_de_lava_icon.png",
+            brands: []
+          },
+          {
+            name: "Ar-condicionado",
+            img: "ar_condicionado_icon.png",
+            brands: []
+          },
+          {
+            name: "Cafeteiras e Eletroportáteis",
+            img: "cafeteira_icon.png",
+            brands: ["Mondial", "Nespresso", "Dolce Gusto", "Oster", "Cadence", "Britânia"]
+          }
+        ]
+      },
+      {
+        name: "Ferramentas e Manutenção Geral",
+        img: "ferramentas_icon.png",
+        subCategories: [
+          {
+            name: "Furadeiras, Parafusadeiras e Esmerilhadeiras",
+            img: "furadeira_icon.png",
+            brands: []
+          },
+          {
+            name: "Equipamentos de Solda e Corte",
+            img: "equipamentos_solda_e_corte_icon.png",
+            brands: []
+          }
+        ]
+      }
+    ];
+
+    let selectedMainCatIndex = null;
+    let selectedSubCatIndex = null;
+
+    // Step 1: Exibir Categorias Principais
+    function showMainCategories() {
+      document.getElementById('editMainCategoryStep').style.display = 'block';
+      document.getElementById('editSubCategoryStep').style.display = 'none';
+      document.getElementById('editBrandStep').style.display = 'none';
+
+      const container = document.getElementById('editMainCategoryContainer');
+      container.innerHTML = '';
+
+      categoryData.forEach((cat, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-categorias';
+        btn.innerHTML = `
+          <img
+            src="/static/images/${cat.img}"
+            alt="${cat.name}"
+            style="width:60px;height:60px;margin-right:15px;"
+          >
+          <span>${cat.name}</span>
+        `;
+        btn.onclick = () => {
+          selectedMainCatIndex = idx;
+          document.getElementById('editMainCategoryStep').style.display = 'none';
+          document.getElementById('editSubCategoryStep').style.display = 'block';
+          document.getElementById('editSelectedMainCategoryText').innerText =
+            "Categoria selecionada: " + cat.name;
+          showSubCategories(idx);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // Step 2: Exibir Subcategorias
+    function showSubCategories(mainCatIndex) {
+      const subCatContainer = document.getElementById('editSubCategoryContainer');
+      subCatContainer.innerHTML = '';
+
+      const subCats = categoryData[mainCatIndex].subCategories;
+      subCats.forEach((sub, subIdx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-categorias';
+
+        if (sub.img) {
+          btn.innerHTML = `
+            <img
+              src="/static/images/${sub.img}"
+              alt="${sub.name}"
+              style="width:60px;height:60px;margin-right:15px;"
+            >
+            <span>${sub.name}</span>
+          `;
+        } else {
+          btn.textContent = sub.name;
+        }
+
+        btn.onclick = () => {
+          selectedSubCatIndex = subIdx;
+          document.getElementById('editSubCategoryStep').style.display = 'none';
+          document.getElementById('editBrandStep').style.display = 'block';
+          document.getElementById('editSelectedSubCategoryText').innerText =
+            "Subcategoria selecionada: " + sub.name;
+          showBrands(mainCatIndex, subIdx);
+        };
+        subCatContainer.appendChild(btn);
+      });
+    }
+
+    // Step 3: Exibir Marcas
+    function showBrands(mainCatIndex, subCatIndex) {
+      const brandContainer = document.getElementById('editBrandContainer');
+      brandContainer.innerHTML = '';
+
+      const subCat = categoryData[mainCatIndex].subCategories[subCatIndex];
+      const brands = subCat.brands || [];
+
+      // Se não houver marcas, permitir "Sem marca"
+      if (brands.length === 0) {
+        const noBrandBtn = document.createElement('button');
+        noBrandBtn.className = 'btn-categorias';
+        noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
+        noBrandBtn.onclick = () => {
+          finalizeCategory(mainCatIndex, subCatIndex, "");
+        };
+        brandContainer.appendChild(noBrandBtn);
+        return;
+      }
+
+      brands.forEach(brand => {
+        let brandName = "";
+        let brandImg = null;
+
+        if (typeof brand === 'string') {
+          brandName = brand;
+        } else {
+          // Caso seja um objeto { name, img }
+          brandName = brand.name;
+          brandImg = brand.img;
+        }
+
+        const btn = document.createElement('button');
+        btn.className = 'btn-categorias';
+
+        if (brandImg) {
+          btn.innerHTML = `
+            <img
+              src="/static/images/${brandImg}"
+              alt="${brandName}"
+              style="width:60px;height:60px;margin-right:15px;"
+            >
+            <span>${brandName}</span>
+          `;
+        } else {
+          btn.textContent = brandName;
+        }
+
+        btn.onclick = () => {
+          finalizeCategory(mainCatIndex, subCatIndex, brandName);
+        };
+        brandContainer.appendChild(btn);
+      });
+
+      // Botão "Sem marca"
+      const noBrandBtn = document.createElement('button');
+      noBrandBtn.className = 'btn-categorias';
+      noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
+      noBrandBtn.onclick = () => {
+        finalizeCategory(mainCatIndex, subCatIndex, "");
+      };
+      brandContainer.appendChild(noBrandBtn);
+    }
+
+    // Definir valores no formulário
+    function finalizeCategory(catIndex, subIndex, brandName) {
+      const catName = categoryData[catIndex].name;
+      const subCatName = categoryData[catIndex].subCategories[subIndex].name;
+
+      document.getElementById('categoryInput').value = catName;
+      document.getElementById('subCategoryInput').value = subCatName;
+      document.getElementById('brandInput').value = brandName;
+
+      // Atualiza exibição
+      document.getElementById('displayCategory').textContent = catName;
+      document.getElementById('displaySubCategory').textContent = subCatName;
+      document.getElementById('displayBrand').textContent = brandName || '---';
+
+      closeCategoryModal();
+    }
+
+    // Voltar do Step 2 para Step 1
+    function backToEditMainCategory() {
+      document.getElementById('editSubCategoryStep').style.display = 'none';
+      document.getElementById('editMainCategoryStep').style.display = 'block';
+    }
+
+    // Voltar do Step 3 para Step 2
+    function backToEditSubCategory() {
+      document.getElementById('editBrandStep').style.display = 'none';
+      document.getElementById('editSubCategoryStep').style.display = 'block';
+    }
+
+    // Resetar modal
+    function resetCategoryModal() {
+      document.getElementById('editMainCategoryStep').style.display = 'block';
+      document.getElementById('editSubCategoryStep').style.display = 'none';
+      document.getElementById('editBrandStep').style.display = 'none';
+      selectedMainCatIndex = null;
+      selectedSubCatIndex = null;
+    }
+  </script>
+</body>
+</html>

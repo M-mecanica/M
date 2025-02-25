@@ -328,8 +328,9 @@
 
           <div class="action-btns">
             {% if session.role == "solucionador" or session["user_id"] == problema["creator_id"] %}
+              <!-- Aponta agora para edit_your_problem em vez de edit_problem -->
               <a
-                href="{{ url_for('edit_problem', problem_id=problema['_id_str']) }}"
+                href="{{ url_for('edit_your_problem', problem_id=problema['_id_str']) }}"
                 class="action-btn"
               >
                 Editar
