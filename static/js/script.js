@@ -8,6 +8,14 @@ window.addEventListener('load', function() {
   if (content) {
     content.style.opacity = '1';
   }
+
+  // PWA: Registro do Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+      .register('/service-worker.js')  // Ajuste o caminho se necessário
+      .then(() => console.log('Service Worker registrado com sucesso!'))
+      .catch(err => console.error('Falha ao registrar o SW:', err));
+  }
 });
 
 /* SIDEBAR CONTROLS */
@@ -251,7 +259,7 @@ function showMainCategories() {
   });
 }
 
-// Exibir subcategorias (agora com imagem, se existir)
+// Exibir subcategorias
 function showSubCategories(catIndex) {
   const subCatContainer = document.getElementById('subCategoryContainer');
   if (!subCatContainer) return;
@@ -262,7 +270,6 @@ function showSubCategories(catIndex) {
     const btn = document.createElement('button');
     btn.className = 'btn-categorias';
 
-    // Se a subcategoria tiver imagem definida
     if (sub.img) {
       btn.innerHTML = `
         <img src="/static/images/${sub.img}" alt="${sub.name}"
@@ -270,7 +277,6 @@ function showSubCategories(catIndex) {
         <span>${sub.name}</span>
       `;
     } else {
-      // Se não tiver imagem, só texto
       btn.textContent = sub.name;
     }
 
@@ -286,7 +292,7 @@ function showSubCategories(catIndex) {
   });
 }
 
-// Exibir marcas (aceitando tanto strings quanto objetos {name, img})
+// Exibir marcas
 function showBrands(catIndex, subCatIndex) {
   const brandContainer = document.getElementById('brandContainer');
   if (!brandContainer) return;
@@ -295,7 +301,6 @@ function showBrands(catIndex, subCatIndex) {
   const subCat = categoryData[catIndex].subCategories[subCatIndex];
   const brands = subCat.brands || [];
 
-  // Se não houver marcas cadastradas (array vazio), só mostra "Ver problemas"
   if (brands.length === 0) {
     const btnVerProblemas = document.createElement('button');
     btnVerProblemas.className = 'btn-categorias';
@@ -310,15 +315,12 @@ function showBrands(catIndex, subCatIndex) {
     return;
   }
 
-  // Se houver marcas, exibe cada uma
   brands.forEach(brand => {
     let brandName = "";
     let brandImg = null;
     if (typeof brand === 'string') {
-      // Se for apenas string, sem ícone
       brandName = brand;
     } else {
-      // Caso queira implementar objetos de marca com name e img
       brandName = brand.name;
       brandImg = brand.img;
     }
@@ -326,7 +328,6 @@ function showBrands(catIndex, subCatIndex) {
     const btn = document.createElement('button');
     btn.className = 'btn-categorias';
 
-    // Se houver imagem de marca, renderiza
     if (brandImg) {
       btn.innerHTML = `
         <img src="/static/images/${brandImg}" alt="${brandName}"
@@ -346,7 +347,7 @@ function showBrands(catIndex, subCatIndex) {
     brandContainer.appendChild(btn);
   });
 
-  // Botão para "Ver todos problemas desta subcategoria"
+  // Botão "Ver todos problemas desta subcategoria"
   const btnVerTodos = document.createElement('button');
   btnVerTodos.className = 'btn-categorias';
   btnVerTodos.textContent = "Ver todos problemas desta subcategoria";
