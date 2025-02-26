@@ -543,6 +543,12 @@ footer p {
     fill: #fff;
     margin-bottom: 2px;
   }
+  /* Regra para ícones via <img> */
+  .mobile-bottom-bar .bottom-bar-btn img {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 2px;
+  }
 
   /* Garante que o main não seja coberto pela barra inferior */
   main {
