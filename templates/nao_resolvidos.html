@@ -3,11 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Problemas Não Resolvidos</title>
+  <!-- Fonte básica -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
+  <!-- Ícones Material (se desejar utilizar) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -17,8 +21,6 @@
       padding: 0;
       box-sizing: border-box;
     }
-
-    /* BODY */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -30,7 +32,42 @@
       overflow-x: hidden;
     }
 
-    /* HEADER FIXO */
+    /* Preloader (opcional, mesmo estilo da página add.html) */
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #333;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Conteúdo (para dar fade-in após o preloader) */
+    #content {
+      transition: opacity 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      opacity: 0; /* começa invisível, depois faz fade-in */
+    }
+
+    /* HEADER - Mesmo estilo da página add.html */
     header {
       background-color: #000;
       display: flex;
@@ -52,6 +89,15 @@
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
+    }
+    @media (max-width: 768px) {
+      header {
+        height: 56px;
+        padding: 0 1rem;
+      }
+      header h1 {
+        font-size: 1.3rem;
+      }
     }
     .header-btn {
       background: none;
@@ -78,26 +124,92 @@
       margin-left: 0.5rem;
     }
 
+    /*
+      Oculta o botão "Perfil" E o botão "Entrar" do header em telas menores
+      que 768px. Dessa forma, apenas a barra inferior mostrará essas opções
+      no mobile.
+    */
+    @media (max-width: 768px) {
+      .perfil-btn,
+      .entrar-btn {
+        display: none !important;
+      }
+    }
+
     /* MAIN */
     main {
+      margin-top: 100px; /* espaço para header fixo */
       flex: 1;
-      font-size: 1.25rem;
-      padding: 2rem;
+      padding: 2rem 1rem;
       width: 100%;
       max-width: 1200px;
-      margin: 100px auto 0;
+      margin-left: auto;
+      margin-right: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
+    @media (max-width: 768px) {
+      main {
+        margin-top: 72px;
+      }
+    }
 
-    /* Container dos resultados */
+    /* FOOTER */
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+      margin: 0;
+    }
+
+    /* Barra inferior (mobile-bottom-bar) - mesmo estilo add.html */
+    .mobile-bottom-bar {
+      display: none; /* por padrão, não mostra no desktop */
+    }
+    @media (max-width: 768px) {
+      .mobile-bottom-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        background-color: #000;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        height: 60px;
+        z-index: 9999;
+      }
+      .mobile-bottom-bar .bottom-bar-btn {
+        color: #fff;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+      }
+      .mobile-bottom-bar .bottom-bar-btn svg {
+        width: 20px;
+        height: 20px;
+        fill: #fff;
+        margin-bottom: 2px;
+      }
+      /* Garante que o main não seja coberto pela barra inferior */
+      main {
+        padding-bottom: 60px;
+      }
+    }
+
+    /* ======================= ESTILO ESPECÍFICO DA LISTA DE PROBLEMAS ======================= */
     .result-container {
       width: 100%;
       margin-top: 1rem;
     }
 
-    /* Cada problema */
     .problem-item {
       background-color: #fff;
       border-radius: 8px;
@@ -117,6 +229,7 @@
       color: #555;
       margin-bottom: 0.5rem;
       text-align: center;
+      line-height: 1.3rem;
     }
     .problem-image-container {
       text-align: center;
@@ -157,7 +270,7 @@
       transform: translateX(-50%) scale(1.02);
     }
 
-    /* Botões de ação no canto inferior direito */
+    /* Botões de ação no canto inferior direito (Editar/Remover) */
     .action-btns {
       position: absolute;
       bottom: 1rem;
@@ -182,7 +295,7 @@
       transform: scale(1.02);
     }
 
-    /* Botão "Novo Problema" */
+    /* Botão "Novo Problema" (quando não há problemas) */
     .new-problem-btn {
       background-color: #000;
       color: #fff;
@@ -210,35 +323,7 @@
       margin-right: 0.4rem;
     }
 
-    /* FOOTER */
-    footer {
-      background-color: #000;
-      text-align: center;
-      padding: 1rem 2rem;
-    }
-    footer p {
-      font-size: 0.9rem;
-      color: #fff;
-      margin: 0;
-    }
-
     @media (max-width: 768px) {
-      header {
-        padding: 1.5rem 2rem;
-        height: 56px;
-      }
-      header h1 {
-        font-size: 1.3rem;
-      }
-      .header-btn {
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-      }
-      main {
-        font-size: 1rem;
-        padding: 1rem;
-        margin-top: 70px;
-      }
       .problem-item {
         margin-bottom: 1.5rem;
         padding-bottom: 4.5rem;
@@ -269,103 +354,254 @@
   </style>
 </head>
 <body>
-  <header>
-    <!-- Botão "Voltar" -->
-    <a href="{{ url_for('index') }}" class="header-btn" title="Voltar à Página Inicial">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2"
-              fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </a>
+  <!-- PRELOADER (opcional) -->
+  <div id="preloader">
+    <div class="loader"></div>
+  </div>
 
-    <h1>Problemas Não Resolvidos</h1>
-
-    <!-- Botão Entrar / Perfil -->
-    {% if not session.get('user_id') %}
-      <a class="header-btn" href="{{ url_for('login') }}">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+  <!-- CONTEÚDO -->
+  <div id="content">
+    <!-- Barra superior fixa, mesmo estilo da página add.html -->
+    <header>
+      <!-- Botão "Voltar" -->
+      <button
+        class="header-btn"
+        id="btnVoltar"
+        aria-label="Voltar"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path
+            d="M15 18l-6-6 6-6"
+            stroke="currentColor"
+            stroke-width="2"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
-        <span>Entrar</span>
-      </a>
-    {% else %}
-      <a class="header-btn" href="{{ url_for('perfil') }}">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
-        </svg>
-        <span>Perfil</span>
-      </a>
-    {% endif %}
-  </header>
+      </button>
 
-  <main>
-    {% if problemas and problemas|length > 0 %}
-      <div class="result-container">
-        {% for problema in problemas %}
-        <div class="problem-item">
-          <h2>{{ problema["titulo"] }}</h2>
-          <p>{{ problema["descricao"] }}</p>
+      <h1>Problemas Não Resolvidos</h1>
 
-          <!-- Exibir imagem original, se existir -->
-          {% if problema.problemImage %}
-            <div class="problem-image-container">
-              <img
-                src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}"
-                alt="Imagem do problema"
-                class="problem-image"
-              />
-            </div>
-          {% endif %}
-
-          <p>Enviado por: {{ problema["creator_name"] }}</p>
-
-          <!-- Qualquer usuário logado pode resolver -->
-          <form action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}" method="GET">
-            <button type="submit" class="resolver-btn">Resolver</button>
-          </form>
-
-          <div class="action-btns">
-            {% if session.role == "solucionador" or session["user_id"] == problema["creator_id"] %}
-              <!-- Aponta agora para edit_your_problem em vez de edit_problem -->
-              <a
-                href="{{ url_for('edit_your_problem', problem_id=problema['_id_str']) }}"
-                class="action-btn"
-              >
-                Editar
-              </a>
-            {% endif %}
-            {% if session.role == "solucionador" %}
-              <form
-                action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}"
-                method="POST"
-                onsubmit="return confirm('Tem certeza que deseja remover este problema?');"
-              >
-                <button type="submit" class="action-btn">Remover</button>
-              </form>
-            {% endif %}
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="no-results">
-        <p>Não há problemas não resolvidos.</p>
-        <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
-            0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-            0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+      <!-- Se NÃO estiver logado, mostra "Entrar" -->
+      {% if not session.get('user_id') %}
+        <a class="header-btn entrar-btn" href="{{ url_for('login') }}">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
           </svg>
-          Novo Problema
+          <span>Entrar</span>
         </a>
-      </div>
-    {% endif %}
-  </main>
+      {% else %}
+        <!-- Se estiver logado, mostra "Perfil" -->
+        <a class="header-btn perfil-btn" href="{{ url_for('perfil') }}">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
+          </svg>
+          <span>Perfil</span>
+        </a>
+      {% endif %}
+    </header>
 
-  <footer>
-    <p>© 2025 Plataforma M</p>
-  </footer>
+    <main>
+      <!-- Exibe a lista de problemas ou mensagem de "nenhum problema" -->
+      {% if problemas and problemas|length > 0 %}
+        <div class="result-container">
+          {% for problema in problemas %}
+
+            <div class="problem-item">
+              <h2>{{ problema["titulo"] }}</h2>
+              <p>{{ problema["descricao"] }}</p>
+
+              <!-- Exibir THUMBNAIL se existir problemImage_thumb -->
+              {% if problema.problemImage_thumb %}
+                <div class="problem-image-container">
+                  <img
+                    src="{{ url_for('gridfs_image', file_id=problema.problemImage_thumb) }}"
+                    alt="Imagem do problema (thumb)"
+                    class="problem-image"
+                  />
+                </div>
+              {% endif %}
+
+              <!-- Criador -->
+              <p>Enviado por: {{ problema["creator_name"] }}</p>
+
+              <!-- Form p/ resolver (qualquer usuário logado pode resolver) -->
+              <form action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}" method="GET">
+                <button type="submit" class="resolver-btn">Resolver</button>
+              </form>
+
+              <div class="action-btns">
+                {% if session.role == "solucionador" or session["user_id"] == problema["creator_id"] %}
+                  <!-- Link de Edição (edit_your_problem) -->
+                  <a
+                    href="{{ url_for('edit_your_problem', problem_id=problema['_id_str']) }}"
+                    class="action-btn"
+                  >
+                    Editar
+                  </a>
+                {% endif %}
+                {% if session.role == "solucionador" %}
+                  <!-- Form de Remoção -->
+                  <form
+                    action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}"
+                    method="POST"
+                    onsubmit="return confirm('Tem certeza que deseja remover este problema?');"
+                  >
+                    <button type="submit" class="action-btn">Remover</button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
+
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="no-results">
+          <p>Não há problemas não resolvidos.</p>
+          <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
+              0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
+              0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            </svg>
+            Novo Problema
+          </a>
+        </div>
+      {% endif %}
+    </main>
+
+    <footer>
+      <p>© 2025 Plataforma M</p>
+    </footer>
+
+    <!-- Barra inferior (mobile) -->
+    <div class="mobile-bottom-bar">
+      <!-- 1) Resolver -->
+      <a
+        href="{{ url_for('unresolved') }}"
+        class="bottom-bar-btn"
+        title="Resolver Problemas"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5
+               0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8
+               5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0
+               6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"
+          />
+        </svg>
+        Resolver
+      </a>
+      <!-- 2) Envie -->
+      <a
+        href="{{ url_for('add_problem') }}"
+        class="bottom-bar-btn"
+        title="Envie seu Problema"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
+            0 0 1 0 1h-3v3a.5.5 0 0 1-1
+            0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
+            0 0 1 8 4z"
+          />
+        </svg>
+        Envie
+      </a>
+      <!-- 3) Perfil/Entrar -->
+      {% if not session.get('user_id') %}
+        <a
+          href="{{ url_for('login') }}"
+          class="bottom-bar-btn"
+          title="Entrar"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3
+            3 3 0 0 0 3 3z"
+            />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4
+              4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
+          </svg>
+          Entrar
+        </a>
+      {% else %}
+        <a
+          href="{{ url_for('perfil') }}"
+          class="bottom-bar-btn"
+          title="Perfil"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3
+            3 3 0 0 0 3 3z"
+            />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4
+              4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
+          </svg>
+          Perfil
+        </a>
+      {% endif %}
+    </div>
+  </div> <!-- /#content -->
+
+  <script>
+    // Preloader + fade-in do conteúdo (opcional)
+    window.addEventListener('load', function () {
+      const preloader = document.getElementById('preloader');
+      const content = document.getElementById('content');
+      if (preloader) {
+        preloader.style.display = 'none';
+      }
+      if (content) {
+        content.style.opacity = '1';
+      }
+    });
+
+    // Botão "Voltar" - lógica de navegação, semelhante ao add.html
+    document.addEventListener('DOMContentLoaded', function() {
+      const ref = document.referrer || "";
+      const btnVoltar = document.getElementById('btnVoltar');
+
+      if (btnVoltar) {
+        btnVoltar.addEventListener('click', function() {
+          // Se não houver referrer, ir para página principal (index)
+          if (!ref) {
+            window.location.href = "{{ url_for('index') }}";
+          } else {
+            // Caso contrário, tenta voltar na history
+            window.history.back();
+          }
+        });
+      }
+    });
+  </script>
 </body>
 </html>

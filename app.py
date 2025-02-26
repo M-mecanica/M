@@ -16,6 +16,12 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import gridfs
 
+# ------------------------------------------------
+# IMPORTAÇÃO ADICIONADA PARA TRABALHO COM IMAGENS
+# ------------------------------------------------
+from PIL import Image
+import io
+
 app = Flask(__name__)
 
 # -----------------------------------------------------------
@@ -130,30 +136,6 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
                 largest_length = num_tokens
     return largest_length
 
-def save_image(file_obj, fs_instance):
-    """
-    Armazena apenas a imagem original no GridFS (fs_instance).
-    Retorna o ID em string ou (None) se não houver imagem válida.
-    """
-    if not file_obj or file_obj.filename.strip() == "":
-        return None
-
-    file_data = file_obj.read()
-    if not file_data:
-        return None
-
-    content_type = file_obj.content_type
-    filename = secure_filename(file_obj.filename)
-
-    # Armazena a imagem original
-    original_id = fs_instance.put(
-        file_data,
-        filename=filename,
-        contentType=content_type
-    )
-
-    return str(original_id)
-
 def calculate_user_level(posted_count, solved_count):
     points = posted_count * 2 + solved_count * 5
     if points < 20:
@@ -188,6 +170,67 @@ def calculate_user_level(posted_count, solved_count):
             progress_percentage = 100
 
     return level, points, remaining_for_next_level, progress_percentage
+
+# -----------------------------------------------------------
+# FUNÇÃO PARA SALVAR IMAGENS (CRIA VERSÃO PRINCIPAL E THUMB)
+# -----------------------------------------------------------
+def save_image(file_obj, fs_instance, max_w=1600, max_h=1200, thumb_w=300, thumb_h=300):
+    """
+    Armazena a imagem em duas versões (principal comprimida e thumbnail) no GridFS.
+    Retorna um dicionário com os IDs em string {"main_id": "...", "thumb_id": "..."}
+    ou None se não houver imagem válida.
+    """
+    if not file_obj or file_obj.filename.strip() == "":
+        return None
+
+    file_data = file_obj.read()
+    if not file_data:
+        return None
+
+    try:
+        # Abre a imagem original com Pillow
+        img = Image.open(io.BytesIO(file_data))
+    except:
+        return None  # não é uma imagem válida
+
+    # Converte para RGB
+    if img.mode != 'RGB':
+        img = img.convert('RGB')
+
+    # 1) Versão principal: redimensiona até (max_w x max_h)
+    img.thumbnail((max_w, max_h))
+    main_io = io.BytesIO()
+    # Salva em JPEG com qualidade ~80 (ajuste conforme desejar)
+    img.save(main_io, format='JPEG', quality=80)
+    main_io.seek(0)
+
+    main_id = fs_instance.put(
+        main_io.getvalue(),
+        filename=secure_filename(file_obj.filename),
+        contentType='image/jpeg'
+    )
+
+    # 2) Versão thumbnail: reabre a imagem original ou usa `img`:
+    #    - Se quisermos "perder" menos qualidade, podemos reabrir do zero,
+    #      mas aqui, reabrir do zero é mais seguro:
+    img_thumb = Image.open(io.BytesIO(file_data))
+    if img_thumb.mode != 'RGB':
+        img_thumb = img_thumb.convert('RGB')
+    img_thumb.thumbnail((thumb_w, thumb_h))
+    thumb_io = io.BytesIO()
+    img_thumb.save(thumb_io, format='JPEG', quality=60)
+    thumb_io.seek(0)
+
+    thumb_id = fs_instance.put(
+        thumb_io.getvalue(),
+        filename=secure_filename("thumb_" + file_obj.filename),
+        contentType='image/jpeg'
+    )
+
+    return {
+        "main_id": str(main_id),
+        "thumb_id": str(thumb_id)
+    }
 
 # -----------------------------------------------------------
 # CRIAÇÃO DE ÍNDICE DE TEXTO (apenas se necessário)
@@ -422,7 +465,9 @@ def load_problems():
                     "titulo": p.get("titulo", ""),
                     "descricao": p.get("descricao", ""),
                     "resolvido": p.get("resolvido", False),
-                    "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
+                    # Aqui, ajustamos para mostrar IDs da main e da thumb
+                    "problemImage_main": str(p["problemImage_main"]) if p.get("problemImage_main") else None,
+                    "problemImage_thumb": str(p["problemImage_thumb"]) if p.get("problemImage_thumb") else None,
                     "creator_name": creator_name,
                     "solver_name": solver_name,
                     "category": p.get("category", ""),
@@ -493,7 +538,8 @@ def load_problems():
                     "titulo": p.get("titulo", ""),
                     "descricao": p.get("descricao", ""),
                     "resolvido": p.get("resolvido", False),
-                    "problemImage": str(p["problemImage"]) if p.get("problemImage") else None,
+                    "problemImage_main": str(p["problemImage_main"]) if p.get("problemImage_main") else None,
+                    "problemImage_thumb": str(p["problemImage_thumb"]) if p.get("problemImage_thumb") else None,
                     "creator_name": creator_name,
                     "solver_name": solver_name,
                     "category": p.get("category", ""),
@@ -525,9 +571,16 @@ def add_problem():
         brand = request.form.get("brand", "").strip()
 
         image_file = request.files.get("problemImage")
-        original_id = save_image(image_file, fs_m)
+        image_ids = save_image(image_file, fs_m)  # retorna dict ou None
 
         if titulo and descricao:
+            if image_ids:
+                main_id = image_ids["main_id"]
+                thumb_id = image_ids["thumb_id"]
+            else:
+                main_id = None
+                thumb_id = None
+
             problema = {
                 "titulo": titulo,
                 "descricao": descricao,
@@ -537,7 +590,8 @@ def add_problem():
                 "creator_custom_name": None,
                 "solver_id": None,
                 "solver_custom_name": None,
-                "problemImage": original_id,
+                "problemImage_main": main_id,
+                "problemImage_thumb": thumb_id,
                 "category": category,
                 "subCategory": subCategory,
                 "brand": brand
@@ -561,7 +615,9 @@ def unresolved():
         if p.get("creator_custom_name"):
             p["creator_name"] = p["creator_custom_name"]
         else:
-            c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])}) if p.get("creator_id") else None
+            c_user = None
+            if p.get("creator_id"):
+                c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
             p["creator_name"] = c_user["nome"] if c_user else "Desconhecido"
 
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
@@ -688,10 +744,17 @@ def delete_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    old_file_id = problema.get("problemImage")
-    if old_file_id:
+    # Apaga as imagens antigas se existirem
+    old_main_id = problema.get("problemImage_main")
+    old_thumb_id = problema.get("problemImage_thumb")
+    if old_main_id:
         try:
-            fs_m.delete(ObjectId(old_file_id))
+            fs_m.delete(ObjectId(old_main_id))
+        except:
+            pass
+    if old_thumb_id:
+        try:
+            fs_m.delete(ObjectId(old_thumb_id))
         except:
             pass
 
@@ -705,11 +768,7 @@ def delete_problem(problem_id):
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
     """
-    Rota antiga, ainda existente para editar problemas
-    (por exemplo, problemas já resolvidos, se permitido).
-    OBS: Essa rota permanece no sistema, mas agora temos
-    também a rota /edit_your_problem para editar problemas
-    não resolvidos de um usuário.
+    Rota antiga para editar problemas.
     """
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
@@ -795,22 +854,40 @@ def edit_problem(problem_id):
         image_file = request.files.get("problemImage")
 
         if delete_image:
-            old_file_id = problema.get("problemImage")
-            if old_file_id:
+            old_main_id = problema.get("problemImage_main")
+            old_thumb_id = problema.get("problemImage_thumb")
+            if old_main_id:
                 try:
-                    fs_m.delete(ObjectId(old_file_id))
+                    fs_m.delete(ObjectId(old_main_id))
                 except:
                     pass
-            updated_fields["problemImage"] = None
+            if old_thumb_id:
+                try:
+                    fs_m.delete(ObjectId(old_thumb_id))
+                except:
+                    pass
+            updated_fields["problemImage_main"] = None
+            updated_fields["problemImage_thumb"] = None
         elif image_file and image_file.filename.strip():
-            new_orig_id = save_image(image_file, fs_m)
-            old_file_id = problema.get("problemImage")
-            if old_file_id:
-                try:
-                    fs_m.delete(ObjectId(old_file_id))
-                except:
-                    pass
-            updated_fields["problemImage"] = new_orig_id
+            image_ids = save_image(image_file, fs_m)
+            if image_ids:
+                new_main_id = image_ids["main_id"]
+                new_thumb_id = image_ids["thumb_id"]
+                # apaga os antigos
+                old_main_id = problema.get("problemImage_main")
+                old_thumb_id = problema.get("problemImage_thumb")
+                if old_main_id:
+                    try:
+                        fs_m.delete(ObjectId(old_main_id))
+                    except:
+                        pass
+                if old_thumb_id:
+                    try:
+                        fs_m.delete(ObjectId(old_thumb_id))
+                    except:
+                        pass
+                updated_fields["problemImage_main"] = new_main_id
+                updated_fields["problemImage_thumb"] = new_thumb_id
 
         problemas_collection.update_one(
             {"_id": ObjectId(problem_id)},
@@ -824,7 +901,6 @@ def edit_problem(problem_id):
 def edit_your_problem(problem_id):
     """
     Nova rota para editar problemas NÃO RESOLVIDOS.
-    Usará o template 'edit_your_problem.html'.
     """
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
@@ -861,7 +937,6 @@ def edit_your_problem(problem_id):
                 erro="Preencha todos os campos."
             )
 
-        # Manter as informações de solver como estão, pois não pode ser alterado aqui
         old_solver_id = problema.get("solver_id")
         old_solver_custom_name = problema.get("solver_custom_name")
 
@@ -888,24 +963,40 @@ def edit_your_problem(problem_id):
         image_file = request.files.get("problemImage")
 
         if delete_image:
-            old_file_id = problema.get("problemImage")
-            if old_file_id:
+            old_main_id = problema.get("problemImage_main")
+            old_thumb_id = problema.get("problemImage_thumb")
+            if old_main_id:
                 try:
-                    fs_m.delete(ObjectId(old_file_id))
+                    fs_m.delete(ObjectId(old_main_id))
                 except:
                     pass
-            updated_fields["problemImage"] = None
+            if old_thumb_id:
+                try:
+                    fs_m.delete(ObjectId(old_thumb_id))
+                except:
+                    pass
+            updated_fields["problemImage_main"] = None
+            updated_fields["problemImage_thumb"] = None
         elif image_file and image_file.filename.strip():
-            new_orig_id = save_image(image_file, fs_m)
-            old_file_id = problema.get("problemImage")
-            if old_file_id:
-                try:
-                    fs_m.delete(ObjectId(old_file_id))
-                except:
-                    pass
-            updated_fields["problemImage"] = new_orig_id
+            image_ids = save_image(image_file, fs_m)
+            if image_ids:
+                new_main_id = image_ids["main_id"]
+                new_thumb_id = image_ids["thumb_id"]
+                old_main_id = problema.get("problemImage_main")
+                old_thumb_id = problema.get("problemImage_thumb")
+                if old_main_id:
+                    try:
+                        fs_m.delete(ObjectId(old_main_id))
+                    except:
+                        pass
+                if old_thumb_id:
+                    try:
+                        fs_m.delete(ObjectId(old_thumb_id))
+                    except:
+                        pass
+                updated_fields["problemImage_main"] = new_main_id
+                updated_fields["problemImage_thumb"] = new_thumb_id
 
-        # Caso já tenha um solver definido (acidentalmente), mantemos:
         if old_solver_id:
             updated_fields["solver_id"] = old_solver_id
         if old_solver_custom_name:
@@ -1013,13 +1104,17 @@ def edit_solution(problem_id):
                     pass
                 step["stepImage"] = None
             elif step_image_file and step_image_file.filename.strip():
-                new_id = save_image(step_image_file, fs_m)
-                if old_file_id:
-                    try:
-                        fs_m.delete(ObjectId(old_file_id))
-                    except:
-                        pass
-                step["stepImage"] = new_id
+                image_ids = save_image(step_image_file, fs_m, max_w=1200, max_h=1200, thumb_w=300, thumb_h=300)
+                # Usar a versão principal do step, ou até a thumbnail, fica a critério.
+                # Normalmente, stepImage seria a principal, sem a thumb, mas é customizável.
+                if image_ids:
+                    # apaga a anterior
+                    if old_file_id:
+                        try:
+                            fs_m.delete(ObjectId(old_file_id))
+                        except:
+                            pass
+                    step["stepImage"] = image_ids["main_id"]
             else:
                 step["stepImage"] = old_file_id
 
@@ -1041,13 +1136,14 @@ def edit_solution(problem_id):
                         pass
                     substep["subStepImage"] = None
                 elif substep_file and substep_file.filename.strip():
-                    new_sub_id = save_image(substep_file, fs_m)
-                    if old_sub_file_id:
-                        try:
-                            fs_m.delete(ObjectId(old_sub_file_id))
-                        except:
-                            pass
-                    substep["subStepImage"] = new_sub_id
+                    sub_image_ids = save_image(substep_file, fs_m, max_w=1200, max_h=1200, thumb_w=300, thumb_h=300)
+                    if sub_image_ids:
+                        if old_sub_file_id:
+                            try:
+                                fs_m.delete(ObjectId(old_sub_file_id))
+                            except:
+                                pass
+                        substep["subStepImage"] = sub_image_ids["main_id"]
                 else:
                     substep["subStepImage"] = old_sub_file_id
 
@@ -1292,7 +1388,9 @@ def load_items():
                 'stock_eld': it.get('stock_eld', 0),
                 'price': float(it.get('price', 0.0)),
                 'is_highlighted': 1 if it.get('is_phrase_match') == 1 else 0,
-                'itemImage': str(it['itemImage']) if it.get('itemImage') else None
+                # Ajuste p/ exibir main e thumb
+                'itemImage_main': str(it['itemImage_main']) if it.get('itemImage_main') else None,
+                'itemImage_thumb': str(it['itemImage_thumb']) if it.get('itemImage_thumb') else None
             })
 
         return jsonify({
@@ -1338,7 +1436,8 @@ def load_items():
                 'stock_mz': it.get('stock_mz', 0),
                 'stock_eld': it.get('stock_eld', 0),
                 'price': float(it.get('price', 0.0)),
-                'itemImage': str(it['itemImage']) if it.get('itemImage') else None
+                'itemImage_main': str(it['itemImage_main']) if it.get('itemImage_main') else None,
+                'itemImage_thumb': str(it['itemImage_thumb']) if it.get('itemImage_thumb') else None
             })
 
         return jsonify({
@@ -1360,26 +1459,33 @@ def upload_item_image(item_id):
 
     file_obj = request.files.get("itemImage")
     if file_obj:
-        file_data = file_obj.read()
-        if file_data:
-            content_type = file_obj.content_type
-            filename = secure_filename(file_obj.filename)
-
-            new_file_id = fs_mz.put(
-                file_data,
-                filename=filename,
-                contentType=content_type
-            )
-            old_file_id = item.get("itemImage")
-            if old_file_id:
+        image_ids = save_image(file_obj, fs_mz)
+        if image_ids:
+            new_main_id = image_ids["main_id"]
+            new_thumb_id = image_ids["thumb_id"]
+            old_main_id = item.get("itemImage_main")
+            old_thumb_id = item.get("itemImage_thumb")
+            if old_main_id:
                 try:
-                    fs_mz.delete(ObjectId(old_file_id))
+                    fs_mz.delete(ObjectId(old_main_id))
+                except:
+                    pass
+            if old_thumb_id:
+                try:
+                    fs_mz.delete(ObjectId(old_thumb_id))
                 except:
                     pass
 
             itens_collection.update_one(
                 {"_id": ObjectId(item_id)},
-                {"$set": {"itemImage": str(new_file_id)}}
+                {
+                    "$set": {
+                        "itemImage_main": new_main_id,
+                        "itemImage_thumb": new_thumb_id
+                    },
+                    # Se quiser remover de vez o campo antigo, descomente:
+                    # "$unset": {"itemImage": ""}
+                }
             )
 
     return redirect(url_for("item_search"))
@@ -1417,7 +1523,14 @@ def add_item():
             stock_eld = 0
 
         image_file = request.files.get("itemImage")
-        original_id = save_image(image_file, fs_mz)
+        image_ids = save_image(image_file, fs_mz)
+
+        if image_ids:
+            main_id = image_ids["main_id"]
+            thumb_id = image_ids["thumb_id"]
+        else:
+            main_id = None
+            thumb_id = None
 
         new_item = {
             "description": description,
@@ -1425,7 +1538,8 @@ def add_item():
             "price": price,
             "stock_mz": stock_mz,
             "stock_eld": stock_eld,
-            "itemImage": original_id
+            "itemImage_main": main_id,
+            "itemImage_thumb": thumb_id
         }
         itens_collection.insert_one(new_item)
         return redirect(url_for("item_search"))
@@ -1499,14 +1613,9 @@ def edit_profile():
 
         profile_photo = request.files.get("profile_photo")
         if profile_photo and profile_photo.filename.strip():
-            file_data = profile_photo.read()
-            if file_data:
-                content_type = profile_photo.content_type
-                new_file_id = fs_m.put(
-                    file_data,
-                    filename=secure_filename(profile_photo.filename),
-                    contentType=content_type
-                )
+            image_ids = save_image(profile_photo, fs_m)
+            if image_ids:
+                new_file_id = image_ids["main_id"]  # A foto de perfil pode ser só a "main"
                 old_photo_id = user_obj.get("profile_image_id")
                 if old_photo_id:
                     try:

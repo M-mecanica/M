@@ -1,675 +1,913 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>M - Resultados da Pesquisa</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <title>M - Resultados da Pesquisa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Fonte básica -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
-    rel="stylesheet"
-  />
-  <!-- Ícones Material (para a lupa) -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <!-- Fonte básica -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Ícones Material (para a lupa) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Roboto', sans-serif;
-      font-size: 1rem;
-      color: #333;
-      background: url("{{ url_for('static', filename='images/' + random_bg) }}") no-repeat center center fixed;
-      background-size: cover;
-      overflow-x: hidden;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    #content {
-      transition: opacity 0.5s ease;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      opacity: 0;
-    }
-    #preloader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: #000;
-      z-index: 99999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .loader {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #333;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    header {
-      background-color: #000;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      height: 80px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-    }
-    header h1 {
-      color: #fff;
-      font-size: 1.6rem;
-      margin: 0;
-      text-align: center;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    @media (max-width: 768px) {
+    <style>
+      /* Reset e estilos básicos */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Roboto', sans-serif;
+        font-size: 1rem;
+        color: #333;
+        background: url("{{ url_for('static', filename='images/' + random_bg) }}")
+          no-repeat center center fixed;
+        background-size: cover;
+        overflow-x: hidden;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      #content {
+        transition: opacity 0.5s ease;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        opacity: 0;
+      }
+      /* PRELOADER */
+      #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #000;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .loader {
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #333;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      /* HEADER */
       header {
-        height: 56px;
-        padding: 0 1rem;
+        background-color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        height: 80px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
       }
       header h1 {
-        font-size: 1.3rem;
+        color: #fff;
+        font-size: 1.6rem;
+        margin: 0;
+        text-align: center;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
       }
-    }
-    .header-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      outline: none;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      transition: background-color 0.2s;
-    }
-    .header-btn:hover {
-      background-color: #333;
-    }
-    .header-btn svg {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-    }
-    .header-btn span {
-      margin-left: 0.5rem;
-    }
-    .fixed-search {
-      position: fixed;
-      top: 80px;
-      left: 0;
-      right: 0;
-      z-index: 999;
-      display: flex;
-      justify-content: center;
-      padding: 0.5rem 0;
-    }
-    @media (max-width: 768px) {
-      .fixed-search {
-        top: 56px;
+      @media (max-width: 768px) {
+        header {
+          height: 56px;
+          padding: 0 1rem;
+        }
+        header h1 {
+          font-size: 1.3rem;
+        }
       }
-    }
-    .search-container {
-      position: relative;
-      width: 100%;
-      max-width: 600px;
-    }
-    .search-container .search-icon {
-      position: absolute;
-      top: 50%;
-      left: 1rem;
-      transform: translateY(-50%);
-      color: #aaa;
-      font-size: 1.6rem;
-      pointer-events: none;
-    }
-    .search-container input[type="text"] {
-      width: 100%;
-      padding: 1rem 1.5rem;
-      padding-left: 3rem;
-      border: none;
-      border-radius: 32px;
-      background-color: #fff;
-      font-size: 1rem;
-      color: #333;
-      outline: none;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .search-container input[type="text"]::placeholder {
-      color: #aaa;
-    }
-    main {
-      flex: 1;
-      font-size: 1.25rem;
-      padding: 2rem;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      margin-top: 140px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    @media (max-width: 768px) {
-      main {
-        margin-top: 116px;
+      .header-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        outline: none;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
         font-size: 1rem;
-        padding: 1rem;
+        transition: background-color 0.2s;
       }
-    }
-    #problem-container {
-      width: 100%;
-    }
-    #sentinel {
-      width: 100%;
-      height: 50px;
-    }
-    .problem-item {
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 1rem 1rem 3.5rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: relative;
-      color: #333;
-    }
-    .problem-item h2 {
-      font-size: 1.4rem;
-      margin-bottom: 0.5rem;
-      color: #000;
-      text-align: center;
-    }
-    .problem-item p {
-      color: #555;
-      margin-bottom: 0.5rem;
-      text-align: center;
-    }
-    .problem-image {
-      display: block;
-      margin: 1rem auto;
-      width: auto;
-      height: auto;
-      max-width: 400px;
-      max-height: 300px;
-      object-fit: contain;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    .ver-solucao-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.6rem 1.2rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      position: absolute;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    .ver-solucao-btn:hover {
-      background-color: #333;
-      transform: translateX(-50%) scale(1.02);
-    }
-    .action-btns {
-      position: absolute;
-      bottom: 1rem;
-      right: 1rem;
-      display: flex;
-      gap: 0.5rem;
-    }
-    .action-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-    }
-    .action-btn:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-    .action-delete-form {
-      display: inline;
-    }
-    .not-found-container {
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 1rem 1rem 3.5rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: relative;
-      color: #333;
-      width: 100%;
-      text-align: center;
-    }
-    .not-found-container p {
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-    }
-    .new-problem-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-    .new-problem-btn:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-    .new-problem-btn svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor;
-      margin-right: 0.4rem;
-    }
-    @media (max-width: 768px) {
+      .header-btn:hover {
+        background-color: #333;
+      }
+      .header-btn svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+      }
+      .header-btn span {
+        margin-left: 0.5rem;
+      }
+
+      /*
+        Oculta o botão "Perfil" E o botão "Entrar" do header em telas menores
+        que 768px. Dessa forma, apenas a barra inferior mostrará essas opções
+        no mobile.
+      */
+      @media (max-width: 768px) {
+        .perfil-btn,
+        .entrar-btn {
+          display: none !important;
+        }
+      }
+
+      /* BUSCA FIXA */
+      .fixed-search {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        display: flex;
+        justify-content: center;
+        padding: 0.5rem 0;
+      }
+      @media (max-width: 768px) {
+        .fixed-search {
+          top: 56px;
+        }
+      }
+      .search-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+      }
+      .search-container .search-icon {
+        position: absolute;
+        top: 50%;
+        left: 1rem;
+        transform: translateY(-50%);
+        color: #aaa;
+        font-size: 1.6rem;
+        pointer-events: none;
+      }
+      .search-container input[type='text'] {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        padding-left: 3rem;
+        border: none;
+        border-radius: 32px;
+        background-color: #fff;
+        font-size: 1rem;
+        color: #333;
+        outline: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .search-container input[type='text']::placeholder {
+        color: #aaa;
+      }
+      /* MAIN */
+      main {
+        flex: 1;
+        font-size: 1.25rem;
+        padding: 2rem;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        margin-top: 140px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      @media (max-width: 768px) {
+        main {
+          margin-top: 116px;
+          font-size: 1rem;
+          padding: 1rem;
+        }
+      }
+      #problem-container {
+        width: 100%;
+      }
+      #sentinel {
+        width: 100%;
+        height: 50px;
+      }
       .problem-item {
-        margin-bottom: 1.5rem;
-        padding-bottom: 4.5rem;
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 1rem 1rem 3.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        color: #333;
       }
       .problem-item h2 {
-        font-size: 1.2rem;
+        font-size: 1.4rem;
+        margin-bottom: 0.5rem;
+        color: #000;
+        text-align: center;
       }
       .problem-item p {
-        font-size: 0.9rem;
-      }
-      .ver-solucao-btn {
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
-      }
-      .action-btn {
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
-      }
-      .new-problem-btn {
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
-      }
-      .new-problem-btn svg {
-        width: 16px;
-        height: 16px;
+        color: #555;
+        margin-bottom: 0.5rem;
+        text-align: center;
       }
       .problem-image {
-        max-width: 280px;
-        max-height: 200px;
+        display: block;
+        margin: 1rem auto;
+        width: auto;
+        height: auto;
+        max-width: 400px;
+        max-height: 300px;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
       }
-      .not-found-container p {
-        font-size: 1rem;
+      .ver-solucao-btn {
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 32px;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s, transform 0.2s;
+        position: absolute;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .ver-solucao-btn:hover {
+        background-color: #333;
+        transform: translateX(-50%) scale(1.02);
+      }
+      .action-btns {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 0.5rem;
+      }
+      .action-btn {
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 32px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s, transform 0.2s;
+      }
+      .action-btn:hover {
+        background-color: #333;
+        transform: scale(1.02);
+      }
+      .action-delete-form {
+        display: inline;
       }
       .not-found-container {
-        padding: 1rem;
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 1rem 1rem 3.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        color: #333;
+        width: 100%;
+        text-align: center;
       }
-    }
-    footer {
-      background-color: #000;
-      text-align: center;
-      padding: 1rem 2rem;
-    }
-    footer p {
-      font-size: 0.9rem;
-      color: #fff;
-    }
-  </style>
-</head>
+      .not-found-container p {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+      }
+      .new-problem-btn {
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 32px;
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s, transform 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1rem;
+      }
+      .new-problem-btn:hover {
+        background-color: #333;
+        transform: scale(1.02);
+      }
+      .new-problem-btn svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+        margin-right: 0.4rem;
+      }
+      @media (max-width: 768px) {
+        .problem-item {
+          margin-bottom: 1.5rem;
+          padding-bottom: 4.5rem;
+        }
+        .problem-item h2 {
+          font-size: 1.2rem;
+        }
+        .problem-item p {
+          font-size: 0.9rem;
+        }
+        .ver-solucao-btn {
+          font-size: 0.8rem;
+          padding: 0.5rem 1rem;
+        }
+        .action-btn {
+          font-size: 0.8rem;
+          padding: 0.5rem 1rem;
+        }
+        .new-problem-btn {
+          font-size: 0.8rem;
+          padding: 0.5rem 1rem;
+        }
+        .new-problem-btn svg {
+          width: 16px;
+          height: 16px;
+        }
+        .problem-image {
+          max-width: 280px;
+          max-height: 200px;
+        }
+        .not-found-container p {
+          font-size: 1rem;
+        }
+        .not-found-container {
+          padding: 1rem;
+        }
+      }
 
-<body>
-  <div id="preloader">
-    <div class="loader"></div>
-  </div>
+      /* FOOTER */
+      footer {
+        background-color: #000;
+        text-align: center;
+        padding: 1rem 2rem;
+      }
+      footer p {
+        font-size: 0.9rem;
+        color: #fff;
+      }
 
-  <div id="content">
-    <header>
-      <button class="header-btn" onclick="window.location.href='{{ url_for('index') }}'" aria-label="Voltar">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <h1>Resultados da Pesquisa</h1>
-      {% if not session.get('user_id') %}
-        <a class="header-btn" href="{{ url_for('login') }}">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
-          </svg>
-          <span>Entrar</span>
-        </a>
-      {% else %}
-        <a class="header-btn" href="{{ url_for('perfil') }}">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
-          </svg>
-          <span>Perfil</span>
-        </a>
-      {% endif %}
-    </header>
-
-    <div class="fixed-search">
-      <form action="{{ url_for('search') }}" method="GET" class="search-container" id="searchForm">
-        <span class="material-icons search-icon">search</span>
-        <input
-          type="text"
-          name="q"
-          id="search-input"
-          value="{{ termo_busca }}"
-          autocomplete="off"
-          autofocus
-        />
-        <input type="hidden" name="category" value="{{ selected_category }}">
-        <input type="hidden" name="subcategory" value="{{ selected_subcategory }}">
-        <input type="hidden" name="brand" value="{{ selected_brand }}">
-      </form>
+      /* BARRA INFERIOR (apenas mobile) */
+      .mobile-bottom-bar {
+        display: none; /* por padrão, não mostra */
+      }
+      @media (max-width: 768px) {
+        .mobile-bottom-bar {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          background-color: #000;
+          width: 100%;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          height: 60px;
+          z-index: 9999;
+        }
+        .mobile-bottom-bar .bottom-bar-btn {
+          color: #fff;
+          text-decoration: none;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.8rem;
+        }
+        .mobile-bottom-bar .bottom-bar-btn svg {
+          width: 20px;
+          height: 20px;
+          fill: #fff;
+          margin-bottom: 2px;
+        }
+        /* Garante que o main não seja coberto pela barra inferior */
+        main {
+          padding-bottom: 60px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- PRELOADER -->
+    <div id="preloader">
+      <div class="loader"></div>
     </div>
 
-    <main>
-      <div id="problem-container"></div>
-      <div id="sentinel"></div>
-      <div id="spinner" class="spinner" style="display: none;"></div>
+    <div id="content">
+      <header>
+        <!-- Botão "Voltar" -->
+        <button
+          class="header-btn"
+          onclick="window.location.href='{{ url_for('index') }}'"
+          aria-label="Voltar"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M15 18l-6-6 6-6"
+              stroke="currentColor"
+              stroke-width="2"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
 
-      <div class="not-found-container">
-        <p>Não conseguiu encontrar seu problema?</p>
-        {% if session.get('user_id') %}
-          <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5
-              0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+        <!-- Título central -->
+        <h1>Resultados da Pesquisa</h1>
+
+        <!-- Se NÃO estiver logado, mostra "Entrar" (com classe 'entrar-btn');
+             se estiver logado, mostra "Perfil" (classe 'perfil-btn'). -->
+        {% if not session.get('user_id') %}
+          <a class="header-btn entrar-btn" href="{{ url_for('login') }}">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+            >
+              <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+              <path
+                d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+              />
             </svg>
-            Envie o seu problema
+            <span>Entrar</span>
+          </a>
+        {% else %}
+          <!-- Aplica a classe 'perfil-btn' para poder ocultar no mobile -->
+          <a class="header-btn perfil-btn" href="{{ url_for('perfil') }}">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+            >
+              <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+              <path
+                d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+              />
+            </svg>
+            <span>Perfil</span>
+          </a>
+        {% endif %}
+      </header>
+
+      <!-- Barra de busca fixa abaixo do header -->
+      <div class="fixed-search">
+        <form
+          action="{{ url_for('search') }}"
+          method="GET"
+          class="search-container"
+          id="searchForm"
+        >
+          <span class="material-icons search-icon">search</span>
+          <input
+            type="text"
+            name="q"
+            id="search-input"
+            value="{{ termo_busca }}"
+            autocomplete="off"
+            autofocus
+          />
+          <input type="hidden" name="category" value="{{ selected_category }}">
+          <input
+            type="hidden"
+            name="subcategory"
+            value="{{ selected_subcategory }}"
+          >
+          <input type="hidden" name="brand" value="{{ selected_brand }}">
+        </form>
+      </div>
+
+      <main>
+        <div id="problem-container"></div>
+        <div id="sentinel"></div>
+        <div id="spinner" class="spinner" style="display: none;"></div>
+
+        <div class="not-found-container">
+          <p>Não conseguiu encontrar seu problema?</p>
+          {% if session.get('user_id') %}
+            <a
+              href="{{ url_for('add_problem') }}"
+              class="new-problem-btn"
+              title="Novo Problema"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+                />
+              </svg>
+              Envie o seu problema
+            </a>
+          {% else %}
+            <a
+              href="{{ url_for('register', next=url_for('add_problem')) }}"
+              class="new-problem-btn"
+              title="Novo Problema"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5
+                  0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+                />
+              </svg>
+              Envie o seu problema
+            </a>
+          {% endif %}
+        </div>
+      </main>
+
+      <footer>
+        <p>© 2025 Plataforma M</p>
+      </footer>
+
+      <!-- BARRA INFERIOR (visível apenas em mobile) -->
+      <div class="mobile-bottom-bar">
+        <!-- 1) Resolver (coluna 1/3) -->
+        <a
+          href="{{ url_for('unresolved') }}"
+          class="bottom-bar-btn"
+          title="Resolver Problemas"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5
+              0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8
+              5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0
+              6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"
+            />
+          </svg>
+          Resolver
+        </a>
+        <!-- 2) Envie (coluna 2/3) -->
+        <a
+          href="{{ url_for('add_problem') }}"
+          class="bottom-bar-btn"
+          title="Envie seu Problema"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
+               0 0 1 0 1h-3v3a.5.5 0 0 1-1
+               0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
+               0 0 1 8 4z"
+            />
+          </svg>
+          Envie
+        </a>
+        <!-- 3) Perfil/Entrar (coluna 3/3) -->
+        {% if not session.get('user_id') %}
+          <a
+            href="{{ url_for('login') }}"
+            class="bottom-bar-btn"
+            title="Entrar"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M8 8a3 3 0 1 0-3-3 3 3
+                0 0 0 3 3z"
+              />
+              <path
+                d="M8 8c-2.33 0-4 1.67-4
+                4v1h8v-1c0-2.33-1.67-4-4-4z"
+              />
+            </svg>
+            Entrar
           </a>
         {% else %}
           <a
-            href="{{ url_for('register', next=url_for('add_problem')) }}"
-            class="new-problem-btn"
-            title="Novo Problema"
+            href="{{ url_for('perfil') }}"
+            class="bottom-bar-btn"
+            title="Perfil"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5
-              0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M8 8a3 3 0 1 0-3-3
+                3 3 0 0 0 3 3z"
+              />
+              <path
+                d="M8 8c-2.33 0-4 1.67-4
+                4v1h8v-1c0-2.33-1.67-4-4-4z"
+              />
             </svg>
-            Envie o seu problema
+            Perfil
           </a>
         {% endif %}
       </div>
-    </main>
+    </div>
 
-    <footer>
-      <p>© 2025 Plataforma M</p>
-    </footer>
-  </div>
-
-  <script>
-    window.addEventListener('load', function() {
-      const preloader = document.getElementById('preloader');
-      const content = document.getElementById('content');
-      if (preloader) {
-        preloader.style.display = 'none';
-      }
-      if (content) {
-        content.style.opacity = '1';
-      }
-    });
-
-    // Parâmetros
-    const urlParams = new URLSearchParams(window.location.search);
-    const doRestore = (urlParams.get('restore') === '1');
-
-    const searchQuery = "{{ termo_busca|safe }}".trim();
-    const selectedCategory = "{{ selected_category|safe }}";
-    const selectedBrand = "{{ selected_brand|safe }}";
-    const selectedSubcategory = "{{ selected_subcategory|safe }}";
-
-    let currentPage = 1;
-    let loading = false;
-    let hasMore = true;
-    let loadedProblems = [];
-
-    const problemContainer = document.getElementById('problem-container');
-    const spinner = document.getElementById('spinner');
-    const searchInput = document.getElementById('search-input');
-    const searchForm = document.getElementById('searchForm');
-
-    // Verifica se temos algum estado guardado no sessionStorage
-    let restoredState = false;
-    const storedData = sessionStorage.getItem('mSearchState');
-
-    if (doRestore && storedData) {
-      try {
-        const parsed = JSON.parse(storedData);
-        // Verificamos se o state guardado bate com a busca atual
-        if (
-          parsed.searchQuery === searchQuery &&
-          parsed.selectedCategory === selectedCategory &&
-          parsed.selectedSubcategory === selectedSubcategory &&
-          parsed.selectedBrand === selectedBrand
-        ) {
-          currentPage = parsed.currentPage;
-          hasMore = parsed.hasMore;
-          loadedProblems = parsed.loadedProblems || [];
-          restoredState = true;
-          loadedProblems.forEach(problem => {
-            const el = createProblemElement(problem);
-            problemContainer.appendChild(el);
-          });
-          // Rola a página para a posição salva
-          setTimeout(() => {
-            window.scrollTo(0, parsed.scrollPosition || 0);
-          }, 50);
+    <script>
+      // Aguarda a página carregar e então remove o preloader e faz fade-in do conteúdo
+      window.addEventListener('load', function () {
+        const preloader = document.getElementById('preloader');
+        const content = document.getElementById('content');
+        if (preloader) {
+          preloader.style.display = 'none';
         }
-      } catch (err) {
-        console.error('Erro ao restaurar sessionStorage:', err);
-      }
-    }
-
-    // Se não restaurou, precisamos carregar normalmente
-    window.addEventListener('DOMContentLoaded', () => {
-      if (searchInput.value) {
-        searchInput.focus();
-        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-      }
-      // Se não deu pra restaurar, carrega do zero
-      if (!restoredState) {
-        loadProblems();
-      }
-      // Observer para scroll infinito
-      const observer = new IntersectionObserver((entries) => {
-        const entry = entries[0];
-        if (entry.isIntersecting && hasMore && !loading) {
-          currentPage++;
-          loadProblems();
-        }
-      }, { root: null, threshold: 0.1 });
-      const sentinel = document.getElementById('sentinel');
-      observer.observe(sentinel);
-    });
-
-    async function loadProblems() {
-      loading = true;
-      spinner.style.display = 'block';
-      try {
-        const url = `/load_problems?page=${currentPage}`
-          + `&q=${encodeURIComponent(searchQuery)}`
-          + `&category=${encodeURIComponent(selectedCategory)}`
-          + `&subcategory=${encodeURIComponent(selectedSubcategory)}`
-          + `&brand=${encodeURIComponent(selectedBrand)}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Erro ao carregar problemas');
-
-        const data = await response.json();
-        hasMore = data.has_more;
-        data.problems.forEach(problem => {
-          loadedProblems.push(problem);
-          const problemEl = createProblemElement(problem);
-          problemContainer.appendChild(problemEl);
-        });
-
-      } catch (error) {
-        console.error(error);
-      } finally {
-        loading = false;
-        spinner.style.display = 'none';
-      }
-    }
-
-    function createProblemElement(problem) {
-      const div = document.createElement('div');
-      div.classList.add('problem-item');
-
-      const creatorEl = document.createElement('p');
-      creatorEl.textContent = "Enviado por: " + (problem.creator_name || "Usuário");
-      creatorEl.style.fontWeight = "bold";
-      div.appendChild(creatorEl);
-
-      const h2 = document.createElement('h2');
-      h2.textContent = problem.titulo;
-      div.appendChild(h2);
-
-      const p = document.createElement('p');
-      p.textContent = problem.descricao;
-      div.appendChild(p);
-
-      // Imagem do problema
-      if (problem.problemImage) {
-        const imgEl = document.createElement('img');
-        imgEl.src = "/gridfs_image/" + problem.problemImage;
-        imgEl.alt = "Imagem do problema";
-        imgEl.classList.add('problem-image');
-        imgEl.loading = "lazy";
-        div.appendChild(imgEl);
-      }
-
-      // Se resolvido
-      if (problem.resolvido) {
-        const solverEl = document.createElement('p');
-        solverEl.textContent = "Resolvido por: " + (problem.solver_name || "Usuário?");
-        solverEl.style.fontStyle = "italic";
-        solverEl.style.marginTop = "0.5rem";
-        div.appendChild(solverEl);
-
-        {% if session.get('user_id') %}
-          const solucaoLink = document.createElement('a');
-          solucaoLink.href = "{{ url_for('exibir_solucao', problem_id='__ID__') }}"
-            .replace('__ID__', problem._id);
-          solucaoLink.classList.add('ver-solucao-btn');
-          solucaoLink.textContent = 'Veja a Solução';
-          solucaoLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            saveStateAndGo(solucaoLink.href);
-          });
-          div.appendChild(solucaoLink);
-        {% else %}
-          const solucaoLink = document.createElement('a');
-          const nextUrl = "{{ url_for('exibir_solucao', problem_id='__ID__') }}".replace('__ID__', problem._id);
-          solucaoLink.href = "{{ url_for('register') }}?next=" + encodeURIComponent(nextUrl);
-          solucaoLink.classList.add('ver-solucao-btn');
-          solucaoLink.textContent = 'Veja a Solução';
-          div.appendChild(solucaoLink);
-        {% endif %}
-      }
-
-      // Se for um solucionador, exibe botões de editar/deletar
-      {% if session.get('user_id') and session.role == 'solucionador' %}
-      const actionBtns = document.createElement('div');
-      actionBtns.classList.add('action-btns');
-
-      const editLink = document.createElement('a');
-      editLink.href = "{{ url_for('edit_problem', problem_id='__ID__') }}"
-        .replace('__ID__', problem._id);
-      editLink.classList.add('action-btn');
-      editLink.textContent = 'Editar';
-
-      const deleteForm = document.createElement('form');
-      deleteForm.method = 'POST';
-      deleteForm.action = "{{ url_for('delete_problem', problem_id='__ID__') }}"
-        .replace('__ID__', problem._id);
-      deleteForm.classList.add('action-delete-form');
-      deleteForm.onsubmit = () => confirm('Tem certeza que deseja deletar este problema?');
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.type = 'submit';
-      deleteBtn.classList.add('action-btn');
-      deleteBtn.textContent = 'Deletar';
-
-      deleteForm.appendChild(deleteBtn);
-      actionBtns.appendChild(editLink);
-      actionBtns.appendChild(deleteForm);
-      div.appendChild(actionBtns);
-      {% endif %}
-
-      return div;
-    }
-
-    // Salva o estado e vai para a URL da solução
-    function saveStateAndGo(url) {
-      const scrollPos = window.scrollY || document.documentElement.scrollTop;
-      const stateObj = {
-        searchQuery: searchQuery,
-        selectedCategory: selectedCategory,
-        selectedSubcategory: selectedSubcategory,
-        selectedBrand: selectedBrand,
-        currentPage: currentPage,
-        hasMore: hasMore,
-        scrollPosition: scrollPos,
-        loadedProblems: loadedProblems
-      };
-      sessionStorage.setItem('mSearchState', JSON.stringify(stateObj));
-      window.location.href = url;
-    }
-
-    // Ao submeter o formulário (busca), limpamos o sessionStorage
-    if (searchForm) {
-      searchForm.addEventListener('submit', function () {
-        // Só limpa se realmente digitou algo no input
-        // (para evitar conflitos ao limpar com a busca vazia).
-        if (searchInput.value.trim() !== "") {
-          const catInput = searchForm.querySelector('input[name="category"]');
-          const subCatInput = searchForm.querySelector('input[name="subcategory"]');
-          const brandInput = searchForm.querySelector('input[name="brand"]');
-          if (catInput) catInput.disabled = true;
-          if (subCatInput) subCatInput.disabled = true;
-          if (brandInput) brandInput.disabled = true;
-          sessionStorage.removeItem('mSearchState');
+        if (content) {
+          content.style.opacity = '1';
         }
       });
-    }
-  </script>
-</body>
+
+      // Parâmetros
+      const urlParams = new URLSearchParams(window.location.search);
+      const doRestore = urlParams.get('restore') === '1';
+
+      const searchQuery = "{{ termo_busca|safe }}".trim();
+      const selectedCategory = "{{ selected_category|safe }}";
+      const selectedBrand = "{{ selected_brand|safe }}";
+      const selectedSubcategory = "{{ selected_subcategory|safe }}";
+
+      let currentPage = 1;
+      let loading = false;
+      let hasMore = true;
+      let loadedProblems = [];
+
+      const problemContainer = document.getElementById('problem-container');
+      const spinner = document.getElementById('spinner');
+      const searchInput = document.getElementById('search-input');
+      const searchForm = document.getElementById('searchForm');
+
+      // Verifica se temos algum estado guardado no sessionStorage
+      let restoredState = false;
+      const storedData = sessionStorage.getItem('mSearchState');
+
+      if (doRestore && storedData) {
+        try {
+          const parsed = JSON.parse(storedData);
+          // Verifica se o state guardado bate com a busca atual
+          if (
+            parsed.searchQuery === searchQuery &&
+            parsed.selectedCategory === selectedCategory &&
+            parsed.selectedSubcategory === selectedSubcategory &&
+            parsed.selectedBrand === selectedBrand
+          ) {
+            currentPage = parsed.currentPage;
+            hasMore = parsed.hasMore;
+            loadedProblems = parsed.loadedProblems || [];
+            restoredState = true;
+            loadedProblems.forEach((problem) => {
+              const el = createProblemElement(problem);
+              problemContainer.appendChild(el);
+            });
+            // Rola a página para a posição salva
+            setTimeout(() => {
+              window.scrollTo(0, parsed.scrollPosition || 0);
+            }, 50);
+          }
+        } catch (err) {
+          console.error('Erro ao restaurar sessionStorage:', err);
+        }
+      }
+
+      // Se não restaurou, precisa carregar normalmente
+      window.addEventListener('DOMContentLoaded', () => {
+        if (searchInput.value) {
+          searchInput.focus();
+          searchInput.setSelectionRange(
+            searchInput.value.length,
+            searchInput.value.length
+          );
+        }
+        if (!restoredState) {
+          loadProblems();
+        }
+        // Observer para scroll infinito
+        const observer = new IntersectionObserver(
+          (entries) => {
+            const entry = entries[0];
+            if (entry.isIntersecting && hasMore && !loading) {
+              currentPage++;
+              loadProblems();
+            }
+          },
+          { root: null, threshold: 0.1 }
+        );
+        const sentinel = document.getElementById('sentinel');
+        observer.observe(sentinel);
+      });
+
+      async function loadProblems() {
+        loading = true;
+        spinner.style.display = 'block';
+        try {
+          const url =
+            `/load_problems?page=${currentPage}` +
+            `&q=${encodeURIComponent(searchQuery)}` +
+            `&category=${encodeURIComponent(selectedCategory)}` +
+            `&subcategory=${encodeURIComponent(selectedSubcategory)}` +
+            `&brand=${encodeURIComponent(selectedBrand)}`;
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('Erro ao carregar problemas');
+
+          const data = await response.json();
+          hasMore = data.has_more;
+          data.problems.forEach((problem) => {
+            loadedProblems.push(problem);
+            const problemEl = createProblemElement(problem);
+            problemContainer.appendChild(problemEl);
+          });
+        } catch (error) {
+          console.error(error);
+        } finally {
+          loading = false;
+          spinner.style.display = 'none';
+        }
+      }
+
+      function createProblemElement(problem) {
+        const div = document.createElement('div');
+        div.classList.add('problem-item');
+
+        // Criador
+        const creatorEl = document.createElement('p');
+        creatorEl.textContent = 'Enviado por: ' + (problem.creator_name || 'Usuário');
+        creatorEl.style.fontWeight = 'bold';
+        div.appendChild(creatorEl);
+
+        // Título
+        const h2 = document.createElement('h2');
+        h2.textContent = problem.titulo;
+        div.appendChild(h2);
+
+        // Descrição
+        const p = document.createElement('p');
+        p.textContent = problem.descricao;
+        div.appendChild(p);
+
+        // Exibe a thumbnail caso exista, senão tenta exibir a imagem principal
+        if (problem.problemImage_thumb) {
+          const imgEl = document.createElement('img');
+          imgEl.src = '/gridfs_image/' + problem.problemImage_thumb;
+          imgEl.alt = 'Thumbnail do problema';
+          imgEl.classList.add('problem-image');
+          imgEl.loading = 'lazy';
+          div.appendChild(imgEl);
+        } else if (problem.problemImage_main) {
+          const imgEl = document.createElement('img');
+          imgEl.src = '/gridfs_image/' + problem.problemImage_main;
+          imgEl.alt = 'Imagem do problema';
+          imgEl.classList.add('problem-image');
+          imgEl.loading = 'lazy';
+          div.appendChild(imgEl);
+        }
+
+        // Se resolvido
+        if (problem.resolvido) {
+          const solverEl = document.createElement('p');
+          solverEl.textContent =
+            'Resolvido por: ' + (problem.solver_name || 'Usuário?');
+          solverEl.style.fontStyle = 'italic';
+          solverEl.style.marginTop = '0.5rem';
+          div.appendChild(solverEl);
+
+          {% if session.get('user_id') %}
+            // Link para a solução
+            const solucaoLink = document.createElement('a');
+            solucaoLink.href =
+              "{{ url_for('exibir_solucao', problem_id='__ID__') }}".replace(
+                '__ID__',
+                problem._id
+              );
+            solucaoLink.classList.add('ver-solucao-btn');
+            solucaoLink.textContent = 'Veja a Solução';
+            solucaoLink.addEventListener('click', (e) => {
+              e.preventDefault();
+              saveStateAndGo(solucaoLink.href);
+            });
+            div.appendChild(solucaoLink);
+          {% else %}
+            // Redireciona para registro, levando a nextURL
+            const solucaoLink = document.createElement('a');
+            const nextUrl =
+              "{{ url_for('exibir_solucao', problem_id='__ID__') }}".replace(
+                '__ID__',
+                problem._id
+              );
+            solucaoLink.href =
+              "{{ url_for('register') }}?next=" + encodeURIComponent(nextUrl);
+            solucaoLink.classList.add('ver-solucao-btn');
+            solucaoLink.textContent = 'Veja a Solução';
+            div.appendChild(solucaoLink);
+          {% endif %}
+        }
+
+        // Se for um solucionador, exibe botões de editar/deletar
+        {% if session.get('user_id') and session.role == 'solucionador' %}
+        const actionBtns = document.createElement('div');
+        actionBtns.classList.add('action-btns');
+
+        const editLink = document.createElement('a');
+        editLink.href =
+          "{{ url_for('edit_problem', problem_id='__ID__') }}".replace(
+            '__ID__',
+            problem._id
+          );
+        editLink.classList.add('action-btn');
+        editLink.textContent = 'Editar';
+
+        const deleteForm = document.createElement('form');
+        deleteForm.method = 'POST';
+        deleteForm.action =
+          "{{ url_for('delete_problem', problem_id='__ID__') }}".replace(
+            '__ID__',
+            problem._id
+          );
+        deleteForm.classList.add('action-delete-form');
+        deleteForm.onsubmit = () =>
+          confirm('Tem certeza que deseja deletar este problema?');
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'submit';
+        deleteBtn.classList.add('action-btn');
+        deleteBtn.textContent = 'Deletar';
+
+        deleteForm.appendChild(deleteBtn);
+        actionBtns.appendChild(editLink);
+        actionBtns.appendChild(deleteForm);
+        div.appendChild(actionBtns);
+        {% endif %}
+
+        return div;
+      }
+
+      // Salva o estado e vai para a URL da solução
+      function saveStateAndGo(url) {
+        const scrollPos = window.scrollY || document.documentElement.scrollTop;
+        const stateObj = {
+          searchQuery: searchQuery,
+          selectedCategory: selectedCategory,
+          selectedSubcategory: selectedSubcategory,
+          selectedBrand: selectedBrand,
+          currentPage: currentPage,
+          hasMore: hasMore,
+          scrollPosition: scrollPos,
+          loadedProblems: loadedProblems,
+        };
+        sessionStorage.setItem('mSearchState', JSON.stringify(stateObj));
+        window.location.href = url;
+      }
+
+      // Ao submeter o formulário (busca), limpamos o sessionStorage
+      if (searchForm) {
+        searchForm.addEventListener('submit', function () {
+          if (searchInput.value.trim() !== '') {
+            const catInput = searchForm.querySelector('input[name="category"]');
+            const subCatInput = searchForm.querySelector('input[name="subcategory"]');
+            const brandInput = searchForm.querySelector('input[name="brand"]');
+            if (catInput) catInput.disabled = true;
+            if (subCatInput) subCatInput.disabled = true;
+            if (brandInput) brandInput.disabled = true;
+            sessionStorage.removeItem('mSearchState');
+          }
+        });
+      }
+    </script>
+  </body>
 </html>

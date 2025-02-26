@@ -3,12 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Registrar Novo Problema</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Fonte básica -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
+  <!-- Ícones Material (se desejar utilizar) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     /* Reset básico */
     * {
@@ -26,7 +31,43 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-    /* HEADER FIXO (mesmo padrão de resultados.html) */
+
+    /* Preloader (opcional) */
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #333;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Conteúdo (para dar fade-in após o preloader) */
+    #content {
+      transition: opacity 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      opacity: 0; /* começa invisível, depois faz fade-in */
+    }
+
+    /* HEADER */
     header {
       background-color: #000;
       display: flex;
@@ -40,12 +81,6 @@
       right: 0;
       z-index: 1000;
     }
-    @media (max-width: 768px) {
-      header {
-        height: 56px;
-        padding: 0 1rem;
-      }
-    }
     header h1 {
       color: #fff;
       font-size: 1.6rem;
@@ -54,6 +89,15 @@
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
+    }
+    @media (max-width: 768px) {
+      header {
+        height: 56px;
+        padding: 0 1rem;
+      }
+      header h1 {
+        font-size: 1.3rem;
+      }
     }
     .header-btn {
       background: none;
@@ -79,8 +123,17 @@
     .header-btn span {
       margin-left: 0.5rem;
     }
+
+    /* Oculta "Perfil" e "Entrar" em telas menores (mostra via mobile-bottom-bar) */
+    @media (max-width: 768px) {
+      .perfil-btn,
+      .entrar-btn {
+        display: none !important;
+      }
+    }
+
     main {
-      margin-top: 100px;
+      margin-top: 100px; /* espaço para header fixo */
       flex: 1;
       padding: 2rem 1rem;
       width: 100%;
@@ -91,6 +144,60 @@
       flex-direction: column;
       align-items: center;
     }
+    @media (max-width: 768px) {
+      main {
+        margin-top: 72px;
+      }
+    }
+
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+      margin: 0;
+    }
+
+    /* Barra inferior (mobile) */
+    .mobile-bottom-bar {
+      display: none; /* no desktop */
+    }
+    @media (max-width: 768px) {
+      .mobile-bottom-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        background-color: #000;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        height: 60px;
+        z-index: 9999;
+      }
+      .mobile-bottom-bar .bottom-bar-btn {
+        color: #fff;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+      }
+      .mobile-bottom-bar .bottom-bar-btn svg {
+        width: 20px;
+        height: 20px;
+        fill: #fff;
+        margin-bottom: 2px;
+      }
+      main {
+        padding-bottom: 60px; /* para não ficar embaixo da barra */
+      }
+    }
+
+    /* Formulário para adicionar problema */
     .page-title {
       font-size: 1.6rem;
       margin-bottom: 2rem;
@@ -232,16 +339,8 @@
       display: none;
       margin-top: 1rem;
     }
-    footer {
-      background-color: #000;
-      text-align: center;
-      padding: 1rem 2rem;
-    }
-    footer p {
-      font-size: 0.9rem;
-      color: #fff;
-      margin: 0;
-    }
+
+    /* Modal de categorias */
     .modal {
       display: none;
       position: fixed;
@@ -345,123 +444,241 @@
     .btn-categorias.voltar:hover {
       background-color: #ccc;
     }
-    @media (max-width: 768px) {
-      header h1 {
-        font-size: 1.3rem;
-      }
-      .btn-definir-cat {
-        font-size: 0.8rem;
-        padding: 0.5rem 0.8rem;
-      }
-      .upload-btn {
-        font-size: 0.8rem;
-        padding: 0.5rem 0.8rem;
-      }
-      .btn-categorias {
-        font-size: 1rem;
-        padding: 0.8rem 1rem;
-      }
-      .modal-header {
-        padding: 1rem;
-      }
-      .modal-header h2 {
-        font-size: 1.2rem;
-      }
-      .close {
-        font-size: 1.6rem;
-        right: 1rem;
-        top: 1rem;
-      }
-      .modal-body {
-        padding: 1rem;
-      }
-      .modal-text {
-        font-size: 1rem;
-      }
-    }
+
   </style>
 </head>
 <body>
-  <header>
-    <button class="header-btn" onclick="window.location.href='{{ url_for('index') }}'" aria-label="Voltar">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-    <h1>Registrar Novo Problema</h1>
-    {% if not session.get('user_id') %}
-      <a class="header-btn" href="{{ url_for('login') }}">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
-        </svg>
-        <span>Entrar</span>
-      </a>
-    {% else %}
-      <a class="header-btn" href="{{ url_for('perfil') }}">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-          <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
-        </svg>
-        <span>Perfil</span>
-      </a>
-    {% endif %}
-  </header>
+  <!-- PRELOADER (opcional) -->
+  <div id="preloader">
+    <div class="loader"></div>
+  </div>
 
-  <main>
-    <h2 class="page-title">Informe os detalhes do problema</h2>
-    <div class="form-container">
-      {% if erro %}
-        <div class="erro">{{ erro }}</div>
+  <!-- CONTEÚDO -->
+  <div id="content">
+    <!-- Barra superior fixa -->
+    <header>
+      <!-- Botão "Voltar" -->
+      <button
+        class="header-btn"
+        id="btnVoltar"
+        aria-label="Voltar"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path
+            d="M15 18l-6-6 6-6"
+            stroke="currentColor"
+            stroke-width="2"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+
+      <h1>Registrar Novo Problema</h1>
+
+      <!-- Se NÃO estiver logado, mostra "Entrar" -->
+      {% if not session.get('user_id') %}
+        <a class="header-btn entrar-btn" href="{{ url_for('login') }}">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
+          </svg>
+          <span>Entrar</span>
+        </a>
+      {% else %}
+        <!-- Se estiver logado, mostra "Perfil" -->
+        <a class="header-btn perfil-btn" href="{{ url_for('perfil') }}">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
+          </svg>
+          <span>Perfil</span>
+        </a>
       {% endif %}
-      <form action="{{ url_for('add_problem') }}" method="POST" enctype="multipart/form-data">
-        <label for="titulo">Título do Problema</label>
-        <input type="text" id="titulo" name="titulo" required />
-        <label for="descricao">Descrição do Problema</label>
-        <textarea id="descricao" name="descricao" rows="5" required></textarea>
+    </header>
 
-        <button type="button" class="btn-definir-cat" onclick="openCategoryModal()">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-            0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+    <main>
+      <h2 class="page-title">Informe os detalhes do problema</h2>
+      <div class="form-container">
+
+        {# Se houver mensagem de erro (por ex. campos obrigatórios) #}
+        {% if erro %}
+          <div class="erro">{{ erro }}</div>
+        {% endif %}
+
+        <!-- Formulário para criar novo problema -->
+        <!-- Observe que o campo de upload se chama 'problemImage', o back-end converte internamente. -->
+        <form action="{{ url_for('add_problem') }}" method="POST" enctype="multipart/form-data">
+
+          <!-- Título -->
+          <label for="titulo">Título do Problema</label>
+          <input type="text" id="titulo" name="titulo" required />
+
+          <!-- Descrição -->
+          <label for="descricao">Descrição do Problema</label>
+          <textarea id="descricao" name="descricao" rows="5" required></textarea>
+
+          <!-- Botão para abrir modal de Categorias -->
+          <button type="button" class="btn-definir-cat" onclick="openCategoryModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path
+                d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
+                0 0 1 0 1h-3v3a.5.5 0 0 1-1
+                0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
+                0 0 1 8 4z"
+              />
+            </svg>
+            Definir Categoria
+          </button>
+
+          <!-- Display simples do que foi escolhido -->
+          <div class="cat-display">
+            Categoria Principal: <span id="displayCategory">---</span><br>
+            Subcategoria: <span id="displaySubCategory">---</span><br>
+            Marca: <span id="displayBrand">---</span>
+          </div>
+
+          <!-- Inputs ocultos que realmente guardam os valores -->
+          <input type="hidden" name="category" id="categoryInput" />
+          <input type="hidden" name="subCategory" id="subCategoryInput" />
+          <input type="hidden" name="brand" id="brandInput" />
+
+          <!-- Upload da imagem -->
+          <label class="upload-btn" for="problemImage">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path
+                d="M.5 9.5a.5.5 0 0 1 .5-.5h2V7.707l-1.146
+                 1.147a.5.5 0 0 1-.708-.708l2-2
+                 a.5.5 0 0 1 .708 0l2 2a.5.5
+                 0 1 1-.708.708L4 7.707V9h2.5a.5.5
+                 0 0 1 .5.5v5A1.5 1.5 0 0 1 5.5
+                 16h-4A1.5 1.5 0 0 1 0 14.5v-5zM10.5
+                 8a.5.5 0 0 1 .5.5v2h4a.5.5
+                 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5
+                 1.5h-4A1.5 1.5 0 0 1 9 15.5v-6a.5.5
+                 0 0 1 .5-.5zM11 11v-2H10v6h4a.5.5
+                 0 0 0 .5-.5V11h-3.5a.5.5
+                 0 0 1-.5-.5zM8 5.5v-4a.5.5
+                 0 0 1 .5-.5h7a.5.5 0 0 1
+                 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-5A1.5
+                 1.5 0 0 1 8 5.5zM9 1v4.5a.5.5 0 0 0
+                 .5.5h5a.5.5 0 0 0 .5-.5V1H9z"
+              />
+            </svg>
+            Adicionar Imagem
+          </label>
+          <input type="file" id="problemImage" name="problemImage" accept="image/*" />
+
+          <!-- Pré-visualização da imagem (JS faz o preview) -->
+          <div id="previewContainer">
+            <img id="previewImage" alt="Pré-visualização da imagem" />
+          </div>
+
+          <!-- Botão de envio -->
+          <input type="submit" value="Enviar Problema" />
+        </form>
+      </div>
+    </main>
+
+    <footer>
+      <p>© 2025 Plataforma M</p>
+    </footer>
+
+    <!-- Barra inferior (mobile) -->
+    <div class="mobile-bottom-bar">
+      <!-- 1) Resolver -->
+      <a
+        href="{{ url_for('unresolved') }}"
+        class="bottom-bar-btn"
+        title="Resolver Problemas"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5
+               0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8
+               5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0
+               6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"
+          />
+        </svg>
+        Resolver
+      </a>
+      <!-- 2) Envie -->
+      <a
+        href="{{ url_for('add_problem') }}"
+        class="bottom-bar-btn"
+        title="Envie seu Problema"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
+            0 0 1 0 1h-3v3a.5.5 0 0 1-1
+            0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
+            0 0 1 8 4z"
+          />
+        </svg>
+        Envie
+      </a>
+      <!-- 3) Perfil/Entrar -->
+      {% if not session.get('user_id') %}
+        <a
+          href="{{ url_for('login') }}"
+          class="bottom-bar-btn"
+          title="Entrar"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4
+              4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
           </svg>
-          Definir Categoria
-        </button>
-        <div class="cat-display">
-          Categoria Principal: <span id="displayCategory">---</span><br>
-          Subcategoria: <span id="displaySubCategory">---</span><br>
-          Marca: <span id="displayBrand">---</span>
-        </div>
-        <input type="hidden" name="category" id="categoryInput" />
-        <input type="hidden" name="subCategory" id="subCategoryInput" />
-        <input type="hidden" name="brand" id="brandInput" />
-
-        <label class="upload-btn" for="problemImage">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M.5 9.5a.5.5 0 0 1 .5-.5h2V7.707l-1.146 1.147a.5.5 0 0 1-.708-.708l2-2
-            a.5.5 0 0 1 .708 0l2 2a.5.5 0 1 1-.708.708L4 7.707V9h2.5a.5.5 0 0 1 .5.5v5A1.5
-            1.5 0 0 1 5.5 16h-4A1.5 1.5 0 0 1 0 14.5v-5zM10.5 8a.5.5 0 0 1 .5.5v2h4a.5.5
-            0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4A1.5 1.5 0 0 1 9 15.5v-6a.5.5 0 0 1
-            .5-.5zM11 11v-2H10v6h4a.5.5 0 0 0 .5-.5V11h-3.5a.5.5 0 0 1-.5-.5zM8 5.5v-4a.5.5
-            0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-5A1.5 1.5 0 0 1 8
-            5.5zM9 1v4.5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5V1H9z"/>
+          Entrar
+        </a>
+      {% else %}
+        <a
+          href="{{ url_for('perfil') }}"
+          class="bottom-bar-btn"
+          title="Perfil"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3
+            3 3 0 0 0 3 3z"
+            />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4
+              4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
           </svg>
-          Adicionar Imagem
-        </label>
-        <input type="file" id="problemImage" name="problemImage" accept="image/*" />
-
-        <div id="previewContainer">
-          <img id="previewImage" alt="Pré-visualização da imagem" />
-        </div>
-        <input type="submit" value="Enviar Problema" />
-      </form>
+          Perfil
+        </a>
+      {% endif %}
     </div>
-  </main>
+  </div>
 
-  <footer>
-    <p>© 2025 Plataforma M</p>
-  </footer>
-
+  <!-- Modal de categorias -->
   <div id="categoryModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -490,6 +707,35 @@
   </div>
 
   <script>
+    // Preloader + fade-in do conteúdo
+    window.addEventListener('load', function () {
+      const preloader = document.getElementById('preloader');
+      const content = document.getElementById('content');
+      if (preloader) {
+        preloader.style.display = 'none';
+      }
+      if (content) {
+        content.style.opacity = '1';
+      }
+    });
+
+    // Botão Voltar
+    document.addEventListener('DOMContentLoaded', function() {
+      const ref = document.referrer || "";
+      const btnVoltar = document.getElementById('btnVoltar');
+      if (btnVoltar) {
+        btnVoltar.addEventListener('click', function() {
+          if (!ref) {
+            // Se não houver referrer, vai para /index
+            window.location.href = "{{ url_for('index') }}";
+          } else {
+            window.history.back();
+          }
+        });
+      }
+    });
+
+    // Preview de imagem do problema
     const problemImageInput = document.getElementById('problemImage');
     const previewImage = document.getElementById('previewImage');
 
@@ -508,6 +754,7 @@
       }
     });
 
+    // Modal de categorias (seleção de Category, SubCategory, Brand)
     function openCategoryModal() {
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
       document.getElementById('categoryModal').style.display = 'flex';
@@ -518,6 +765,7 @@
       resetCategoryModalSteps();
     }
 
+    // Dados das categorias e subcategorias
     const categoryData = [
       {
         name: "Veículos",
@@ -722,15 +970,11 @@
       subCats.forEach((sub, subIdx) => {
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
-        if (sub.img) {
-          btn.innerHTML = `
-            <img src="/static/images/${sub.img}" alt="${sub.name}"
-                 style="width:60px;height:60px;margin-right:15px;">
-            <span>${sub.name}</span>
-          `;
-        } else {
-          btn.textContent = sub.name;
-        }
+        btn.innerHTML = `
+          <img src="/static/images/${sub.img}" alt="${sub.name}"
+               style="width:60px;height:60px;margin-right:15px;">
+          <span>${sub.name}</span>
+        `;
         btn.onclick = () => {
           document.getElementById('subCategoryStep').style.display = 'none';
           document.getElementById('brandStep').style.display = 'block';
@@ -751,6 +995,7 @@
       const subCat = categoryData[catIndex].subCategories[subCatIndex];
       const brands = subCat.brands || [];
 
+      // Se não houver marcas definidas, criar botão "Sem marca"
       if (brands.length === 0) {
         const noBrandBtn = document.createElement('button');
         noBrandBtn.className = 'btn-categorias';
@@ -791,6 +1036,7 @@
         brandContainer.appendChild(btn);
       });
 
+      // Botão "Sem marca"
       const noBrandBtn = document.createElement('button');
       noBrandBtn.className = 'btn-categorias';
       noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
