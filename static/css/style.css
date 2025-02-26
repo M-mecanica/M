@@ -509,3 +509,43 @@ footer p {
   background-color: #333;
   transform: scale(1.02);
 }
+
+/* BARRA INFERIOR (apenas mobile) */
+.mobile-bottom-bar {
+  display: none; /* por padrão, não mostra */
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-bar {
+    /* Unificando para grid de 3 colunas, cada botão ocupando 1/3 */
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    background-color: #000;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 60px;
+    z-index: 9999;
+  }
+  .mobile-bottom-bar .bottom-bar-btn {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.8rem;
+    justify-content: center;
+  }
+  .mobile-bottom-bar .bottom-bar-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: #fff;
+    margin-bottom: 2px;
+  }
+
+  /* Garante que o main não seja coberto pela barra inferior */
+  main {
+    padding-bottom: 60px;
+  }
+}
