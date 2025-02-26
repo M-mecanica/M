@@ -11,7 +11,7 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
-  <!-- Ícones Material (para manter consistência) -->
+  <!-- Ícones Material (para manter consistência caso use em outros locais) -->
   <link
     rel="stylesheet"
     href="https://fonts.googleapis.com/icon?family=Material+Icons"
@@ -491,7 +491,8 @@
     }
 
     /*********************************************
-     * BARRA INFERIOR (apenas mobile, igual a resultados.html)
+     * BARRA INFERIOR (apenas mobile),
+     * AGORA COM IMAGENS EM VEZ DE SVGS (IGUAL AO resultados.html)
      *********************************************/
     .mobile-bottom-bar {
       display: none; /* por padrão, não mostra */
@@ -509,18 +510,16 @@
         z-index: 9999;
       }
       .mobile-bottom-bar .bottom-bar-btn {
+        text-align: center;
         color: #fff;
         text-decoration: none;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
         font-size: 0.8rem;
+        justify-content: center;
       }
-      .mobile-bottom-bar .bottom-bar-btn svg {
-        width: 20px;
-        height: 20px;
-        fill: #fff;
+      .mobile-bottom-bar .bottom-bar-btn img {
         margin-bottom: 2px;
       }
       /* Garante que o main não seja coberto pela barra inferior */
@@ -541,7 +540,7 @@
   <div id="content">
     <!-- HEADER - mesmo estilo da página resultados.html -->
     <header>
-      <!-- Botão Voltar (usando button + onclick, como em resultados.html) -->
+      <!-- Botão Voltar -->
       <button
         class="header-btn"
         onclick="window.location.href='{{ url_for('index') }}'"
@@ -713,7 +712,7 @@
       <p>© 2025 Plataforma M</p>
     </footer>
 
-    <!-- BARRA INFERIOR (visível apenas em mobile, igual a resultados.html) -->
+    <!-- BARRA INFERIOR (visível apenas em mobile, usando imagens iguais a resultados.html) -->
     <div class="mobile-bottom-bar">
       <!-- 1) Resolver (coluna 1/3) -->
       <a
@@ -721,20 +720,11 @@
         class="bottom-bar-btn"
         title="Resolver Problemas"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5
-               0 0 0 2.01 15h11.98a.5.5 0 0 0
-               .442-.934l-6.45-12.5zM8
-               5c.28 0 .5.22.5.5V9a.5.5
-               0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0
-               6a.75.75 0 1 1 0 1.5A.75.75 0 0 1
-               8 11z"
-          />
-        </svg>
+        <img
+          src="{{ url_for('static', filename='images/resolver_icon.png') }}"
+          alt="Resolver Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
         Resolver
       </a>
       <!-- 2) Envie (coluna 2/3) -->
@@ -743,19 +733,11 @@
         class="bottom-bar-btn"
         title="Envie seu Problema"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="M8 4a.5.5 0 0 1
-               .5.5v3h3a.5.5 0 0 1
-               0 1h-3v3a.5.5 0 0 1-1
-               0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
-               0 0 1 8 4z"
-          />
-        </svg>
-        Envie
+        <img
+          src="{{ url_for('static', filename='images/icone_mais.png') }}"
+          alt="Envie"
+          style="width:55px; height:55px;"
+        />
       </a>
       <!-- 3) Perfil/Entrar (coluna 3/3) -->
       {% if not session.get('user_id') %}
@@ -764,19 +746,11 @@
           class="bottom-bar-btn"
           title="Entrar"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M8 8a3 3 0 1 0-3-3
-                 3 3 0 0 0 3 3z"
-            />
-            <path
-              d="M8 8c-2.33 0-4
-                 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
-            />
-          </svg>
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
           Entrar
         </a>
       {% else %}
@@ -785,19 +759,11 @@
           class="bottom-bar-btn"
           title="Perfil"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M8 8a3 3 0 1 0-3-3
-                 3 3 0 0 0 3 3z"
-            />
-            <path
-              d="M8 8c-2.33 0-4
-                 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
-            />
-          </svg>
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
           Perfil
         </a>
       {% endif %}

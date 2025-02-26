@@ -1,313 +1,351 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>M - Página Inicial</title>
-  <!-- Ajuste para dispositivos mobile -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <meta charset="UTF-8" />
+    <title>M - Página Inicial</title>
+    <!-- Ajuste para dispositivos mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Fonte básica -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
-    rel="stylesheet"
-  />
+    <!-- Fonte básica -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- CSS principal (carregado externamente) -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <!-- CSS principal (carregado externamente) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 
-  <!-- Aqui, apenas para o background inline via Jinja -->
-  <style>
-    /* Mantemos apenas o background inline para capturar a variável random_bg */
-    body {
-      background: #f0f0f0 url('{{ url_for("static", filename="images/" ~ random_bg) }}')
-        no-repeat center center fixed;
-      background-size: cover;
-      overflow-x: hidden;
-    }
-
-    @media (max-width: 768px) {
+    <!-- Aqui, apenas para o background inline via Jinja -->
+    <style>
+      /* Mantemos apenas o background inline para capturar a variável random_bg */
       body {
-        background-attachment: scroll;
+        background: #f0f0f0 url('{{ url_for("static", filename="images/" ~ random_bg) }}')
+          no-repeat center center fixed;
+        background-size: cover;
+        overflow-x: hidden;
       }
-    }
 
-    /* Oculta o link de "Entrar"/"Perfil" do Header quando em mobile,
-       para evitar duplicidade (já que estará na barra inferior). */
-    @media (max-width: 768px) {
-      .desktop-only {
-        display: none !important;
+      @media (max-width: 768px) {
+        body {
+          background-attachment: scroll;
+        }
       }
-    }
 
-    /* Oculta o botão de menu (hamburger) para dispositivos mobile */
-    @media (max-width: 768px) {
-      #hamburgerBtn {
-        display: none !important;
+      /* Oculta o link de "Entrar"/"Perfil" do Header quando em mobile,
+         para evitar duplicidade (já que estará na barra inferior). */
+      @media (max-width: 768px) {
+        .desktop-only {
+          display: none !important;
+        }
       }
-    }
 
-    /* Ajusta a barra inferior para 3 colunas,
-       deixando cada botão ocupar 1/3 da tela. */
-    @media (max-width: 768px) {
-      .mobile-bottom-bar {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        background-color: #000;
-        width: 100%;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        height: 60px;
-        z-index: 9999;
+      /* Oculta o botão de menu (hamburger) para dispositivos mobile */
+      @media (max-width: 768px) {
+        #hamburgerBtn {
+          display: none !important;
+        }
       }
-      .mobile-bottom-bar .bottom-bar-btn {
-        text-align: center;
-        color: #fff;
-        text-decoration: none;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 0.8rem;
-        justify-content: center;
+
+      /* Ajusta a barra inferior para 3 colunas,
+         deixando cada botão ocupar 1/3 da tela. */
+      @media (max-width: 768px) {
+        .mobile-bottom-bar {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          background-color: #000;
+          width: 100%;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          height: 60px;
+          z-index: 9999;
+        }
+        .mobile-bottom-bar .bottom-bar-btn {
+          text-align: center;
+          color: #fff;
+          text-decoration: none;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-size: 0.8rem;
+          justify-content: center;
+        }
+        .mobile-bottom-bar .bottom-bar-btn svg {
+          width: 20px;
+          height: 20px;
+          fill: #fff;
+          margin-bottom: 2px;
+        }
+        /* Garante que o main não seja coberto pela barra inferior */
+        main {
+          padding-bottom: 60px;
+        }
       }
-      .mobile-bottom-bar .bottom-bar-btn svg {
-        width: 20px;
-        height: 20px;
-        fill: #fff;
-        margin-bottom: 2px;
-      }
-      /* Garante que o main não seja coberto pela barra inferior */
-      main {
-        padding-bottom: 60px;
-      }
-    }
-  </style>
-</head>
-<body>
+    </style>
+  </head>
+  <body>
+    <!-- PRELOADER -->
+    <div id="preloader">
+      <div class="loader"></div>
+    </div>
 
-  <!-- PRELOADER -->
-  <div id="preloader">
-    <div class="loader"></div>
-  </div>
+    <!--
+      Div principal que conterá toda a página.
+      Adicionamos flex e min-height para que
+      header, main e footer fiquem como no layout antigo
+    -->
+    <div
+      id="content"
+      style="opacity:0; display: flex; flex-direction: column; min-height: 100vh;"
+    >
+      <header>
+        <!-- Botão MENU (Hamburger) -->
+        <button
+          class="header-btn"
+          aria-label="Abrir Menu"
+          title="Abrir Menu"
+          id="hamburgerBtn"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+          </svg>
+          <span>Menu</span>
+        </button>
 
-  <!--
-    Div principal que conterá toda a página.
-    Adicionamos flex e min-height para que
-    header, main e footer fiquem como no layout antigo
-  -->
-  <div id="content" style="opacity:0; display: flex; flex-direction: column; min-height: 100vh;">
-
-    <header>
-      <!-- Botão MENU (Hamburger) -->
-      <button class="header-btn" aria-label="Abrir Menu" title="Abrir Menu" id="hamburgerBtn">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
-        </svg>
-        <span>Menu</span>
-      </button>
-
-      <!-- Se não estiver logado, mostra "Entrar" / Se estiver, mostra "Perfil" -->
-      {% if not session.get('user_id') %}
+        <!-- Se não estiver logado, mostra "Entrar" / Se estiver, mostra "Perfil" -->
+        {% if not session.get('user_id') %}
         <a class="header-btn desktop-only" href="{{ url_for('login') }}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z" />
           </svg>
           <span>Entrar</span>
         </a>
-      {% else %}
+        {% else %}
         <a class="header-btn desktop-only" href="{{ url_for('perfil') }}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z" />
           </svg>
           <span>Perfil</span>
         </a>
-      {% endif %}
-    </header>
+        {% endif %}
+      </header>
 
-    <main>
-      <!-- Logo reduzida -->
-      <div class="logo-grande">
-        <img src="{{ url_for('static', filename='images/logo_m_transparente.png') }}" alt="Logo M">
-      </div>
-
-      <!-- Barra de Pesquisa -->
-      <form action="{{ url_for('index') }}" method="POST" class="search-container">
-        <div class="input-wrapper">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M10 2a8 8 0 015.29 13.71l5 5a1 1 0 01-1.42 1.42l-5-5A8 8 0 1110 2zm0 2a6 6 0 100 12 6 6 0 000-12z"/>
-          </svg>
-          <input type="text" name="search" placeholder="Pesquise um problema..." autocomplete="off" />
-        </div>
-        <button type="submit" class="explore-button">
+      <main>
+        <!-- Logo reduzida -->
+        <div class="logo-grande">
           <img
-            src="{{ url_for('static', filename='images/Fugueti_num_tem_re.png') }}"
-            alt="Foguete"
-            style="width:24px;height:24px;margin-right:0.5rem;"
-          >
-          Explorar
-        </button>
-      </form>
-
-      <!-- Botão para abrir Modal de Categoria/Marca -->
-      <div style="margin-bottom: 1rem;">
-        <button class="btn-selecione-aqui" onclick="openCategoryModal()">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
-          </svg>
-          Selecione o Seu Problema
-        </button>
-      </div>
-    </main>
-
-    <!-- Barra Lateral (menu) -->
-    <div class="mobile-sidebar" id="mobileSidebar">
-      <div class="menu-items">
-        <!-- "Envie o seu problema" -->
-        <a href="{% if session.get('user_id') %}{{ url_for('add_problem') }}{% else %}{{ url_for('register', next=url_for('add_problem')) }}{% endif %}">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-          </svg>
-          Envie o seu problema
-        </a>
-
-        <!-- Problemas Não Resolvidos -->
-        <a href="{% if session.get('user_id') %}{{ url_for('unresolved') }}{% else %}{{ url_for('register', next=url_for('unresolved')) }}{% endif %}">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8 5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0 6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"/>
-          </svg>
-          Problemas Não Resolvidos
-        </a>
-
-        <!-- Gerenciar Usuários (se for solucionador) -->
-        {% if session.role == 'solucionador' %}
-        <a href="{{ url_for('listar_usuarios') }}">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M13 7a3 3 0 1 0-6 0 3 3 0 0 0 6 0zm-1.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM6 8c0 1.105-.672 2-1.5 2S3 9.105 3 8s.672-2 1.5-2S6 6.895 6 8zm-1.5 1a2.49 2.49 0 0 0 1-.2 3.006 3.006 0 0 1 2.25 2.9.5.5 0 0 1-1 0 2.001 2.001 0 0 0-4 0 .5.5 0 0 1-1 0 3.006 3.006 0 0 1 2.25-2.9c.306.127.641.2 1 .2zm6.5 3c-.273 0-.535-.03-.789-.086a2.001 2.001 0 0 0-3.422 0A3.105 3.105 0 0 1 8 12a3.106 3.106 0 0 1-1.289-.273.5.5 0 0 1 .578-.816 2.001 2.001 0 0 0 3.422 0 .5.5 0 0 1 .578.816c-.254.057-.516.086-.789.086z"/>
-          </svg>
-          Gerenciar Usuários
-        </a>
-        {% endif %}
-
-        <!-- Logout (só aparece se logado) -->
-        {% if session.get('user_id') %}
-        <a href="{{ url_for('logout') }}">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M9.828 4a.5.5 0 0 1 .354.146l3 3a.5.5 0 0 1 0 .708l-3 3A.5.5 0 0 1 9 10.5V9H5.5a.5.5 0 0 1 0-1H9V5.5a.5.5 0 0 1 .5-.5h.328z"/>
-            <path d="M13 14.5a.5.5 0 0 1-.5.5h-5a2 2 0 0 1-2-2v-1a.5.5 0 0 1 1 0v1a1 1 0 0 0 1 1h5a.5.5 0 0 1 .5.5zm-7-11v-1a2 2 0 0 1 2-2h5a.5.5 0 0 1 0 1h-5a1 1 0 0 0-1 1v1a.5.5 0 0 1-1 0z"/>
-          </svg>
-          Logout
-        </a>
-        {% endif %}
-      </div>
-      <div class="sidebar-footer">
-        {% if session.get('user_id') %}
-        <a href="javascript:openManualModal();">
-          🔒 Manual das soluções impossíveis
-        </a>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class="overlay" id="overlay"></div>
-
-    <footer>
-      <p>© 2025 Plataforma M</p>
-    </footer>
-
-    <!-- BARRA INFERIOR (visível apenas em mobile) -->
-    <div class="mobile-bottom-bar">
-      <!-- 1) Resolver (coluna 1/3) -->
-      <a href="{{ url_for('unresolved') }}" class="bottom-bar-btn" title="Resolver Problemas">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8 5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0 6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"/>
-        </svg>
-        Resolver
-      </a>
-      <!-- 2) Envie (coluna 2/3) -->
-      <a href="{{ url_for('add_problem') }}" class="bottom-bar-btn" title="Envie seu Problema">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-        </svg>
-        Envie
-      </a>
-      <!-- 3) Perfil/Entrar (coluna 3/3) -->
-      {% if not session.get('user_id') %}
-        <a href="{{ url_for('login') }}" class="bottom-bar-btn" title="Entrar">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
-          </svg>
-          Entrar
-        </a>
-      {% else %}
-        <a href="{{ url_for('perfil') }}" class="bottom-bar-btn" title="Perfil">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z"/>
-            <path d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"/>
-          </svg>
-          Perfil
-        </a>
-      {% endif %}
-    </div>
-
-    <!-- MODAL - Manual das soluções impossíveis -->
-    <div id="manualModal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2></h2>
-          <span class="close" onclick="closeManualModal()">&times;</span>
+            src="{{ url_for('static', filename='images/logo_m_transparente.png') }}"
+            alt="Logo M"
+          />
         </div>
-        <div class="modal-body">
-          <p class="modal-text">
-            🏆 Resolva diferentes problemas para ter acesso a essa área.
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button class="locked-button">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-              <path d="M8 2a3 3 0 0 0-3 3v2H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-1V5a3 3 0 0 0-3-3zm0 2a1 1 0 0 1 1 1v2H7V5a1 1 0 0 1 1-1z"/>
+
+        <!-- Barra de Pesquisa -->
+        <form action="{{ url_for('index') }}" method="POST" class="search-container">
+          <div class="input-wrapper">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path
+                d="M10 2a8 8 0 015.29 13.71l5 5a1 1 0 01-1.42 1.42l-5-5A8 8 0 1110 2zm0 2a6 6 0 100 12 6 6 0 000-12z"
+              />
             </svg>
-            Acesso Bloqueado
+            <input
+              type="text"
+              name="search"
+              placeholder="Pesquise um problema..."
+              autocomplete="off"
+            />
+          </div>
+          <button type="submit" class="explore-button">
+            <img
+              src="{{ url_for('static', filename='images/fugueti_num_tem_re.png') }}"
+              alt="Foguete"
+              style="width:30px;height:30px;"
+            />
+            Explorar
+          </button>
+        </form>
+
+        <!-- Botão para abrir Modal de Categoria/Marca -->
+        <div style="margin-bottom: 1rem;">
+          <button class="btn-selecione-aqui" onclick="openCategoryModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+            </svg>
+            Selecione o Seu Problema
           </button>
         </div>
+      </main>
+
+      <!-- Barra Lateral (menu) -->
+      <div class="mobile-sidebar" id="mobileSidebar">
+        <div class="menu-items">
+          <!-- "Envie o seu problema" -->
+          <a
+            href="{% if session.get('user_id') %}{{ url_for('add_problem') }}{% else %}{{ url_for('register', next=url_for('add_problem')) }}{% endif %}"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path
+                d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+              />
+            </svg>
+            Envie o seu problema
+          </a>
+
+          <!-- Problemas Não Resolvidos -->
+          <a
+            href="{% if session.get('user_id') %}{{ url_for('unresolved') }}{% else %}{{ url_for('register', next=url_for('unresolved')) }}{% endif %}"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path
+                d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5 0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8 5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0 6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"
+              />
+            </svg>
+            Problemas Não Resolvidos
+          </a>
+
+          <!-- Gerenciar Usuários (se for solucionador) -->
+          {% if session.role == 'solucionador' %}
+          <a href="{{ url_for('listar_usuarios') }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path
+                d="M13 7a3 3 0 1 0-6 0 3 3 0 0 0 6 0zm-1.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM6 8c0 1.105-.672 2-1.5 2S3 9.105 3 8s.672-2 1.5-2S6 6.895 6 8zm-1.5 1a2.49 2.49 0 0 0 1-.2 3.006 3.006 0 0 1 2.25 2.9.5.5 0 0 1-1 0 2.001 2.001 0 0 0-4 0 .5.5 0 0 1-1 0 3.006 3.006 0 0 1 2.25-2.9c.306.127.641.2 1 .2zm6.5 3c-.273 0-.535-.03-.789-.086a2.001 2.001 0 0 0-3.422 0A3.105 3.105 0 0 1 8 12a3.106 3.106 0 0 1-1.289-.273.5.5 0 0 1 .578-.816 2.001 2.001 0 0 0 3.422 0 .5.5 0 0 1 .578.816c-.254.057-.516.086-.789.086z"
+              />
+            </svg>
+            Gerenciar Usuários
+          </a>
+          {% endif %}
+
+          <!-- Logout (só aparece se logado) -->
+          {% if session.get('user_id') %}
+          <a href="{{ url_for('logout') }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path
+                d="M9.828 4a.5.5 0 0 1 .354.146l3 3a.5.5 0 0 1 0 .708l-3 3A.5.5 0 0 1 9 10.5V9H5.5a.5.5 0 0 1 0-1H9V5.5a.5.5 0 0 1 .5-.5h.328z"
+              />
+              <path
+                d="M13 14.5a.5.5 0 0 1-.5.5h-5a2 2 0 0 1-2-2v-1a.5.5 0 0 1 1 0v1a1 1 0 0 0 1 1h5a.5.5 0 0 1 .5.5zm-7-11v-1a2 2 0 0 1 2-2h5a.5.5 0 0 1 0 1h-5a1 1 0 0 0-1 1v1a.5.5 0 0 1-1 0z"
+              />
+            </svg>
+            Logout
+          </a>
+          {% endif %}
+        </div>
+        <div class="sidebar-footer">
+          {% if session.get('user_id') %}
+          <a href="javascript:openManualModal();">
+            🔒 Manual das soluções impossíveis
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="overlay" id="overlay"></div>
+
+      <footer>
+        <p>© 2025 Plataforma M</p>
+      </footer>
+
+      <!-- BARRA INFERIOR (visível apenas em mobile) -->
+      <div class="mobile-bottom-bar">
+        <!-- 1) Resolver (coluna 1/3) -->
+        <a href="{{ url_for('unresolved') }}" class="bottom-bar-btn" title="Resolver Problemas">
+          <img
+            src="{{ url_for('static', filename='images/resolver_icon.png') }}"
+            alt="Resolver Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Resolver
+        </a>
+        <!-- 2) Envie (coluna 2/3) -->
+        <a href="{{ url_for('add_problem') }}" class="bottom-bar-btn" title="Envie seu Problema">
+          <img
+            src="{{ url_for('static', filename='images/icone_mais.png') }}"
+            alt="Envie"
+            style="width:55px; height:55px;"
+          />
+        </a>
+        <!-- 3) Perfil/Entrar (coluna 3/3) -->
+        {% if not session.get('user_id') %}
+        <a href="{{ url_for('login') }}" class="bottom-bar-btn" title="Entrar">
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Entrar
+        </a>
+        {% else %}
+        <a href="{{ url_for('perfil') }}" class="bottom-bar-btn" title="Perfil">
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Perfil
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- MODAL - Manual das soluções impossíveis -->
+      <div id="manualModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2></h2>
+            <span class="close" onclick="closeManualModal()">&times;</span>
+          </div>
+          <div class="modal-body">
+            <p class="modal-text">
+              🏆 Resolva diferentes problemas para ter acesso a essa área.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button class="locked-button">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <path
+                  d="M8 2a3 3 0 0 0-3 3v2H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-1V5a3 3 0 0 0-3-3zm0 2a1 1 0 0 1 1 1v2H7V5a1 1 0 0 1 1-1z"
+                />
+              </svg>
+              Acesso Bloqueado
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL: 3 Passos (categoria -> subcategoria -> marca) -->
+      <div id="categoryModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Escolha a categoria principal:</h2>
+            <span class="close" onclick="closeCategoryModal()">&times;</span>
+          </div>
+          <div class="modal-body">
+            <!-- Step 1: Lista de Categorias Principais -->
+            <div id="mainCategoryStep" style="display: block;">
+              <div id="mainCategoryContainer"></div>
+            </div>
+
+            <!-- Step 2: Subcategoria -->
+            <div id="subCategoryStep" style="display: none;">
+              <p class="modal-text" id="selectedMainCategoryText"></p>
+              <div id="subCategoryContainer"></div>
+              <button class="btn-categorias voltar" onclick="goBackToMainCategory()">Voltar</button>
+            </div>
+
+            <!-- Step 3: Marca -->
+            <div id="brandStep" style="display: none;">
+              <p class="modal-text" id="selectedSubCategoryText"></p>
+              <div id="brandContainer"></div>
+              <button class="btn-categorias voltar" onclick="goBackToSubCategory()">Voltar</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+    <!-- Fim do #content -->
 
-    <!-- MODAL: 3 Passos (categoria -> subcategoria -> marca) -->
-    <div id="categoryModal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Escolha a categoria principal:</h2>
-          <span class="close" onclick="closeCategoryModal()">&times;</span>
-        </div>
-        <div class="modal-body">
-          <!-- Step 1: Lista de Categorias Principais -->
-          <div id="mainCategoryStep" style="display: block;">
-            <div id="mainCategoryContainer"></div>
-          </div>
-
-          <!-- Step 2: Subcategoria -->
-          <div id="subCategoryStep" style="display: none;">
-            <p class="modal-text" id="selectedMainCategoryText"></p>
-            <div id="subCategoryContainer"></div>
-            <button class="btn-categorias voltar" onclick="goBackToMainCategory()">Voltar</button>
-          </div>
-
-          <!-- Step 3: Marca -->
-          <div id="brandStep" style="display: none;">
-            <p class="modal-text" id="selectedSubCategoryText"></p>
-            <div id="brandContainer"></div>
-            <button class="btn-categorias voltar" onclick="goBackToSubCategory()">Voltar</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div> <!-- Fim do #content -->
-
-  <!-- JS principal (carregado externamente) com defer (não bloqueia parsing do HTML) -->
-  <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
-</body>
+    <!-- JS principal (carregado externamente) com defer (não bloqueia parsing do HTML) -->
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+  </body>
 </html>

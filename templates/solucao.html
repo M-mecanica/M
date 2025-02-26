@@ -170,7 +170,7 @@
       color: #fff;
     }
 
-    /* BARRA INFERIOR (apenas mobile, igual à resultados.html) */
+    /* BARRA INFERIOR (visível apenas em mobile) */
     .mobile-bottom-bar {
       display: none; /* por padrão, não mostra */
     }
@@ -256,17 +256,23 @@
       margin-left: auto;
       margin-right: auto;
     }
+    /* Ajuste de imagem para caber corretamente em mobile */
     .problem-image {
       display: block;
       margin: 1rem auto;
-      width: auto;
+      width: 100%;
       height: auto;
       max-width: 400px;
-      max-height: 300px;
       object-fit: contain;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
+    @media (max-width: 768px) {
+      .problem-image {
+        max-width: 100%;
+      }
+    }
+
     .whatsapp-share-btn {
       background-color: #000;
       color: #fff;
@@ -913,89 +919,44 @@
       <p>© 2025 Plataforma M - MVP</p>
     </footer>
 
-    <!-- BARRA INFERIOR (visível apenas em mobile) -->
+    <!-- BARRA INFERIOR (visível apenas em mobile), IGUAL À DA PÁGINA INDEX -->
     <div class="mobile-bottom-bar">
-      <!-- 1) Resolver -->
-      <a
-        href="{{ url_for('unresolved') }}"
-        class="bottom-bar-btn"
-        title="Resolver Problemas"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5
-            0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8
-            5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0
-            6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"
-          />
-        </svg>
+      <!-- 1) Resolver (coluna 1/3) -->
+      <a href="{{ url_for('unresolved') }}" class="bottom-bar-btn" title="Resolver Problemas">
+        <img
+          src="{{ url_for('static', filename='images/resolver_icon.png') }}"
+          alt="Resolver Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
         Resolver
       </a>
-      <!-- 2) Envie -->
-      <a
-        href="{{ url_for('add_problem') }}"
-        class="bottom-bar-btn"
-        title="Envie seu Problema"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
-            0 0 1 0 1h-3v3a.5.5 0 0 1-1
-            0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
-            0 0 1 8 4z"
-          />
-        </svg>
-        Envie
+      <!-- 2) Envie (coluna 2/3) -->
+      <a href="{{ url_for('add_problem') }}" class="bottom-bar-btn" title="Envie seu Problema">
+        <img
+          src="{{ url_for('static', filename='images/icone_mais.png') }}"
+          alt="Envie"
+          style="width:55px; height:55px;"
+        />
       </a>
-      <!-- 3) Perfil/Entrar -->
+      <!-- 3) Perfil/Entrar (coluna 3/3) -->
       {% if not session.get('user_id') %}
-        <a
-          href="{{ url_for('login') }}"
-          class="bottom-bar-btn"
-          title="Entrar"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M8 8a3 3 0 1 0-3-3 3 3
-              0 0 0 3 3z"
-            />
-            <path
-              d="M8 8c-2.33 0-4 1.67-4
-              4v1h8v-1c0-2.33-1.67-4-4-4z"
-            />
-          </svg>
-          Entrar
-        </a>
+      <a href="{{ url_for('login') }}" class="bottom-bar-btn" title="Entrar">
+        <img
+          src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+          alt="Perfil Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
+        Entrar
+      </a>
       {% else %}
-        <a
-          href="{{ url_for('perfil') }}"
-          class="bottom-bar-btn"
-          title="Perfil"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M8 8a3 3 0 1 0-3-3
-              3 3 0 0 0 3 3z"
-            />
-            <path
-              d="M8 8c-2.33 0-4 1.67-4
-              4v1h8v-1c0-2.33-1.67-4-4-4z"
-            />
-          </svg>
-          Perfil
-        </a>
+      <a href="{{ url_for('perfil') }}" class="bottom-bar-btn" title="Perfil">
+        <img
+          src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+          alt="Perfil Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
+        Perfil
+      </a>
       {% endif %}
     </div>
   </div>
@@ -1034,7 +995,7 @@
       descBlock.textContent = stepData.stepDescription;
       stepDiv.appendChild(descBlock);
 
-      // Exemplo: exibe stepImage_main (se preferir thumbnail, use stepImage_thumb)
+      // Exibe stepImage_main (ou outro campo de imagem, conforme necessidade)
       if (stepData.stepImage && stepData.stepImage.trim() !== "") {
         const imageContainer = document.createElement('div');
         imageContainer.classList.add('step-image-block');

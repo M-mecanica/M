@@ -32,7 +32,7 @@
       overflow-x: hidden;
     }
 
-    /* Preloader (opcional, mesmo estilo da página add.html) */
+    /* Preloader (opcional) */
     #preloader {
       position: fixed;
       top: 0;
@@ -54,8 +54,12 @@
       animation: spin 0.7s linear infinite;
     }
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     /* Conteúdo (para dar fade-in após o preloader) */
@@ -67,7 +71,7 @@
       opacity: 0; /* começa invisível, depois faz fade-in */
     }
 
-    /* HEADER - Mesmo estilo da página add.html */
+    /* HEADER */
     header {
       background-color: #000;
       display: flex;
@@ -124,11 +128,7 @@
       margin-left: 0.5rem;
     }
 
-    /*
-      Oculta o botão "Perfil" E o botão "Entrar" do header em telas menores
-      que 768px. Dessa forma, apenas a barra inferior mostrará essas opções
-      no mobile.
-    */
+    /* Oculta "Perfil" e "Entrar" em telas menores (mostra via mobile-bottom-bar) */
     @media (max-width: 768px) {
       .perfil-btn,
       .entrar-btn {
@@ -143,8 +143,7 @@
       padding: 2rem 1rem;
       width: 100%;
       max-width: 1200px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -167,7 +166,7 @@
       margin: 0;
     }
 
-    /* Barra inferior (mobile-bottom-bar) - mesmo estilo add.html */
+    /* Barra inferior (mobile) */
     .mobile-bottom-bar {
       display: none; /* por padrão, não mostra no desktop */
     }
@@ -184,27 +183,25 @@
         z-index: 9999;
       }
       .mobile-bottom-bar .bottom-bar-btn {
+        text-align: center;
         color: #fff;
         text-decoration: none;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
         font-size: 0.8rem;
+        justify-content: center;
       }
-      .mobile-bottom-bar .bottom-bar-btn svg {
-        width: 20px;
-        height: 20px;
-        fill: #fff;
+      .mobile-bottom-bar .bottom-bar-btn img {
         margin-bottom: 2px;
       }
-      /* Garante que o main não seja coberto pela barra inferior */
       main {
+        /* Garante que o conteúdo não seja coberto pela barra inferior */
         padding-bottom: 60px;
       }
     }
 
-    /* ======================= ESTILO ESPECÍFICO DA LISTA DE PROBLEMAS ======================= */
+    /* Lista de problemas */
     .result-container {
       width: 100%;
       margin-top: 1rem;
@@ -215,7 +212,7 @@
       border-radius: 8px;
       padding: 1rem 1rem 3.5rem;
       margin-bottom: 2rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       position: relative;
       color: #333;
     }
@@ -238,7 +235,7 @@
     .problem-image {
       max-width: 300px;
       border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .no-results {
@@ -270,7 +267,7 @@
       transform: translateX(-50%) scale(1.02);
     }
 
-    /* Botões de ação no canto inferior direito (Editar/Remover) */
+    /* Botões de ação (editar/remover) */
     .action-btns {
       position: absolute;
       bottom: 1rem;
@@ -361,7 +358,7 @@
 
   <!-- CONTEÚDO -->
   <div id="content">
-    <!-- Barra superior fixa, mesmo estilo da página add.html -->
+    <!-- Barra superior fixa -->
     <header>
       <!-- Botão "Voltar" -->
       <button
@@ -424,7 +421,7 @@
               <h2>{{ problema["titulo"] }}</h2>
               <p>{{ problema["descricao"] }}</p>
 
-              <!-- Exibir THUMBNAIL se existir problemImage_thumb -->
+              <!-- Exibe thumbnail se existir -->
               {% if problema.problemImage_thumb %}
                 <div class="problem-image-container">
                   <img
@@ -439,7 +436,10 @@
               <p>Enviado por: {{ problema["creator_name"] }}</p>
 
               <!-- Form p/ resolver (qualquer usuário logado pode resolver) -->
-              <form action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}" method="GET">
+              <form
+                action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}"
+                method="GET"
+              >
                 <button type="submit" class="resolver-btn">Resolver</button>
               </form>
 
@@ -471,11 +471,17 @@
       {% else %}
         <div class="no-results">
           <p>Não há problemas não resolvidos.</p>
-          <a href="{{ url_for('add_problem') }}" class="new-problem-btn" title="Novo Problema">
+          <a
+            href="{{ url_for('add_problem') }}"
+            class="new-problem-btn"
+            title="Novo Problema"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
-              0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-              0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+              <path
+                d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
+                   0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
+                   0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+              />
             </svg>
             Novo Problema
           </a>
@@ -487,87 +493,44 @@
       <p>© 2025 Plataforma M</p>
     </footer>
 
-    <!-- Barra inferior (mobile) -->
+    <!-- Barra inferior (mobile) - estilo com imagens, igual ao resultados.html -->
     <div class="mobile-bottom-bar">
-      <!-- 1) Resolver -->
-      <a
-        href="{{ url_for('unresolved') }}"
-        class="bottom-bar-btn"
-        title="Resolver Problemas"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="M8.982 1.566a.5.5 0 0 0-.964 0l-6.52 12.5A.5.5
-               0 0 0 2.01 15h11.98a.5.5 0 0 0 .442-.934l-6.45-12.5zM8
-               5c.28 0 .5.22.5.5V9a.5.5 0 0 1-1 0V5.5c0-.28.22-.5.5-.5zm0
-               6a.75.75 0 1 1 0 1.5A.75.75 0 0 1 8 11z"
-          />
-        </svg>
+      <!-- 1) Resolver (coluna 1/3) -->
+      <a href="{{ url_for('unresolved') }}" class="bottom-bar-btn" title="Resolver Problemas">
+        <img
+          src="{{ url_for('static', filename='images/resolver_icon.png') }}"
+          alt="Resolver Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
         Resolver
       </a>
-      <!-- 2) Envie -->
-      <a
-        href="{{ url_for('add_problem') }}"
-        class="bottom-bar-btn"
-        title="Envie seu Problema"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
-            0 0 1 0 1h-3v3a.5.5 0 0 1-1
-            0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
-            0 0 1 8 4z"
-          />
-        </svg>
-        Envie
+      <!-- 2) Envie (coluna 2/3) -->
+      <a href="{{ url_for('add_problem') }}" class="bottom-bar-btn" title="Envie seu Problema">
+        <img
+          src="{{ url_for('static', filename='images/icone_mais.png') }}"
+          alt="Envie"
+          style="width:55px; height:55px;"
+        />
       </a>
-      <!-- 3) Perfil/Entrar -->
+      <!-- 3) Perfil/Entrar (coluna 3/3) -->
       {% if not session.get('user_id') %}
-        <a
-          href="{{ url_for('login') }}"
-          class="bottom-bar-btn"
-          title="Entrar"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8 8a3 3 0 1 0-3-3
-            3 3 0 0 0 3 3z"
-            />
-            <path
-              d="M8 8c-2.33 0-4 1.67-4
-              4v1h8v-1c0-2.33-1.67-4-4-4z"
-            />
-          </svg>
-          Entrar
-        </a>
+      <a href="{{ url_for('login') }}" class="bottom-bar-btn" title="Entrar">
+        <img
+          src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+          alt="Perfil Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
+        Entrar
+      </a>
       {% else %}
-        <a
-          href="{{ url_for('perfil') }}"
-          class="bottom-bar-btn"
-          title="Perfil"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8 8a3 3 0 1 0-3-3
-            3 3 0 0 0 3 3z"
-            />
-            <path
-              d="M8 8c-2.33 0-4 1.67-4
-              4v1h8v-1c0-2.33-1.67-4-4-4z"
-            />
-          </svg>
-          Perfil
-        </a>
+      <a href="{{ url_for('perfil') }}" class="bottom-bar-btn" title="Perfil">
+        <img
+          src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+          alt="Perfil Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
+        Perfil
+      </a>
       {% endif %}
     </div>
   </div> <!-- /#content -->
@@ -585,7 +548,7 @@
       }
     });
 
-    // Botão "Voltar" - lógica de navegação, semelhante ao add.html
+    // Botão "Voltar"
     document.addEventListener('DOMContentLoaded', function() {
       const ref = document.referrer || "";
       const btnVoltar = document.getElementById('btnVoltar');
