@@ -690,8 +690,13 @@
       renderSteps();
     });
 
-    // Ao submeter, converte solutionData em JSON e põe no campo hidden
-    form.addEventListener('submit', () => {
+    // Ao submeter, checa se há passos
+    form.addEventListener('submit', function(e) {
+      if (!solutionData.steps || solutionData.steps.length === 0) {
+        e.preventDefault();
+        alert("Não é possível enviar uma solução vazia. Adicione pelo menos um passo.");
+        return;
+      }
       hiddenField.value = JSON.stringify(solutionData);
     });
 

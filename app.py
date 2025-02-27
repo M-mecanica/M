@@ -645,6 +645,16 @@ def resolver_problema(problem_id):
     except json.JSONDecodeError:
         solution_data = {}
 
+    # -----------------------------
+    # VALIDAÇÃO: impede solução vazia
+    # -----------------------------
+    # Caso steps seja vazio, ou não exista, consideramos "solução inválida".
+    steps = solution_data.get("steps")
+    if not steps or len(steps) == 0:
+        # Retorna ao form com mensagem de erro (ou poderia exibir de outra forma)
+        return "Não é possível enviar uma solução vazia. Volte e adicione pelo menos um passo.", 400
+
+    # Se estiver tudo certo, marca como resolvido
     problemas_collection.update_one(
         {"_id": ObjectId(problem_id)},
         {
@@ -1327,6 +1337,11 @@ def load_items():
         search_tokens = [t for t in normalized_search_phrase.split() if t and t not in STOPWORDS]
 
         pipeline_base = [
+            {
+                '$addFields': {
+                    'matching_phrases': '$matching_phrases'
+                }
+            },
             {
                 '$addFields': {
                     'is_phrase_match': {
