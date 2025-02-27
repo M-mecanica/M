@@ -609,9 +609,9 @@ def unresolved():
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
 
-    # Se o referrer não contiver "resolver", armazenamos para poder voltar.
+    # Se o referrer não contiver "resolver" NEM "unresolved", armazenamos para poder voltar.
     referrer = request.referrer
-    if referrer and "resolver" not in referrer:
+    if referrer and "resolver" not in referrer and "unresolved" not in referrer:
         session["nao_resolvidos_prev_page"] = referrer
 
     query = {"resolvido": False}
@@ -645,16 +645,10 @@ def resolver_problema(problem_id):
     except json.JSONDecodeError:
         solution_data = {}
 
-    # -----------------------------
-    # VALIDAÇÃO: impede solução vazia
-    # -----------------------------
-    # Caso steps seja vazio, ou não exista, consideramos "solução inválida".
     steps = solution_data.get("steps")
     if not steps or len(steps) == 0:
-        # Retorna ao form com mensagem de erro (ou poderia exibir de outra forma)
         return "Não é possível enviar uma solução vazia. Volte e adicione pelo menos um passo.", 400
 
-    # Se estiver tudo certo, marca como resolvido
     problemas_collection.update_one(
         {"_id": ObjectId(problem_id)},
         {
@@ -760,7 +754,6 @@ def delete_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    # Apaga as imagens antigas se existirem
     old_main_id = problema.get("problemImage_main")
     old_thumb_id = problema.get("problemImage_thumb")
     if old_main_id:
