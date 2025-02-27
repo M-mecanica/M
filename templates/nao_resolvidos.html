@@ -1,570 +1,552 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>M - Problemas Não Resolvidos</title>
-  <!-- Fonte básica -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
-    rel="stylesheet"
-  />
-  <!-- Ícones Material (se desejar utilizar) -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <head>
+    <meta charset="UTF-8" />
+    <title>M - Problemas Não Resolvidos</title>
+    <!-- Fonte básica -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Ícones Material (se desejar utilizar) -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
-    /* Reset básico */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Roboto', sans-serif;
-      font-size: 1rem;
-      background-color: #f0f0f0;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Preloader (opcional) */
-    #preloader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: #000;
-      z-index: 99999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .loader {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #333;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
+    <style>
+      /* Reset básico */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-      100% {
-        transform: rotate(360deg);
+      /* Para que o flex funcione corretamente e o rodapé fique na parte inferior */
+      html,
+      body {
+        height: 100%;
       }
-    }
-
-    /* Conteúdo (para dar fade-in após o preloader) */
-    #content {
-      transition: opacity 0.5s ease;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      opacity: 0; /* começa invisível, depois faz fade-in */
-    }
-
-    /* HEADER */
-    header {
-      background-color: #000;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      height: 80px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-    }
-    header h1 {
-      color: #fff;
-      font-size: 1.6rem;
-      margin: 0;
-      text-align: center;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    @media (max-width: 768px) {
-      header {
-        height: 56px;
-        padding: 0 1rem;
-      }
-      header h1 {
-        font-size: 1.3rem;
-      }
-    }
-    .header-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      outline: none;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      transition: background-color 0.2s;
-    }
-    .header-btn:hover {
-      background-color: #333;
-    }
-    .header-btn svg {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-    }
-    .header-btn span {
-      margin-left: 0.5rem;
-    }
-
-    /* Oculta "Perfil" e "Entrar" em telas menores (mostra via mobile-bottom-bar) */
-    @media (max-width: 768px) {
-      .perfil-btn,
-      .entrar-btn {
-        display: none !important;
-      }
-    }
-
-    /* MAIN */
-    main {
-      margin-top: 100px; /* espaço para header fixo */
-      flex: 1;
-      padding: 2rem 1rem;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    @media (max-width: 768px) {
-      main {
-        margin-top: 72px;
-      }
-    }
-
-    /* FOOTER */
-    footer {
-      background-color: #000;
-      text-align: center;
-      padding: 1rem 2rem;
-    }
-    footer p {
-      font-size: 0.9rem;
-      color: #fff;
-      margin: 0;
-    }
-
-    /* Barra inferior (mobile) */
-    .mobile-bottom-bar {
-      display: none; /* por padrão, não mostra no desktop */
-    }
-    @media (max-width: 768px) {
-      .mobile-bottom-bar {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        background-color: #000;
-        width: 100%;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        height: 60px;
-        z-index: 9999;
-      }
-      .mobile-bottom-bar .bottom-bar-btn {
-        text-align: center;
-        color: #fff;
-        text-decoration: none;
+      body {
+        font-family: "Roboto", sans-serif;
+        font-size: 1rem;
+        background-color: #f0f0f0;
+        color: #333;
         display: flex;
         flex-direction: column;
+        overflow-x: hidden;
+      }
+
+      /* Preloader (opcional) */
+      #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #000;
+        z-index: 99999;
+        display: flex;
         align-items: center;
-        font-size: 0.8rem;
         justify-content: center;
       }
-      .mobile-bottom-bar .bottom-bar-btn img {
-        margin-bottom: 2px;
+      .loader {
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #333;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 0.7s linear infinite;
       }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* O wrapper de conteúdo ocupa o espaço disponível */
+      #content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        transition: opacity 0.5s ease;
+        opacity: 0; /* começa invisível e faz fade-in */
+      }
+
+      /* HEADER fixo no topo */
+      header {
+        background-color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        height: 80px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+      }
+      header h1 {
+        color: #fff;
+        font-size: 1.6rem;
+        margin: 0;
+        text-align: center;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      @media (max-width: 768px) {
+        header {
+          height: 56px;
+          padding: 0 1rem;
+        }
+        header h1 {
+          font-size: 1.3rem;
+        }
+      }
+      .header-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        outline: none;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        transition: background-color 0.2s;
+      }
+      .header-btn:hover {
+        background-color: #333;
+      }
+      .header-btn svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+      }
+      .header-btn span {
+        margin-left: 0.5rem;
+      }
+      /* Oculta "Perfil" e "Entrar" em telas menores (mostra via mobile-bottom-bar) */
+      @media (max-width: 768px) {
+        .perfil-btn,
+        .entrar-btn {
+          display: none !important;
+        }
+      }
+
+      /* MAIN: espaçamento para não ficar embaixo do header fixo */
       main {
-        /* Garante que o conteúdo não seja coberto pela barra inferior */
-        padding-bottom: 60px;
+        margin-top: 100px;
+        padding: 2rem 1rem;
+        width: 100%;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+        flex: 1;
       }
-    }
+      @media (max-width: 768px) {
+        main {
+          margin-top: 72px;
+          padding-bottom: 80px; /* espaço para a barra inferior */
+        }
+      }
 
-    /* Lista de problemas */
-    .result-container {
-      width: 100%;
-      margin-top: 1rem;
-    }
+      /* FOOTER */
+      footer {
+        background-color: #000;
+        text-align: center;
+        padding: 1rem 2rem;
+      }
+      footer p {
+        font-size: 0.9rem;
+        color: #fff;
+        margin: 0;
+      }
 
-    .problem-item {
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 1rem 1rem 3.5rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      position: relative;
-      color: #333;
-    }
-    .problem-item h2 {
-      font-size: 1.4rem;
-      margin-bottom: 0.5rem;
-      color: #000;
-      text-align: center;
-    }
-    .problem-item p {
-      color: #555;
-      margin-bottom: 0.5rem;
-      text-align: center;
-      line-height: 1.3rem;
-    }
-    .problem-image-container {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    .problem-image {
-      max-width: 300px;
-      border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+      /* Barra inferior (mobile) */
+      .mobile-bottom-bar {
+        display: none; /* por padrão, não mostra no desktop */
+      }
+      @media (max-width: 768px) {
+        .mobile-bottom-bar {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          background-color: #000;
+          width: 100%;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          height: 60px;
+          z-index: 9999;
+        }
+        .mobile-bottom-bar .bottom-bar-btn {
+          text-align: center;
+          color: #fff;
+          text-decoration: none;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-size: 0.8rem;
+          justify-content: center;
+        }
+        .mobile-bottom-bar .bottom-bar-btn img {
+          margin-bottom: 2px;
+        }
+      }
 
-    .no-results {
-      text-align: center;
-      margin-top: 2rem;
-      color: #666;
-      font-size: 1.2rem;
-    }
-
-    /* Botão "Resolver" */
-    .resolver-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.6rem 1.2rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      position: absolute;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    .resolver-btn:hover {
-      background-color: #333;
-      transform: translateX(-50%) scale(1.02);
-    }
-
-    /* Botões de ação (editar/remover) */
-    .action-btns {
-      position: absolute;
-      bottom: 1rem;
-      right: 1rem;
-      display: flex;
-      gap: 0.5rem;
-    }
-    .action-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-    }
-    .action-btn:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
-    /* Botão "Novo Problema" (quando não há problemas) */
-    .new-problem-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-    .new-problem-btn:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-    .new-problem-btn svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor;
-      margin-right: 0.4rem;
-    }
-
-    @media (max-width: 768px) {
+      /* Lista de problemas */
+      .result-container {
+        width: 100%;
+        margin-top: 1rem;
+      }
       .problem-item {
-        margin-bottom: 1.5rem;
-        padding-bottom: 4.5rem;
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 1rem 1rem 3.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        color: #333;
       }
       .problem-item h2 {
-        font-size: 1.2rem;
+        font-size: 1.4rem;
+        margin-bottom: 0.5rem;
+        color: #000;
+        text-align: center;
       }
       .problem-item p {
-        font-size: 0.9rem;
+        color: #555;
+        margin-bottom: 0.5rem;
+        text-align: center;
+        line-height: 1.3rem;
       }
+      .problem-image-container {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      .problem-image {
+        max-width: 300px;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .no-results {
+        text-align: center;
+        margin-top: 2rem;
+        color: #666;
+        font-size: 1.2rem;
+      }
+
+      /* Botão "Resolver" */
       .resolver-btn {
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 32px;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s, transform 0.2s;
+        position: absolute;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .resolver-btn:hover {
+        background-color: #333;
+        transform: translateX(-50%) scale(1.02);
+      }
+
+      /* Botões de ação (editar/remover) */
+      .action-btns {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 0.5rem;
       }
       .action-btn {
-        font-size: 0.8rem;
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 32px;
         padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s, transform 0.2s;
       }
+      .action-btn:hover {
+        background-color: #333;
+        transform: scale(1.02);
+      }
+
+      /* Botão "Novo Problema" (quando não há problemas) */
       .new-problem-btn {
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 32px;
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s, transform 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1rem;
+      }
+      .new-problem-btn:hover {
+        background-color: #333;
+        transform: scale(1.02);
       }
       .new-problem-btn svg {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+        margin-right: 0.4rem;
       }
-    }
-  </style>
-</head>
-<body>
-  <!-- PRELOADER (opcional) -->
-  <div id="preloader">
-    <div class="loader"></div>
-  </div>
+      @media (max-width: 768px) {
+        .problem-item {
+          margin-bottom: 1.5rem;
+          padding-bottom: 4.5rem;
+        }
+        .problem-item h2 {
+          font-size: 1.2rem;
+        }
+        .problem-item p {
+          font-size: 0.9rem;
+        }
+        .resolver-btn {
+          font-size: 0.8rem;
+          padding: 0.5rem 1rem;
+        }
+        .action-btn {
+          font-size: 0.8rem;
+          padding: 0.5rem 1rem;
+        }
+        .new-problem-btn {
+          font-size: 0.8rem;
+          padding: 0.5rem 1rem;
+        }
+        .new-problem-btn svg {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- PRELOADER (opcional) -->
+    <div id="preloader">
+      <div class="loader"></div>
+    </div>
 
-  <!-- CONTEÚDO -->
-  <div id="content">
-    <!-- Barra superior fixa -->
-    <header>
-      <!-- Botão "Voltar" -->
-      <button
-        class="header-btn"
-        id="btnVoltar"
-        aria-label="Voltar"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path
-            d="M15 18l-6-6 6-6"
-            stroke="currentColor"
-            stroke-width="2"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-
-      <h1>Problemas Não Resolvidos</h1>
-
-      <!-- Se NÃO estiver logado, mostra "Entrar" -->
-      {% if not session.get('user_id') %}
-        <a class="header-btn entrar-btn" href="{{ url_for('login') }}">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+    <!-- CONTEÚDO -->
+    <div id="content">
+      <!-- Barra superior fixa -->
+      <header>
+        <!-- Botão "Voltar" - CORREÇÃO: ADICIONADO type="button" -->
+        <button type="button" class="header-btn" id="btnVoltar" aria-label="Voltar">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path
-              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+              d="M15 18l-6-6 6-6"
+              stroke="currentColor"
+              stroke-width="2"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             />
           </svg>
-          <span>Entrar</span>
-        </a>
-      {% else %}
-        <!-- Se estiver logado, mostra "Perfil" -->
-        <a class="header-btn perfil-btn" href="{{ url_for('perfil') }}">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
-            <path
-              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
-            />
-          </svg>
-          <span>Perfil</span>
-        </a>
-      {% endif %}
-    </header>
+        </button>
 
-    <main>
-      <!-- Exibe a lista de problemas ou mensagem de "nenhum problema" -->
-      {% if problemas and problemas|length > 0 %}
-        <div class="result-container">
-          {% for problema in problemas %}
+        <h1>Problemas Não Resolvidos</h1>
 
-            <div class="problem-item">
-              <h2>{{ problema["titulo"] }}</h2>
-              <p>{{ problema["descricao"] }}</p>
-
-              <!-- Exibe thumbnail se existir -->
-              {% if problema.problemImage_thumb %}
-                <div class="problem-image-container">
-                  <img
-                    src="{{ url_for('gridfs_image', file_id=problema.problemImage_thumb) }}"
-                    alt="Imagem do problema (thumb)"
-                    class="problem-image"
-                  />
-                </div>
-              {% endif %}
-
-              <!-- Criador -->
-              <p>Enviado por: {{ problema["creator_name"] }}</p>
-
-              <!-- Form p/ resolver (qualquer usuário logado pode resolver) -->
-              <form
-                action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}"
-                method="GET"
-              >
-                <button type="submit" class="resolver-btn">Resolver</button>
-              </form>
-
-              <div class="action-btns">
-                {% if session.role == "solucionador" or session["user_id"] == problema["creator_id"] %}
-                  <!-- Link de Edição (edit_your_problem) -->
-                  <a
-                    href="{{ url_for('edit_your_problem', problem_id=problema['_id_str']) }}"
-                    class="action-btn"
-                  >
-                    Editar
-                  </a>
-                {% endif %}
-                {% if session.role == "solucionador" %}
-                  <!-- Form de Remoção -->
-                  <form
-                    action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}"
-                    method="POST"
-                    onsubmit="return confirm('Tem certeza que deseja remover este problema?');"
-                  >
-                    <button type="submit" class="action-btn">Remover</button>
-                  </form>
-                {% endif %}
-              </div>
-            </div>
-
-          {% endfor %}
-        </div>
-      {% else %}
-        <div class="no-results">
-          <p>Não há problemas não resolvidos.</p>
-          <a
-            href="{{ url_for('add_problem') }}"
-            class="new-problem-btn"
-            title="Novo Problema"
-          >
+        <!-- Se NÃO estiver logado, mostra "Entrar" -->
+        {% if not session.get('user_id') %}
+          <a class="header-btn entrar-btn" href="{{ url_for('login') }}">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
               <path
-                d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
-                   0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
-                   0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+                d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
               />
             </svg>
-            Novo Problema
+            <span>Entrar</span>
           </a>
-        </div>
-      {% endif %}
-    </main>
+        {% else %}
+          <!-- Se estiver logado, mostra "Perfil" -->
+          <a class="header-btn perfil-btn" href="{{ url_for('perfil') }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+              <path
+                d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+              />
+            </svg>
+            <span>Perfil</span>
+          </a>
+        {% endif %}
+      </header>
 
-    <footer>
-      <p>© 2025 Plataforma M</p>
-    </footer>
+      <main>
+        <!-- Exibe a lista de problemas ou mensagem de "nenhum problema" -->
+        {% if problemas and problemas|length > 0 %}
+          <div class="result-container">
+            {% for problema in problemas %}
+              <div class="problem-item">
+                <h2>{{ problema["titulo"] }}</h2>
+                <p>{{ problema["descricao"] }}</p>
 
-    <!-- Barra inferior (mobile) - estilo com imagens, igual ao resultados.html -->
-    <div class="mobile-bottom-bar">
-      <!-- 1) Resolver (coluna 1/3) -->
-      <a href="{{ url_for('unresolved') }}" class="bottom-bar-btn" title="Resolver Problemas">
-        <img
-          src="{{ url_for('static', filename='images/resolver_icon.png') }}"
-          alt="Resolver Icon"
-          style="width:30px;height:30px;margin-bottom:0px;"
-        />
-        Resolver
-      </a>
-      <!-- 2) Envie (coluna 2/3) -->
-      <a href="{{ url_for('add_problem') }}" class="bottom-bar-btn" title="Envie seu Problema">
-        <img
-          src="{{ url_for('static', filename='images/icone_mais.png') }}"
-          alt="Envie"
-          style="width:55px; height:55px;"
-        />
-      </a>
-      <!-- 3) Perfil/Entrar (coluna 3/3) -->
-      {% if not session.get('user_id') %}
-      <a href="{{ url_for('login') }}" class="bottom-bar-btn" title="Entrar">
-        <img
-          src="{{ url_for('static', filename='images/perfil_icon.png') }}"
-          alt="Perfil Icon"
-          style="width:30px;height:30px;margin-bottom:0px;"
-        />
-        Entrar
-      </a>
-      {% else %}
-      <a href="{{ url_for('perfil') }}" class="bottom-bar-btn" title="Perfil">
-        <img
-          src="{{ url_for('static', filename='images/perfil_icon.png') }}"
-          alt="Perfil Icon"
-          style="width:30px;height:30px;margin-bottom:0px;"
-        />
-        Perfil
-      </a>
-      {% endif %}
+                <!-- Exibe thumbnail se existir -->
+                {% if problema.problemImage_thumb %}
+                  <div class="problem-image-container">
+                    <img
+                      src="{{ url_for('gridfs_image', file_id=problema.problemImage_thumb) }}"
+                      alt="Imagem do problema (thumb)"
+                      class="problem-image"
+                    />
+                  </div>
+                {% endif %}
+
+                <!-- Criador -->
+                <p>Enviado por: {{ problema["creator_name"] }}</p>
+
+                <!-- Formulário para resolver -->
+                <form
+                  action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}"
+                  method="GET"
+                >
+                  <button type="submit" class="resolver-btn">Resolver</button>
+                </form>
+
+                <div class="action-btns">
+                  {% if session.role == "solucionador" or session["user_id"] == problema["creator_id"] %}
+                    <a
+                      href="{{ url_for('edit_your_problem', problem_id=problema['_id_str']) }}"
+                      class="action-btn"
+                    >
+                      Editar
+                    </a>
+                  {% endif %}
+                  {% if session.role == "solucionador" %}
+                    <form
+                      action="{{ url_for('delete_problem', problem_id=problema['_id_str']) }}"
+                      method="POST"
+                      onsubmit="return confirm('Tem certeza que deseja remover este problema?');"
+                    >
+                      <button type="submit" class="action-btn">Remover</button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="no-results">
+            <p>Não há problemas não resolvidos.</p>
+            <a
+              href="{{ url_for('add_problem') }}"
+              class="new-problem-btn"
+              title="Novo Problema"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <path
+                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
+                   0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
+                   0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+                />
+              </svg>
+              Novo Problema
+            </a>
+          </div>
+        {% endif %}
+      </main>
+
+      <footer>
+        <p>© 2025 Plataforma M</p>
+      </footer>
+
+      <!-- Barra inferior (mobile) -->
+      <div class="mobile-bottom-bar">
+        <!-- 1) Resolver (coluna 1/3) -->
+        <a href="{{ url_for('unresolved') }}" class="bottom-bar-btn" title="Resolver Problemas">
+          <img
+            src="{{ url_for('static', filename='images/resolver_icon.png') }}"
+            alt="Resolver Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Resolver
+        </a>
+        <!-- 2) Envie (coluna 2/3) -->
+        <a href="{{ url_for('add_problem') }}" class="bottom-bar-btn" title="Envie seu Problema">
+          <img
+            src="{{ url_for('static', filename='images/icone_mais.png') }}"
+            alt="Envie"
+            style="width:55px; height:55px;"
+          />
+        </a>
+        <!-- 3) Perfil/Entrar (coluna 3/3) -->
+        {% if not session.get('user_id') %}
+          <a href="{{ url_for('login') }}" class="bottom-bar-btn" title="Entrar">
+            <img
+              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              alt="Perfil Icon"
+              style="width:30px;height:30px;margin-bottom:0px;"
+            />
+            Entrar
+          </a>
+        {% else %}
+          <a href="{{ url_for('perfil') }}" class="bottom-bar-btn" title="Perfil">
+            <img
+              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              alt="Perfil Icon"
+              style="width:30px;height:30px;margin-bottom:0px;"
+            />
+            Perfil
+          </a>
+        {% endif %}
+      </div>
     </div>
-  </div> <!-- /#content -->
+    <!-- /#content -->
 
-  <script>
-    // Preloader + fade-in do conteúdo (opcional)
-    window.addEventListener('load', function () {
-      const preloader = document.getElementById('preloader');
-      const content = document.getElementById('content');
-      if (preloader) {
-        preloader.style.display = 'none';
-      }
-      if (content) {
-        content.style.opacity = '1';
-      }
-    });
+    <script>
+      // Preloader + fade-in do conteúdo (opcional)
+      window.addEventListener("load", function () {
+        const preloader = document.getElementById("preloader");
+        const content = document.getElementById("content");
+        if (preloader) {
+          preloader.style.display = "none";
+        }
+        if (content) {
+          content.style.opacity = "1";
+        }
+      });
 
-    // Botão "Voltar" deve levar o usuário de volta à página anterior
-    // que ficou salva na sessão (exceto se for a página de resolver).
-    document.addEventListener('DOMContentLoaded', function() {
-      const prevPage = "{{ session.get('nao_resolvidos_prev_page') }}";
-      const btnVoltar = document.getElementById('btnVoltar');
-
-      if (btnVoltar) {
-        btnVoltar.addEventListener('click', function() {
-          if (prevPage) {
-            window.location.href = prevPage;
-          } else {
-            // Se não houver prevPage, volta para o index por padrão
-            window.location.href = "{{ url_for('index') }}";
-          }
-        });
-      }
-    });
-  </script>
-</body>
+      // Botão "Voltar": volta para a página salva na sessão ou para o index
+      document.addEventListener("DOMContentLoaded", function () {
+        const prevPage = "{{ session.get('nao_resolvidos_prev_page') }}";
+        const btnVoltar = document.getElementById("btnVoltar");
+        if (btnVoltar) {
+          btnVoltar.addEventListener("click", function () {
+            if (prevPage) {
+              window.location.href = prevPage;
+            } else {
+              window.location.href = "{{ url_for('index') }}";
+            }
+          });
+        }
+      });
+    </script>
+  </body>
 </html>

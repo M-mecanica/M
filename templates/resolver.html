@@ -80,7 +80,7 @@
     }
 
     /* ------------------------------------------------------
-       HEADER (barra superior fixa, estilo semelhante ao nao_resolvidos.html)
+       HEADER (barra superior fixa)
     ------------------------------------------------------ */
     header {
       background-color: #000;
@@ -384,8 +384,9 @@
   <div id="content">
     <!-- BARRA SUPERIOR FIXA -->
     <header>
-      <!-- Botão "Voltar" -->
+      <!-- Botão "Voltar" - CORREÇÃO: ADICIONADO type="button" -->
       <button
+        type="button"
         class="header-btn"
         id="btnVoltar"
         aria-label="Voltar"
@@ -535,7 +536,7 @@
     });
 
     // --------------------------------------
-    // Botão "Voltar" -> direciona para nao_resolvidos
+    // Botão "Voltar" -> direciona para /unresolved
     // --------------------------------------
     document.addEventListener('DOMContentLoaded', function() {
       const btnVoltar = document.getElementById('btnVoltar');
