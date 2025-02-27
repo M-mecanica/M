@@ -200,7 +200,7 @@ def save_image(file_obj, fs_instance, max_w=1600, max_h=1200, thumb_w=300, thumb
     # 1) Versão principal: redimensiona até (max_w x max_h)
     img.thumbnail((max_w, max_h))
     main_io = io.BytesIO()
-    # Salva em JPEG com qualidade ~80 (ajuste conforme desejar)
+    # Salva em JPEG com qualidade ~80
     img.save(main_io, format='JPEG', quality=80)
     main_io.seek(0)
 
@@ -210,9 +210,7 @@ def save_image(file_obj, fs_instance, max_w=1600, max_h=1200, thumb_w=300, thumb
         contentType='image/jpeg'
     )
 
-    # 2) Versão thumbnail: reabre a imagem original ou usa `img`:
-    #    - Se quisermos "perder" menos qualidade, podemos reabrir do zero,
-    #      mas aqui, reabrir do zero é mais seguro:
+    # 2) Versão thumbnail
     img_thumb = Image.open(io.BytesIO(file_data))
     if img_thumb.mode != 'RGB':
         img_thumb = img_thumb.convert('RGB')
@@ -465,7 +463,6 @@ def load_problems():
                     "titulo": p.get("titulo", ""),
                     "descricao": p.get("descricao", ""),
                     "resolvido": p.get("resolvido", False),
-                    # Aqui, ajustamos para mostrar IDs da main e da thumb
                     "problemImage_main": str(p["problemImage_main"]) if p.get("problemImage_main") else None,
                     "problemImage_thumb": str(p["problemImage_thumb"]) if p.get("problemImage_thumb") else None,
                     "creator_name": creator_name,
@@ -490,7 +487,6 @@ def load_problems():
         displayed_object_ids = [ObjectId(x) for x in displayed_ids]
 
         random_match_stage = {"_id": {"$nin": displayed_object_ids}}
-        # Insere também a condição de problemas resolvidos
         for key, val in filters.items():
             random_match_stage[key] = val
 
@@ -571,7 +567,7 @@ def add_problem():
         brand = request.form.get("brand", "").strip()
 
         image_file = request.files.get("problemImage")
-        image_ids = save_image(image_file, fs_m)  # retorna dict ou None
+        image_ids = save_image(image_file, fs_m)
 
         if titulo and descricao:
             if image_ids:
@@ -605,8 +601,18 @@ def add_problem():
 
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
+    """
+    Rota para exibir problemas não resolvidos.
+    Ajuste: Vamos guardar a página anterior para que, ao clicar em "Voltar",
+    o usuário nunca retorne ao /resolver e sim onde estava antes de /unresolved.
+    """
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
+
+    # Se o referrer não contiver "resolver", armazenamos para poder voltar.
+    referrer = request.referrer
+    if referrer and "resolver" not in referrer:
+        session["nao_resolvidos_prev_page"] = referrer
 
     query = {"resolvido": False}
     problemas_nao_resolvidos = list(problemas_collection.find(query))
@@ -1105,10 +1111,7 @@ def edit_solution(problem_id):
                 step["stepImage"] = None
             elif step_image_file and step_image_file.filename.strip():
                 image_ids = save_image(step_image_file, fs_m, max_w=1200, max_h=1200, thumb_w=300, thumb_h=300)
-                # Usar a versão principal do step, ou até a thumbnail, fica a critério.
-                # Normalmente, stepImage seria a principal, sem a thumb, mas é customizável.
                 if image_ids:
-                    # apaga a anterior
                     if old_file_id:
                         try:
                             fs_m.delete(ObjectId(old_file_id))
@@ -1388,7 +1391,6 @@ def load_items():
                 'stock_eld': it.get('stock_eld', 0),
                 'price': float(it.get('price', 0.0)),
                 'is_highlighted': 1 if it.get('is_phrase_match') == 1 else 0,
-                # Ajuste p/ exibir main e thumb
                 'itemImage_main': str(it['itemImage_main']) if it.get('itemImage_main') else None,
                 'itemImage_thumb': str(it['itemImage_thumb']) if it.get('itemImage_thumb') else None
             })
@@ -1482,9 +1484,7 @@ def upload_item_image(item_id):
                     "$set": {
                         "itemImage_main": new_main_id,
                         "itemImage_thumb": new_thumb_id
-                    },
-                    # Se quiser remover de vez o campo antigo, descomente:
-                    # "$unset": {"itemImage": ""}
+                    }
                 }
             )
 
@@ -1615,7 +1615,7 @@ def edit_profile():
         if profile_photo and profile_photo.filename.strip():
             image_ids = save_image(profile_photo, fs_m)
             if image_ids:
-                new_file_id = image_ids["main_id"]  # A foto de perfil pode ser só a "main"
+                new_file_id = image_ids["main_id"]
                 old_photo_id = user_obj.get("profile_image_id")
                 if old_photo_id:
                     try:

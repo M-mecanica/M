@@ -548,19 +548,19 @@
       }
     });
 
-    // Botão "Voltar"
+    // Botão "Voltar" deve levar o usuário de volta à página anterior
+    // que ficou salva na sessão (exceto se for a página de resolver).
     document.addEventListener('DOMContentLoaded', function() {
-      const ref = document.referrer || "";
+      const prevPage = "{{ session.get('nao_resolvidos_prev_page') }}";
       const btnVoltar = document.getElementById('btnVoltar');
 
       if (btnVoltar) {
         btnVoltar.addEventListener('click', function() {
-          // Se não houver referrer, ir para página principal (index)
-          if (!ref) {
-            window.location.href = "{{ url_for('index') }}";
+          if (prevPage) {
+            window.location.href = prevPage;
           } else {
-            // Caso contrário, tenta voltar na history
-            window.history.back();
+            // Se não houver prevPage, volta para o index por padrão
+            window.location.href = "{{ url_for('index') }}";
           }
         });
       }
