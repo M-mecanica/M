@@ -1,857 +1,1320 @@
+<!-- profil.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>M - Meu Perfil</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <title>M - Meu Perfil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Fonte básica -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
-    rel="stylesheet"
-  />
-  <!-- Ícones Material (para manter consistência caso use em outros locais) -->
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/icon?family=Material+Icons"
-  />
+    <!-- Tags Open Graph (usadas quando houver compartilhamento em redes sociais,
+         especialmente no perfil público) -->
+    {% if is_public and og_data %}
+      <meta property="og:title" content="{{ og_data.title|safe }}" />
+      <meta property="og:description" content="{{ og_data.description|safe }}" />
+      <meta property="og:image" content="{{ og_data.image|safe }}" />
+      <meta property="og:url" content="{{ og_data.url|safe }}" />
+      <meta property="og:type" content="website" />
+    {% endif %}
 
-  <style>
-    /*********************************************
-     * RESET E ESTRUTURA GERAL (MESMO DE resultados.html)
-     *********************************************/
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <!-- Fonte básica -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Ícones Material -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
 
-    body {
-      font-family: 'Roboto', sans-serif;
-      font-size: 1rem;
-      color: #333;
-      background: url("{{ url_for('static', filename='images/' + random_bg) }}")
-        no-repeat center center fixed;
-      background-size: cover;
-      overflow-x: hidden;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* TRANSIÇÃO (fade-in) para o conteúdo */
-    #content {
-      transition: opacity 0.5s ease;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      opacity: 0; /* inicia com opacidade 0 */
-    }
-
-    /* PRELOADER (mesmo de resultados.html) */
-    #preloader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: #000;
-      z-index: 99999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .loader {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #333;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
+    <style>
+      /*********************************************
+       * RESET E ESTRUTURA GERAL
+       *********************************************/
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
 
-    /*********************************************
-     * HEADER FIXO (MESMO PADRÃO DE resultados.html)
-     *********************************************/
-    header {
-      background-color: #000;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      height: 80px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-    }
-    header h1 {
-      color: #fff;
-      font-size: 1.6rem;
-      margin: 0;
-      text-align: center;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    @media (max-width: 768px) {
+      body {
+        font-family: 'Roboto', sans-serif;
+        font-size: 1rem;
+        color: #333;
+        background: #fff; /* Fundo branco */
+        overflow-x: hidden;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* TRANSIÇÃO (fade-in) para o conteúdo */
+      #content {
+        transition: opacity 0.5s ease;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        opacity: 0; /* inicia com opacidade 0 */
+      }
+
+      /* PRELOADER */
+      #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #000;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .loader {
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #333;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /*********************************************
+       * HEADER FIXO
+       *********************************************/
       header {
-        height: 56px;
-        padding: 0 1rem;
+        background-color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Distribui espaços entre o botão voltar, título e config/login */
+        padding: 0 2rem;
+        height: 80px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
       }
       header h1 {
-        font-size: 1.3rem;
-      }
-    }
-    .header-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      outline: none;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      transition: background-color 0.2s;
-    }
-    .header-btn:hover {
-      background-color: #333;
-    }
-    .header-btn svg {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-    }
-    .header-btn span {
-      margin-left: 0.5rem;
-    }
-
-    /*
-      Oculta o botão "Perfil" E o botão "Entrar" do header em telas menores
-      que 768px. Dessa forma, apenas a barra inferior mostrará essas opções
-      no mobile.
-    */
-    @media (max-width: 768px) {
-      .perfil-btn,
-      .entrar-btn {
-        display: none !important;
-      }
-    }
-
-    /*********************************************
-     * MAIN (PADRONIZADO COM resultados.html)
-     *********************************************/
-    main {
-      flex: 1;
-      font-size: 1.25rem;
-      padding: 2rem;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      margin-top: 140px; /* espaço para header fixo */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    @media (max-width: 768px) {
-      main {
-        margin-top: 116px;
-        font-size: 1rem;
-        padding: 1rem;
-      }
-    }
-
-    /*********************************************
-     * CONTAINER DE PERFIL E ELEMENTOS INTERNOS
-     *********************************************/
-    .profile-container {
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      padding: 2rem;
-      width: 100%;
-      max-width: 600px;
-      text-align: center;
-    }
-
-    .profile-header {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    /* Avatar (usado como background-image) */
-    .avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background-position: center;
-      background-size: cover;
-      background-repeat: no-repeat;
-      margin-bottom: 1rem;
-    }
-
-    .profile-name {
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-
-    .profile-level {
-      font-size: 1rem;
-      color: #666;
-      margin-top: 0.5rem;
-    }
-
-    /* Cards de estatísticas */
-    .stats-cards {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 2rem;
-    }
-    .stat-card {
-      background-color: #fafafa;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      flex: 1;
-      padding: 1rem;
-      text-align: center;
-    }
-    .stat-card h2 {
-      font-size: 2rem;
-      margin-bottom: 0.25rem;
-    }
-    .stat-card p {
-      margin: 0;
-      color: #666;
-    }
-
-    /* Barra de progresso e conquistas (badges) */
-    .progress-bar-container {
-      margin: 1.5rem auto;
-      width: 80%;
-      max-width: 300px;
-      background-color: #eee;
-      border-radius: 8px;
-      overflow: hidden;
-      height: 14px;
-      position: relative;
-    }
-    .progress-bar-fill {
-      background-color: #4caf50;
-      width: 40%; /* ajustado via {{ progress_percentage }} */
-      height: 100%;
-      transition: width 0.3s ease;
-    }
-    .progress-label {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-      color: #666;
-    }
-    .badges-section {
-      margin-top: 2rem;
-    }
-    .badge {
-      display: inline-block;
-      background-color: #ffeb3b;
-      padding: 0.5rem 1rem;
-      border-radius: 16px;
-      font-size: 0.9rem;
-      color: #333;
-      margin-right: 0.5rem;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-      margin-bottom: 0.5rem;
-    }
-
-    /* Últimos problemas */
-    .latest-problems {
-      margin-top: 3rem;
-      text-align: left;
-    }
-    .problem-item {
-      background-color: #fff;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      padding: 1rem;
-      border: 1px solid #eee;
-    }
-    .problem-item h3 {
-      margin-bottom: 0.5rem;
-      font-size: 1.2rem;
-      color: #000;
-    }
-    .problem-item p {
-      margin: 0.25rem 0;
-      color: #444;
-    }
-    .problem-item a {
-      color: #0066cc;
-      text-decoration: none;
-    }
-
-    /*********************************************
-     * BOTÕES ESTILIZADOS
-     *********************************************/
-    .rounded-btn {
-      display: inline-block;
-      background-color: #000;
-      color: #fff;
-      padding: 0.5rem 1.2rem;
-      border-radius: 25px;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-      text-decoration: none;
-      transition: background-color 0.2s ease;
-    }
-    .rounded-btn:hover {
-      background-color: #333;
-    }
-
-    .edit-profile-btn {
-      margin: 1rem auto 0;
-    }
-
-    /* Botão "+ Envie o Seu Problema" (igual a resultados.html) */
-    .new-problem-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.2rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-    .new-problem-btn:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-    .new-problem-btn svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor;
-      margin-right: 0.4rem;
-    }
-
-    /*********************************************
-     * FORM DE UPLOAD DE FOTO (INPUT FILE)
-     *********************************************/
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-weight: 600;
-    }
-    .form-group input[type='text'] {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    .form-group input[type='file'] {
-      display: none; /* escondemos o input para usar um label customizado */
-    }
-    .custom-file-label {
-      background-color: #000;
-      color: #fff;
-      padding: 0.5rem 1.2rem;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 1rem;
-      display: inline-block;
-      transition: background-color 0.2s ease;
-    }
-    .custom-file-label:hover {
-      background-color: #333;
-    }
-
-    /*********************************************
-     * MODAL (MESMO ESTILO DE resultados.html)
-     *********************************************/
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 9999;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.4);
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background-color: #fff;
-      width: 95%;
-      max-width: 700px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      animation: modalFadeIn 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      max-height: 90vh;
-      overflow: hidden;
-      border: 1px solid #fff; /* Borda branca fina */
-      position: relative;     /* Para posicionar o "close" */
-    }
-    @keyframes modalFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    .modal-header {
-      background-color: #000;
-      color: #fff;
-      padding: 2rem;
-      position: relative;
-      border-bottom: 1px solid #333;
-    }
-    .modal-header h2 {
-      margin: 0;
-      font-size: 2rem;
-      font-weight: 500;
-    }
-    .close {
-      color: #fff;
-      position: absolute;
-      right: 2rem;
-      top: 2rem;
-      font-size: 2.4rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-    .close:hover {
-      color: #ccc;
-    }
-    .modal-body {
-      padding: 2rem;
-      text-align: left;
-      overflow-y: auto;
-      max-height: calc(90vh - 100px);
-    }
-    .modal-footer {
-      padding: 2rem;
-      border-top: 1px solid #eee;
-      text-align: right;
-    }
-    .save-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background-color 0.2s ease;
-    }
-    .save-btn:hover {
-      background-color: #333;
-    }
-
-    /*********************************************
-     * FOOTER (MESMO DE resultados.html)
-     *********************************************/
-    footer {
-      background-color: #000;
-      text-align: center;
-      padding: 1rem 2rem;
-    }
-    footer p {
-      font-size: 0.9rem;
-      color: #fff;
-      margin: 0;
-    }
-
-    /*********************************************
-     * BARRA INFERIOR (apenas mobile),
-     * AGORA COM IMAGENS EM VEZ DE SVGS (IGUAL AO resultados.html)
-     *********************************************/
-    .mobile-bottom-bar {
-      display: none; /* por padrão, não mostra */
-    }
-    @media (max-width: 768px) {
-      .mobile-bottom-bar {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        background-color: #000;
-        width: 100%;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        height: 60px;
-        z-index: 9999;
-      }
-      .mobile-bottom-bar .bottom-bar-btn {
-        text-align: center;
         color: #fff;
+        font-size: 1.6rem;
+        margin: 0;
+        text-align: center;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      @media (max-width: 768px) {
+        header {
+          height: 56px;
+          padding: 0 1rem;
+        }
+        header h1 {
+          font-size: 1.3rem;
+        }
+      }
+      .header-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        outline: none;
+        color: #fff;
+        display: flex;
+        align-items: center;
         text-decoration: none;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        transition: background-color 0.2s;
+      }
+      .header-btn:hover {
+        background-color: #333;
+      }
+      .header-btn svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+      }
+      .header-btn span {
+        margin-left: 0.5rem;
+      }
+
+      /* Botão Voltar some no mobile */
+      @media (max-width: 768px) {
+        .back-btn {
+          display: none !important;
+        }
+      }
+
+      /* Exclui o botão "Perfil" em telas grandes (PC/notebook) */
+      @media (min-width: 769px) {
+        .perfil-btn {
+          display: none !important;
+        }
+      }
+
+      /*
+       * Também podemos ocultar o botão "Entrar" no mobile,
+       * pois ele já aparece na barra inferior:
+       */
+      @media (max-width: 768px) {
+        .entrar-btn {
+          display: none !important;
+        }
+      }
+
+      /* Para garantir que o botão de configurações fique à direita no mobile */
+      @media (max-width: 768px) {
+        .header-btn.config-btn {
+          margin-left: auto;
+        }
+      }
+
+      /*********************************************
+       * MAIN
+       *********************************************/
+      main {
+        flex: 1;
+        font-size: 1.25rem;
+        padding: 2rem;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        margin-top: 80px; /* Espaço para não ficar encoberto pelo header */
         display: flex;
         flex-direction: column;
         align-items: center;
-        font-size: 0.8rem;
+      }
+      @media (max-width: 768px) {
+        main {
+          margin-top: 56px; /* Ajustado para o tamanho do header no mobile */
+          font-size: 1rem;
+          padding: 1rem;
+        }
+      }
+
+      .profile-container {
+        width: 100%;
+        max-width: 600px;
+        text-align: center;
+        margin: 0 auto;
+      }
+
+      .profile-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        margin-bottom: 1rem;
+      }
+
+      .profile-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      /* Container do nível (com icone + cor diferenciada) */
+      .profile-level-box {
+        margin-top: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        background-color: #f9f9f9;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 0.4rem 1rem;
+      }
+      .profile-level-box .level-name {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-right: 0.5rem;
+      }
+      .profile-level-box .level-number {
+        font-size: 0.95rem;
+        color: #555;
+      }
+
+      .profile-points {
+        margin-top: 0.5rem;
+        font-size: 1rem;
+        color: #333;
+      }
+      .level-estimate {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.2rem;
+      }
+
+      .stats-cards {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+      }
+      .stat-card {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        flex: 1;
+        padding: 1rem;
+        text-align: center;
+      }
+      .stat-card h2 {
+        font-size: 2rem;
+        margin-bottom: 0.25rem;
+      }
+      .stat-card p {
+        margin: 0;
+        color: #666;
+      }
+
+      .progress-bar-container {
+        margin: 1.5rem auto 0.5rem auto;
+        width: 80%;
+        max-width: 300px;
+        background-color: #eee;
+        border-radius: 8px;
+        overflow: hidden;
+        height: 14px;
+        position: relative;
+      }
+      .progress-bar-fill {
+        background-color: #4caf50;
+        width: 40%; /* ajustado via variável progress_percentage */
+        height: 100%;
+        transition: width 0.3s ease;
+      }
+      .progress-label {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #666;
+      }
+      .badges-section {
+        margin-top: 2rem;
+      }
+      .badge {
+        display: inline-block;
+        background-color: #ffeb3b;
+        padding: 0.5rem 1rem;
+        border-radius: 16px;
+        font-size: 0.9rem;
+        color: #333;
+        margin-right: 0.5rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        margin-bottom: 0.5rem;
+      }
+
+      .rounded-btn {
+        display: inline-block;
+        background-color: #000;
+        color: #fff;
+        padding: 0.5rem 1.2rem;
+        border-radius: 25px;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+      }
+      .rounded-btn:hover {
+        background-color: #333;
+      }
+
+      /* Ajuste nos botões de Editar/Compartilhar para ficarem uniformes em qualquer dispositivo */
+      .edit-profile-btn,
+      .share-profile-btn {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        padding: 0.4rem 1rem;
+      }
+
+      .profile-buttons {
+        display: flex;
+        width: calc(100% + 4rem); /* soma pra “anular” o padding anterior */
+        margin-left: -2rem;
+        margin-right: -2rem;
+      }
+      .profile-buttons button {
+        flex: 1;
+        margin: 0;
+      }
+
+      @media (max-width: 768px) {
+        .profile-buttons {
+          width: 100%;
+          margin-left: 0;
+          margin-right: 0;
+          justify-content: center;
+          gap: 5%;
+        }
+        .profile-buttons button {
+          flex: none;
+          width: 45%;
+        }
+      }
+
+      .new-problem-btn {
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 32px;
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s, transform 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1rem;
+      }
+      .new-problem-btn:hover {
+        background-color: #333;
+        transform: scale(1.02);
+      }
+      .new-problem-btn svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+        margin-right: 0.4rem;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-weight: 600;
+      }
+      .form-group input[type='text'] {
+        width: 100%;
+        padding: 0.5rem;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+      .form-group input[type='file'] {
+        display: none;
+      }
+      .custom-file-label {
+        background-color: #000;
+        color: #fff;
+        padding: 0.5rem 1.2rem;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 1rem;
+        display: inline-block;
+        transition: background-color 0.2s ease;
+      }
+      .custom-file-label:hover {
+        background-color: #333;
+      }
+
+      /*********************************************
+       * MODAL (EDITAR PERFIL)
+       *********************************************/
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        align-items: center;
         justify-content: center;
       }
-      .mobile-bottom-bar .bottom-bar-btn img {
-        margin-bottom: 2px;
+      .modal-content {
+        background-color: #fff;
+        width: 95%;
+        max-width: 700px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        animation: modalFadeIn 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        max-height: 90vh;
+        overflow: hidden;
+        border: 1px solid #fff;
+        position: relative;
       }
-      /* Garante que o main não seja coberto pela barra inferior */
-      main {
-        padding-bottom: 60px;
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
-    }
-  </style>
-</head>
+      .modal-header {
+        background-color: #000;
+        color: #fff;
+        padding: 2rem;
+        position: relative;
+        border-bottom: 1px solid #333;
+      }
+      .modal-header h2 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 500;
+      }
+      .close {
+        color: #fff;
+        position: absolute;
+        right: 2rem;
+        top: 2rem;
+        font-size: 2.4rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s;
+      }
+      .close:hover {
+        color: #ccc;
+      }
+      .modal-body {
+        padding: 2rem;
+        text-align: left;
+        overflow-y: auto;
+        max-height: calc(90vh - 100px);
+      }
+      .modal-footer {
+        padding: 2rem;
+        border-top: 1px solid #eee;
+        text-align: right;
+      }
+      .save-btn {
+        background-color: #000;
+        color: #fff;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.2s ease;
+      }
+      .save-btn:hover {
+        background-color: #333;
+      }
 
-<body>
-  <!-- PRELOADER -->
-  <div id="preloader">
-    <div class="loader"></div>
-  </div>
+      /*********************************************
+       * TELA DE CONFIGURAÇÕES (FULLSCREEN)
+       *********************************************/
+      .settings-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+      }
+      .settings-content {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+      .close-settings {
+        background: none;
+        color: #fff;
+        border: none;
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 1rem;
+        cursor: pointer;
+        align-self: flex-end;
+      }
+      .close-settings:hover {
+        color: #ccc;
+      }
+      .settings-body {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        text-align: center;
+        padding: 2rem;
+      }
+      .settings-body p {
+        font-size: 1.2rem;
+        margin-bottom: 0;
+      }
+      .settings-footer {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .logout-btn {
+        background-color: #e53935;
+        color: #fff;
+        border: none;
+        border-radius: 25px;
+        padding: 0.7rem 2rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+      }
+      .logout-btn:hover {
+        background-color: #c62828;
+      }
 
-  <!-- CONTEÚDO GERAL (para o fade-in) -->
-  <div id="content">
-    <!-- HEADER - mesmo estilo da página resultados.html -->
-    <header>
-      <!-- Botão Voltar -->
-      <button
-        class="header-btn"
-        onclick="window.location.href='{{ url_for('index') }}'"
-        aria-label="Voltar"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path
-            d="M15 18l-6-6 6-6"
-            stroke="currentColor"
-            stroke-width="2"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
+      footer {
+        background-color: #000;
+        text-align: center;
+        padding: 1rem 2rem;
+      }
+      footer p {
+        font-size: 0.9rem;
+        color: #fff;
+        margin: 0;
+      }
 
-      <!-- Título central -->
-      <h1>Meu Perfil</h1>
+      /*********************************************
+       * BARRA INFERIOR (mobile)
+       *********************************************/
+      .mobile-bottom-bar {
+        display: none;
+      }
+      @media (max-width: 768px) {
+        .mobile-bottom-bar {
+          display: grid;
+          /* 4 colunas: Home, Resolver, Enviar, Perfil/Entrar */
+          grid-template-columns: 1fr 1fr 1fr 1fr;
+          background-color: #000;
+          width: 100%;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          height: 60px;
+          z-index: 9999;
+        }
+        .mobile-bottom-bar .bottom-bar-btn {
+          text-align: center;
+          color: #fff;
+          text-decoration: none;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-size: 0.8rem;
+          justify-content: center;
+        }
+        .mobile-bottom-bar .bottom-bar-btn img {
+          margin-bottom: 2px;
+        }
+        main {
+          padding-bottom: 60px;
+        }
+      }
+      .bottom-bar-btn.active {
+        background-color: #444;
+      }
 
-      <!-- Se NÃO estiver logado, mostra "Entrar" -->
-      {% if not session.get('user_id') %}
-        <a class="header-btn entrar-btn" href="{{ url_for('login') }}">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+      @media (max-width: 768px) {
+        .header-btn.config-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 0.5rem;
+          font-size: 0.8rem;
+          margin-left: auto;
+        }
+        .header-btn.config-btn svg {
+          width: 30px;
+          height: 30px;
+          margin-bottom: 2px;
+        }
+        .header-btn.config-btn span {
+          margin: 0;
+        }
+      }
+
+      /*********************************************
+       * TAB BAR ESTILO PINTEREST
+       *********************************************/
+      .tab-bar {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+      }
+      .tab-option {
+        margin: 0 2rem;
+        padding-bottom: 0.5rem;
+        cursor: pointer;
+        font-size: 1.1rem;
+        position: relative;
+        color: #555;
+      }
+      .tab-option:hover {
+        color: #000;
+      }
+      .tab-option.active {
+        font-weight: bold;
+        color: #000;
+        border-bottom: 2px solid #000;
+      }
+
+      .tab-content {
+        display: none;
+        margin-top: 2rem;
+        text-align: left;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      .problem-item {
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border: 1px solid #eee;
+      }
+      .problem-item h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+        color: #000;
+      }
+      .problem-item p {
+        margin: 0.25rem 0;
+        color: #444;
+      }
+      .problem-item a {
+        color: #0066cc;
+        text-decoration: none;
+      }
+
+      /* Modal para escolhas de compartilhamento (WhatsApp/Facebook) */
+      .share-modal-overlay {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        align-items: center;
+        justify-content: center;
+      }
+      .share-modal-content {
+        background-color: #fff;
+        width: 90%;
+        max-width: 400px;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        animation: modalFadeIn 0.3s ease;
+      }
+      .share-modal-content h3 {
+        margin-bottom: 1rem;
+      }
+      .share-modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        color: #333;
+        cursor: pointer;
+      }
+      .share-option-btn {
+        display: inline-flex;
+        align-items: center;
+        background-color: #000;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        margin: 0.5rem;
+        text-decoration: none;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+      .share-option-btn:hover {
+        background-color: #333;
+      }
+      .share-option-btn img {
+        width: 24px;
+        height: 24px;
+        margin-right: 0.5rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- PRELOADER -->
+    <div id="preloader">
+      <div class="loader"></div>
+    </div>
+
+    <!-- CONTEÚDO GERAL (fade-in) -->
+    <div id="content">
+      <!-- HEADER -->
+      <header>
+        <!-- Botão Voltar (escondido no mobile) -->
+        <button
+          class="header-btn back-btn"
+          onclick="window.location.href='{{ url_for('index') }}'"
+          aria-label="Voltar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path
-              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+              d="M15 18l-6-6 6-6"
+              stroke="currentColor"
+              stroke-width="2"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             />
           </svg>
-          <span>Entrar</span>
-        </a>
-      {% else %}
-        <!-- Se estiver logado, mostra "Perfil" -->
-        <a class="header-btn perfil-btn" href="{{ url_for('perfil') }}">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
-            <path
-              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
-            />
-          </svg>
-          <span>Perfil</span>
-        </a>
-      {% endif %}
-    </header>
-
-    <!-- MAIN -->
-    <main>
-      <!-- Container de Perfil -->
-      <div class="profile-container">
-        <!-- Avatar e Nome -->
-        <div class="profile-header">
-          {% if user.profile_image_id %}
-            <div
-              class="avatar"
-              style="
-                background-image: url('{{ url_for('get_user_photo', file_id=user.profile_image_id) }}');
-              "
-            ></div>
-          {% else %}
-            <div
-              class="avatar"
-              style="
-                background-image: url('/static/images/avatar_placeholder.png');
-              "
-            ></div>
-          {% endif %}
-
-          <div class="profile-name">{{ user.nome }}</div>
-          <div class="profile-level">Nível: {{ user_level }}</div>
-        </div>
-
-        <!-- Estatísticas (Problemas) -->
-        <div class="stats-cards">
-          <div class="stat-card">
-            <h2>{{ posted_count }}</h2>
-            <p>Problemas Enviados</p>
-          </div>
-          <div class="stat-card">
-            <h2>{{ solved_count }}</h2>
-            <p>Problemas Resolvidos</p>
-          </div>
-        </div>
-
-        <!-- Barra de progresso: próxima conquista/nível -->
-        <div class="progress-bar-container">
-          <div
-            class="progress-bar-fill"
-            style="width: {{ progress_percentage }}%;"
-          ></div>
-        </div>
-        <div class="progress-label">
-          Próximo nível em {{ remaining_for_next_level }} problema(s)!
-        </div>
-
-        <!-- Seção de Badges/Conquistas -->
-        <div class="badges-section">
-          {% for badge in user_badges %}
-            <span class="badge">{{ badge }}</span>
-          {% endfor %}
-        </div>
-
-        <!-- Botão para editar o perfil (abre modal) -->
-        <button class="edit-profile-btn rounded-btn" id="openModalBtn">
-          Editar Perfil
         </button>
 
-        <!-- Últimos Problemas Enviados -->
-        <div class="latest-problems">
-          <h2>Últimos Problemas Enviados</h2>
-          {% if latest_problems and latest_problems|length > 0 %}
-            {% for p in latest_problems %}
-              <div class="problem-item">
-                <h3>{{ p.titulo }}</h3>
-                <p>
-                  Descrição:
-                  {{ p.descricao[:80] }}{{ "..." if p.descricao|length > 80 else "" }}
-                </p>
-                <p>
-                  <strong>Status:</strong>
-                  {{ "Resolvido" if p.resolvido else "Pendente" }}
-                </p>
-                {% if p.resolvido %}
-                  <a
-                    href="{{ url_for('exibir_solucao', problem_id=p._id_str) }}"
-                    >Ver Solução</a
-                  >
-                {% else %}
-                  <a
-                    href="{{ url_for('resolver_form', problem_id=p._id_str) }}"
-                    >Resolver Agora</a
-                  >
-                {% endif %}
-              </div>
-            {% endfor %}
-            <!-- Botão "Ver todos" -->
-            <a href="{{ url_for('user_history', user_id=user._id) }}" class="rounded-btn"
-              >Ver todos</a
+        <h1>Meu Perfil</h1>
+
+        {% if not session.get('user_id') %}
+          <!-- Se NÃO estiver logado, mostra "Entrar" -->
+          <a class="header-btn entrar-btn" href="{{ url_for('login') }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+              <path
+                d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+              />
+            </svg>
+            <span>Entrar</span>
+          </a>
+        {% else %}
+          <!-- LOGADO: Botão Configurações (canto direito) -->
+          <button
+            class="header-btn config-btn"
+            id="openConfigBtn"
+            aria-label="Configurações"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              style="fill: currentColor;"
             >
-          {% else %}
-            <p>Você ainda não postou nenhum problema.</p>
-            <!-- Botão "+ Envie o Seu Problema" -->
-            <a href="{{ url_for('add_problem') }}" class="new-problem-btn">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 16 16"
+              <path
+                d="M487.7 315.4l-42.2-24.4c2.1-11.6 3.2-23.7 3.2-35.6s-1.1-24-3.2-35.6l42.2-24.4c14.6-8.5 21-26.9 14.5-42.2l-2.2-5.2c-6.6-15.3-22.7-24.4-39.4-22.4l-49.1 6.2c-9.8-8-20.4-15.2-31.7-21.3l-14.2-48.3c-4.3-14.6-18-24.8-33.2-24.8h-5.6c-15.2 0-28.9 10.2-33.2 24.8l-14.2 48.3c-11.3 6.1-21.9 13.4-31.7 21.3l-49.1-6.2c-16.7-2-32.8 7.1-39.4 22.4l-2.2 5.2c-6.6 15.3.1 33.6 14.5 42.2l42.2 24.4c-2.1 11.6-3.2 23.7-3.2 35.6s1.1 24 3.2 35.6l-42.2 24.4c-14.6 8.5-21.1 26.9-14.5 42.2l2.2 5.2c6.6 15.3 22.7 24.4 39.4 22.4l49.1-6.2c9.8 8 20.4 15.2 31.7 21.3l14.2 48.3c4.3 14.6 18 24.8 33.2 24.8h5.6c15.2 0 28.9-10.2 33.2-24.8l14.2-48.3c11.3-6.1 21.9-13.4 31.7-21.3l49.1 6.2c16.7 2 32.8-7.1 39.4-22.4l2.2-5.2c6.6-15.3.1-33.7-14.5-42.2zM256 334c-43.1 0-78-34.9-78-78s34.9-78 78-78 78 34.9 78 78-34.9 78-78 78z"
+              />
+            </svg>
+            <span></span>
+          </button>
+        {% endif %}
+      </header>
+
+      <!-- MAIN -->
+      <main>
+        <div class="profile-container">
+          <div class="profile-header">
+            {% if user.profile_image_id %}
+              <div
+                class="avatar"
+                style="
+                  background-image: url('{{ url_for('get_user_photo', file_id=user.profile_image_id) }}');
+                "
+              ></div>
+            {% else %}
+              <div
+                class="avatar"
+                style="
+                  background-image: url('/static/images/avatar_placeholder.png');
+                "
+              ></div>
+            {% endif %}
+
+            <div class="profile-name">{{ user.nome }}</div>
+
+            <!-- Se não for is_public, mostrar botões de edição e compartilhar -->
+            {% if not is_public %}
+            <div class="profile-buttons">
+              <button class="edit-profile-btn rounded-btn" id="openModalBtn">
+                Editar Perfil
+              </button>
+
+              <button
+                class="share-profile-btn rounded-btn"
+                id="shareProfileBtn"
               >
-                <path
-                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
+                Compartilhar Perfil
+              </button>
+            </div>
+            {% endif %}
+
+            <!-- Caixa do Nível -->
+            <div class="profile-level-box">
+              <span class="level-name">{{ level_name }}</span>
+              <span class="level-number"> (Nível {{ level }})</span>
+            </div>
+            <div class="profile-points">Você tem {{ points }} pontos</div>
+            <div class="level-estimate">Estimativa: {{ estimate_str }}</div>
+          </div>
+
+          <!-- Barra de Progresso -->
+          <div class="progress-bar-container">
+            <div
+              class="progress-bar-fill"
+              style="width: {{ progress_percentage }}%;"
+            ></div>
+          </div>
+          <div class="progress-label">
+            Falta(m) {{ remaining_for_next_level }} ponto(s) para o próximo nível
+          </div>
+
+          <div class="stats-cards">
+            <div class="stat-card">
+              <h2>{{ posted_count }}</h2>
+              <p>Problemas Enviados</p>
+            </div>
+            <div class="stat-card">
+              <h2>{{ solved_count }}</h2>
+              <p>Problemas Resolvidos</p>
+            </div>
+          </div>
+
+          <!-- Exibe possíveis badges -->
+          <div class="badges-section">
+            {% for badge in user_badges %}
+              <span class="badge">{{ badge }}</span>
+            {% endfor %}
+          </div>
+
+          <!-- TAB BAR: só aparece se não for "is_public" ou se existirem dados pra mostrar -->
+          {% if not is_public %}
+          <div class="tab-bar">
+            <div class="tab-option active" data-tab="enviados">Problemas Enviados</div>
+            <div class="tab-option" data-tab="resolvidos">Problemas Resolvidos</div>
+          </div>
+
+          <!-- CONTEÚDO: PROBLEMAS ENVIADOS (CRIADOS) -->
+          <div id="enviadosTab" class="tab-content active">
+            <h2>Problemas Enviados</h2>
+            {% if latest_problems and latest_problems|length > 0 %}
+              {% for p in latest_problems %}
+                <div class="problem-item">
+                  <h3>{{ p.titulo }}</h3>
+                  <p>
+                    Descrição:
+                    {{ p.descricao[:80] }}{{ "..." if p.descricao|length > 80 else "" }}
+                  </p>
+                  <p>
+                    <strong>Status:</strong>
+                    {{ "Resolvido" if p.resolvido else "Pendente" }}
+                  </p>
+                  {% if p.resolvido %}
+                    <a href="{{ url_for('exibir_solucao', problem_id=p._id_str) }}">
+                      Ver Solução
+                    </a>
+                  {% else %}
+                    <a href="{{ url_for('resolver_form', problem_id=p._id_str) }}">
+                      Resolver Agora
+                    </a>
+                  {% endif %}
+                </div>
+              {% endfor %}
+              <!-- Link para ver todos os problemas enviados (histórico) -->
+              <a href="{{ url_for('user_history', user_id=user._id) }}" class="rounded-btn">
+                Ver todos
+              </a>
+            {% else %}
+              <p>Você ainda não postou nenhum problema.</p>
+              <a href="{{ url_for('add_problem') }}" class="new-problem-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                  <path
+                    d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
                      0 0 1 0 1h-3v3a.5.5 0 0 1-1
                      0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
                      0 0 1 8 4z"
-                />
-              </svg>
-              Envie o Seu Problema
-            </a>
+                  />
+                </svg>
+                Envie o Seu Problema
+              </a>
+            {% endif %}
+          </div>
+
+          <!-- CONTEÚDO: PROBLEMAS RESOLVIDOS (QUE O USUÁRIO SOLUCIONOU) -->
+          <div id="resolvidosTab" class="tab-content">
+            <h2>Problemas Resolvidos</h2>
+            {% if latest_solved_problems and latest_solved_problems|length > 0 %}
+              {% for p in latest_solved_problems %}
+                <div class="problem-item">
+                  <h3>{{ p.titulo }}</h3>
+                  <p>
+                    Descrição:
+                    {{ p.descricao[:80] }}{{ "..." if p.descricao|length > 80 else "" }}
+                  </p>
+                  <a href="{{ url_for('exibir_solucao', problem_id=p._id_str) }}">
+                    Ver Solução
+                  </a>
+                </div>
+              {% endfor %}
+              <a href="{{ url_for('user_history', user_id=user._id) }}" class="rounded-btn">
+                Ver todos
+              </a>
+            {% else %}
+              <p>Nenhum problema resolvido recentemente.</p>
+              <a href="{{ url_for('unresolved') }}" class="new-problem-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                  <path
+                    d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
+                     0 0 1 0 1h-3v3a.5.5 0 0 1-1
+                     0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
+                     0 0 1 8 4z"
+                  />
+                </svg>
+                Resolver Problemas
+              </a>
+            {% endif %}
+          </div>
           {% endif %}
         </div>
-      </div>
-    </main>
+      </main>
 
-    <!-- FOOTER -->
-    <footer>
-      <p>© 2025 Plataforma M</p>
-    </footer>
+      <!-- FOOTER -->
+      <footer>
+        <p>© 2025 Plataforma M</p>
+      </footer>
 
-    <!-- BARRA INFERIOR (visível apenas em mobile, usando imagens iguais a resultados.html) -->
-    <div class="mobile-bottom-bar">
-      <!-- 1) Resolver (coluna 1/3) -->
-      <a
-        href="{{ url_for('unresolved') }}"
-        class="bottom-bar-btn"
-        title="Resolver Problemas"
-      >
-        <img
-          src="{{ url_for('static', filename='images/resolver_icon.png') }}"
-          alt="Resolver Icon"
-          style="width:30px;height:30px;margin-bottom:0px;"
-        />
-        Resolver
-      </a>
-      <!-- 2) Envie (coluna 2/3) -->
-      <a
-        href="{{ url_for('add_problem') }}"
-        class="bottom-bar-btn"
-        title="Envie seu Problema"
-      >
-        <img
-          src="{{ url_for('static', filename='images/icone_mais.png') }}"
-          alt="Envie"
-          style="width:55px; height:55px;"
-        />
-      </a>
-      <!-- 3) Perfil/Entrar (coluna 3/3) -->
-      {% if not session.get('user_id') %}
+      <!-- BARRA INFERIOR (mobile) -->
+      <div class="mobile-bottom-bar">
+        <!-- Home -->
         <a
-          href="{{ url_for('login') }}"
-          class="bottom-bar-btn"
-          title="Entrar"
+          href="{{ url_for('index') }}"
+          class="bottom-bar-btn{% if request.endpoint == 'index' %} active{% endif %}"
+          title="Página Inicial"
         >
           <img
-            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
-            alt="Perfil Icon"
+            src="{{ url_for('static', filename='images/home_icon.png') }}"
+            alt="Home Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
-          Entrar
+          Home
         </a>
-      {% else %}
+
+        <!-- Resolver -->
         <a
-          href="{{ url_for('perfil') }}"
-          class="bottom-bar-btn"
-          title="Perfil"
+          href="{{ url_for('unresolved') }}"
+          class="bottom-bar-btn{% if request.endpoint == 'unresolved' %} active{% endif %}"
+          title="Resolver Problemas"
         >
           <img
-            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
-            alt="Perfil Icon"
+            src="{{ url_for('static', filename='images/resolver_icon.png') }}"
+            alt="Resolver Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
-          Perfil
+          Resolver
         </a>
-      {% endif %}
-    </div>
-  </div>
-  <!-- /#content -->
 
-  <!-- MODAL Editar Perfil -->
-  <div class="modal" id="editProfileModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Editar Perfil</h2>
-        <span class="close" id="closeModalBtn">&times;</span>
-      </div>
-      <div class="modal-body">
-        <!-- Formulário que envia para /edit_profile -->
-        <form
-          method="POST"
-          action="{{ url_for('edit_profile') }}"
-          enctype="multipart/form-data"
+        <!-- Envie -->
+        <a
+          href="{{ url_for('add_problem') }}"
+          class="bottom-bar-btn{% if request.endpoint == 'add_problem' %} active{% endif %}"
+          title="Envie seu Problema"
         >
-          <div class="form-group">
-            <label for="nome">Nome:</label>
-            <input type="text" name="nome" id="nome" value="{{ user.nome }}">
-          </div>
-          <div class="form-group">
-            <label for="profile_photo">Foto de Perfil:</label>
-            <!-- Label estilizada como botão, input escondido -->
-            <label for="profile_photo" class="custom-file-label"
-              >Escolher Foto</label
-            >
-            <input
-              type="file"
-              name="profile_photo"
-              id="profile_photo"
-              accept="image/*"
+          <img
+            src="{{ url_for('static', filename='images/icone_mais.png') }}"
+            alt="Envie"
+            style="width:30px; height:30px;"
+          />
+          Enviar
+        </a>
+
+        <!-- Perfil ou Entrar (Apenas no Mobile) -->
+        {% if not session.get('user_id') %}
+          <a
+            href="{{ url_for('login') }}"
+            class="bottom-bar-btn{% if request.endpoint in ['login','register'] %} active{% endif %}"
+            title="Entrar"
+          >
+            <img
+              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              alt="Perfil Icon"
+              style="width:30px;height:30px;margin-bottom:0px;"
             />
-          </div>
-
-          <div class="modal-footer">
-            <button type="submit" class="save-btn">Salvar</button>
-          </div>
-        </form>
+            Entrar
+          </a>
+        {% else %}
+          <a
+            href="{{ url_for('perfil') }}"
+            class="bottom-bar-btn perfil-btn{% if request.endpoint == 'perfil' %} active{% endif %}"
+            title="Perfil"
+          >
+            <img
+              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              alt="Perfil Icon"
+              style="width:30px;height:30px;margin-bottom:0px;"
+            />
+            Perfil
+          </a>
+        {% endif %}
       </div>
     </div>
-  </div>
+    <!-- /#content -->
 
-  <!-- SCRIPT INLINE (inclui fade-in, preloader e modal) -->
-  <script>
-    /***************************
-     * PRELOADER + FADE-IN
-     ***************************/
-    window.addEventListener('load', function () {
-      const preloader = document.getElementById('preloader');
-      const content = document.getElementById('content');
-      if (preloader) {
-        preloader.style.display = 'none';
-      }
-      if (content) {
-        content.style.opacity = '1'; // faz o fade-in
-      }
-    });
+    <!-- MODAL Editar Perfil -->
+    <div class="modal" id="editProfileModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Editar Perfil</h2>
+          <span class="close" id="closeModalBtn">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form
+            method="POST"
+            action="{{ url_for('edit_profile') }}"
+            enctype="multipart/form-data"
+          >
+            <!-- Foto e botão de upload -->
+            <div class="form-group" style="text-align: center;">
+              <div id="profilePhotoPreviewContainer" style="margin: 0 auto 1rem auto;">
+                {% if user.profile_image_id %}
+                  <img
+                    id="profilePhotoPreview"
+                    src="{{ url_for('get_user_photo', file_id=user.profile_image_id) }}"
+                    alt="Prévia da Foto de Perfil"
+                    style="max-width: 150px; border-radius: 50%;"
+                  />
+                {% else %}
+                  <img
+                    id="profilePhotoPreview"
+                    src="/static/images/avatar_placeholder.png"
+                    alt="Prévia da Foto de Perfil"
+                    style="max-width: 150px; border-radius: 50%;"
+                  />
+                {% endif %}
+              </div>
+              <label for="profile_photo" class="custom-file-label">Escolher Foto</label>
+              <input
+                type="file"
+                name="profile_photo"
+                id="profile_photo"
+                accept="image/*"
+              />
+            </div>
 
-    /***************************
-     * MODAL EDITAR PERFIL
-     ***************************/
-    const openModalBtn = document.getElementById('openModalBtn');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const editProfileModal = document.getElementById('editProfileModal');
+            <!-- Campo de Nome -->
+            <div class="form-group">
+              <label for="nome">Nome:</label>
+              <input type="text" name="nome" id="nome" value="{{ user.nome }}" />
+            </div>
 
-    if (openModalBtn && closeModalBtn && editProfileModal) {
-      // Abre o modal
-      openModalBtn.addEventListener('click', () => {
-        editProfileModal.style.display = 'flex';
-      });
+            <div class="modal-footer">
+              <button type="submit" class="save-btn">Salvar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
-      // Fecha o modal (botão X)
-      closeModalBtn.addEventListener('click', () => {
-        editProfileModal.style.display = 'none';
-      });
+    <!-- TELA DE CONFIGURAÇÕES (FULLSCREEN) -->
+    <div class="settings-overlay" id="settingsOverlay">
+      <div class="settings-content">
+        <button class="close-settings" id="closeSettingsBtn">X</button>
+        <div class="settings-body">
+          <!-- Conteúdo extra de configurações, se houver -->
+        </div>
+        <div class="settings-footer">
+          <a href="{{ url_for('logout') }}" class="logout-btn">Sair</a>
+        </div>
+      </div>
+    </div>
 
-      // Fecha o modal se o usuário clicar fora do conteúdo (opcional)
-      window.addEventListener('click', (event) => {
-        if (event.target === editProfileModal) {
-          editProfileModal.style.display = 'none';
+    <!-- MODAL DE COMPARTILHAMENTO -->
+    <div class="share-modal-overlay" id="shareModalOverlay">
+      <div class="share-modal-content">
+        <span class="share-modal-close" id="closeShareModalBtn">&times;</span>
+        <h3>Compartilhar Perfil</h3>
+        <p>Selecione onde deseja compartilhar:</p>
+        <!-- Botões WhatsApp e Facebook -->
+        <button class="share-option-btn" id="whatsappShareBtn">
+          <img
+            src="{{ url_for('static', filename='images/whatsapp_icon.png') }}"
+            alt="WhatsApp"
+          />
+          WhatsApp
+        </button>
+        <button class="share-option-btn" id="facebookShareBtn">
+          <img
+            src="{{ url_for('static', filename='images/facebook_icon.png') }}"
+            alt="Facebook"
+          />
+          Facebook
+        </button>
+      </div>
+    </div>
+
+    <!-- SCRIPT INLINE -->
+    <script>
+      // Preloader + Fade-in
+      window.addEventListener('load', function () {
+        const preloader = document.getElementById('preloader');
+        const content = document.getElementById('content');
+        if (preloader) {
+          preloader.style.display = 'none';
+        }
+        if (content) {
+          content.style.opacity = '1';
         }
       });
-    }
-  </script>
-</body>
+
+      // Modal Editar Perfil
+      const openModalBtn = document.getElementById('openModalBtn');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const editProfileModal = document.getElementById('editProfileModal');
+
+      if (openModalBtn && closeModalBtn && editProfileModal) {
+        openModalBtn.addEventListener('click', () => {
+          editProfileModal.style.display = 'flex';
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+          editProfileModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+          if (event.target === editProfileModal) {
+            editProfileModal.style.display = 'none';
+          }
+        });
+      }
+
+      // Tela Configurações
+      const openConfigBtn = document.getElementById('openConfigBtn');
+      const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+      const settingsOverlay = document.getElementById('settingsOverlay');
+
+      if (openConfigBtn && closeSettingsBtn && settingsOverlay) {
+        openConfigBtn.addEventListener('click', () => {
+          settingsOverlay.style.display = 'flex';
+        });
+
+        closeSettingsBtn.addEventListener('click', () => {
+          settingsOverlay.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+          if (event.target === settingsOverlay) {
+            settingsOverlay.style.display = 'none';
+          }
+        });
+      }
+
+      // Tabs estilo Pinterest
+      const tabOptions = document.querySelectorAll('.tab-option');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      tabOptions.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          // Remove 'active' de todos os tabs e conteúdos
+          tabOptions.forEach((t) => t.classList.remove('active'));
+          tabContents.forEach((content) => content.classList.remove('active'));
+
+          // Adiciona 'active' ao tab clicado e exibe seu conteúdo
+          tab.classList.add('active');
+          const tabName = tab.getAttribute('data-tab');
+          document.getElementById(tabName + 'Tab').classList.add('active');
+        });
+      });
+
+      // Preview da foto
+      const profilePhotoInput = document.getElementById('profile_photo');
+      const profilePhotoPreview = document.getElementById('profilePhotoPreview');
+
+      if (profilePhotoInput && profilePhotoPreview) {
+        profilePhotoInput.addEventListener('change', function () {
+          const file = this.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              profilePhotoPreview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+          } else {
+            // Se o usuário cancelar a escolha, volta à foto anterior ou placeholder
+            {% if user.profile_image_id %}
+              profilePhotoPreview.src = "{{ url_for('get_user_photo', file_id=user.profile_image_id) }}";
+            {% else %}
+              profilePhotoPreview.src = "/static/images/avatar_placeholder.png";
+            {% endif %}
+          }
+        });
+      }
+
+      // Lógica de compartilhamento: modal + links
+      const shareProfileBtn = document.getElementById('shareProfileBtn');
+      const shareModalOverlay = document.getElementById('shareModalOverlay');
+      const closeShareModalBtn = document.getElementById('closeShareModalBtn');
+      const whatsappShareBtn = document.getElementById('whatsappShareBtn');
+      const facebookShareBtn = document.getElementById('facebookShareBtn');
+
+      if (shareProfileBtn) {
+        shareProfileBtn.addEventListener('click', async () => {
+          try {
+            // Exibe o modal de opções
+            shareModalOverlay.style.display = 'flex';
+
+            // Obtém os links de compartilhamento via POST
+            const res = await fetch('{{ url_for("get_profile_share_links") }}', {
+              method: 'POST'
+            });
+            if (!res.ok) {
+              alert("Falha ao gerar links de compartilhamento.");
+              return;
+            }
+            const data = await res.json();
+            if (data.error) {
+              alert("Erro: " + data.error);
+              return;
+            }
+
+            // Configura ações dos botões
+            whatsappShareBtn.onclick = () => {
+              window.open(data.whatsapp_url, '_blank');
+            };
+            facebookShareBtn.onclick = () => {
+              window.open(data.facebook_url, '_blank');
+            };
+          } catch (err) {
+            console.error(err);
+            alert("Erro ao gerar links de compartilhamento.");
+          }
+        });
+      }
+
+      if (closeShareModalBtn && shareModalOverlay) {
+        closeShareModalBtn.addEventListener('click', () => {
+          shareModalOverlay.style.display = 'none';
+        });
+        shareModalOverlay.addEventListener('click', (evt) => {
+          if (evt.target === shareModalOverlay) {
+            shareModalOverlay.style.display = 'none';
+          }
+        });
+      }
+    </script>
+  </body>
 </html>

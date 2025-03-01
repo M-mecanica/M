@@ -10,16 +10,17 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
-  <!-- Ícones Material (se desejar) -->
+
+  <!-- Ícones Material -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 
   <!-- Responsividade -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* ------------------------------------------------------
-       RESET BÁSICO E DEFINIÇÕES GERAIS
-    ------------------------------------------------------ */
+    /* ===========================
+       RESET E BASE
+       =========================== */
     * {
       margin: 0;
       padding: 0;
@@ -28,17 +29,17 @@
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      background-color: #f0f0f0;
       color: #333;
+      background-color: #f0f0f0;
+      overflow-x: hidden;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
-      overflow-x: hidden; /* evita scroll horizontal */
     }
 
-    /* ------------------------------------------------------
-       PRELOADER (opcional)
-    ------------------------------------------------------ */
+    /* ===========================
+       PRELOADER
+       =========================== */
     #preloader {
       position: fixed;
       top: 0;
@@ -68,9 +69,6 @@
       }
     }
 
-    /* ------------------------------------------------------
-       CONTEÚDO (para dar fade-in após o preloader)
-    ------------------------------------------------------ */
     #content {
       transition: opacity 0.5s ease;
       display: flex;
@@ -79,9 +77,9 @@
       opacity: 0; /* começa invisível, depois faz fade-in */
     }
 
-    /* ------------------------------------------------------
+    /* ===========================
        HEADER (barra superior fixa)
-    ------------------------------------------------------ */
+       =========================== */
     header {
       background-color: #000;
       display: flex;
@@ -137,8 +135,7 @@
     .header-btn span {
       margin-left: 0.5rem;
     }
-
-    /* Oculta "Perfil" e "Entrar" em telas menores (mostra via mobile-bottom-bar) */
+    /* Esconde Perfil/Entrar no mobile (exibimos só na barra inferior) */
     @media (max-width: 768px) {
       .perfil-btn,
       .entrar-btn {
@@ -146,29 +143,30 @@
       }
     }
 
-    /* ------------------------------------------------------
+    /* ===========================
        MAIN
-    ------------------------------------------------------ */
+       =========================== */
     main {
-      margin-top: 100px; /* espaço para header fixo */
       flex: 1;
-      padding: 2rem 1rem;
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
+      margin-top: 100px; /* espaço para o header fixo */
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 2rem;
     }
     @media (max-width: 768px) {
       main {
         margin-top: 72px;
+        padding: 1rem;
       }
     }
 
-    /* ------------------------------------------------------
+    /* ===========================
        FOOTER
-    ------------------------------------------------------ */
+       =========================== */
     footer {
       background-color: #000;
       text-align: center;
@@ -177,19 +175,19 @@
     footer p {
       font-size: 0.9rem;
       color: #fff;
-      margin: 0;
     }
 
-    /* ------------------------------------------------------
+    /* ===========================
        BARRA INFERIOR (MOBILE)
-    ------------------------------------------------------ */
+       (Mesma estrutura do profil.html, com 4 colunas)
+       =========================== */
     .mobile-bottom-bar {
       display: none; /* por padrão, não mostra no desktop */
     }
     @media (max-width: 768px) {
       .mobile-bottom-bar {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr 1fr; /* 4 colunas */
         background-color: #000;
         width: 100%;
         position: fixed;
@@ -211,45 +209,128 @@
       .mobile-bottom-bar .bottom-bar-btn img {
         margin-bottom: 2px;
       }
+      /* Garante que o main não seja coberto pela barra inferior */
       main {
-        /* Garante que o conteúdo não seja coberto pela barra inferior */
         padding-bottom: 60px;
       }
     }
+    /* Indica o botão ativo na barra inferior */
+    .bottom-bar-btn.active {
+      background-color: #444;
+    }
 
-    /* ------------------------------------------------------
-       ESTILOS ESPECÍFICOS PARA A SEÇÃO DE SOLUÇÃO
-    ------------------------------------------------------ */
-    .container {
-      background-color: #fff;
+    /* ===========================
+       CONTAINERS DE PROBLEMA E SOLUÇÃO
+       =========================== */
+    .problem-container {
+      width: 100%;
+      margin-top: 1rem;
       border: 1px solid #ccc;
       border-radius: 8px;
-      padding: 1.5rem;
-      width: 100%;
-      max-width: 1200px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin: 0 auto;
+      padding: 2rem;
+      background-color: #fff;
+      position: relative;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .container h2 {
-      font-size: 1.25rem;
-      margin-bottom: 0.75rem;
-      color: #000;
+    .creator-info {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 0.5rem;
       text-align: center;
     }
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      color: #000;
+      font-weight: 700;
+      text-align: center;
+    }
+    p.description {
+      margin-bottom: 2rem;
+      color: #555;
+      font-size: 1.2rem;
+      max-width: 1000px;
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* Imagem principal do problema */
+    .problem-image {
+      display: block;
+      margin: 1rem auto;
+      width: 100%;
+      height: auto;
+      max-width: 400px;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    @media (max-width: 768px) {
+      .problem-image {
+        max-width: 100%;
+      }
+    }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 2rem 0;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    /* ===========================
+       CONTAINER DA SOLUÇÃO (FORM DE RESOLVER)
+       =========================== */
+    .solution-container {
+      width: 100%;
+      margin-top: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 2rem;
+      background-color: #fff;
+      position: relative;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .solver-info {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .solution-container h3 {
+      margin-bottom: 1rem;
+      font-size: 1.6rem;
+      color: #000;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* =============================================
+       ESTILOS ESPECÍFICOS DO FORM DE CRIAÇÃO DE PASSOS
+       ============================================= */
     .info-text {
       font-size: 1rem;
       color: #555;
       margin-bottom: 1rem;
       line-height: 1.4;
       text-align: center;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    /* Blocos de Passos e Passos x.x */
+    form {
+      position: relative; /* para posicionar o botão .btn-finish no container */
+      padding-bottom: 4rem; /* espaço para não sobrepor conteúdo */
+    }
+    #stepsContainer {
+      margin-top: 1rem;
+    }
     .step-block {
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
       border-left: 4px solid #888;
       padding-left: 1rem;
       padding-top: 0.75rem;
@@ -257,69 +338,87 @@
       background: #f9f9f9;
       border-radius: 4px;
       position: relative;
-      font-size: 1.1rem;
     }
     .step-block h3 {
       color: #000;
       margin-bottom: 0.5rem;
-      font-size: 1.4rem; /* destaca título "Passo x" */
+      font-size: 1.25rem;
       font-weight: 700;
     }
 
+    .input-step-title {
+      width: 95%;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .textarea-step-description {
+      width: 95%;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: none;
+    }
+
+    /* Subpassos */
     .passo-xx-block {
-      margin-left: 1rem;
+      margin-left: 1.5rem;
       border-left: 3px dashed #ccc;
       padding-left: 1rem;
       margin-top: 1rem;
-      font-size: 1rem;
     }
     .passo-xx-block h4 {
       color: #444;
       margin-bottom: 0.3rem;
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 700;
     }
-
-    /* Inputs e textareas */
-    input[type="text"],
-    textarea {
-      font-family: 'Roboto', sans-serif;
-      background-color: #fff;
-      color: #333;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 0.5rem;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      margin-bottom: 0.75rem;
-      resize: none; /* remove o redimensionamento */
-      width: 100%;
+    .substep-container {
+      margin-bottom: 1rem;
     }
-    input[type="text"]:focus,
-    textarea:focus {
-      border-color: #aaa;
-      box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Tamanhos diferenciados para os campos de título */
-    .input-step-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      width: 95% !important;
+    .substep-container h5 {
+      color: #444;
+      margin-bottom: 0.3rem;
+      font-size: 1rem;
+      font-weight: 700;
     }
     .input-substep-title {
-      font-size: 1.2rem;
-      font-weight: 500;
-      width: 90% !important;
-    }
-    .textarea-step-description,
-    .textarea-substep-description {
+      width: 90%;
+      margin-bottom: 0.4rem;
+      padding: 0.4rem;
       font-size: 1rem;
-      width: 95% !important;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .textarea-substep-description {
+      width: 90%;
+      margin-bottom: 0.4rem;
+      padding: 0.4rem;
+      font-size: 0.95rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: none;
     }
 
-    /* Botões (Adicionar, Remover, etc.) */
-    .btn {
+    /* Área de upload de imagens (botões estilizados) */
+    .upload-area {
+      margin-top: 0.5rem;
+    }
+    .image-label {
+      font-size: 0.9rem;
+      color: #333;
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: 500;
+    }
+    .hidden-file-input {
+      display: none;
+    }
+    .btn-upload {
       background-color: #000;
       color: #fff;
       border: none;
@@ -329,9 +428,38 @@
       font-weight: 500;
       cursor: pointer;
       transition: background-color 0.2s, transform 0.2s;
-      margin-right: 0.5rem;
-      margin-top: 0.5rem;
-      display: inline-block;
+      margin-top: 0.2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
+    }
+    .btn-upload:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+    .file-chosen {
+      margin-left: 0.5rem;
+      font-size: 0.85rem;
+      color: #666;
+      font-style: italic;
+    }
+
+    /* Botões gerais */
+    .btn {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
     }
     .btn:hover {
       background-color: #333;
@@ -339,52 +467,65 @@
     }
     .btn-remove {
       background-color: #f44336;
+      margin-top: 0.5rem;
     }
     .btn-remove:hover {
       background-color: #d32f2f;
     }
+    .btn-substep {
+      margin-top: 0.5rem;
+    }
+
+    /* Botão "Enviar Solução" */
     .btn-finish {
       background-color: #4caf50;
-      margin-top: 1rem;
+      position: absolute;
+      right: 2rem;
+      bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0;
     }
     .btn-finish:hover {
       background-color: #45a049;
     }
 
-    /* ------------------------------------------------------
-       VERSÃO MOBILE (ajustes extras)
-    ------------------------------------------------------ */
+    /* Responsivo */
     @media (max-width: 768px) {
-      .step-block {
-        font-size: 1rem;
-      }
       .step-block h3 {
-        font-size: 1.2rem;
+        font-size: 1.15rem;
       }
-      .input-step-title {
-        font-size: 1.2rem;
+      .input-step-title,
+      .textarea-step-description {
+        font-size: 0.95rem;
       }
-      .input-substep-title {
-        font-size: 1rem;
-      }
-      .textarea-step-description,
+      .input-substep-title,
       .textarea-substep-description {
         font-size: 0.9rem;
+      }
+      .btn {
+        font-size: 0.85rem;
+      }
+      .btn-finish {
+        font-size: 0.9rem;
+        right: 1rem;
+        bottom: 1rem;
       }
     }
   </style>
 </head>
 <body>
-  <!-- PRELOADER (opcional) -->
+  <!-- PRELOADER -->
   <div id="preloader">
     <div class="loader"></div>
   </div>
 
   <!-- CONTEÚDO -->
   <div id="content">
-    <!-- BARRA SUPERIOR FIXA -->
+    <!-- HEADER FIXO -->
     <header>
-      <!-- Botão "Voltar" - CORREÇÃO: ADICIONADO type="button" -->
+      <!-- Botão "Voltar" -->
       <button
         type="button"
         class="header-btn"
@@ -406,8 +547,8 @@
 
       <h1>Resolver Problema</h1>
 
-      <!-- Se NÃO estiver logado, mostra "Entrar" -->
       {% if not session.get('user_id') %}
+        <!-- Se NÃO estiver logado, mostra "Entrar" -->
         <a class="header-btn entrar-btn" href="{{ url_for('login') }}">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -437,36 +578,65 @@
       {% endif %}
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL -->
+    <!-- MAIN -->
     <main>
-      <div class="container">
-        <h2>Criar / Detalhar a Solução</h2>
+      <!-- CONTAINER DO PROBLEMA -->
+      <div class="problem-container">
+        <p class="creator-info">Enviado por: {{ creator_name }}</p>
+        <h2>{{ problem.titulo }}</h2>
+        <p class="description">{{ problem.descricao }}</p>
+
+        {% if problem.problemImage_main %}
+          <img
+            src="{{ url_for('gridfs_image', file_id=problem.problemImage_main) }}"
+            alt="Imagem do Problema"
+            class="problem-image"
+          />
+        {% endif %}
+      </div>
+
+      <hr class="section-divider" />
+
+      <!-- CONTAINER DA SOLUÇÃO (FORMULÁRIO PARA CRIAR PASSOS) -->
+      <div class="solution-container" id="resolverContainer">
+        <p class="solver-info">Você está resolvendo como: {{ solver_name }}</p>
+        <h3>Detalhe a Solução:</h3>
+
         <p class="info-text">
-          Aqui você pode adicionar passos e também detalhar cada passo em
-          <em>Passos x.x</em> (por exemplo, Passo 1.1, Passo 1.2, Passo 2.1, etc.)
-          para compor a solução deste problema. Ao finalizar, clique em
-          <strong>Enviar Solução</strong> para marcar o problema como resolvido.
+          Adicione passos principais (<em>Passo 1, Passo 2</em>, etc.) e subpassos (<em>1.1, 1.2</em>...),
+          inclua descrições e imagens para demonstrar a solução. Ao finalizar, clique em
+          <strong>Enviar Solução</strong>.
         </p>
 
-        <!-- FORM que envia o JSON com a solução -->
+        <!-- FORM que envia o JSON + imagens -->
         <form
           id="solutionForm"
-          action="{{ url_for('resolver_problema', problem_id=problem_id) }}"
+          action="{{ url_for('resolver_problema', problem_id=problem._id) }}"
           method="POST"
+          enctype="multipart/form-data"
         >
-          <!-- Campo hidden que receberá o JSON final -->
           <input type="hidden" name="solution_data" id="solution_data" value="" />
 
-          <!-- Container dos passos -->
           <div id="stepsContainer"></div>
 
           <!-- Botão para adicionar passo -->
-          <button type="button" class="btn" id="btnAddStep">
+          <button
+            type="button"
+            class="btn"
+            id="btnAddStep"
+            style="margin-top: 1rem;"
+          >
+            <span class="material-icons">add</span>
             Adicionar Passo
           </button>
 
           <!-- Botão de Enviar Solução -->
-          <button type="submit" class="btn btn-finish" id="btnSubmitSolution">
+          <button
+            type="submit"
+            class="btn btn-finish"
+            id="btnSubmitSolution"
+          >
+            <span class="material-icons">send</span>
             Enviar Solução
           </button>
         </form>
@@ -478,10 +648,28 @@
       <p>© 2025 Plataforma M - MVP</p>
     </footer>
 
-    <!-- BARRA INFERIOR (MOBILE) -->
+    <!-- BARRA INFERIOR (aparece no mobile, igual à do profil.html) -->
     <div class="mobile-bottom-bar">
-      <!-- 1) Resolver -->
-      <a href="{{ url_for('unresolved') }}" class="bottom-bar-btn" title="Resolver Problemas">
+      <!-- Home -->
+      <a
+        href="{{ url_for('index') }}"
+        class="bottom-bar-btn"
+        title="Página Inicial"
+      >
+        <img
+          src="{{ url_for('static', filename='images/home_icon.png') }}"
+          alt="Home Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
+        Home
+      </a>
+
+      <!-- Resolver (ATIVO) -->
+      <a
+        href="{{ url_for('unresolved') }}"
+        class="bottom-bar-btn active"
+        title="Resolver Problemas"
+      >
         <img
           src="{{ url_for('static', filename='images/resolver_icon.png') }}"
           alt="Resolver Icon"
@@ -489,17 +677,28 @@
         />
         Resolver
       </a>
-      <!-- 2) Adicionar problema -->
-      <a href="{{ url_for('add_problem') }}" class="bottom-bar-btn" title="Envie seu Problema">
+
+      <!-- Envie -->
+      <a
+        href="{{ url_for('add_problem') }}"
+        class="bottom-bar-btn"
+        title="Envie seu Problema"
+      >
         <img
           src="{{ url_for('static', filename='images/icone_mais.png') }}"
           alt="Envie"
-          style="width:55px; height:55px;"
+          style="width:30px; height:30px;"
         />
+        Enviar
       </a>
-      <!-- 3) Perfil/Entrar -->
+
+      <!-- Perfil/Entrar -->
       {% if not session.get('user_id') %}
-        <a href="{{ url_for('login') }}" class="bottom-bar-btn" title="Entrar">
+        <a
+          href="{{ url_for('login') }}"
+          class="bottom-bar-btn"
+          title="Entrar"
+        >
           <img
             src="{{ url_for('static', filename='images/perfil_icon.png') }}"
             alt="Perfil Icon"
@@ -508,7 +707,11 @@
           Entrar
         </a>
       {% else %}
-        <a href="{{ url_for('perfil') }}" class="bottom-bar-btn" title="Perfil">
+        <a
+          href="{{ url_for('perfil') }}"
+          class="bottom-bar-btn"
+          title="Perfil"
+        >
           <img
             src="{{ url_for('static', filename='images/perfil_icon.png') }}"
             alt="Perfil Icon"
@@ -536,20 +739,20 @@
     });
 
     // --------------------------------------
-    // Botão "Voltar" -> direciona para /unresolved
+    // Botão "Voltar" -> direciona para /unresolved (ou personalizar)
     // --------------------------------------
     document.addEventListener('DOMContentLoaded', function() {
       const btnVoltar = document.getElementById('btnVoltar');
       if (btnVoltar) {
         btnVoltar.addEventListener('click', function() {
-          // Direciona SEMPRE para a rota /unresolved (que renderiza nao_resolvidos.html)
+          // Por exemplo, ir sempre para a rota "unresolved"
           window.location.href = "{{ url_for('unresolved') }}";
         });
       }
     });
 
     // --------------------------------------
-    // Lógica do formulário de solução
+    // Lógica do formulário de solução (passos)
     // --------------------------------------
     let solutionData = {
       steps: []
@@ -567,12 +770,12 @@
         const stepBlock = document.createElement('div');
         stepBlock.className = 'step-block';
 
-        // Título do passo principal
-        const stepTitleEl = document.createElement('h3');
-        stepTitleEl.textContent = `Passo ${stepIndex + 1}`;
-        stepBlock.appendChild(stepTitleEl);
+        // Título do passo
+        const stepTitleHeading = document.createElement('h3');
+        stepTitleHeading.textContent = `Passo ${stepIndex + 1}`;
+        stepBlock.appendChild(stepTitleHeading);
 
-        // Input do título do passo
+        // Input título do passo
         const stepTitleInput = document.createElement('input');
         stepTitleInput.type = 'text';
         stepTitleInput.className = 'input-step-title';
@@ -583,9 +786,9 @@
         };
         stepBlock.appendChild(stepTitleInput);
 
-        // Textarea descrição do passo
+        // Textarea descrição
         const stepDesc = document.createElement('textarea');
-        stepDesc.rows = 6;
+        stepDesc.rows = 4;
         stepDesc.className = 'textarea-step-description';
         stepDesc.placeholder = 'Descrição detalhada do passo...';
         stepDesc.value = step.stepDescription || '';
@@ -593,6 +796,46 @@
           solutionData.steps[stepIndex].stepDescription = stepDesc.value;
         };
         stepBlock.appendChild(stepDesc);
+
+        // Upload de imagem do passo
+        const uploadArea = document.createElement('div');
+        uploadArea.className = 'upload-area';
+
+        const labelStepImage = document.createElement('label');
+        labelStepImage.className = 'image-label';
+        labelStepImage.textContent = 'Imagem do Passo (opcional):';
+        uploadArea.appendChild(labelStepImage);
+
+        const fileInputStep = document.createElement('input');
+        fileInputStep.type = 'file';
+        fileInputStep.name = `stepImage_${stepIndex}`;
+        fileInputStep.accept = 'image/*';
+        fileInputStep.className = 'hidden-file-input';
+        fileInputStep.id = `fileInputStep_${stepIndex}`;
+        uploadArea.appendChild(fileInputStep);
+
+        const btnUploadStep = document.createElement('label');
+        btnUploadStep.className = 'btn-upload';
+        btnUploadStep.setAttribute('for', `fileInputStep_${stepIndex}`);
+        btnUploadStep.innerHTML = `
+          <span class="material-icons">image</span>
+          Selecionar Imagem
+        `;
+        uploadArea.appendChild(btnUploadStep);
+
+        const fileChosenSpanStep = document.createElement('span');
+        fileChosenSpanStep.className = 'file-chosen';
+        uploadArea.appendChild(fileChosenSpanStep);
+
+        fileInputStep.addEventListener('change', (e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            fileChosenSpanStep.textContent = e.target.files[0].name;
+          } else {
+            fileChosenSpanStep.textContent = '';
+          }
+        });
+
+        stepBlock.appendChild(uploadArea);
 
         // Botão remover passo
         const btnRemoveStep = document.createElement('button');
@@ -605,26 +848,23 @@
         };
         stepBlock.appendChild(btnRemoveStep);
 
-        // Container para Passos x.x
+        // Subpassos
         const subPassosWrapper = document.createElement('div');
         subPassosWrapper.classList.add('passo-xx-block');
 
-        // Título do bloco (ex.: "Passos do Passo 1")
         const subTitleEl = document.createElement('h4');
-        subTitleEl.textContent = `Passos do Passo ${stepIndex + 1}`;
+        subTitleEl.textContent = `Subpassos do Passo ${stepIndex + 1}`;
         subPassosWrapper.appendChild(subTitleEl);
 
         step.miniSteps.forEach((sub, subIndex) => {
           const subDiv = document.createElement('div');
-          subDiv.style.marginBottom = '1rem';
+          subDiv.className = 'substep-container';
 
-          // Exibir "Passo X.Y"
           const subStepNumberEl = document.createElement('h5');
           subStepNumberEl.textContent = `Passo ${stepIndex + 1}.${subIndex + 1}`;
-          subStepNumberEl.style.marginBottom = '0.5rem';
           subDiv.appendChild(subStepNumberEl);
 
-          // Título do Passo x.x
+          // Título do subpasso
           const subTitulo = document.createElement('input');
           subTitulo.type = 'text';
           subTitulo.className = 'input-substep-title';
@@ -635,9 +875,9 @@
           };
           subDiv.appendChild(subTitulo);
 
-          // Descrição do Passo x.x
+          // Descrição do subpasso
           const subDesc = document.createElement('textarea');
-          subDesc.rows = 4;
+          subDesc.rows = 3;
           subDesc.className = 'textarea-substep-description';
           subDesc.placeholder = `Descrição do Passo ${stepIndex + 1}.${subIndex + 1}...`;
           subDesc.value = sub.miniStepDescription || '';
@@ -646,10 +886,50 @@
           };
           subDiv.appendChild(subDesc);
 
-          // Botão remover Passo x.x
+          // Upload de imagem do subpasso
+          const uploadAreaSub = document.createElement('div');
+          uploadAreaSub.className = 'upload-area';
+
+          const labelSubImage = document.createElement('label');
+          labelSubImage.className = 'image-label';
+          labelSubImage.textContent = 'Imagem do Subpasso (opcional):';
+          uploadAreaSub.appendChild(labelSubImage);
+
+          const fileInputSub = document.createElement('input');
+          fileInputSub.type = 'file';
+          fileInputSub.name = `subStepImage_${stepIndex}_${subIndex}`;
+          fileInputSub.accept = 'image/*';
+          fileInputSub.className = 'hidden-file-input';
+          fileInputSub.id = `fileInputSub_${stepIndex}_${subIndex}`;
+          uploadAreaSub.appendChild(fileInputSub);
+
+          const btnUploadSub = document.createElement('label');
+          btnUploadSub.className = 'btn-upload';
+          btnUploadSub.setAttribute('for', `fileInputSub_${stepIndex}_${subIndex}`);
+          btnUploadSub.innerHTML = `
+            <span class="material-icons">image</span>
+            Selecionar Imagem
+          `;
+          uploadAreaSub.appendChild(btnUploadSub);
+
+          const fileChosenSpanSub = document.createElement('span');
+          fileChosenSpanSub.className = 'file-chosen';
+          uploadAreaSub.appendChild(fileChosenSpanSub);
+
+          fileInputSub.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+              fileChosenSpanSub.textContent = e.target.files[0].name;
+            } else {
+              fileChosenSpanSub.textContent = '';
+            }
+          });
+
+          subDiv.appendChild(uploadAreaSub);
+
+          // Botão remover subpasso
           const btnRemoveSub = document.createElement('button');
           btnRemoveSub.type = 'button';
-          btnRemoveSub.textContent = `Remover Passo ${stepIndex + 1}.${subIndex + 1}`;
+          btnRemoveSub.textContent = `Remover ${stepIndex + 1}.${subIndex + 1}`;
           btnRemoveSub.className = 'btn btn-remove';
           btnRemoveSub.style.marginLeft = '8px';
           btnRemoveSub.onclick = () => {
@@ -661,11 +941,11 @@
           subPassosWrapper.appendChild(subDiv);
         });
 
-        // Botão para adicionar um novo Passo x.x
+        // Botão para adicionar novo subpasso
         const btnAddSub = document.createElement('button');
         btnAddSub.type = 'button';
-        btnAddSub.className = 'btn';
-        btnAddSub.textContent = `Adicionar Passo ${stepIndex + 1}.${step.miniSteps.length + 1}`;
+        btnAddSub.className = 'btn btn-substep';
+        btnAddSub.textContent = `+ Subpasso ${stepIndex + 1}.${step.miniSteps.length + 1}`;
         btnAddSub.onclick = () => {
           solutionData.steps[stepIndex].miniSteps.push({
             miniStepTitle: '',
@@ -680,7 +960,7 @@
       });
     }
 
-    // Botão para adicionar um passo principal vazio
+    // Adicionar passo
     btnAddStep.addEventListener('click', () => {
       solutionData.steps.push({
         stepTitle: '',
@@ -690,7 +970,7 @@
       renderSteps();
     });
 
-    // Ao submeter, checa se há passos
+    // Antes de enviar, coloca o JSON dos passos no campo hidden
     form.addEventListener('submit', function(e) {
       if (!solutionData.steps || solutionData.steps.length === 0) {
         e.preventDefault();

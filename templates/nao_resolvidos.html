@@ -141,6 +141,12 @@
           display: none !important;
         }
       }
+      /* Oculta o botão de voltar em dispositivos móveis */
+      @media (max-width: 768px) {
+        #btnVoltar {
+          display: none !important;
+        }
+      }
 
       /* MAIN: espaçamento para não ficar embaixo do header fixo */
       main {
@@ -178,7 +184,8 @@
       @media (max-width: 768px) {
         .mobile-bottom-bar {
           display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
+          /* Agora com 4 colunas para incluir o botão Home */
+          grid-template-columns: 1fr 1fr 1fr 1fr;
           background-color: #000;
           width: 100%;
           position: fixed;
@@ -200,6 +207,13 @@
         .mobile-bottom-bar .bottom-bar-btn img {
           margin-bottom: 2px;
         }
+        main {
+          padding-bottom: 60px;
+        }
+      }
+      /* Classe para indicar o botão ativo no mobile */
+      .bottom-bar-btn.active {
+        background-color: #444;
       }
 
       /* Lista de problemas */
@@ -358,7 +372,7 @@
     <div id="content">
       <!-- Barra superior fixa -->
       <header>
-        <!-- Botão "Voltar" - CORREÇÃO: ADICIONADO type="button" -->
+        <!-- Botão "Voltar" - visível apenas em telas maiores -->
         <button type="button" class="header-btn" id="btnVoltar" aria-label="Voltar">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path
@@ -372,7 +386,7 @@
           </svg>
         </button>
 
-        <h1>Problemas Não Resolvidos</h1>
+        <h1>Resolver Problemas</h1>
 
         <!-- Se NÃO estiver logado, mostra "Entrar" -->
         {% if not session.get('user_id') %}
@@ -400,7 +414,6 @@
       </header>
 
       <main>
-        <!-- Exibe a lista de problemas ou mensagem de "nenhum problema" -->
         {% if problemas and problemas|length > 0 %}
           <div class="result-container">
             {% for problema in problemas %}
@@ -408,7 +421,6 @@
                 <h2>{{ problema["titulo"] }}</h2>
                 <p>{{ problema["descricao"] }}</p>
 
-                <!-- Exibe thumbnail se existir -->
                 {% if problema.problemImage_thumb %}
                   <div class="problem-image-container">
                     <img
@@ -419,10 +431,8 @@
                   </div>
                 {% endif %}
 
-                <!-- Criador -->
                 <p>Enviado por: {{ problema["creator_name"] }}</p>
 
-                <!-- Formulário para resolver -->
                 <form
                   action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}"
                   method="GET"
@@ -479,8 +489,26 @@
 
       <!-- Barra inferior (mobile) -->
       <div class="mobile-bottom-bar">
-        <!-- 1) Resolver (coluna 1/3) -->
-        <a href="{{ url_for('unresolved') }}" class="bottom-bar-btn" title="Resolver Problemas">
+        <!-- Home (novo botão) -->
+        <a
+          href="{{ url_for('index') }}"
+          class="bottom-bar-btn{% if request.endpoint == 'index' %} active{% endif %}"
+          title="Página Inicial"
+        >
+          <img
+            src="{{ url_for('static', filename='images/home_icon.png') }}"
+            alt="Home Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Home
+        </a>
+
+        <!-- Resolver -->
+        <a
+          href="{{ url_for('unresolved') }}"
+          class="bottom-bar-btn{% if request.endpoint == 'unresolved' %} active{% endif %}"
+          title="Resolver Problemas"
+        >
           <img
             src="{{ url_for('static', filename='images/resolver_icon.png') }}"
             alt="Resolver Icon"
@@ -488,17 +516,28 @@
           />
           Resolver
         </a>
-        <!-- 2) Envie (coluna 2/3) -->
-        <a href="{{ url_for('add_problem') }}" class="bottom-bar-btn" title="Envie seu Problema">
+
+        <!-- Envie -->
+        <a
+          href="{{ url_for('add_problem') }}"
+          class="bottom-bar-btn{% if request.endpoint == 'add_problem' %} active{% endif %}"
+          title="Envie seu Problema"
+        >
           <img
             src="{{ url_for('static', filename='images/icone_mais.png') }}"
             alt="Envie"
-            style="width:55px; height:55px;"
+            style="width:30px; height:30px;"
           />
+          Enviar
         </a>
-        <!-- 3) Perfil/Entrar (coluna 3/3) -->
+
+        <!-- Perfil ou Entrar -->
         {% if not session.get('user_id') %}
-          <a href="{{ url_for('login') }}" class="bottom-bar-btn" title="Entrar">
+          <a
+            href="{{ url_for('login') }}"
+            class="bottom-bar-btn{% if request.endpoint in ['login','register'] %} active{% endif %}"
+            title="Entrar"
+          >
             <img
               src="{{ url_for('static', filename='images/perfil_icon.png') }}"
               alt="Perfil Icon"
@@ -507,7 +546,11 @@
             Entrar
           </a>
         {% else %}
-          <a href="{{ url_for('perfil') }}" class="bottom-bar-btn" title="Perfil">
+          <a
+            href="{{ url_for('perfil') }}"
+            class="bottom-bar-btn{% if request.endpoint == 'perfil' %} active{% endif %}"
+            title="Perfil"
+          >
             <img
               src="{{ url_for('static', filename='images/perfil_icon.png') }}"
               alt="Perfil Icon"

@@ -10,8 +10,10 @@
     rel="stylesheet"
   />
   <!-- Ícones Material -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+  />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -23,7 +25,7 @@
     }
     body {
       font-family: 'Roboto', sans-serif;
-      font-size: 1rem;
+      font-size: 1rem; /* Mesmo tamanho base de resultados.html */
       color: #333;
       background-color: #f0f0f0; /* Fundo neutro */
       overflow-x: hidden;
@@ -32,7 +34,7 @@
       flex-direction: column;
     }
 
-    /* Preloader (mesmo estilo da página de resultados) */
+    /* Preloader */
     #preloader {
       position: fixed;
       top: 0;
@@ -71,7 +73,7 @@
       opacity: 0; /* começa invisível, depois faz fade-in */
     }
 
-    /* HEADER (mesmo estilo da página de resultados) */
+    /* HEADER */
     header {
       background-color: #000;
       display: flex;
@@ -129,7 +131,7 @@
     }
 
     /*
-      Oculta o botão "Perfil" E o botão "Entrar" do header em telas menores
+      Oculta o botão "Perfil" e o botão "Entrar" do header em telas menores
       que 768px. Dessa forma, apenas a barra inferior mostrará essas opções
       no mobile.
     */
@@ -151,15 +153,18 @@
       flex-direction: column;
       align-items: center;
       padding: 2rem;
+      /* Igual ao resultados.html: define um tamanho base ligeiramente maior */
+      font-size: 1.25rem;
     }
     @media (max-width: 768px) {
       main {
         margin-top: 72px;
         padding: 1rem;
+        font-size: 1rem; /* Ajusta para ficar igual ao mobile de resultados.html */
       }
     }
 
-    /* FOOTER (mesmo estilo) */
+    /* FOOTER */
     footer {
       background-color: #000;
       text-align: center;
@@ -170,14 +175,14 @@
       color: #fff;
     }
 
-    /* BARRA INFERIOR (visível apenas em mobile) */
+    /* Barra inferior (mobile) */
     .mobile-bottom-bar {
-      display: none; /* por padrão, não mostra */
+      display: none; /* por padrão, não mostra no desktop */
     }
     @media (max-width: 768px) {
       .mobile-bottom-bar {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
         background-color: #000;
         width: 100%;
         position: fixed;
@@ -187,29 +192,29 @@
         z-index: 9999;
       }
       .mobile-bottom-bar .bottom-bar-btn {
+        text-align: center;
         color: #fff;
         text-decoration: none;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
         font-size: 0.8rem;
+        justify-content: center;
       }
-      .mobile-bottom-bar .bottom-bar-btn svg {
-        width: 20px;
-        height: 20px;
-        fill: #fff;
+      .mobile-bottom-bar .bottom-bar-btn img {
         margin-bottom: 2px;
       }
-      /* Garante que o main não seja coberto pela barra inferior */
       main {
+        /* Garante que o conteúdo não seja coberto pela barra inferior */
         padding-bottom: 60px;
       }
+    }
+    .bottom-bar-btn.active {
+      background-color: #444;
     }
 
     /* === Estilos específicos da página de solução === */
 
-    /* Div opcional de fundo fixo (caso queira usar a imagem de fundo) */
     .fixed-bg {
       position: fixed;
       top: 0;
@@ -222,6 +227,7 @@
       z-index: -1;
     }
 
+    /* Container do problema */
     .problem-container {
       width: 100%;
       margin-top: 1rem;
@@ -232,47 +238,73 @@
       position: relative;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .creator-info,
-    .solver-info {
-      font-size: 1.1rem;
-      font-weight: 500;
-      color: #555;
+    /* Criador, Solver, etc. - sem forçar font-size, herda do main */
+    .creator-container,
+    .solver-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center; /* Centraliza verticalmente */
+      justify-content: flex-start;
       margin-bottom: 0.5rem;
-      text-align: center;
     }
-    h2 {
-      font-size: 1.8rem;
+    .profile-pic {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 0.4rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    .creator-link,
+    .solver-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+    }
+    .creator-link:hover,
+    .solver-link:hover {
+      opacity: 0.85;
+    }
+
+    /* Título e descrição do problema */
+    .problem-container h2 {
+      font-size: 1.4rem; /* Mesmo que .problem-item h2 do resultados.html */
       margin-bottom: 0.5rem;
       color: #000;
-      font-weight: 700;
       text-align: center;
     }
-    p.description {
-      margin-bottom: 2rem;
+    .problem-container p.description {
       color: #555;
-      font-size: 1.2rem;
-      max-width: 1000px;
+      margin-bottom: 0.5rem;
       text-align: center;
+      /* Deixa a fonte herdar do main (1.25rem desktop / 1rem mobile) */
+      /* Se quiser limitar largura, pode usar max-width, mas não altera a fonte */
+      max-width: 1000px;
       margin-left: auto;
       margin-right: auto;
+      margin-bottom: 2rem;
     }
-    /* Ajuste de imagem para caber corretamente em mobile */
+    @media (max-width: 768px) {
+      .problem-container h2 {
+        font-size: 1.2rem; /* Ajuste mobile igual ao .problem-item h2 do resultados.html */
+      }
+    }
+
+    /* Imagem do problema */
     .problem-image {
       display: block;
       margin: 1rem auto;
-      width: 100%;
+      width: auto;
       height: auto;
       max-width: 400px;
+      max-height: 300px;
       object-fit: contain;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
-    @media (max-width: 768px) {
-      .problem-image {
-        max-width: 100%;
-      }
-    }
 
+    /* Botão de compartilhamento via WhatsApp */
     .whatsapp-share-btn {
       background-color: #000;
       color: #fff;
@@ -299,6 +331,7 @@
       height: 20px;
     }
 
+    /* Divider */
     .section-divider {
       border: none;
       border-top: 1px solid #ccc;
@@ -307,6 +340,7 @@
       max-width: 1100px;
     }
 
+    /* Container da solução */
     .solution-container {
       width: 100%;
       margin-top: 1rem;
@@ -317,17 +351,20 @@
       position: relative;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .solver-info {
-      text-align: center;
-    }
     .solution-container h3 {
+      font-size: 1.4rem; /* Acompanhando o padrão do título anterior */
       margin-bottom: 1rem;
-      font-size: 1.6rem;
       color: #000;
       font-weight: 700;
       text-align: center;
     }
+    @media (max-width: 768px) {
+      .solution-container h3 {
+        font-size: 1.2rem;
+      }
+    }
 
+    /* Botão para mostrar passos (usuário comum) */
     .show-solution-btn {
       background-color: #000;
       color: #fff;
@@ -347,6 +384,7 @@
       transform: scale(1.02);
     }
 
+    /* Barra de progresso */
     .progress-container {
       position: relative;
       width: 100%;
@@ -371,12 +409,13 @@
       margin-bottom: 1rem;
     }
 
+    /* Onde os passos serão exibidos */
     .steps-output {
       margin-top: 2rem;
       line-height: 1.7;
       white-space: pre-wrap;
       font-family: 'Courier New', monospace;
-      font-size: 1.05rem;
+      font-size: 1rem; /* Pode herdar ou definir levemente menor para destaque de código */
       margin-bottom: 2.5rem;
       min-height: 80px;
       color: #333;
@@ -384,6 +423,8 @@
       margin-left: auto;
       margin-right: auto;
     }
+
+    /* Bloco de passo principal */
     .step-container {
       margin-bottom: 2rem;
       padding: 1rem 1rem 2rem;
@@ -396,13 +437,12 @@
       position: relative;
     }
     .step-title-block {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       color: #000;
       margin-bottom: 0.8rem;
       font-weight: bold;
     }
     .step-description-block {
-      font-size: 1.2rem;
       color: #444;
       margin-bottom: 1rem;
       white-space: pre-wrap;
@@ -429,6 +469,7 @@
       opacity: 0.8;
     }
 
+    /* Subpassos */
     .mini-steps-block {
       margin-left: 1rem;
       margin-top: 1rem;
@@ -440,14 +481,14 @@
       display: none;
     }
     .mini-step-title {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       color: #333;
       font-weight: bold;
       margin-bottom: 0.3rem;
       display: block;
     }
     .mini-step-description {
-      font-size: 1.05rem;
+      font-size: 1rem;
       color: #555;
       white-space: pre-wrap;
       margin-bottom: 0.5rem;
@@ -485,6 +526,7 @@
       transform: scale(1.02);
     }
 
+    /* Botões de feedback (Consegui / Não consegui) */
     .feedback-buttons {
       display: flex;
       gap: 1rem;
@@ -551,6 +593,7 @@
       margin-top: 0.5rem;
     }
 
+    /* Feedback de "Esta solução ajudou?" */
     .feedback-container {
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -592,6 +635,7 @@
       color: #fff;
     }
 
+    /* Modal de sugestão de melhorias */
     .modal {
       display: none;
       position: fixed;
@@ -730,11 +774,47 @@
     <main>
       <!-- Container do problema -->
       <div class="problem-container">
-        <p class="creator-info">Enviado por: {{ creator_name }}</p>
+        <!-- Enviado por (mesmo padrão da página de resultados) -->
+        <div class="creator-container">
+          {% if creator_id %}
+            <a href="{{ url_for('ver_usuario', user_id=creator_id) }}" class="creator-link">
+              {% if creator_profile_image_id %}
+                <img
+                  src="{{ url_for('get_user_photo', file_id=creator_profile_image_id) }}"
+                  alt="Foto de perfil do criador"
+                  class="profile-pic"
+                />
+              {% else %}
+                <img
+                  src="{{ url_for('static', filename='images/avatar_placeholder.png') }}"
+                  alt="Foto de perfil padrão"
+                  class="profile-pic"
+                />
+              {% endif %}
+              <p><strong>Enviado por:</strong> {{ creator_name }}</p>
+            </a>
+          {% else %}
+            {% if creator_profile_image_id %}
+              <img
+                src="{{ url_for('get_user_photo', file_id=creator_profile_image_id) }}"
+                alt="Foto de perfil do criador"
+                class="profile-pic"
+              />
+              <p><strong>Enviado por:</strong> {{ creator_name }}</p>
+            {% else %}
+              <img
+                src="{{ url_for('static', filename='images/avatar_placeholder.png') }}"
+                alt="Foto de perfil padrão"
+                class="profile-pic"
+              />
+              <p><strong>Enviado por:</strong> {{ creator_name }}</p>
+            {% endif %}
+          {% endif %}
+        </div>
+
         <h2>{{ problema["titulo"] }}</h2>
         <p class="description">{{ problema["descricao"] }}</p>
 
-        {# Caso queira exibir a imagem principal (comprimida) #}
         {% if problema.problemImage_main %}
           <img
             src="{{ url_for('gridfs_image', file_id=problema.problemImage_main) }}"
@@ -802,8 +882,45 @@
         data-steps='{{ solucao.get("steps", [])|tojson }}'
         data-problem-id="{{ problema['_id'] }}"
       >
-        <p class="solver-info">Resolvido por: {{ solver_name }}</p>
-        <h3>Solução:</h3>
+        <!-- "Resolvido por:" fica aqui, acima do título da solução -->
+        <div class="solver-container">
+          {% if solver_id %}
+            <a href="{{ url_for('ver_usuario', user_id=solver_id) }}" class="solver-link">
+              {% if solver_profile_image_id %}
+                <img
+                  src="{{ url_for('get_user_photo', file_id=solver_profile_image_id) }}"
+                  alt="Foto de perfil do solucionador"
+                  class="profile-pic"
+                />
+              {% else %}
+                <img
+                  src="{{ url_for('static', filename='images/avatar_placeholder.png') }}"
+                  alt="Foto de perfil padrão"
+                  class="profile-pic"
+                />
+              {% endif %}
+              <p><strong>Resolvido por:</strong> {{ solver_name }}</p>
+            </a>
+          {% else %}
+            {% if solver_profile_image_id %}
+              <img
+                src="{{ url_for('get_user_photo', file_id=solver_profile_image_id) }}"
+                alt="Foto de perfil do solucionador"
+                class="profile-pic"
+              />
+              <p><strong>Resolvido por:</strong> {{ solver_name }}</p>
+            {% else %}
+              <img
+                src="{{ url_for('static', filename='images/avatar_placeholder.png') }}"
+                alt="Foto de perfil padrão"
+                class="profile-pic"
+              />
+              <p><strong>Resolvido por:</strong> {{ solver_name }}</p>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        <h3>Solução Completa:</h3>
 
         <!-- Apenas aparece se o usuário NÃO for solucionador -->
         <button
@@ -852,7 +969,7 @@
         </div>
       {% endif %}
 
-      <!-- Container para feedback da solução -->
+      <!-- Container para feedback da solução (like/dislike) -->
       <div class="feedback-container">
         <div class="helpful-question">
           <p>Essa solução te ajudou?</p>
@@ -919,10 +1036,28 @@
       <p>© 2025 Plataforma M - MVP</p>
     </footer>
 
-    <!-- BARRA INFERIOR (visível apenas em mobile), IGUAL À DA PÁGINA INDEX -->
+    <!-- Barra inferior (mobile) -->
     <div class="mobile-bottom-bar">
-      <!-- 1) Resolver (coluna 1/3) -->
-      <a href="{{ url_for('unresolved') }}" class="bottom-bar-btn" title="Resolver Problemas">
+      <!-- Home (novo botão) -->
+      <a
+        href="{{ url_for('index') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'index' or request.endpoint == 'solucao' %} active{% endif %}"
+        title="Página Inicial"
+      >
+        <img
+          src="{{ url_for('static', filename='images/home_icon.png') }}"
+          alt="Home Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
+        Home
+      </a>
+
+      <!-- Resolver -->
+      <a
+        href="{{ url_for('unresolved') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'unresolved' %} active{% endif %}"
+        title="Resolver Problemas"
+      >
         <img
           src="{{ url_for('static', filename='images/resolver_icon.png') }}"
           alt="Resolver Icon"
@@ -930,33 +1065,48 @@
         />
         Resolver
       </a>
-      <!-- 2) Envie (coluna 2/3) -->
-      <a href="{{ url_for('add_problem') }}" class="bottom-bar-btn" title="Envie seu Problema">
+
+      <!-- Envie -->
+      <a
+        href="{{ url_for('add_problem') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'add_problem' %} active{% endif %}"
+        title="Envie seu Problema"
+      >
         <img
           src="{{ url_for('static', filename='images/icone_mais.png') }}"
           alt="Envie"
-          style="width:55px; height:55px;"
+          style="width:30px; height:30px;"
         />
+        Enviar
       </a>
-      <!-- 3) Perfil/Entrar (coluna 3/3) -->
+
+      <!-- Perfil ou Entrar -->
       {% if not session.get('user_id') %}
-      <a href="{{ url_for('login') }}" class="bottom-bar-btn" title="Entrar">
-        <img
-          src="{{ url_for('static', filename='images/perfil_icon.png') }}"
-          alt="Perfil Icon"
-          style="width:30px;height:30px;margin-bottom:0px;"
-        />
-        Entrar
-      </a>
+        <a
+          href="{{ url_for('login') }}"
+          class="bottom-bar-btn{% if request.endpoint in ['login','register'] %} active{% endif %}"
+          title="Entrar"
+        >
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Entrar
+        </a>
       {% else %}
-      <a href="{{ url_for('perfil') }}" class="bottom-bar-btn" title="Perfil">
-        <img
-          src="{{ url_for('static', filename='images/perfil_icon.png') }}"
-          alt="Perfil Icon"
-          style="width:30px;height:30px;margin-bottom:0px;"
-        />
-        Perfil
-      </a>
+        <a
+          href="{{ url_for('perfil') }}"
+          class="bottom-bar-btn{% if request.endpoint == 'perfil' %} active{% endif %}"
+          title="Perfil"
+        >
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Perfil
+        </a>
       {% endif %}
     </div>
   </div>
@@ -995,7 +1145,7 @@
       descBlock.textContent = stepData.stepDescription;
       stepDiv.appendChild(descBlock);
 
-      // Exibe stepImage_main (ou outro campo de imagem, conforme necessidade)
+      // Exibe stepImage (se existir)
       if (stepData.stepImage && stepData.stepImage.trim() !== "") {
         const imageContainer = document.createElement('div');
         imageContainer.classList.add('step-image-block');
@@ -1025,7 +1175,6 @@
           subDesc.textContent = sub.miniStepDescription;
           miniStepContainer.appendChild(subDesc);
 
-          // Exibe subStepImage_main (ou subStepImage_thumb), se preferir
           if (sub.subStepImage && sub.subStepImage.trim() !== "") {
             const subImgContainer = document.createElement('div');
             subImgContainer.classList.add('mini-step-image-block');
@@ -1325,7 +1474,7 @@
 
       if (btnVoltar) {
         btnVoltar.addEventListener('click', function() {
-          // Se veio de edit_solution, força ir para resultados
+          // Se veio de edit_solution, força ir para resultados ou qualquer lógica que desejar
           if (ref.includes('/edit_solution')) {
             window.location.href = "{{ url_for('search') }}";
           }

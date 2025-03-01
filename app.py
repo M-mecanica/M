@@ -1,3 +1,4 @@
+# app.py
 import os
 import json
 import re
@@ -5,7 +6,7 @@ import unicodedata
 import datetime
 import random
 import secrets
-from urllib.parse import urlparse, quote
+from urllib.parse import urlparse, quote, urlencode
 from flask import (
     Flask, render_template, request, redirect,
     url_for, session, jsonify, make_response
@@ -137,30 +138,59 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
     return largest_length
 
 def calculate_user_level(posted_count, solved_count):
+    """
+    Novo sistema de níveis:
+    ---------------------------------------------------
+    Nível  Nome                       Pontos   Estimativa
+     1    🔧 Iniciante Curioso        0        Imediato
+     2    🔩 Explorador de Engrenagens 10       2 a 4 problemas postados ou 2 resolvidos
+     3    🛠 Desbravador Técnico      25       Cerca de 5 resoluções ou 10 postagens
+     4    ⚙️ Mestre das Soluções      50       Cerca de 10 resoluções e algumas postagens
+     5    🏆 Lenda da Mecânica        100      Cerca de 20 resoluções e engajamento geral
+    ---------------------------------------------------
+    Pontos = (Problemas postados * 2) + (Problemas resolvidos * 5)
+    """
     points = posted_count * 2 + solved_count * 5
-    if points < 20:
+
+    if points < 10:
         level = 1
-        next_level_points = 20
-    elif points < 50:
+        level_name = "🔧 Iniciante Curioso"
+        next_threshold = 10
+        estimate_str = "Imediato"
+    elif points < 25:
         level = 2
-        next_level_points = 50
-    elif points < 100:
+        level_name = "🔩 Explorador de Engrenagens"
+        next_threshold = 25
+        estimate_str = "2 a 4 problemas postados ou 2 resolvidos"
+    elif points < 50:
         level = 3
-        next_level_points = 100
-    else:
+        level_name = "🛠 Desbravador Técnico"
+        next_threshold = 50
+        estimate_str = "Cerca de 5 resoluções ou 10 postagens"
+    elif points < 100:
         level = 4
-        next_level_points = 999999
+        level_name = "⚙️ Mestre das Soluções"
+        next_threshold = 100
+        estimate_str = "Cerca de 10 resoluções e algumas postagens"
+    else:
+        level = 5
+        level_name = "🏆 Lenda da Mecânica"
+        next_threshold = 999999
+        estimate_str = "Cerca de 20 resoluções e engajamento geral"
 
-    remaining_for_next_level = max(0, next_level_points - points)
+    remaining_for_next_level = max(0, next_threshold - points)
 
+    # Cálculo do progresso dentro do nível atual:
     if level == 1:
-        base_min, base_max = 0, 20
+        base_min, base_max = 0, 10
     elif level == 2:
-        base_min, base_max = 20, 50
+        base_min, base_max = 10, 25
     elif level == 3:
+        base_min, base_max = 25, 50
+    elif level == 4:
         base_min, base_max = 50, 100
     else:
-        base_min, base_max = 100, 100
+        base_min, base_max = 100, 100  # no nível máximo
 
     if base_max == base_min:
         progress_percentage = 100
@@ -169,11 +199,8 @@ def calculate_user_level(posted_count, solved_count):
         if progress_percentage > 100:
             progress_percentage = 100
 
-    return level, points, remaining_for_next_level, progress_percentage
+    return level, level_name, points, remaining_for_next_level, progress_percentage, estimate_str
 
-# -----------------------------------------------------------
-# FUNÇÃO PARA SALVAR IMAGENS (CRIA VERSÃO PRINCIPAL E THUMB)
-# -----------------------------------------------------------
 def save_image(file_obj, fs_instance, max_w=1600, max_h=1200, thumb_w=300, thumb_h=300):
     """
     Armazena a imagem em duas versões (principal comprimida e thumbnail) no GridFS.
@@ -345,7 +372,8 @@ def register():
             "role": "comum",
             "whatsapp": whatsapp,
             "maquinas": maquinas,
-            "profile_image_id": None
+            "profile_image_id": None,
+            "perfil_token": None
         }
         inserted = usuarios_collection.insert_one(novo_usuario)
 
@@ -421,7 +449,6 @@ def load_problems():
             skip = (page - 1) * ITEMS_PER_PAGE
             match_stage = {"$and": [{"tags": {"$all": search_tokens}}]}
 
-            # Adicionando o filtro de resolvido e demais filtros
             for key, val in filters.items():
                 match_stage["$and"].append({key: val})
 
@@ -442,21 +469,27 @@ def load_problems():
                 # Criador
                 if p.get("creator_custom_name"):
                     creator_name = p["creator_custom_name"]
+                    creator_profile_image_id = None
                 else:
+                    creator_name = "Não definido"
+                    creator_profile_image_id = None
                     if p.get("creator_id"):
                         c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
-                        creator_name = c_user["nome"] if c_user else "Usuário?"
-                    else:
-                        creator_name = "Não definido"
+                        if c_user:
+                            creator_name = c_user["nome"]
+                            creator_profile_image_id = c_user.get("profile_image_id")
 
                 # Solucionador
                 solver_name = None
+                solver_profile_image_id = None
                 if p.get("solver_custom_name"):
                     solver_name = p["solver_custom_name"]
                 else:
                     if p.get("solver_id"):
                         s_user = usuarios_collection.find_one({"_id": ObjectId(p["solver_id"])})
-                        solver_name = s_user["nome"] if s_user else "Usuário?"
+                        if s_user:
+                            solver_name = s_user["nome"]
+                            solver_profile_image_id = s_user.get("profile_image_id")
 
                 problems_list.append({
                     "_id": str(p["_id"]),
@@ -466,7 +499,11 @@ def load_problems():
                     "problemImage_main": str(p["problemImage_main"]) if p.get("problemImage_main") else None,
                     "problemImage_thumb": str(p["problemImage_thumb"]) if p.get("problemImage_thumb") else None,
                     "creator_name": creator_name,
+                    "creator_profile_image_id": creator_profile_image_id,
                     "solver_name": solver_name,
+                    "solver_profile_image_id": solver_profile_image_id,
+                    "creator_id": str(p["creator_id"]) if p.get("creator_id") else None,
+                    "solver_id": str(p["solver_id"]) if p.get("solver_id") else None,
                     "category": p.get("category", ""),
                     "subCategory": p.get("subCategory", ""),
                     "brand": p.get("brand", "")
@@ -476,11 +513,10 @@ def load_problems():
             return jsonify({"problems": problems_list, "has_more": has_more, "total_count": total_count})
 
         else:
-            # Caso haja texto, mas só stopwords, retorna vazio
             return jsonify({"problems": [], "has_more": False, "total_count": 0})
 
     else:
-        # Busca vazia -> problemas aleatórios (somente resolvidos agora)
+        # Busca vazia -> problemas aleatórios (somente resolvidos)
         if page == 1:
             session["displayed_problem_ids"] = []
         displayed_ids = session.get("displayed_problem_ids", [])
@@ -514,20 +550,26 @@ def load_problems():
             for p in random_problems:
                 if p.get("creator_custom_name"):
                     creator_name = p["creator_custom_name"]
+                    creator_profile_image_id = None
                 else:
+                    creator_name = "Não definido"
+                    creator_profile_image_id = None
                     if p.get("creator_id"):
                         c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
-                        creator_name = c_user["nome"] if c_user else "Usuário?"
-                    else:
-                        creator_name = "Não definido"
+                        if c_user:
+                            creator_name = c_user["nome"]
+                            creator_profile_image_id = c_user.get("profile_image_id")
 
                 solver_name = None
+                solver_profile_image_id = None
                 if p.get("solver_custom_name"):
                     solver_name = p["solver_custom_name"]
                 else:
                     if p.get("solver_id"):
                         s_user = usuarios_collection.find_one({"_id": ObjectId(p["solver_id"])})
-                        solver_name = s_user["nome"] if s_user else "Usuário?"
+                        if s_user:
+                            solver_name = s_user["nome"]
+                            solver_profile_image_id = s_user.get("profile_image_id")
 
                 problems_list.append({
                     "_id": str(p["_id"]),
@@ -537,7 +579,11 @@ def load_problems():
                     "problemImage_main": str(p["problemImage_main"]) if p.get("problemImage_main") else None,
                     "problemImage_thumb": str(p["problemImage_thumb"]) if p.get("problemImage_thumb") else None,
                     "creator_name": creator_name,
+                    "creator_profile_image_id": creator_profile_image_id,
                     "solver_name": solver_name,
+                    "solver_profile_image_id": solver_profile_image_id,
+                    "creator_id": str(p["creator_id"]) if p.get("creator_id") else None,
+                    "solver_id": str(p["solver_id"]) if p.get("solver_id") else None,
                     "category": p.get("category", ""),
                     "subCategory": p.get("subCategory", ""),
                     "brand": p.get("brand", "")
@@ -601,15 +647,9 @@ def add_problem():
 
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
-    """
-    Rota para exibir problemas não resolvidos.
-    Ajuste: Vamos guardar a página anterior para que, ao clicar em "Voltar",
-    o usuário nunca retorne ao /resolver e sim onde estava antes de /unresolved.
-    """
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
 
-    # Se o referrer não contiver "resolver" NEM "unresolved", armazenamos para poder voltar.
     referrer = request.referrer
     if referrer and "resolver" not in referrer and "unresolved" not in referrer:
         session["nao_resolvidos_prev_page"] = referrer
@@ -632,7 +672,21 @@ def unresolved():
 def resolver_form(problem_id):
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
-    return render_template("resolver.html", problem_id=problem_id)
+
+    problem = problemas_collection.find_one({"_id": ObjectId(problem_id)})
+    if not problem:
+        return "Problema não encontrado.", 404
+
+    if problem.get("creator_custom_name"):
+        creator_name = problem["creator_custom_name"]
+    else:
+        creator_name = "Desconhecido"
+        if problem.get("creator_id"):
+            c_user = usuarios_collection.find_one({"_id": ObjectId(problem["creator_id"])})
+            if c_user:
+                creator_name = c_user["nome"]
+
+    return render_template("resolver.html", problem=problem, creator_name=creator_name)
 
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
@@ -649,6 +703,23 @@ def resolver_problema(problem_id):
     if not steps or len(steps) == 0:
         return "Não é possível enviar uma solução vazia. Volte e adicione pelo menos um passo.", 400
 
+    # Upload de imagens dos passos e subpassos
+    for i, step in enumerate(steps):
+        step_file = request.files.get(f"stepImage_{i}")
+        if step_file and step_file.filename.strip():
+            image_ids = save_image(step_file, fs_m)
+            if image_ids:
+                step["stepImage"] = image_ids["main_id"]
+
+        miniSteps = step.get("miniSteps", [])
+        for j, substep in enumerate(miniSteps):
+            sub_file = request.files.get(f"subStepImage_{i}_{j}")
+            if sub_file and sub_file.filename.strip():
+                image_ids = save_image(sub_file, fs_m)
+                if image_ids:
+                    substep["subStepImage"] = image_ids["main_id"]
+
+    # Marca como resolvido
     problemas_collection.update_one(
         {"_id": ObjectId(problem_id)},
         {
@@ -670,6 +741,7 @@ def exibir_solucao(problem_id):
     if not problema.get("resolvido"):
         return "Ainda não resolvido.", 400
 
+    # Gera token para compartilhamento, se não existir
     if "share_token" not in problema:
         new_token = secrets.token_urlsafe(16)
         problemas_collection.update_one(
@@ -679,10 +751,9 @@ def exibir_solucao(problem_id):
         problema["share_token"] = new_token
 
     # Verifica login ou token
-    if not user_is_logged_in():
-        token_param = request.args.get("token", "")
-        if token_param != problema["share_token"]:
-            return redirect(url_for("register", next=request.url))
+    token_param = request.args.get("token", "")
+    if not user_is_logged_in() and token_param != problema["share_token"]:
+        return redirect(url_for("register", next=request.url))
 
     # Registra visualização se logado
     if user_is_logged_in():
@@ -692,23 +763,35 @@ def exibir_solucao(problem_id):
             upsert=True
         )
 
+    # Criador
     if problema.get("creator_custom_name"):
         creator_name = problema["creator_custom_name"]
+        creator_id = None
+        creator_profile_image_id = None
     else:
-        if problema.get("creator_id"):
-            c_user = usuarios_collection.find_one({"_id": ObjectId(problema["creator_id"])})
-            creator_name = c_user["nome"] if c_user else "Usuário?"
-        else:
-            creator_name = "Desconhecido"
+        creator_name = "Desconhecido"
+        creator_id = problema.get("creator_id")
+        creator_profile_image_id = None
+        if creator_id:
+            c_user = usuarios_collection.find_one({"_id": ObjectId(creator_id)})
+            if c_user:
+                creator_name = c_user["nome"]
+                creator_profile_image_id = c_user.get("profile_image_id")
 
+    # Solucionador
     if problema.get("solver_custom_name"):
         solver_name = problema["solver_custom_name"]
+        solver_id = None
+        solver_profile_image_id = None
     else:
-        if problema.get("solver_id"):
-            s_user = usuarios_collection.find_one({"_id": ObjectId(problema["solver_id"])})
-            solver_name = s_user["nome"] if s_user else "Usuário?"
-        else:
-            solver_name = "Desconhecido"
+        solver_name = "Desconhecido"
+        solver_id = problema.get("solver_id")
+        solver_profile_image_id = None
+        if solver_id:
+            s_user = usuarios_collection.find_one({"_id": ObjectId(solver_id)})
+            if s_user:
+                solver_name = s_user["nome"]
+                solver_profile_image_id = s_user.get("profile_image_id")
 
     solucao = problema.get("solucao", {})
     share_url = url_for("exibir_solucao", problem_id=problem_id, token=problema["share_token"], _external=True)
@@ -738,6 +821,10 @@ def exibir_solucao(problem_id):
         share_msg_encoded=share_msg_encoded,
         creator_name=creator_name,
         solver_name=solver_name,
+        creator_id=creator_id,
+        solver_id=solver_id,
+        creator_profile_image_id=creator_profile_image_id,
+        solver_profile_image_id=solver_profile_image_id,
         user_helpful_feedback=user_helpful_feedback,
         like_count=like_count,
         random_bg=random_bg
@@ -776,9 +863,6 @@ def delete_problem(problem_id):
 
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
-    """
-    Rota antiga para editar problemas.
-    """
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
 
@@ -882,7 +966,6 @@ def edit_problem(problem_id):
             if image_ids:
                 new_main_id = image_ids["main_id"]
                 new_thumb_id = image_ids["thumb_id"]
-                # apaga os antigos
                 old_main_id = problema.get("problemImage_main")
                 old_thumb_id = problema.get("problemImage_thumb")
                 if old_main_id:
@@ -908,9 +991,6 @@ def edit_problem(problem_id):
 
 @app.route("/edit_your_problem/<problem_id>", methods=["GET", "POST"])
 def edit_your_problem(problem_id):
-    """
-    Nova rota para editar problemas NÃO RESOLVIDOS.
-    """
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
 
@@ -918,11 +998,9 @@ def edit_your_problem(problem_id):
     if not problema:
         return "Problema não encontrado.", 404
 
-    # Verifica se o problema está resolvido
     if problema.get("resolvido", False):
         return "Este problema já foi resolvido. Use a rota de edição geral.", 400
 
-    # Verifica se o usuário pode editar (criador ou solucionador)
     can_edit = (session["user_id"] == problema.get("creator_id")) or user_has_role(["solucionador"])
     if not can_edit:
         return "Acesso negado. Somente o criador ou um solucionador podem editar.", 403
@@ -1097,7 +1175,6 @@ def edit_solution(problem_id):
         old_steps = old_solution_data.get("steps", [])
         steps = new_solution_data.get("steps", [])
 
-        # Ajuste de imagens de passo e subpasso
         for i, step in enumerate(steps):
             delete_step = request.form.get(f"deleteExistingStepImage_{i}", "false") == "true"
             step_image_file = request.files.get(f"stepImage_{i}")
@@ -1555,7 +1632,7 @@ def add_item():
     return render_template("add_item.html")
 
 # -----------------------------------------------------------
-# PERFIL
+# PERFIL + COMPARTILHAMENTO
 # -----------------------------------------------------------
 @app.route("/perfil", methods=["GET"])
 def perfil():
@@ -1572,7 +1649,8 @@ def perfil():
     posted_count = problemas_collection.count_documents({"creator_id": user_id})
     solved_count = problemas_collection.count_documents({"solver_id": user_id, "resolvido": True})
 
-    user_level, points, remaining_for_next_level, progress_percentage = calculate_user_level(
+    # Cálculo de nível
+    level, level_name, points, remaining_for_next_level, progress_percentage, estimate_str = calculate_user_level(
         posted_count, solved_count
     )
 
@@ -1582,9 +1660,16 @@ def perfil():
     if solved_count >= 5:
         user_badges.append("Solucionador de Ouro")
 
+    # Buscar últimos problemas criados
     latest_problems_cursor = problemas_collection.find({"creator_id": user_id}).sort("_id", -1).limit(3)
     latest_problems = list(latest_problems_cursor)
     for p in latest_problems:
+        p["_id_str"] = str(p["_id"])
+
+    # Buscar últimos problemas resolvidos
+    latest_solved_cursor = problemas_collection.find({"solver_id": user_id, "resolvido": True}).sort("_id", -1).limit(3)
+    latest_solved_problems = list(latest_solved_cursor)
+    for p in latest_solved_problems:
         p["_id_str"] = str(p["_id"])
 
     return render_template(
@@ -1592,11 +1677,15 @@ def perfil():
         user=user_obj,
         posted_count=posted_count,
         solved_count=solved_count,
-        user_level=user_level,
+        level=level,
+        level_name=level_name,
+        points=points,
         remaining_for_next_level=remaining_for_next_level,
         progress_percentage=progress_percentage,
+        estimate_str=estimate_str,
         user_badges=user_badges,
-        latest_problems=latest_problems,
+        latest_problems=latest_problems,          # CRIADOS
+        latest_solved_problems=latest_solved_problems,  # RESOLVIDOS
         random_bg=random_bg
     )
 
@@ -1650,6 +1739,115 @@ def get_user_photo(file_id):
         return response
     except:
         return "Foto não encontrada.", 404
+
+# Gera um link simples (para copiar) - permanecerá para compatibilidade
+@app.route("/get_profile_share_link", methods=["POST"])
+def get_profile_share_link():
+    if not user_is_logged_in():
+        return jsonify({"error": "Não autorizado"}), 401
+
+    user_id = session["user_id"]
+    user_doc = usuarios_collection.find_one({"_id": ObjectId(user_id)})
+
+    if not user_doc.get("perfil_token"):
+        new_token = secrets.token_urlsafe(16)
+        usuarios_collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"perfil_token": new_token}}
+        )
+        user_doc["perfil_token"] = new_token
+
+    share_url = url_for("perfil_publico", token=user_doc["perfil_token"], _external=True)
+    return jsonify({"share_url": share_url})
+
+# Novo endpoint: devolve links de compartilhamento WhatsApp e Facebook
+@app.route("/get_profile_share_links", methods=["POST"])
+def get_profile_share_links():
+    if not user_is_logged_in():
+        return jsonify({"error": "Não autorizado"}), 401
+
+    user_id = session["user_id"]
+    user_doc = usuarios_collection.find_one({"_id": ObjectId(user_id)})
+
+    if not user_doc.get("perfil_token"):
+        new_token = secrets.token_urlsafe(16)
+        usuarios_collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"perfil_token": new_token}}
+        )
+        user_doc["perfil_token"] = new_token
+
+    share_url = url_for("perfil_publico", token=user_doc["perfil_token"], _external=True)
+
+    # WhatsApp
+    whatsapp_text = f"Perfil do M: {share_url}"
+    whatsapp_url = "https://api.whatsapp.com/send?" + urlencode({"text": whatsapp_text})
+
+    # Facebook
+    facebook_url = "https://www.facebook.com/sharer/sharer.php?" + urlencode({"u": share_url})
+
+    return jsonify({
+        "share_url": share_url,
+        "whatsapp_url": whatsapp_url,
+        "facebook_url": facebook_url
+    })
+
+@app.route("/perfil_publico/<token>")
+def perfil_publico(token):
+    user_doc = usuarios_collection.find_one({"perfil_token": token})
+    if not user_doc:
+        return "Perfil não encontrado ou token inválido.", 404
+
+    user_id_str = str(user_doc["_id"])
+    posted_count = problemas_collection.count_documents({"creator_id": user_id_str})
+    solved_count = problemas_collection.count_documents({"solver_id": user_id_str, "resolvido": True})
+
+    level, level_name, points, remaining_for_next_level, progress_percentage, estimate_str = calculate_user_level(
+        posted_count, solved_count
+    )
+
+    user_badges = []
+    if posted_count >= 1:
+        user_badges.append("Primeira Postagem")
+    if solved_count >= 5:
+        user_badges.append("Solucionador de Ouro")
+
+    latest_problems_cursor = problemas_collection.find({"creator_id": user_id_str}).sort("_id", -1).limit(3)
+    latest_problems = list(latest_problems_cursor)
+    for p in latest_problems:
+        p["_id_str"] = str(p["_id"])
+
+    # URL absoluta da foto (para as tags de compartilhamento)
+    if user_doc.get("profile_image_id"):
+        profile_photo_url = url_for('get_user_photo', file_id=user_doc["profile_image_id"], _external=True)
+    else:
+        profile_photo_url = url_for('static', filename='images/avatar_placeholder.png', _external=True)
+
+    # Dados para Open Graph
+    og_data = {
+        "title": f"Perfil do M - {user_doc['nome']}",
+        "description": f"Confira o perfil de {user_doc['nome']} na Plataforma M!",
+        "image": profile_photo_url,
+        "url": request.url
+    }
+
+    return render_template(
+        "profil.html",
+        user=user_doc,
+        posted_count=posted_count,
+        solved_count=solved_count,
+        level=level,
+        level_name=level_name,
+        points=points,
+        remaining_for_next_level=remaining_for_next_level,
+        progress_percentage=progress_percentage,
+        estimate_str=estimate_str,
+        user_badges=user_badges,
+        latest_problems=latest_problems,
+        random_bg="fundo1.jpeg",
+        is_public=True,
+        og_data=og_data
+    )
 
 # -----------------------------------------------------------
 # FEEDBACK "SIM/NAO" (LIKE/DISLIKE)
@@ -1730,6 +1928,52 @@ def submit_step_feedback():
         "timestamp": datetime.datetime.utcnow()
     })
     return jsonify({"message": "Feedback registrado com sucesso!"})
+
+# -----------------------------------------------------------
+# NOVA ROTA PARA EXIBIR PERFIL DE OUTRO USUÁRIO
+# -----------------------------------------------------------
+@app.route("/ver_usuario/<user_id>", methods=["GET"])
+def ver_usuario(user_id):
+    """
+    Exibe o perfil de um outro usuário qualquer (não o logado),
+    usando o template 'perfil_usuario.html'.
+    """
+    user_doc = usuarios_collection.find_one({"_id": ObjectId(user_id)})
+    if not user_doc:
+        return "Usuário não encontrado.", 404
+
+    posted_count = problemas_collection.count_documents({"creator_id": user_id})
+    solved_count = problemas_collection.count_documents({"solver_id": user_id, "resolvido": True})
+
+    level, level_name, points, remaining_for_next_level, progress_percentage, estimate_str = calculate_user_level(
+        posted_count, solved_count
+    )
+
+    user_badges = []
+    if posted_count >= 1:
+        user_badges.append("Primeira Postagem")
+    if solved_count >= 5:
+        user_badges.append("Solucionador de Ouro")
+
+    latest_problems_cursor = problemas_collection.find({"creator_id": user_id}).sort("_id", -1).limit(3)
+    latest_problems = list(latest_problems_cursor)
+    for p in latest_problems:
+        p["_id_str"] = str(p["_id"])
+
+    return render_template(
+        "perfil_usuario.html",
+        user=user_doc,
+        posted_count=posted_count,
+        solved_count=solved_count,
+        level=level,
+        level_name=level_name,
+        points=points,
+        remaining_for_next_level=remaining_for_next_level,
+        progress_percentage=progress_percentage,
+        estimate_str=estimate_str,
+        user_badges=user_badges,
+        latest_problems=latest_problems
+    )
 
 # -----------------------------------------------------------
 # MAIN

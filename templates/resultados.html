@@ -12,7 +12,10 @@
       rel="stylesheet"
     />
     <!-- Ícones Material (para a lupa) -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
 
     <style>
       /* Reset e estilos básicos */
@@ -127,7 +130,7 @@
       }
 
       /*
-        Oculta o botão "Perfil" E o botão "Entrar" do header em telas menores
+        Oculta o botão "Perfil" e o botão "Entrar" do header em telas menores
         que 768px. Dessa forma, apenas a barra inferior mostrará essas opções
         no mobile.
       */
@@ -239,6 +242,29 @@
         max-height: 300px;
         object-fit: contain;
         border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+      /* Ajustes para alinhar texto e imagem verticalmente ao centro */
+      .creator-container,
+      .solver-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center; /* Centraliza verticalmente */
+        justify-content: flex-start;
+        margin-bottom: 0.5rem;
+      }
+      .creator-container p,
+      .solver-container p {
+        text-align: left !important;
+        margin: 0;
+        line-height: 36px;
+      }
+      .profile-pic {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 0.4rem;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
       }
       .ver-solucao-btn {
@@ -385,7 +411,8 @@
       @media (max-width: 768px) {
         .mobile-bottom-bar {
           display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
+          /* Agora com 4 colunas para incluir o botão Home */
+          grid-template-columns: 1fr 1fr 1fr 1fr;
           background-color: #000;
           width: 100%;
           position: fixed;
@@ -411,6 +438,9 @@
           /* Garante que o conteúdo não seja coberto pela barra inferior */
           padding-bottom: 60px;
         }
+      }
+      .bottom-bar-btn.active {
+        background-color: #444;
       }
     </style>
   </head>
@@ -462,7 +492,6 @@
             <span>Entrar</span>
           </a>
         {% else %}
-          <!-- Aplica a classe 'perfil-btn' para poder ocultar no mobile -->
           <a class="header-btn perfil-btn" href="{{ url_for('perfil') }}">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -524,8 +553,8 @@
               >
                 <path
                   d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0
-                  1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1
-                  0-1h3v-3A.5.5 0 0 1 8 4z"
+                  1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
+                  0 0 1 8 4z"
                 />
               </svg>
               Envie o seu problema
@@ -541,10 +570,7 @@
                 viewBox="0 0 16 16"
               >
                 <path
-                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0
-                  1 0 1h-3v3a.5.5 0 0 1-1
-                  0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5
-                  0 0 1 8 4z"
+                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0-1h-3v-3A.5.5 0 0 1 8 4z"
                 />
               </svg>
               Envie o seu problema
@@ -559,8 +585,26 @@
 
       <!-- BARRA INFERIOR (visível apenas em mobile) -->
       <div class="mobile-bottom-bar">
-        <!-- 1) Resolver (coluna 1/3) -->
-        <a href="{{ url_for('unresolved') }}" class="bottom-bar-btn" title="Resolver Problemas">
+        <!-- Home (novo botão) - Forçar como "active" -->
+        <a
+          href="{{ url_for('index') }}"
+          class="bottom-bar-btn active"
+          title="Página Inicial"
+        >
+          <img
+            src="{{ url_for('static', filename='images/home_icon.png') }}"
+            alt="Home Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Home
+        </a>
+
+        <!-- Resolver -->
+        <a
+          href="{{ url_for('unresolved') }}"
+          class="bottom-bar-btn"
+          title="Resolver Problemas"
+        >
           <img
             src="{{ url_for('static', filename='images/resolver_icon.png') }}"
             alt="Resolver Icon"
@@ -568,33 +612,48 @@
           />
           Resolver
         </a>
-        <!-- 2) Envie (coluna 2/3) -->
-        <a href="{{ url_for('add_problem') }}" class="bottom-bar-btn" title="Envie seu Problema">
+
+        <!-- Envie -->
+        <a
+          href="{{ url_for('add_problem') }}"
+          class="bottom-bar-btn"
+          title="Envie seu Problema"
+        >
           <img
             src="{{ url_for('static', filename='images/icone_mais.png') }}"
             alt="Envie"
-            style="width:55px; height:55px;"
+            style="width:30px; height:30px;"
           />
+          Enviar
         </a>
-        <!-- 3) Perfil/Entrar (coluna 3/3) -->
+
+        <!-- Perfil ou Entrar -->
         {% if not session.get('user_id') %}
-        <a href="{{ url_for('login') }}" class="bottom-bar-btn" title="Entrar">
-          <img
-            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
-            alt="Perfil Icon"
-            style="width:30px;height:30px;margin-bottom:0px;"
-          />
-          Entrar
-        </a>
+          <a
+            href="{{ url_for('login') }}"
+            class="bottom-bar-btn"
+            title="Entrar"
+          >
+            <img
+              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              alt="Perfil Icon"
+              style="width:30px;height:30px;margin-bottom:0px;"
+            />
+            Entrar
+          </a>
         {% else %}
-        <a href="{{ url_for('perfil') }}" class="bottom-bar-btn" title="Perfil">
-          <img
-            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
-            alt="Perfil Icon"
-            style="width:30px;height:30px;margin-bottom:0px;"
-          />
-          Perfil
-        </a>
+          <a
+            href="{{ url_for('perfil') }}"
+            class="bottom-bar-btn"
+            title="Perfil"
+          >
+            <img
+              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              alt="Perfil Icon"
+              style="width:30px;height:30px;margin-bottom:0px;"
+            />
+            Perfil
+          </a>
         {% endif %}
       </div>
     </div>
@@ -723,10 +782,66 @@
         div.classList.add('problem-item');
 
         // Criador
-        const creatorEl = document.createElement('p');
-        creatorEl.textContent = 'Enviado por: ' + (problem.creator_name || 'Usuário');
-        creatorEl.style.fontWeight = 'bold';
-        div.appendChild(creatorEl);
+        const creatorContainer = document.createElement('div');
+        creatorContainer.classList.add('creator-container');
+
+        // Monta um link se existir 'creator_id'
+        if (problem.creator_id) {
+          // Cria um <a> que conterá foto e texto
+          const creatorLink = document.createElement('a');
+          creatorLink.href = '/ver_usuario/' + problem.creator_id;
+          creatorLink.style.display = 'flex';
+          creatorLink.style.alignItems = 'center';
+          creatorLink.style.textDecoration = 'none';
+          creatorLink.style.color = 'inherit'; // para manter a cor do texto
+
+          // Se tiver imagem de perfil do criador, mostra
+          if (problem.creator_profile_image_id) {
+            const creatorImg = document.createElement('img');
+            creatorImg.src = '/user_photo/' + problem.creator_profile_image_id;
+            creatorImg.alt = 'Foto de perfil do criador';
+            creatorImg.classList.add('profile-pic');
+            creatorLink.appendChild(creatorImg);
+          } else {
+            // Fallback para avatar placeholder
+            const creatorImg = document.createElement('img');
+            creatorImg.src = '/static/images/avatar_placeholder.png';
+            creatorImg.alt = 'Foto de perfil padrão';
+            creatorImg.classList.add('profile-pic');
+            creatorLink.appendChild(creatorImg);
+          }
+
+          // Texto "Enviado por: ..."
+          const creatorText = document.createElement('p');
+          creatorText.innerHTML =
+            '<strong>Enviado por:</strong> ' +
+            (problem.creator_name || 'Usuário');
+          creatorLink.appendChild(creatorText);
+
+          creatorContainer.appendChild(creatorLink);
+        } else {
+          // Caso não haja creator_id, exibe de modo simples
+          if (problem.creator_profile_image_id) {
+            const creatorImg = document.createElement('img');
+            creatorImg.src = '/user_photo/' + problem.creator_profile_image_id;
+            creatorImg.alt = 'Foto de perfil do criador';
+            creatorImg.classList.add('profile-pic');
+            creatorContainer.appendChild(creatorImg);
+          } else {
+            // Fallback para avatar placeholder
+            const placeholderImg = document.createElement('img');
+            placeholderImg.src = '/static/images/avatar_placeholder.png';
+            placeholderImg.alt = 'Foto de perfil padrão';
+            placeholderImg.classList.add('profile-pic');
+            creatorContainer.appendChild(placeholderImg);
+          }
+          const creatorEl = document.createElement('p');
+          creatorEl.innerHTML =
+            '<strong>Enviado por:</strong> ' + (problem.creator_name || 'Usuário');
+          creatorContainer.appendChild(creatorEl);
+        }
+
+        div.appendChild(creatorContainer);
 
         // Título
         const h2 = document.createElement('h2');
@@ -757,15 +872,67 @@
 
         // Se resolvido
         if (problem.resolvido) {
-          const solverEl = document.createElement('p');
-          solverEl.textContent =
-            'Resolvido por: ' + (problem.solver_name || 'Usuário?');
-          solverEl.style.fontStyle = 'italic';
-          solverEl.style.marginTop = '0.5rem';
-          div.appendChild(solverEl);
+          // Podemos exibir info do "solucionador", se quisermos
+          if (problem.solver_name) {
+            const solverContainer = document.createElement('div');
+            solverContainer.classList.add('solver-container');
 
+            // Se tiver solver_id, faz link. Caso contrário, mostra texto simples
+            if (problem.solver_id) {
+              const solverLink = document.createElement('a');
+              solverLink.href = '/ver_usuario/' + problem.solver_id;
+              solverLink.style.display = 'flex';
+              solverLink.style.alignItems = 'center';
+              solverLink.style.textDecoration = 'none';
+              solverLink.style.color = 'inherit';
+
+              if (problem.solver_profile_image_id) {
+                const solverImg = document.createElement('img');
+                solverImg.src = '/user_photo/' + problem.solver_profile_image_id;
+                solverImg.alt = 'Foto de perfil do solucionador';
+                solverImg.classList.add('profile-pic');
+                solverLink.appendChild(solverImg);
+              } else {
+                // Fallback solver
+                const solverImg = document.createElement('img');
+                solverImg.src = '/static/images/avatar_placeholder.png';
+                solverImg.alt = 'Foto de perfil padrão';
+                solverImg.classList.add('profile-pic');
+                solverLink.appendChild(solverImg);
+              }
+              const solverText = document.createElement('p');
+              solverText.innerHTML =
+                '<strong>Resolvido por:</strong> ' + problem.solver_name;
+              solverLink.appendChild(solverText);
+
+              solverContainer.appendChild(solverLink);
+            } else {
+              // Caso não tenha solver_id
+              if (problem.solver_profile_image_id) {
+                const solverImg = document.createElement('img');
+                solverImg.src = '/user_photo/' + problem.solver_profile_image_id;
+                solverImg.alt = 'Foto de perfil do solucionador';
+                solverImg.classList.add('profile-pic');
+                solverContainer.appendChild(solverImg);
+              } else {
+                // Fallback solver
+                const solverImg = document.createElement('img');
+                solverImg.src = '/static/images/avatar_placeholder.png';
+                solverImg.alt = 'Foto de perfil padrão';
+                solverImg.classList.add('profile-pic');
+                solverContainer.appendChild(solverImg);
+              }
+              const solverText = document.createElement('p');
+              solverText.innerHTML =
+                '<strong>Resolvido por:</strong> ' + problem.solver_name;
+              solverContainer.appendChild(solverText);
+            }
+            solverContainer.style.marginTop = '0.5rem';
+            div.appendChild(solverContainer);
+          }
+
+          // Botão "Ver Solução"
           {% if session.get('user_id') %}
-            // Link para a solução
             const solucaoLink = document.createElement('a');
             solucaoLink.href =
               "{{ url_for('exibir_solucao', problem_id='__ID__') }}".replace(
@@ -780,7 +947,7 @@
             });
             div.appendChild(solucaoLink);
           {% else %}
-            // Redireciona para registro, levando a nextURL
+            // Se não logado, direciona para registro
             const solucaoLink = document.createElement('a');
             const nextUrl =
               "{{ url_for('exibir_solucao', problem_id='__ID__') }}".replace(
@@ -797,38 +964,38 @@
 
         // Se for um solucionador, exibe botões de editar/deletar
         {% if session.get('user_id') and session.role == 'solucionador' %}
-        const actionBtns = document.createElement('div');
-        actionBtns.classList.add('action-btns');
+          const actionBtns = document.createElement('div');
+          actionBtns.classList.add('action-btns');
 
-        const editLink = document.createElement('a');
-        editLink.href =
-          "{{ url_for('edit_problem', problem_id='__ID__') }}".replace(
-            '__ID__',
-            problem._id
-          );
-        editLink.classList.add('action-btn');
-        editLink.textContent = 'Editar';
+          const editLink = document.createElement('a');
+          editLink.href =
+            "{{ url_for('edit_problem', problem_id='__ID__') }}".replace(
+              '__ID__',
+              problem._id
+            );
+          editLink.classList.add('action-btn');
+          editLink.textContent = 'Editar';
 
-        const deleteForm = document.createElement('form');
-        deleteForm.method = 'POST';
-        deleteForm.action =
-          "{{ url_for('delete_problem', problem_id='__ID__') }}".replace(
-            '__ID__',
-            problem._id
-          );
-        deleteForm.classList.add('action-delete-form');
-        deleteForm.onsubmit = () =>
-          confirm('Tem certeza que deseja deletar este problema?');
+          const deleteForm = document.createElement('form');
+          deleteForm.method = 'POST';
+          deleteForm.action =
+            "{{ url_for('delete_problem', problem_id='__ID__') }}".replace(
+              '__ID__',
+              problem._id
+            );
+          deleteForm.classList.add('action-delete-form');
+          deleteForm.onsubmit = () =>
+            confirm('Tem certeza que deseja deletar este problema?');
 
-        const deleteBtn = document.createElement('button');
-        deleteBtn.type = 'submit';
-        deleteBtn.classList.add('action-btn');
-        deleteBtn.textContent = 'Deletar';
+          const deleteBtn = document.createElement('button');
+          deleteBtn.type = 'submit';
+          deleteBtn.classList.add('action-btn');
+          deleteBtn.textContent = 'Deletar';
 
-        deleteForm.appendChild(deleteBtn);
-        actionBtns.appendChild(editLink);
-        actionBtns.appendChild(deleteForm);
-        div.appendChild(actionBtns);
+          deleteForm.appendChild(deleteBtn);
+          actionBtns.appendChild(editLink);
+          actionBtns.appendChild(deleteForm);
+          div.appendChild(actionBtns);
         {% endif %}
 
         return div;

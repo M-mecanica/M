@@ -132,6 +132,13 @@
       }
     }
 
+    /* Esconde o botão "Voltar" em telas menores que 768px */
+    @media (max-width: 768px) {
+      #btnVoltar {
+        display: none !important;
+      }
+    }
+
     main {
       margin-top: 100px; /* espaço para header fixo */
       flex: 1;
@@ -168,7 +175,8 @@
     @media (max-width: 768px) {
       .mobile-bottom-bar {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        /* Agora com 4 colunas para incluir o botão Home */
+        grid-template-columns: 1fr 1fr 1fr 1fr;
         background-color: #000;
         width: 100%;
         position: fixed;
@@ -193,6 +201,10 @@
       main {
         padding-bottom: 60px; /* para não ficar embaixo da barra */
       }
+    }
+    /* Classe para destacar o botão ativo na barra inferior */
+    .bottom-bar-btn.active {
+      background-color: #444;
     }
 
     /* Formulário para adicionar problema */
@@ -455,7 +467,7 @@
   <div id="content">
     <!-- Barra superior fixa -->
     <header>
-      <!-- Botão "Voltar" -->
+      <!-- Botão "Voltar" (escondido em telas <= 768px via CSS) -->
       <button
         class="header-btn"
         id="btnVoltar"
@@ -473,7 +485,7 @@
         </svg>
       </button>
 
-      <h1>Registrar Novo Problema</h1>
+      <h1>Envie Seu Problema</h1>
 
       <!-- Se NÃO estiver logado, mostra "Entrar" -->
       {% if not session.get('user_id') %}
@@ -510,24 +522,17 @@
       <h2 class="page-title">Informe os detalhes do problema</h2>
       <div class="form-container">
 
-        {# Se houver mensagem de erro (por ex. campos obrigatórios) #}
         {% if erro %}
           <div class="erro">{{ erro }}</div>
         {% endif %}
 
-        <!-- Formulário para criar novo problema -->
-        <!-- Observe que o campo de upload se chama 'problemImage', o back-end converte internamente. -->
         <form action="{{ url_for('add_problem') }}" method="POST" enctype="multipart/form-data">
-
-          <!-- Título -->
           <label for="titulo">Título do Problema</label>
           <input type="text" id="titulo" name="titulo" required />
 
-          <!-- Descrição -->
           <label for="descricao">Descrição do Problema</label>
           <textarea id="descricao" name="descricao" rows="5" required></textarea>
 
-          <!-- Botão para abrir modal de Categorias -->
           <button type="button" class="btn-definir-cat" onclick="openCategoryModal()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
               <path
@@ -540,19 +545,16 @@
             Definir Categoria
           </button>
 
-          <!-- Display simples do que foi escolhido -->
           <div class="cat-display">
             Categoria Principal: <span id="displayCategory">---</span><br>
             Subcategoria: <span id="displaySubCategory">---</span><br>
             Marca: <span id="displayBrand">---</span>
           </div>
 
-          <!-- Inputs ocultos que realmente guardam os valores -->
           <input type="hidden" name="category" id="categoryInput" />
           <input type="hidden" name="subCategory" id="subCategoryInput" />
           <input type="hidden" name="brand" id="brandInput" />
 
-          <!-- Upload da imagem -->
           <label class="upload-btn" for="problemImage">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
               <path
@@ -578,12 +580,10 @@
           </label>
           <input type="file" id="problemImage" name="problemImage" accept="image/*" />
 
-          <!-- Pré-visualização da imagem (JS faz o preview) -->
           <div id="previewContainer">
             <img id="previewImage" alt="Pré-visualização da imagem" />
           </div>
 
-          <!-- Botão de envio -->
           <input type="submit" value="Enviar Problema" />
         </form>
       </div>
@@ -595,8 +595,26 @@
 
     <!-- Barra inferior (mobile) -->
     <div class="mobile-bottom-bar">
-      <!-- 1) Resolver (coluna 1/3) -->
-      <a href="{{ url_for('unresolved') }}" class="bottom-bar-btn" title="Resolver Problemas">
+      <!-- Home (novo botão) -->
+      <a
+        href="{{ url_for('index') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'index' %} active{% endif %}"
+        title="Página Inicial"
+      >
+        <img
+          src="{{ url_for('static', filename='images/home_icon.png') }}"
+          alt="Home Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
+        Home
+      </a>
+
+      <!-- Resolver -->
+      <a
+        href="{{ url_for('unresolved') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'unresolved' %} active{% endif %}"
+        title="Resolver Problemas"
+      >
         <img
           src="{{ url_for('static', filename='images/resolver_icon.png') }}"
           alt="Resolver Icon"
@@ -604,33 +622,48 @@
         />
         Resolver
       </a>
-      <!-- 2) Envie (coluna 2/3) -->
-      <a href="{{ url_for('add_problem') }}" class="bottom-bar-btn" title="Envie seu Problema">
+
+      <!-- Envie -->
+      <a
+        href="{{ url_for('add_problem') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'add_problem' %} active{% endif %}"
+        title="Envie seu Problema"
+      >
         <img
           src="{{ url_for('static', filename='images/icone_mais.png') }}"
           alt="Envie"
-          style="width:55px; height:55px;"
+          style="width:30px; height:30px;"
         />
+        Enviar
       </a>
-      <!-- 3) Perfil/Entrar (coluna 3/3) -->
+
+      <!-- Perfil ou Entrar -->
       {% if not session.get('user_id') %}
-      <a href="{{ url_for('login') }}" class="bottom-bar-btn" title="Entrar">
-        <img
-          src="{{ url_for('static', filename='images/perfil_icon.png') }}"
-          alt="Perfil Icon"
-          style="width:30px;height:30px;margin-bottom:0px;"
-        />
-        Entrar
-      </a>
+        <a
+          href="{{ url_for('login') }}"
+          class="bottom-bar-btn{% if request.endpoint in ['login','register'] %} active{% endif %}"
+          title="Entrar"
+        >
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Entrar
+        </a>
       {% else %}
-      <a href="{{ url_for('perfil') }}" class="bottom-bar-btn" title="Perfil">
-        <img
-          src="{{ url_for('static', filename='images/perfil_icon.png') }}"
-          alt="Perfil Icon"
-          style="width:30px;height:30px;margin-bottom:0px;"
-        />
-        Perfil
-      </a>
+        <a
+          href="{{ url_for('perfil') }}"
+          class="bottom-bar-btn{% if request.endpoint == 'perfil' %} active{% endif %}"
+          title="Perfil"
+        >
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Perfil
+        </a>
       {% endif %}
     </div>
   </div>
