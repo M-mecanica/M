@@ -1,9 +1,55 @@
+<!-- perfil_usuario.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <title>M - Perfil do Usuário</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      ============================================================
+      IMPORTANTE PARA COMPARTILHAMENTO EM REDES SOCIAIS:
+      Ao compartilhar este link (perfil público), as redes sociais
+      irão buscar estas meta tags para exibir a foto e a descrição.
+      É fundamental que o URL seja público e acessível, incluindo o
+      da imagem (com _external=True). Ajuste conforme necessário.
+      ============================================================
+    -->
+    <meta property="og:title" content="Perfil do M - {{ user.nome }}" />
+    <meta
+      property="og:description"
+      content="Confira o perfil de {{ user.nome }} na Plataforma M!"
+    />
+    <meta
+      property="og:image"
+      content="
+      {% if user.profile_image_id %}
+        {{ url_for('get_user_photo', file_id=user.profile_image_id, _external=True) }}
+      {% else %}
+        {{ url_for('static', filename='images/avatar_placeholder.png', _external=True) }}
+      {% endif %}
+      "
+    />
+    <meta property="og:url" content="{{ request.url }}" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Perfil do M - {{ user.nome }}" />
+    <meta
+      name="twitter:description"
+      content="Confira o perfil de {{ user.nome }} na Plataforma M!"
+    />
+    <meta
+      name="twitter:image"
+      content="
+      {% if user.profile_image_id %}
+        {{ url_for('get_user_photo', file_id=user.profile_image_id, _external=True) }}
+      {% else %}
+        {{ url_for('static', filename='images/avatar_placeholder.png', _external=True) }}
+      {% endif %}
+      "
+    />
 
     <!-- Fonte básica -->
     <link rel="preconnect" href="https://fonts.gstatic.com" />
@@ -188,16 +234,40 @@
         background-repeat: no-repeat;
         margin-bottom: 1rem;
       }
-
       .profile-name {
         font-size: 1.5rem;
         font-weight: 700;
       }
 
-      .profile-level {
-        font-size: 1rem;
-        color: #666;
+      /* Informações de nível e pontos */
+      .profile-level-box {
         margin-top: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        background-color: #f9f9f9;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 0.4rem 1rem;
+      }
+      .profile-level-box .level-name {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-right: 0.5rem;
+      }
+      .profile-level-box .level-number {
+        font-size: 0.95rem;
+        color: #555;
+      }
+
+      .profile-points {
+        margin-top: 0.5rem;
+        font-size: 1rem;
+        color: #333;
+      }
+      .level-estimate {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.2rem;
       }
 
       .stats-cards {
@@ -292,7 +362,9 @@
         margin: 0;
       }
 
-      /* Barra inferior (mobile) */
+      /*********************************************
+       * BARRA INFERIOR (mobile)
+       *********************************************/
       .mobile-bottom-bar {
         display: none;
       }
@@ -327,7 +399,7 @@
       }
 
       /*********************************************
-       * TAB BAR ESTILO PINTEREST
+       * TAB BAR
        *********************************************/
       .tab-bar {
         display: flex;
@@ -357,6 +429,27 @@
       }
       .tab-content.active {
         display: block;
+      }
+
+      .rounded-btn {
+        display: inline-block;
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 32px;
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s, transform 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .rounded-btn:hover {
+        background-color: #333;
+        transform: scale(1.02);
       }
     </style>
   </head>
@@ -418,19 +511,24 @@
             <!-- Nome do usuário -->
             <div class="profile-name">{{ user.nome }}</div>
 
-            <!-- Exemplo: Nível -->
-            <div class="profile-level">Nível: {{ user_level }}</div>
+            <!-- Caixa do Nível -->
+            <div class="profile-level-box">
+              <span class="level-name">{{ level_name }}</span>
+              <span class="level-number"> (Nível {{ level }})</span>
+            </div>
+            <div class="profile-points">Pontos: {{ points }}</div>
+            <div class="level-estimate">Estimativa: {{ estimate_str }}</div>
+          </div>
 
-            <!-- Barra de Progresso -->
-            <div class="progress-bar-container">
-              <div
-                class="progress-bar-fill"
-                style="width: {{ progress_percentage }}%;"
-              ></div>
-            </div>
-            <div class="progress-label">
-              Próximo nível em {{ remaining_for_next_level }} problema(s)!
-            </div>
+          <!-- Barra de Progresso -->
+          <div class="progress-bar-container">
+            <div
+              class="progress-bar-fill"
+              style="width: {{ progress_percentage }}%;"
+            ></div>
+          </div>
+          <div class="progress-label">
+            Falta(m) {{ remaining_for_next_level }} ponto(s) para o próximo nível
           </div>
 
           <!-- Cartões de estatísticas -->
@@ -445,7 +543,7 @@
             </div>
           </div>
 
-          <!-- Insígnias -->
+          <!-- Exibe insígnias -->
           <div class="badges-section">
             {% for badge in user_badges %}
               <span class="badge">{{ badge }}</span>
@@ -484,8 +582,8 @@
               <!-- Link para todos -->
               <a
                 href="{{ url_for('user_history', user_id=user._id) }}"
-                class="badge"
-                style="background-color: #000; color: #fff;"
+                class="rounded-btn"
+                style="margin-top: 1rem;"
               >
                 Ver todos os problemas enviados
               </a>
@@ -498,21 +596,21 @@
           <div id="resolvidosTab" class="tab-content">
             <h2>Problemas Resolvidos</h2>
             {% if solved_problems and solved_problems|length > 0 %}
-              {% for p in solved_problems %}
+              {% for sp in solved_problems %}
                 <div class="problem-item">
-                  <h3>{{ p.titulo }}</h3>
+                  <h3>{{ sp.titulo }}</h3>
                   <p>
-                    {{ p.descricao[:80] }}{{ "..." if p.descricao|length > 80 else "" }}
+                    {{ sp.descricao[:80] }}{{ "..." if sp.descricao|length > 80 else "" }}
                   </p>
-                  <a href="{{ url_for('exibir_solucao', problem_id=p._id_str) }}">
+                  <a href="{{ url_for('exibir_solucao', problem_id=sp._id_str) }}">
                     Ver Solução
                   </a>
                 </div>
               {% endfor %}
               <a
-                href="{{ url_for('user_history', user_id=user._id, status='resolvido') }}"
-                class="badge"
-                style="background-color: #000; color: #fff;"
+                href="{{ url_for('user_history', user_id=user._id) }}"
+                class="rounded-btn"
+                style="margin-top: 1rem;"
               >
                 Ver todos os problemas resolvidos
               </a>
@@ -529,7 +627,6 @@
 
       <!-- Barra inferior (se desejar no mobile) -->
       <div class="mobile-bottom-bar">
-        <!-- Exemplo de botões, não necessariamente ativos aqui -->
         <a
           href="{{ url_for('index') }}"
           class="bottom-bar-btn"
@@ -629,7 +726,7 @@
         });
       });
 
-      // Botão "Voltar" - mesmo estilo de solucao.html
+      // Botão "Voltar"
       document.addEventListener('DOMContentLoaded', function() {
         const ref = document.referrer || "";
         const btnVoltar = document.getElementById('btnVoltar');

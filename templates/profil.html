@@ -6,16 +6,6 @@
     <title>M - Meu Perfil</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Tags Open Graph (usadas quando houver compartilhamento em redes sociais,
-         especialmente no perfil público) -->
-    {% if is_public and og_data %}
-      <meta property="og:title" content="{{ og_data.title|safe }}" />
-      <meta property="og:description" content="{{ og_data.description|safe }}" />
-      <meta property="og:image" content="{{ og_data.image|safe }}" />
-      <meta property="og:url" content="{{ og_data.url|safe }}" />
-      <meta property="og:type" content="website" />
-    {% endif %}
-
     <!-- Fonte básica -->
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link
@@ -706,8 +696,10 @@
         text-decoration: none;
       }
 
-      /* Modal para escolhas de compartilhamento (WhatsApp/Facebook) */
-      .share-modal-overlay {
+      /***********************************************
+       * MODAL COMPARTILHAR PERFIL
+       ***********************************************/
+      #shareModal {
         display: none;
         position: fixed;
         z-index: 9999;
@@ -715,52 +707,63 @@
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
+        background-color: rgba(0, 0, 0, 0.4);
         align-items: center;
         justify-content: center;
       }
-      .share-modal-content {
+      #shareModalContent {
         background-color: #fff;
-        width: 90%;
-        max-width: 400px;
+        width: 95%;
+        max-width: 350px;
         border-radius: 8px;
-        padding: 2rem;
-        text-align: center;
-        position: relative;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
         animation: modalFadeIn 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #fff;
+        position: relative;
       }
-      .share-modal-content h3 {
-        margin-bottom: 1rem;
-      }
-      .share-modal-close {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        font-size: 1.5rem;
-        color: #333;
-        cursor: pointer;
-      }
-      .share-option-btn {
-        display: inline-flex;
-        align-items: center;
+      #shareModalHeader {
         background-color: #000;
         color: #fff;
-        padding: 0.5rem 1rem;
-        border-radius: 25px;
-        margin: 0.5rem;
-        text-decoration: none;
-        font-size: 1rem;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      #shareModalHeader h2 {
+        margin: 0;
+        font-size: 1.25rem;
+      }
+      #closeShareModal {
+        background: none;
+        color: #fff;
         border: none;
+        font-size: 1.5rem;
         cursor: pointer;
-        transition: background-color 0.2s ease;
       }
-      .share-option-btn:hover {
-        background-color: #333;
+      #shareModalBody {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
-      .share-option-btn img {
-        width: 24px;
-        height: 24px;
-        margin-right: 0.5rem;
+      .share-option-btn {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0;
+        padding: 0.6rem;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      .share-option-btn.whatsapp {
+        background-color: #25D366;
+      }
+      .share-option-btn.facebook {
+        background-color: #1877F2;
       }
     </style>
   </head>
@@ -849,21 +852,21 @@
 
             <div class="profile-name">{{ user.nome }}</div>
 
-            <!-- Se não for is_public, mostrar botões de edição e compartilhar -->
-            {% if not is_public %}
             <div class="profile-buttons">
+              <!-- Botão de Edição de Perfil -->
               <button class="edit-profile-btn rounded-btn" id="openModalBtn">
                 Editar Perfil
               </button>
 
+              <!-- Botão de Compartilhar Perfil -->
               <button
                 class="share-profile-btn rounded-btn"
-                id="shareProfileBtn"
+                id="openShareModalBtn"
+                data-username="{{ user.nome }}"
               >
                 Compartilhar Perfil
               </button>
             </div>
-            {% endif %}
 
             <!-- Caixa do Nível -->
             <div class="profile-level-box">
@@ -903,8 +906,7 @@
             {% endfor %}
           </div>
 
-          <!-- TAB BAR: só aparece se não for "is_public" ou se existirem dados pra mostrar -->
-          {% if not is_public %}
+          <!-- TAB BAR -->
           <div class="tab-bar">
             <div class="tab-option active" data-tab="enviados">Problemas Enviados</div>
             <div class="tab-option" data-tab="resolvidos">Problemas Resolvidos</div>
@@ -937,7 +939,7 @@
                 </div>
               {% endfor %}
               <!-- Link para ver todos os problemas enviados (histórico) -->
-              <a href="{{ url_for('user_history', user_id=user._id) }}" class="rounded-btn">
+              <a href="{{ url_for('user_history', user_id=user._id) }}" class="rounded-btn" style="margin-top: 1rem;">
                 Ver todos
               </a>
             {% else %}
@@ -972,7 +974,7 @@
                   </a>
                 </div>
               {% endfor %}
-              <a href="{{ url_for('user_history', user_id=user._id) }}" class="rounded-btn">
+              <a href="{{ url_for('user_history', user_id=user._id) }}" class="rounded-btn" style="margin-top: 1rem;">
                 Ver todos
               </a>
             {% else %}
@@ -990,7 +992,6 @@
               </a>
             {% endif %}
           </div>
-          {% endif %}
         </div>
       </main>
 
@@ -1130,6 +1131,25 @@
       </div>
     </div>
 
+    <!-- MODAL Compartilhar Perfil -->
+    <div class="modal" id="shareModal">
+      <div id="shareModalContent">
+        <div id="shareModalHeader">
+          <h2>Compartilhar Perfil</h2>
+          <button id="closeShareModal">&times;</button>
+        </div>
+        <div id="shareModalBody">
+          <p style="font-size:1rem; margin-bottom:1rem;">Escolha onde deseja compartilhar:</p>
+          <button class="share-option-btn whatsapp" id="btnShareWhatsApp">
+            WhatsApp
+          </button>
+          <button class="share-option-btn facebook" id="btnShareFacebook">
+            Facebook
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- TELA DE CONFIGURAÇÕES (FULLSCREEN) -->
     <div class="settings-overlay" id="settingsOverlay">
       <div class="settings-content">
@@ -1140,30 +1160,6 @@
         <div class="settings-footer">
           <a href="{{ url_for('logout') }}" class="logout-btn">Sair</a>
         </div>
-      </div>
-    </div>
-
-    <!-- MODAL DE COMPARTILHAMENTO -->
-    <div class="share-modal-overlay" id="shareModalOverlay">
-      <div class="share-modal-content">
-        <span class="share-modal-close" id="closeShareModalBtn">&times;</span>
-        <h3>Compartilhar Perfil</h3>
-        <p>Selecione onde deseja compartilhar:</p>
-        <!-- Botões WhatsApp e Facebook -->
-        <button class="share-option-btn" id="whatsappShareBtn">
-          <img
-            src="{{ url_for('static', filename='images/whatsapp_icon.png') }}"
-            alt="WhatsApp"
-          />
-          WhatsApp
-        </button>
-        <button class="share-option-btn" id="facebookShareBtn">
-          <img
-            src="{{ url_for('static', filename='images/facebook_icon.png') }}"
-            alt="Facebook"
-          />
-          Facebook
-        </button>
       </div>
     </div>
 
@@ -1264,55 +1260,79 @@
         });
       }
 
-      // Lógica de compartilhamento: modal + links
-      const shareProfileBtn = document.getElementById('shareProfileBtn');
-      const shareModalOverlay = document.getElementById('shareModalOverlay');
-      const closeShareModalBtn = document.getElementById('closeShareModalBtn');
-      const whatsappShareBtn = document.getElementById('whatsappShareBtn');
-      const facebookShareBtn = document.getElementById('facebookShareBtn');
+      // FUNÇÃO DE COMPARTILHAMENTO
+      // Abrir modal "Share"
+      const openShareModalBtn = document.getElementById('openShareModalBtn');
+      const shareModal = document.getElementById('shareModal');
+      const closeShareModalBtn = document.getElementById('closeShareModal');
+      const btnShareWhatsApp = document.getElementById('btnShareWhatsApp');
+      const btnShareFacebook = document.getElementById('btnShareFacebook');
 
-      if (shareProfileBtn) {
-        shareProfileBtn.addEventListener('click', async () => {
+      let finalShareURL = ""; // será gerado ao clicar em "Compartilhar Perfil"
+      let userName = "";
+
+      if (openShareModalBtn && shareModal && closeShareModalBtn) {
+        openShareModalBtn.addEventListener('click', async () => {
+          // Obtemos nome do usuário (para compor a mensagem):
+          userName = openShareModalBtn.dataset.username;
+
+          // Antes de exibir o modal, chamamos a rota que gera/retorna o link de compartilhamento
           try {
-            // Exibe o modal de opções
-            shareModalOverlay.style.display = 'flex';
-
-            // Obtém os links de compartilhamento via POST
-            const res = await fetch('{{ url_for("get_profile_share_links") }}', {
+            const res = await fetch("{{ url_for('get_profile_share_link') }}", {
               method: 'POST'
             });
-            if (!res.ok) {
-              alert("Falha ao gerar links de compartilhamento.");
-              return;
+            if (res.ok) {
+              const data = await res.json();
+              if (data.share_url) {
+                finalShareURL = data.share_url;
+                // Exibe o modal
+                shareModal.style.display = 'flex';
+              } else {
+                alert("Falha ao gerar link de compartilhamento.");
+              }
+            } else {
+              alert("Falha ao obter link de compartilhamento (erro no servidor).");
             }
-            const data = await res.json();
-            if (data.error) {
-              alert("Erro: " + data.error);
-              return;
-            }
-
-            // Configura ações dos botões
-            whatsappShareBtn.onclick = () => {
-              window.open(data.whatsapp_url, '_blank');
-            };
-            facebookShareBtn.onclick = () => {
-              window.open(data.facebook_url, '_blank');
-            };
           } catch (err) {
             console.error(err);
-            alert("Erro ao gerar links de compartilhamento.");
+            alert("Erro ao obter link de compartilhamento.");
+          }
+        });
+
+        closeShareModalBtn.addEventListener('click', () => {
+          shareModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+          if (event.target === shareModal) {
+            shareModal.style.display = 'none';
           }
         });
       }
 
-      if (closeShareModalBtn && shareModalOverlay) {
-        closeShareModalBtn.addEventListener('click', () => {
-          shareModalOverlay.style.display = 'none';
-        });
-        shareModalOverlay.addEventListener('click', (evt) => {
-          if (evt.target === shareModalOverlay) {
-            shareModalOverlay.style.display = 'none';
+      // Ações nos botões de compartilhamento (WhatsApp / Facebook)
+      if (btnShareWhatsApp) {
+        btnShareWhatsApp.addEventListener('click', () => {
+          if (!finalShareURL) {
+            alert("Link de perfil não encontrado.");
+            return;
           }
+          // Texto para WhatsApp
+          const shareText = `Perfil do M: ${userName}. Confira em: ${finalShareURL}`;
+          const wppLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+          window.open(wppLink, '_blank');
+        });
+      }
+
+      if (btnShareFacebook) {
+        btnShareFacebook.addEventListener('click', () => {
+          if (!finalShareURL) {
+            alert("Link de perfil não encontrado.");
+            return;
+          }
+          // No Facebook, basta compartilhar a URL; se a página tiver meta tags de OG, puxará foto e texto
+          const fbLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(finalShareURL)}&quote=${encodeURIComponent('Perfil do M: ' + userName)}`;
+          window.open(fbLink, '_blank');
         });
       }
     </script>

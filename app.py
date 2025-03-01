@@ -6,7 +6,7 @@ import unicodedata
 import datetime
 import random
 import secrets
-from urllib.parse import urlparse, quote, urlencode
+from urllib.parse import urlparse, quote
 from flask import (
     Flask, render_template, request, redirect,
     url_for, session, jsonify, make_response
@@ -1740,15 +1740,19 @@ def get_user_photo(file_id):
     except:
         return "Foto não encontrada.", 404
 
-# Gera um link simples (para copiar) - permanecerá para compatibilidade
 @app.route("/get_profile_share_link", methods=["POST"])
 def get_profile_share_link():
+    """
+    Gera (ou recupera) o token de perfil do usuário logado e retorna o link
+    para a rota `perfil_usuario` (página pública do perfil).
+    """
     if not user_is_logged_in():
         return jsonify({"error": "Não autorizado"}), 401
 
     user_id = session["user_id"]
     user_doc = usuarios_collection.find_one({"_id": ObjectId(user_id)})
 
+    # Se não tem token, gera
     if not user_doc.get("perfil_token"):
         new_token = secrets.token_urlsafe(16)
         usuarios_collection.update_one(
@@ -1757,43 +1761,15 @@ def get_profile_share_link():
         )
         user_doc["perfil_token"] = new_token
 
-    share_url = url_for("perfil_publico", token=user_doc["perfil_token"], _external=True)
+    # O link público passa a ser -> /perfil_usuario/<token>
+    share_url = url_for("perfil_usuario", token=user_doc["perfil_token"], _external=True)
     return jsonify({"share_url": share_url})
 
-# Novo endpoint: devolve links de compartilhamento WhatsApp e Facebook
-@app.route("/get_profile_share_links", methods=["POST"])
-def get_profile_share_links():
-    if not user_is_logged_in():
-        return jsonify({"error": "Não autorizado"}), 401
-
-    user_id = session["user_id"]
-    user_doc = usuarios_collection.find_one({"_id": ObjectId(user_id)})
-
-    if not user_doc.get("perfil_token"):
-        new_token = secrets.token_urlsafe(16)
-        usuarios_collection.update_one(
-            {"_id": ObjectId(user_id)},
-            {"$set": {"perfil_token": new_token}}
-        )
-        user_doc["perfil_token"] = new_token
-
-    share_url = url_for("perfil_publico", token=user_doc["perfil_token"], _external=True)
-
-    # WhatsApp
-    whatsapp_text = f"Perfil do M: {share_url}"
-    whatsapp_url = "https://api.whatsapp.com/send?" + urlencode({"text": whatsapp_text})
-
-    # Facebook
-    facebook_url = "https://www.facebook.com/sharer/sharer.php?" + urlencode({"u": share_url})
-
-    return jsonify({
-        "share_url": share_url,
-        "whatsapp_url": whatsapp_url,
-        "facebook_url": facebook_url
-    })
-
-@app.route("/perfil_publico/<token>")
-def perfil_publico(token):
+@app.route("/perfil_usuario/<token>")
+def perfil_usuario(token):
+    """
+    Exibe o perfil público do usuário, usando o template 'perfil_usuario.html'.
+    """
     user_doc = usuarios_collection.find_one({"perfil_token": token})
     if not user_doc:
         return "Perfil não encontrado ou token inválido.", 404
@@ -1812,27 +1788,24 @@ def perfil_publico(token):
     if solved_count >= 5:
         user_badges.append("Solucionador de Ouro")
 
+    # Últimos problemas criados
     latest_problems_cursor = problemas_collection.find({"creator_id": user_id_str}).sort("_id", -1).limit(3)
     latest_problems = list(latest_problems_cursor)
     for p in latest_problems:
         p["_id_str"] = str(p["_id"])
 
-    # URL absoluta da foto (para as tags de compartilhamento)
-    if user_doc.get("profile_image_id"):
-        profile_photo_url = url_for('get_user_photo', file_id=user_doc["profile_image_id"], _external=True)
-    else:
-        profile_photo_url = url_for('static', filename='images/avatar_placeholder.png', _external=True)
+    # Agora, se quiser mostrar ou não os problemas resolvidos, você pode buscar
+    # Exemplo: iremos buscar resolvidos por esse usuário
+    solved_problems_cursor = problemas_collection.find(
+        {"solver_id": user_id_str, "resolvido": True}
+    ).sort("_id", -1).limit(3)
+    solved_problems = list(solved_problems_cursor)
+    for sp in solved_problems:
+        sp["_id_str"] = str(sp["_id"])
 
-    # Dados para Open Graph
-    og_data = {
-        "title": f"Perfil do M - {user_doc['nome']}",
-        "description": f"Confira o perfil de {user_doc['nome']} na Plataforma M!",
-        "image": profile_photo_url,
-        "url": request.url
-    }
-
+    # Passamos tudo para o template perfil_usuario.html
     return render_template(
-        "profil.html",
+        "perfil_usuario.html",
         user=user_doc,
         posted_count=posted_count,
         solved_count=solved_count,
@@ -1844,9 +1817,7 @@ def perfil_publico(token):
         estimate_str=estimate_str,
         user_badges=user_badges,
         latest_problems=latest_problems,
-        random_bg="fundo1.jpeg",
-        is_public=True,
-        og_data=og_data
+        solved_problems=solved_problems
     )
 
 # -----------------------------------------------------------
@@ -1930,13 +1901,13 @@ def submit_step_feedback():
     return jsonify({"message": "Feedback registrado com sucesso!"})
 
 # -----------------------------------------------------------
-# NOVA ROTA PARA EXIBIR PERFIL DE OUTRO USUÁRIO
+# ROTA PARA EXIBIR PERFIL DE OUTRO USUÁRIO (INTERNAMENTE)
 # -----------------------------------------------------------
 @app.route("/ver_usuario/<user_id>", methods=["GET"])
 def ver_usuario(user_id):
     """
     Exibe o perfil de um outro usuário qualquer (não o logado),
-    usando o template 'perfil_usuario.html'.
+    usando o template 'perfil_usuario.html' ou similar.
     """
     user_doc = usuarios_collection.find_one({"_id": ObjectId(user_id)})
     if not user_doc:
@@ -1960,6 +1931,17 @@ def ver_usuario(user_id):
     for p in latest_problems:
         p["_id_str"] = str(p["_id"])
 
+    # Se quiser buscar problemas que este user resolveu:
+    solved_problems_cursor = problemas_collection.find(
+        {"solver_id": user_id, "resolvido": True}
+    ).sort("_id", -1).limit(3)
+    solved_problems = list(solved_problems_cursor)
+    for sp in solved_problems:
+        sp["_id_str"] = str(sp["_id"])
+
+    # Reutilizamos o template "perfil_usuario.html"
+    # Mas note que esse template está formatado para uso público (token).
+    # Internamente podemos usar a mesma ideia, só que sem token.
     return render_template(
         "perfil_usuario.html",
         user=user_doc,
@@ -1972,7 +1954,8 @@ def ver_usuario(user_id):
         progress_percentage=progress_percentage,
         estimate_str=estimate_str,
         user_badges=user_badges,
-        latest_problems=latest_problems
+        latest_problems=latest_problems,
+        solved_problems=solved_problems
     )
 
 # -----------------------------------------------------------
