@@ -245,11 +245,6 @@
         font-size: 1rem;
         color: #333;
       }
-      .level-estimate {
-        font-size: 0.85rem;
-        color: #666;
-        margin-top: 0.2rem;
-      }
 
       .stats-cards {
         display: flex;
@@ -874,7 +869,6 @@
               <span class="level-number"> (Nível {{ level }})</span>
             </div>
             <div class="profile-points">Você tem {{ points }} pontos</div>
-            <div class="level-estimate">Estimativa: {{ estimate_str }}</div>
           </div>
 
           <!-- Barra de Progresso -->
@@ -899,7 +893,7 @@
             </div>
           </div>
 
-          <!-- Exibe possíveis badges -->
+          <!-- Exibe badges (agora só "Solucionador de Ouro", quando aplicável) -->
           <div class="badges-section">
             {% for badge in user_badges %}
               <span class="badge">{{ badge }}</span>

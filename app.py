@@ -180,7 +180,7 @@ def calculate_user_level(posted_count, solved_count):
 
     remaining_for_next_level = max(0, next_threshold - points)
 
-    # Cálculo do progresso dentro do nível atual:
+    # Cálculo do progresso dentro do nível atual
     if level == 1:
         base_min, base_max = 0, 10
     elif level == 2:
@@ -190,7 +190,7 @@ def calculate_user_level(posted_count, solved_count):
     elif level == 4:
         base_min, base_max = 50, 100
     else:
-        base_min, base_max = 100, 100  # no nível máximo
+        base_min, base_max = 100, 100  # nível máximo
 
     if base_max == base_min:
         progress_percentage = 100
@@ -795,8 +795,26 @@ def exibir_solucao(problem_id):
 
     solucao = problema.get("solucao", {})
     share_url = url_for("exibir_solucao", problem_id=problem_id, token=problema["share_token"], _external=True)
+
+    # Texto para WhatsApp (já existente)
     share_text = f"Confira a solução para: {problema['titulo']} - {share_url}"
     share_msg_encoded = quote(share_text, safe='')
+
+    # Texto e link para Facebook
+    # Aqui também adicionamos um "quote" (descrição) extra se quiser
+    fb_text = f"Confira a solução do M para: {problema['titulo']} - {problema['descricao']}"
+    facebook_share_url = (
+        "https://www.facebook.com/sharer/sharer.php?u="
+        + quote(share_url, safe='')
+        + "&quote="
+        + quote(fb_text, safe='')
+    )
+
+    # URL da imagem (para usar em Open Graph ou algo similar)
+    if problema.get("problemImage_main"):
+        problem_image_url = url_for("gridfs_image", file_id=problema["problemImage_main"], _external=True)
+    else:
+        problem_image_url = url_for("static", filename="images/default_problem.png", _external=True)
 
     user_helpful_feedback = None
     if user_is_logged_in():
@@ -827,7 +845,10 @@ def exibir_solucao(problem_id):
         solver_profile_image_id=solver_profile_image_id,
         user_helpful_feedback=user_helpful_feedback,
         like_count=like_count,
-        random_bg=random_bg
+        random_bg=random_bg,
+        facebook_share_url=facebook_share_url,
+        problem_image_url=problem_image_url,
+        share_url=share_url
     )
 
 @app.route("/delete/<problem_id>", methods=["POST"])
@@ -1654,9 +1675,8 @@ def perfil():
         posted_count, solved_count
     )
 
+    # Insígnias (exemplo simples)
     user_badges = []
-    if posted_count >= 1:
-        user_badges.append("Primeira Postagem")
     if solved_count >= 5:
         user_badges.append("Solucionador de Ouro")
 
@@ -1783,19 +1803,14 @@ def perfil_usuario(token):
     )
 
     user_badges = []
-    if posted_count >= 1:
-        user_badges.append("Primeira Postagem")
     if solved_count >= 5:
         user_badges.append("Solucionador de Ouro")
 
-    # Últimos problemas criados
     latest_problems_cursor = problemas_collection.find({"creator_id": user_id_str}).sort("_id", -1).limit(3)
     latest_problems = list(latest_problems_cursor)
     for p in latest_problems:
         p["_id_str"] = str(p["_id"])
 
-    # Agora, se quiser mostrar ou não os problemas resolvidos, você pode buscar
-    # Exemplo: iremos buscar resolvidos por esse usuário
     solved_problems_cursor = problemas_collection.find(
         {"solver_id": user_id_str, "resolvido": True}
     ).sort("_id", -1).limit(3)
@@ -1803,7 +1818,6 @@ def perfil_usuario(token):
     for sp in solved_problems:
         sp["_id_str"] = str(sp["_id"])
 
-    # Passamos tudo para o template perfil_usuario.html
     return render_template(
         "perfil_usuario.html",
         user=user_doc,
@@ -1921,8 +1935,6 @@ def ver_usuario(user_id):
     )
 
     user_badges = []
-    if posted_count >= 1:
-        user_badges.append("Primeira Postagem")
     if solved_count >= 5:
         user_badges.append("Solucionador de Ouro")
 
@@ -1931,7 +1943,6 @@ def ver_usuario(user_id):
     for p in latest_problems:
         p["_id_str"] = str(p["_id"])
 
-    # Se quiser buscar problemas que este user resolveu:
     solved_problems_cursor = problemas_collection.find(
         {"solver_id": user_id, "resolvido": True}
     ).sort("_id", -1).limit(3)
@@ -1939,9 +1950,6 @@ def ver_usuario(user_id):
     for sp in solved_problems:
         sp["_id_str"] = str(sp["_id"])
 
-    # Reutilizamos o template "perfil_usuario.html"
-    # Mas note que esse template está formatado para uso público (token).
-    # Internamente podemos usar a mesma ideia, só que sem token.
     return render_template(
         "perfil_usuario.html",
         user=user_doc,

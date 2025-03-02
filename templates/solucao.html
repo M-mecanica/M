@@ -1,3 +1,4 @@
+<!-- solucao.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -15,6 +16,13 @@
     href="https://fonts.googleapis.com/icon?family=Material+Icons"
   />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Meta tags para compartilhamento no Facebook (Open Graph) -->
+  <meta property="og:title" content="Confira a solução do M para: {{ problema['titulo'] }}">
+  <meta property="og:description" content="{{ problema['descricao'] }} (via Plataforma M)">
+  <meta property="og:image" content="{{ problem_image_url }}">
+  <meta property="og:url" content="{{ share_url }}">
+  <meta property="og:type" content="website">
 
   <style>
     /* Reset e estilos básicos */
@@ -238,12 +246,11 @@
       position: relative;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    /* Criador, Solver, etc. - sem forçar font-size, herda do main */
     .creator-container,
     .solver-container {
       display: flex;
       flex-direction: row;
-      align-items: center; /* Centraliza verticalmente */
+      align-items: center;
       justify-content: flex-start;
       margin-bottom: 0.5rem;
     }
@@ -267,9 +274,8 @@
       opacity: 0.85;
     }
 
-    /* Título e descrição do problema */
     .problem-container h2 {
-      font-size: 1.4rem; /* Mesmo que .problem-item h2 do resultados.html */
+      font-size: 1.4rem;
       margin-bottom: 0.5rem;
       color: #000;
       text-align: center;
@@ -278,8 +284,6 @@
       color: #555;
       margin-bottom: 0.5rem;
       text-align: center;
-      /* Deixa a fonte herdar do main (1.25rem desktop / 1rem mobile) */
-      /* Se quiser limitar largura, pode usar max-width, mas não altera a fonte */
       max-width: 1000px;
       margin-left: auto;
       margin-right: auto;
@@ -287,11 +291,10 @@
     }
     @media (max-width: 768px) {
       .problem-container h2 {
-        font-size: 1.2rem; /* Ajuste mobile igual ao .problem-item h2 do resultados.html */
+        font-size: 1.2rem;
       }
     }
 
-    /* Imagem do problema */
     .problem-image {
       display: block;
       margin: 1rem auto;
@@ -304,26 +307,29 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 
-    /* Botão de compartilhamento via WhatsApp */
-    .whatsapp-share-btn {
+    .default-btn {
       background-color: #000;
       color: #fff;
       border: none;
       border-radius: 32px;
-      padding: 0.8rem 1.4rem;
-      font-size: 1rem;
-      font-weight: 500;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
       cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
-      margin: 1rem 0.5rem;
       display: inline-flex;
       align-items: center;
-      text-decoration: none;
+      justify-content: center;
       gap: 0.5rem;
     }
-    .whatsapp-share-btn:hover {
+    .default-btn:hover {
       background-color: #333;
       transform: scale(1.02);
+    }
+
+    .whatsapp-share-btn {
+      margin: 1rem 0.5rem;
     }
     .whatsapp-icon {
       fill: currentColor;
@@ -331,7 +337,11 @@
       height: 20px;
     }
 
-    /* Divider */
+    .facebook-share-btn {
+      margin: 1rem 0.5rem;
+      background-color: #1877f2;
+    }
+
     .section-divider {
       border: none;
       border-top: 1px solid #ccc;
@@ -340,7 +350,6 @@
       max-width: 1100px;
     }
 
-    /* Container da solução */
     .solution-container {
       width: 100%;
       margin-top: 1rem;
@@ -352,7 +361,7 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .solution-container h3 {
-      font-size: 1.4rem; /* Acompanhando o padrão do título anterior */
+      font-size: 1.4rem;
       margin-bottom: 1rem;
       color: #000;
       font-weight: 700;
@@ -364,27 +373,9 @@
       }
     }
 
-    /* Botão para mostrar passos (usuário comum) */
-    .show-solution-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.8rem 1.4rem;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.2s;
+    #btnShowSolution {
       margin: 1rem 0;
-      display: inline-block;
-      text-decoration: none;
     }
-    .show-solution-btn:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
-    /* Barra de progresso */
     .progress-container {
       position: relative;
       width: 100%;
@@ -408,14 +399,12 @@
       margin-top: 0.5rem;
       margin-bottom: 1rem;
     }
-
-    /* Onde os passos serão exibidos */
     .steps-output {
       margin-top: 2rem;
       line-height: 1.7;
       white-space: pre-wrap;
       font-family: 'Courier New', monospace;
-      font-size: 1rem; /* Pode herdar ou definir levemente menor para destaque de código */
+      font-size: 1rem;
       margin-bottom: 2.5rem;
       min-height: 80px;
       color: #333;
@@ -423,8 +412,6 @@
       margin-left: auto;
       margin-right: auto;
     }
-
-    /* Bloco de passo principal */
     .step-container {
       margin-bottom: 2rem;
       padding: 1rem 1rem 2rem;
@@ -468,8 +455,6 @@
       color: #0a0;
       opacity: 0.8;
     }
-
-    /* Subpassos */
     .mini-steps-block {
       margin-left: 1rem;
       margin-top: 1rem;
@@ -508,48 +493,14 @@
       margin-top: 0.5rem;
     }
     .mini-steps-btn {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.2s;
       margin: 0.5rem 0;
-      display: inline-block;
-      text-decoration: none;
     }
-    .mini-steps-btn:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
-    /* Botões de feedback (Consegui / Não consegui) */
     .feedback-buttons {
       display: flex;
       gap: 1rem;
       justify-content: center;
       margin-top: 1rem;
     }
-    .feedback-btn {
-      background-color: #fff;
-      color: #000;
-      border: 1px solid #000;
-      border-radius: 28px;
-      padding: 0.7rem 1.2rem;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: transform 0.2s;
-      display: inline-block;
-      text-decoration: none;
-    }
-    .feedback-btn:hover {
-      transform: scale(1.02);
-    }
-
     .shake {
       animation: shake 0.5s;
     }
@@ -561,7 +512,6 @@
       80% { transform: translate(5px, 0); }
       100% { transform: translate(0, 0); }
     }
-
     .fail-feedback-form {
       text-align: center;
       margin-top: 1rem;
@@ -575,25 +525,14 @@
       font-size: 1rem;
       padding: 0.5rem;
     }
-    .fail-feedback-form button {
-      background-color: #444;
-      color: #fff;
-      border: none;
-      border-radius: 24px;
-      padding: 0.6rem 1rem;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .fail-feedback-form button:hover {
-      background-color: #666;
+    .fail-feedback-form button.default-btn {
+      margin-top: 0.5rem;
     }
     .fail-feedback-thank {
       font-size: 0.95rem;
       color: #666;
       margin-top: 0.5rem;
     }
-
-    /* Feedback de "Esta solução ajudou?" */
     .feedback-container {
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -615,26 +554,11 @@
       gap: 1rem;
       justify-content: center;
     }
-    .helpful-btn {
-      background-color: #fff;
-      color: #000;
-      border: 1px solid #000;
-      border-radius: 28px;
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: transform 0.2s;
-      margin: 0 0.5rem;
-    }
-    .helpful-btn:hover {
-      transform: scale(1.02);
-    }
     .helpful-btn.selected {
-      background-color: #000;
-      color: #fff;
+      background-color: #333 !important;
+      transform: none !important;
+      color: #fff !important;
     }
-
     /* Modal de sugestão de melhorias */
     .modal {
       display: none;
@@ -774,7 +698,7 @@
     <main>
       <!-- Container do problema -->
       <div class="problem-container">
-        <!-- Enviado por (mesmo padrão da página de resultados) -->
+        <!-- Enviado por (igual padrão da página de resultados) -->
         <div class="creator-container">
           {% if creator_id %}
             <a href="{{ url_for('ver_usuario', user_id=creator_id) }}" class="creator-link">
@@ -823,10 +747,12 @@
           />
         {% endif %}
 
+        <!-- Botoes de compartilhamento (WhatsApp e Facebook) -->
         <div style="text-align: center; margin-top: 1rem;">
+          <!-- Botão WhatsApp -->
           <a
             href="https://wa.me/?text={{ share_msg_encoded }}"
-            class="whatsapp-share-btn"
+            class="default-btn whatsapp-share-btn"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -868,7 +794,25 @@
                    -1.6-2.1-5.1-3.4 -10.7-6.2z"
               />
             </svg>
-            Enviar
+            WhatsApp
+          </a>
+
+          <!-- Botão Facebook -->
+          <a
+            href="{{ facebook_share_url }}"
+            class="default-btn facebook-share-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width:20px;height:20px;">
+              <path
+                fill="currentColor"
+                d="M279.14 288l14.22-92.66h-88.91V129.27c0-25.35
+                   12.42-50.06 52.24-50.06h40.42V6.26S266.43 0
+                   225.36 0c-73.48 0-121.36 44.67-121.36 126.25v69.09H22.89V288h81.11v224h100.2V288z"
+              />
+            </svg>
+            Facebook
           </a>
         </div>
       </div>
@@ -925,7 +869,7 @@
         <!-- Apenas aparece se o usuário NÃO for solucionador -->
         <button
           type="button"
-          class="show-solution-btn"
+          class="default-btn"
           id="btnShowSolution"
           style="display: none;"
         >
@@ -935,8 +879,8 @@
         <div class="steps-output"></div>
 
         <div class="feedback-buttons" id="feedbackButtons" style="display: none;">
-          <button type="button" class="feedback-btn" id="btnConsegui">✅ Consegui!</button>
-          <button type="button" class="feedback-btn" id="btnNaoConsegui">❌ Não Consegui</button>
+          <button type="button" class="default-btn" id="btnConsegui">✅ Consegui!</button>
+          <button type="button" class="default-btn" id="btnNaoConsegui">❌ Não Consegui</button>
         </div>
 
         <div class="fail-feedback-form" id="failFeedbackForm">
@@ -945,7 +889,7 @@
             placeholder="Descreva o que houve dificuldade..."
           ></textarea>
           <br />
-          <button type="button" id="btnEnviarFeedback">Enviar Feedback</button>
+          <button type="button" class="default-btn" id="btnEnviarFeedback">Enviar Feedback</button>
           <div class="fail-feedback-thank">
             Seu feedback nos ajuda a melhorar a plataforma! 😊
           </div>
@@ -962,7 +906,7 @@
         <div style="text-align: center; margin-top: 1rem;">
           <a
             href="{{ url_for('edit_solution', problem_id=problema['_id']) }}"
-            class="show-solution-btn"
+            class="default-btn"
           >
             Editar Solução
           </a>
@@ -976,14 +920,14 @@
           <div class="helpful-feedback-buttons">
             <button
               type="button"
-              class="helpful-btn {% if user_helpful_feedback == 'SIM' %}selected{% endif %}"
+              class="default-btn {% if user_helpful_feedback == 'SIM' %}selected{% endif %}"
               id="btnHelpfulSim"
             >
               👍 Sim
             </button>
             <button
               type="button"
-              class="helpful-btn {% if user_helpful_feedback == 'NAO' %}selected{% endif %}"
+              class="default-btn {% if user_helpful_feedback == 'NAO' %}selected{% endif %}"
               id="btnHelpfulNao"
             >
               👎 Não
@@ -991,7 +935,7 @@
           </div>
           <button
             type="button"
-            class="helpful-btn"
+            class="default-btn"
             id="btnOpenSuggestionModal"
             style="margin-top: 1rem;"
           >
@@ -1021,7 +965,7 @@
               <br />
               <button
                 type="submit"
-                class="show-solution-btn"
+                class="default-btn"
                 style="margin-top: 0.5rem;"
               >
                 Enviar Sugestão
@@ -1189,7 +1133,7 @@
 
         let currentMiniStepIndex = 0;
         const btnShowMiniStep = document.createElement('button');
-        btnShowMiniStep.classList.add('mini-steps-btn');
+        btnShowMiniStep.classList.add('default-btn', 'mini-steps-btn');
         btnShowMiniStep.textContent = "Mostrar Passo " + stepNumber + ".1";
         stepDiv.appendChild(btnShowMiniStep);
 
