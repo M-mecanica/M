@@ -22,7 +22,7 @@
     Agora adicionamos "Confira a solução do M para:" antes do título e da descrição.
   -->
   <meta property="og:title" content="Confira a solução do M para: {{ problema['titulo'] }}">
-  <meta property="og:description" content={{ problema['descricao'] }} (via Plataforma M)">
+  <meta property="og:description" content="{{ problema['descricao'] }} (via Plataforma M)">
   <meta property="og:image" content="{{ problem_image_url }}">
   <meta property="og:url" content="{{ share_url }}">
   <meta property="og:type" content="website">
@@ -298,13 +298,17 @@
       }
     }
 
+    /*
+      Ajuste para a imagem do problema em mobile:
+      width: 100%; max-width: 400px; height: auto;
+      Assim ela não sai da tela em celulares.
+    */
     .problem-image {
       display: block;
       margin: 1rem auto;
-      width: auto;
-      height: auto;
+      width: 100%;
       max-width: 400px;
-      max-height: 300px;
+      height: auto;
       object-fit: contain;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
@@ -442,6 +446,10 @@
       text-align: center;
       margin-bottom: 1rem;
     }
+    /*
+      Garantir que as imagens de passo não estourem a tela:
+      width: 100%; max-width: 400px; height: auto;
+    */
     .step-image-block img {
       max-width: 400px;
       width: 100%;
@@ -487,8 +495,12 @@
       text-align: center;
       margin-bottom: 1rem;
     }
+    /*
+      Garantir que as imagens de subpassos não estourem a tela:
+      width: 100%; max-width: 400px; height: auto;
+    */
     .mini-step-image-block img {
-      max-width: 350px;
+      max-width: 400px;
       width: 100%;
       height: auto;
       border: 1px solid #ccc;
