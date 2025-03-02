@@ -796,13 +796,12 @@ def exibir_solucao(problem_id):
     solucao = problema.get("solucao", {})
     share_url = url_for("exibir_solucao", problem_id=problem_id, token=problema["share_token"], _external=True)
 
-    # Texto para WhatsApp (já existente)
-    share_text = f"Confira a solução para: {problema['titulo']} - {share_url}"
+    # Texto para WhatsApp (AGORA SEM "Confira a solução para:")
+    share_text = f"{share_url}"
     share_msg_encoded = quote(share_text, safe='')
 
-    # Texto e link para Facebook
-    # Aqui também adicionamos um "quote" (descrição) extra se quiser
-    fb_text = f"Confira a solução do M para: {problema['titulo']} - {problema['descricao']}"
+    # Texto e link para Facebook (removemos também o "Confira..." do quote)
+    fb_text = f"{problema['descricao']}"
     facebook_share_url = (
         "https://www.facebook.com/sharer/sharer.php?u="
         + quote(share_url, safe='')
