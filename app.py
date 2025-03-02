@@ -796,12 +796,12 @@ def exibir_solucao(problem_id):
     solucao = problema.get("solucao", {})
     share_url = url_for("exibir_solucao", problem_id=problem_id, token=problema["share_token"], _external=True)
 
-    # Ajuste para WhatsApp: inclui texto antes do link
-    share_text = f"Confira a Solução do M para: {problema['titulo']} {share_url}"
+    # Texto para WhatsApp
+    share_text = f"{share_url}"
     share_msg_encoded = quote(share_text, safe='')
 
-    # Ajuste para Facebook: inclui "Confira a Solução do M para:" antes da descrição
-    fb_text = f"Confira a Solução do M para: {problema['descricao']}"
+    # Texto e link para Facebook
+    fb_text = f"{problema['descricao']}"
     facebook_share_url = (
         "https://www.facebook.com/sharer/sharer.php?u="
         + quote(share_url, safe='')
@@ -1477,7 +1477,6 @@ def load_items():
                 item.get('matching_phrases', [])
             )
 
-        # Ordena: primeiro is_phrase_match=1, depois maior sub-frase, depois ordem alfabética
         items.sort(
             key=lambda x: (
                 -x['is_phrase_match'],
@@ -1507,7 +1506,6 @@ def load_items():
             'total_items': total_items
         })
     else:
-        # Busca vazia -> itens aleatórios
         if page == 1:
             session["displayed_item_ids"] = []
         displayed_ids = session.get("displayed_item_ids", [])

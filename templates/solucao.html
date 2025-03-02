@@ -17,10 +17,12 @@
   />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Meta tags para compartilhamento no Facebook (Open Graph) -->
-  <!-- Reintroduzindo o texto "Confira a Solução do M para:" antes do título e descrição -->
-  <meta property="og:title" content="Confira a Solução do M para: {{ problema['titulo'] }}">
-  <meta property="og:description" content="Confira a Solução do M para: {{ problema['descricao'] }} (via Plataforma M)">
+  <!--
+    Meta tags para compartilhamento no Facebook (Open Graph)
+    Agora adicionamos "Confira a solução do M para:" antes do título e da descrição.
+  -->
+  <meta property="og:title" content="Confira a solução do M para: {{ problema['titulo'] }}">
+  <meta property="og:description" content="Confira a solução do M para: {{ problema['descricao'] }} (via Plataforma M)">
   <meta property="og:image" content="{{ problem_image_url }}">
   <meta property="og:url" content="{{ share_url }}">
   <meta property="og:type" content="website">
