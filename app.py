@@ -276,6 +276,29 @@ def init_db():
         )
 
 # -----------------------------------------------------------
+# FUNÇÃO PARA VERIFICAR SE USUÁRIO PRECISA SER NOTIFICADO
+# -----------------------------------------------------------
+# <-- INÍCIO DA MUDANÇA
+def user_needs_notification_setup(user_doc):
+    """
+    Retorna True se o usuário NÃO tiver (email OU whatsapp) OU não habilitou notify_on_resolve.
+    Interpretando a regra:
+    Se NÃO satisfaz => ( (tem whatsApp OU tem email) E notify_on_resolve= True ),
+    então needs_notification_setup = True.
+    """
+    has_whatsapp = bool(user_doc.get("whatsapp", "").strip())
+    has_email = bool(user_doc.get("email", "").strip())
+    notify_enabled = user_doc.get("notify_on_resolve", False)
+
+    # Se ele tem (whatsapp OU email) E notify_on_resolve=True => is completo => NÃO precisa setup
+    # Caso contrário => precisa
+    if (has_whatsapp or has_email) and notify_enabled:
+        return False
+    else:
+        return True
+# <-- FIM DA MUDANÇA
+
+# -----------------------------------------------------------
 # ROTAS PRINCIPAIS E DE USUÁRIOS
 # -----------------------------------------------------------
 @app.route("/")
@@ -373,7 +396,9 @@ def register():
             "whatsapp": whatsapp,
             "maquinas": maquinas,
             "profile_image_id": None,
-            "perfil_token": None
+            "perfil_token": None,
+            "email": None,
+            "notify_on_resolve": False
             # Não adicionamos email/notificação aqui,
             # pois só pediremos na edição de perfil
         }
@@ -641,7 +666,18 @@ def add_problem():
                 "brand": brand
             }
             problemas_collection.insert_one(problema)
-            return redirect(url_for("unresolved"))
+
+            # <-- INÍCIO DA MUDANÇA
+            # Depois de inserir, checamos se o usuário está sem (whatsapp OU email) e sem notify_on_resolve:
+            user_doc = usuarios_collection.find_one({"_id": ObjectId(session["user_id"])})
+            if user_doc and user_needs_notification_setup(user_doc):
+                # Redireciona para /perfil com um parâmetro que force a abertura do modal e banner
+                return redirect(url_for("perfil", missing_info="1"))
+            else:
+                # Caso contrário, segue fluxo normal
+                return redirect(url_for("unresolved"))
+            # <-- FIM DA MUDANÇA
+
         else:
             return render_template("add.html", erro="Preencha todos os campos.")
 
@@ -1695,6 +1731,12 @@ def perfil():
     for p in latest_solved_problems:
         p["_id_str"] = str(p["_id"])
 
+    # <-- INÍCIO DA MUDANÇA
+    # Verifica se veio "missing_info=1" pela URL (ou outro param) para forçar modal e banner
+    missing_info = request.args.get("missing_info", "")
+    success_updated = request.args.get("success", "")
+    # <-- FIM DA MUDANÇA
+
     return render_template(
         "profil.html",
         user=user_obj,
@@ -1709,7 +1751,11 @@ def perfil():
         user_badges=user_badges,
         latest_problems=latest_problems,
         latest_solved_problems=latest_solved_problems,
-        random_bg=random_bg
+        random_bg=random_bg,
+        # <-- INÍCIO DA MUDANÇA
+        missing_info=missing_info,
+        success_updated=success_updated
+        # <-- FIM DA MUDANÇA
     )
 
 @app.route("/edit_profile", methods=["GET", "POST"])
@@ -1766,6 +1812,16 @@ def edit_profile():
             {"$set": update_fields}
         )
 
+        # <-- INÍCIO DA MUDANÇA
+        # Se agora o usuário preencheu (whatsapp ou email) e habilitou notify_on_resolve,
+        # redirecionamos com ?success=1 para exibir mensagem "Suas preferências foram atualizadas!"
+        updated_user = usuarios_collection.find_one({"_id": ObjectId(user_id)})
+        if updated_user:
+            if not user_needs_notification_setup(updated_user):
+                # Significa que agora ele tem (email ou whatsapp) E notify_on_resolve=True
+                return redirect(url_for("perfil", success="1"))
+        # Caso contrário, só volta pro perfil normal
+        # <-- FIM DA MUDANÇA
         return redirect(url_for("perfil"))
 
     return render_template("edit_profile.html", user=user_obj)

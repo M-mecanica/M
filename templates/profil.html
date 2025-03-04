@@ -697,7 +697,77 @@
       }
 
       /***********************************************
-       * MODAL COMPARTILHAR PERFIL
+       * BANNER "FALTA INFO" DENTRO DO MODAL (Novo)
+       ***********************************************/
+      .missing-info-banner {
+        position: absolute;
+        top: 80px; /* ou algo que não sobreponha o header do modal */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 500px;
+        background-color: #ffcc00;
+        color: #333;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 2px solid #ccc;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 999999; /* Garantir que fique por cima */
+        text-align: center;
+        font-size: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .missing-info-banner p {
+        margin: 0;
+      }
+      .banner-ok-btn {
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 25px;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        margin: 0 auto;
+      }
+      .banner-ok-btn:hover {
+        background-color: #333;
+      }
+
+      /***********************************************
+       * MENSAGEM DE SUCESSO (FIXA NO TOPO) (Novo)
+       ***********************************************/
+      .success-message {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #4caf50;
+        color: #fff;
+        padding: 1rem 2rem;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        font-size: 1rem;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .success-message .close-success-msg {
+        border: none;
+        background: none;
+        color: #fff;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .success-message .close-success-msg:hover {
+        color: #ddd;
+      }
+
+      /***********************************************
+       * MODAL COMPARTILHAR PERFIL (Antigo, restaurado)
        ***********************************************/
       #shareModal {
         display: none;
@@ -723,7 +793,6 @@
         border: 1px solid #fff;
         position: relative;
       }
-      /* Ajuste para centralizar "Compartilhar Perfil" e colocar o botão de fechar no canto. */
       #shareModalHeader {
         position: relative;
         display: flex;
@@ -774,10 +843,9 @@
         background-color: #25D366;
       }
       .share-option-btn.facebook {
-        background-color: #1877F2; /* Cor oficial do Facebook */
+        background-color: #1877F2;
       }
       .share-option-btn.instagram {
-        /* Instagram com gradient aproximado */
         background: linear-gradient(45deg, #f09433, #bc1888);
       }
       .share-option-btn.native-share {
@@ -785,17 +853,6 @@
       }
       .share-option-btn.copy-link-btn {
         background-color: #777;
-      }
-
-      @keyframes modalFadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
       }
     </style>
   </head>
@@ -805,6 +862,14 @@
     <div id="preloader">
       <div class="loader"></div>
     </div>
+
+    <!-- MENSAGEM DE SUCESSO (caso success_updated=1) -->
+    {% if success_updated == "1" %}
+      <div class="success-message" id="successMsg">
+        <span>Suas preferências foram atualizadas com sucesso!</span>
+        <button class="close-success-msg" id="closeSuccessMsgBtn">&times;</button>
+      </div>
+    {% endif %}
 
     <!-- CONTEÚDO GERAL (fade-in) -->
     <div id="content">
@@ -1026,7 +1091,6 @@
         </div>
       </main>
 
-      <!-- FOOTER -->
       <footer>
         <p>© 2025 Plataforma M</p>
       </footer>
@@ -1114,7 +1178,14 @@
           <h2>Editar Perfil</h2>
           <span class="close" id="closeModalBtn">&times;</span>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" style="position: relative;">
+          <!-- Banner de Falta de Info (caso missing_info=1) -->
+          <div class="missing-info-banner" id="missingInfoBanner" style="display: none;">
+            <p><strong>Quer ser notificado quando seu problema for resolvido?</strong></p>
+            <p>Adicione o Telefone ou o email e habilite as notificações</p>
+            <button class="banner-ok-btn" id="bannerOkBtn">OK</button>
+          </div>
+
           <form
             method="POST"
             action="{{ url_for('edit_profile') }}"
@@ -1208,7 +1279,7 @@
       </div>
     </div>
 
-    <!-- MODAL Compartilhar Perfil -->
+    <!-- MODAL Compartilhar Perfil (Restaurado do "antigo") -->
     <div class="modal" id="shareModal">
       <div id="shareModalContent">
         <div id="shareModalHeader">
@@ -1439,6 +1510,15 @@
         }
       });
 
+      // Fecha mensagem de sucesso (se houver)
+      const closeSuccessMsgBtn = document.getElementById('closeSuccessMsgBtn');
+      const successMsgDiv = document.getElementById('successMsg');
+      if (closeSuccessMsgBtn && successMsgDiv) {
+        closeSuccessMsgBtn.addEventListener('click', () => {
+          successMsgDiv.style.display = 'none';
+        });
+      }
+
       // Modal Editar Perfil
       const openModalBtn = document.getElementById('openModalBtn');
       const closeModalBtn = document.getElementById('closeModalBtn');
@@ -1456,6 +1536,33 @@
         window.addEventListener('click', (event) => {
           if (event.target === editProfileModal) {
             editProfileModal.style.display = 'none';
+          }
+        });
+      }
+
+      // Verificação se "missing_info" = "1" => Abrir modal + Mostrar Banner
+      const urlParams = new URLSearchParams(window.location.search);
+      const missingInfo = urlParams.get('missing_info');
+      if (missingInfo === '1') {
+        // Força a abertura do modal
+        if (editProfileModal) {
+          editProfileModal.style.display = 'flex';
+        }
+        // Exibe banner
+        const banner = document.getElementById('missingInfoBanner');
+        if (banner) {
+          banner.style.display = 'flex';
+        }
+      }
+
+      // Botão OK do Banner
+      const bannerOkBtn = document.getElementById('bannerOkBtn');
+      if (bannerOkBtn) {
+        bannerOkBtn.addEventListener('click', function () {
+          // Apenas oculta o banner
+          const banner = document.getElementById('missingInfoBanner');
+          if (banner) {
+            banner.style.display = 'none';
           }
         });
       }
