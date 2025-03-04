@@ -1,4 +1,3 @@
-<!-- solucao.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -335,20 +334,6 @@
       transform: scale(1.02);
     }
 
-    .whatsapp-share-btn {
-      margin: 1rem 0.5rem;
-    }
-    .whatsapp-icon {
-      fill: currentColor;
-      width: 20px;
-      height: 20px;
-    }
-
-    .facebook-share-btn {
-      margin: 1rem 0.5rem;
-      background-color: #1877f2;
-    }
-
     .section-divider {
       border: none;
       border-top: 1px solid #ccc;
@@ -574,6 +559,7 @@
       transform: none !important;
       color: #fff !important;
     }
+
     /* Modal de sugestão de melhorias */
     .modal {
       display: none;
@@ -641,6 +627,86 @@
       overflow-y: auto;
       max-height: calc(90vh - 100px);
     }
+
+    /*
+      ============ NOVO: Modal de compartilhamento (copiado de profil.html) ============
+      (estilizado para permitir compartilhar via WhatsApp, Facebook, Instagram, etc.)
+    */
+    #shareSolutionModalContent {
+      background-color: #fff;
+      width: 95%;
+      max-width: 350px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      animation: modalFadeIn 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #fff;
+      position: relative;
+    }
+    #shareSolutionModalHeader {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #000;
+      color: #fff;
+      padding: 1rem;
+    }
+    #shareSolutionModalHeader h2 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+    #closeShareSolutionModal {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      background: none;
+      color: #fff;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    #shareSolutionModalBody {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .share-option-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.6rem;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .share-option-btn svg {
+      margin-right: 8px;
+      fill: currentColor;
+    }
+    .share-option-btn.whatsapp {
+      background-color: #25D366;
+    }
+    .share-option-btn.facebook {
+      background-color: #1877F2; /* Cor oficial do Facebook */
+    }
+    .share-option-btn.instagram {
+      /* Instagram com gradient aproximado */
+      background: linear-gradient(45deg, #f09433, #bc1888);
+    }
+    .share-option-btn.native-share {
+      background-color: #333;
+    }
+    .share-option-btn.copy-link-btn {
+      background-color: #777;
+    }
+
   </style>
 </head>
 <body>
@@ -762,73 +828,41 @@
           />
         {% endif %}
 
-        <!-- Botoes de compartilhamento (WhatsApp e Facebook) -->
+        <!-- Botão UNIFICADO para abrir modal de compartilhamento -->
         <div style="text-align: center; margin-top: 1rem;">
-          <!-- Botão WhatsApp -->
-          <a
-            href="https://wa.me/?text={{ share_msg_encoded }}"
-            class="default-btn whatsapp-share-btn"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            class="default-btn"
+            style="margin: 1rem auto;"
+            id="openShareSolutionModalBtn"
+            data-solutionurl="{{ share_url }}"
+            data-problemtitle="{{ problema['titulo'] }}"
           >
+            <!-- Ícone "share" -->
             <svg
-              class="whatsapp-icon"
+              width="18"
+              height="18"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 448 512"
+              viewBox="0 0 512 512"
+              style="fill: currentColor;"
             >
               <path
-                d="M380.9 97.1C339 55.2 283.2 32 224 32 100.3 32
-                   0 132.3 0 256c0 45.4 11.8 89.3 34.3 128L0 480l100.6 -33.2
-                   c37.9 20.8 81 31.8 123.4 31.8h.1c124 0 224.4-100.3
-                   224.6-224.3.1-59.3-23-115.2 -67.8-159.2zM224.1 400
-                   c-35 0-69.2 -9.3-98.6-26.9l-6.9-4.1 -58.4 19.3
-                   19.6-57.1-4.5-7c-17.6-28 -26.8-60.4-26.8-93.8
-                   0-97.5 79.2-176.8 176.8-176.8
-                   47.2 0 91.6 18.4 124.9 51.7
-                   33.2 33.2 51.5 77.6 51.4 124.7
-                   -.2 97.5-79.4 176.7 -176.8 176.7zm101.7-131.5
-                   c-5.6-2.8-33.2-16.4 -38.4-18.2-5.1-1.9-8.8 -2.8
-                   -12.6 2.8-3.7 5.6-14.4 18.2-17.6 21.9
-                   -3.2 3.7 -6.5 4.2-12.1 1.4
-                   -5.6 -2.8-23.6-8.7-45-27.6
-                   -16.6-14.7-27.8-32.8 -31-38.4
-                   -3.2-5.6-.3-8.6 2.4-11.3
-                   2.5-2.5 5.6-6.5 8.4-9.7
-                   s3.7-5.6 5.6-9.3c1.9-3.7.9-7-0.5 -9.8
-                   -1.4-2.8-12.6-30.4 -17.3-41.8
-                   -4.5-11-9.1-9.3-12.6-9.5
-                   -3.2-.2-7-.2-10.7-.2
-                   s-9.8 1.4 -15 6.9
-                   c-5.1 5.6-19.7 19.3-19.7 47.1
-                   s20.2 54.5 23 58.2
-                   c2.8 3.7 39.8 60.7 96.4 85.2
-                   13.4 5.8 23.8 9.3 31.9 11.9
-                   13.4 4.2 25.6 3.6 35.2 2.2
-                   10.7-1.6 33.2-13.5 37.9-26.6
-                   4.7-13.2 4.7-24.5 3.2-26.6
-                   -1.6-2.1-5.1-3.4 -10.7-6.2z"
+                d="M503.691 189.836l-192-160C302.126 25.161
+                298.063 24 294.071 24c-4.275 0-8.531 1.242-12.266
+                3.773C272.161 36.881 272 41.719 272 46.312V128C128
+                128 64 173.568 64 320c0 63.551 31.362 85.719 49.703
+                92.137 5.289 1.856 11.183 2.789 16.787 2.789
+                9.189 0 18.264-2.183 26.361-6.531 12.195-6.52
+                19.149-19.364 17.232-33.121C168.98 308.02
+                201.047 270.581 272 256v81.688c0 4.593.161
+                9.431 9.805 18.539C285.54 359.758 289.796
+                361 294.07 361c3.992 0 8.055-1.161
+                11.625-3.77l192-160c3.773-3.156 5.305-7.772
+                5.305-12.23S507.464 192.992 503.691 189.836zM256 334
+                c-43.1 0-78-34.9-78-78s34.9-78 78-78 78 34.9 78 78-34.9 78-78 78z"
               />
             </svg>
-            WhatsApp
-          </a>
-
-          <!-- Botão Facebook -->
-          <a
-            href="{{ facebook_share_url }}"
-            class="default-btn facebook-share-btn"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" style="width:20px;height:20px;">
-              <path
-                fill="currentColor"
-                d="M279.14 288l14.22-92.66h-88.91V129.27c0-25.35
-                   12.42-50.06 52.24-50.06h40.42V6.26S266.43 0
-                   225.36 0c-73.48 0-121.36 44.67-121.36 126.25v69.09H22.89V288h81.11v224h100.2V288z"
-              />
-            </svg>
-            Facebook
-          </a>
+            Compartilhar Solução
+          </button>
         </div>
       </div>
 
@@ -1070,12 +1104,222 @@
     </div>
   </div>
 
+  <!-- Áudio de sucesso (opcional) -->
   <audio
     id="successSound"
     src="/static/sounds/success.mp3"
     preload="auto"
     style="display:none;"
   ></audio>
+
+  <!-- ================ NOVO: Modal para compartilhar solução (copiado de profil.html) ================ -->
+  <div class="modal" id="shareSolutionModal">
+    <div id="shareSolutionModalContent">
+      <div id="shareSolutionModalHeader">
+        <h2>Compartilhar Solução</h2>
+        <button id="closeShareSolutionModal">&times;</button>
+      </div>
+      <div id="shareSolutionModalBody">
+        <p style="font-size:1rem; margin-bottom:1rem;">Escolha como deseja compartilhar:</p>
+
+        <!-- Botão "Compartilhar via Dispositivo" (Web Share API) -->
+        <button
+          class="share-option-btn native-share"
+          id="btnNativeShareSolution"
+          style="display: none;"
+        >
+          <!-- Ícone genérico "Share" -->
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 512 512"
+            fill="currentColor"
+          >
+            <path
+              d="M503.691 189.836l-192-160C302.126 25.161
+                298.063 24 294.071 24c-4.275 0-8.531 1.242-12.266
+                3.773C272.161 36.881 272 41.719 272 46.312V128C128
+                128 64 173.568 64 320c0 63.551 31.362 85.719 49.703
+                92.137 5.289 1.856 11.183 2.789 16.787 2.789
+                9.189 0 18.264-2.183 26.361-6.531 12.195-6.52
+                19.149-19.364 17.232-33.121C168.98 308.02
+                201.047 270.581 272 256v81.688c0 4.593.161
+                9.431 9.805 18.539C285.54 359.758 289.796
+                361 294.07 361c3.992 0 8.055-1.161
+                11.625-3.77l192-160c3.773-3.156 5.305-7.772
+                5.305-12.23S507.464 192.992 503.691 189.836zM256 334
+                c-43.1 0-78-34.9-78-78s34.9-78 78-78 78 34.9 78 78-34.9 78-78 78z"
+            />
+          </svg>
+          Compartilhar via Dispositivo
+        </button>
+
+        <!-- Botão WhatsApp -->
+        <button class="share-option-btn whatsapp" id="btnShareSolutionWhatsApp">
+          <svg
+            width="20"
+            height="20"
+            fill="currentColor"
+            viewBox="0 0 448 512"
+          >
+            <path
+              d="M380.9 97.1C339 55.2 283.2 32 224 32 100.3 32
+                  0 132.3 0 256c0 45.4 11.8 89.3 34.3 128L0 480l100.6 -33.2
+                  c37.9 20.8 81 31.8 123.4 31.8h.1c124 0 224.4-100.3
+                  224.6-224.3.1-59.3-23-115.2 -67.8-159.2zM224.1 400
+                  c-35 0-69.2 -9.3-98.6-26.9l-6.9-4.1 -58.4 19.3
+                  19.6-57.1-4.5-7c-17.6-28 -26.8-60.4-26.8-93.8
+                  0-97.5 79.2-176.8 176.8-176.8
+                  47.2 0 91.6 18.4 124.9 51.7
+                  33.2 33.2 51.5 77.6 51.4 124.7
+                  -.2 97.5-79.4 176.7 -176.8 176.7zm101.7-131.5
+                  c-5.6-2.8-33.2-16.4 -38.4-18.2-5.1-1.9-8.8 -2.8
+                  -12.6 2.8-3.7 5.6-14.4 18.2-17.6 21.9
+                  -3.2 3.7 -6.5 4.2-12.1 1.4
+                  -5.6 -2.8-23.6-8.7-45-27.6
+                  -16.6-14.7-27.8-32.8 -31-38.4
+                  -3.2-5.6-.3-8.6 2.4-11.3
+                  2.5-2.5 5.6-6.5
+                  8.4-9.7
+                  s3.7-5.6 5.5-9.3c1.9-3.7.9-7-0.5 -9.8
+                  -1.4-2.8-12.6-30.4 -17.3-41.8
+                  -4.5-11-9-9.3-12.6-9.5
+                  -3.2-.2-7-.2-10.7-.2
+                  s-9.8 1.4 -15 6.9
+                  c-5.1 5.6-19.7 19.3-19.7 47.1
+                  s20.2 54.5 23 58.2
+                  c2.8 3.7 39.8 60.7 96.4 85.2
+                  13 5.8 23.8 9.3 31.9 11.9
+                  13.4 4.2 25.6 3.6 35.2 2.2
+                  10.7-1.6 33.2-13.5
+                  37.9-25.8
+                  4.7-13.2
+                  4.7-24.5 3.2-26.6
+                  -1.6-2.1-5.1-3.4 -10.7-6.2z"
+            />
+          </svg>
+          WhatsApp
+        </button>
+
+        <!-- Botão Facebook -->
+        <button class="share-option-btn facebook" id="btnShareSolutionFacebook">
+          <svg
+            width="20"
+            height="20"
+            fill="white"
+            viewBox="0 0 13 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12.033.003H9.209C5.73.003 3.391 2.453 3.391 5.869v2.529H.566A.566.566 0 0 0 0 8.964v3.006c0
+                  .312.254.566.566.566h2.825v7.899c0
+                  .312.254.565.566.565h3.29c.312 0
+                  .566-.253.566-.565v-7.899h2.946a.566.566 0 0 0
+                  .565-.566l.001-3.006a.56.56 0 0 0-.166-.4.568.568 0 0 0-.399-.166H7.813V6.249c0-1.01.24-1.521
+                  1.55-1.521l1.9-.001a.566.566 0 0 0
+                  .566-.566V.568A.566.566 0 0 0 11.262 0h-.01l.781.003z"
+            />
+          </svg>
+          Facebook
+        </button>
+
+        <!-- Botão Instagram -->
+        <button class="share-option-btn instagram" id="btnShareSolutionInstagram">
+          <svg
+            width="20"
+            height="20"
+            fill="currentColor"
+            viewBox="0 0 448 512"
+          >
+            <path
+              d="M224.1 141c-63.6 0-114.9
+                51.3-114.9 114.9s51.3 114.9 114.9
+                114.9 114.9-51.3 114.9-114.9S287.6
+                141 224.1 141zm0
+                190c-41.7 0-75.1-33.4-75.1-75.1
+                0-41.7 33.4-75.1
+                75.1-75.1 41.7 0 75.1 33.4
+                75.1 75.1 0
+                41.7-33.4 75.1-75.1
+                75.1zm146.4-194.3c0
+                14.9-12 26.9-26.9
+                26.9-14.9 0-26.9-12-26.9-26.9
+                0-14.9 12-26.9
+                26.9-26.9 14.9 0
+                26.9 12 26.9 26.9zm76.1
+                27.2c-1.7-36.2-9.9-68.4-36.2-94.7s-58.5-34.5-94.7
+                -36.2C290.9 32 284 32 224
+                32s-66.9 0-88.5
+                1.7c-36.2 1.7-68.4
+                9.9-94.7 36.2S6.3
+                128.5 4.6 164.7C2.9 186.3 2.9
+                193.2 2.9 256s0
+                69.7 1.7 91.3c1.7
+                36.2 9.9 68.4
+                36.2 94.7s58.5 34.5 94.7
+                36.2c21.6 1.7 28.5
+                1.7 88.5
+                1.7s66.9 0
+                88.5-1.7c36.2-1.7
+                68.4-9.9
+                94.7-36.2s34.5-58.5
+                36.2-94.7c1.7-21.6
+                1.7-28.5 1.7-88.5s0-66.9-1.7
+                -88.5zM398.8
+                388.4c-7.8
+                19.6-22.9
+                34.7-42.5
+                42.5-29.4
+                11.7-99.2
+                9-132.3
+                9s-102.9
+                2.6-132.3-9c-19.6-7.8-34.7-22.9
+                -42.5-42.5-11.7-29.4-9-99.2
+                -9-132.3s-2.6-102.9
+                9-132.3c7.8-19.6
+                22.9-34.7 42.5-42.5
+                29.4-11.7 99.2-9
+                132.3-9s102.9-2.6
+                132.3 9c19.6 7.8
+                34.7 22.9
+                42.5 42.5
+                11.7 29.4
+                9 99.2
+                9 132.3s2.7
+                102.9-9
+                132.3z"
+            />
+          </svg>
+          Instagram
+        </button>
+
+        <!-- Botão de copiar link -->
+        <button class="share-option-btn copy-link-btn" id="btnCopySolutionLink">
+          <!-- Ícone genérico "Copy" -->
+          <svg
+            width="20"
+            height="20"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M16 1H4c-1.103 0-2
+                .897-2 2v14h2V3h12V1z"
+            ></path>
+            <path
+              d="M18 5H8c-1.103
+                0-2 .897-2 2v14c0 1.103.897
+                2 2 2h10c1.103 0
+                2-.897 2-2V7c0-1.103-.897-2-2-2zm0
+                16H8V7h10v14z"
+            ></path>
+          </svg>
+          Copiar Link
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- ================ FIM do Modal de Compartilhar Solução ================ -->
 
   <script>
     // Preloader + fade-in do conteúdo
@@ -1093,6 +1337,9 @@
     const isSolucionador = {{ 'true' if session.get("role") == "solucionador" else 'false' }};
     const userIsLoggedIn = {{ 'true' if session.get("user_id") else 'false' }};
 
+    // --------------------------------------------------------------------------------
+    // Lógica de exibição da solução passo-a-passo (igual ao original):
+    // --------------------------------------------------------------------------------
     function revealStepSimple(stepDiv, stepNumber, stepData) {
       const titleBlock = document.createElement('div');
       titleBlock.classList.add('step-title-block');
@@ -1445,6 +1692,127 @@
             // Caso contrário, tenta voltar na history
             window.history.back();
           }
+        });
+      }
+    });
+
+    // ============ SCRIPT PARA COMPARTILHAMENTO (copiado/adaptado do profil.html) ============
+    document.addEventListener('DOMContentLoaded', function() {
+      const openShareModalBtn = document.getElementById('openShareSolutionModalBtn');
+      const shareModal = document.getElementById('shareSolutionModal');
+      const closeShareModalBtn = document.getElementById('closeShareSolutionModal');
+      const btnShareSolutionWhatsApp = document.getElementById('btnShareSolutionWhatsApp');
+      const btnShareSolutionFacebook = document.getElementById('btnShareSolutionFacebook');
+      const btnShareSolutionInstagram = document.getElementById('btnShareSolutionInstagram');
+      const btnCopySolutionLink = document.getElementById('btnCopySolutionLink');
+      const btnNativeShareSolution = document.getElementById('btnNativeShareSolution');
+
+      let finalShareURL = "";
+      let problemTitle = "";
+
+      if (openShareModalBtn && shareModal && closeShareModalBtn) {
+        openShareModalBtn.addEventListener('click', () => {
+          // Pegamos os dados do data-attribute
+          finalShareURL = openShareModalBtn.dataset.solutionurl;
+          problemTitle = openShareModalBtn.dataset.problemtitle;
+
+          // Exibe o modal
+          shareModal.style.display = 'flex';
+
+          // Se o navegador suportar Web Share API, mostra o botão nativo
+          if (navigator.share) {
+            btnNativeShareSolution.style.display = 'block';
+          }
+        });
+
+        closeShareModalBtn.addEventListener('click', () => {
+          shareModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+          if (event.target === shareModal) {
+            shareModal.style.display = 'none';
+          }
+        });
+      }
+
+      // Botão "Compartilhar via Dispositivo" (Web Share API)
+      if (btnNativeShareSolution) {
+        btnNativeShareSolution.addEventListener('click', async () => {
+          if (!finalShareURL) {
+            alert("Link da solução não encontrado.");
+            return;
+          }
+          const shareTitle = `Solução para: ${problemTitle}`;
+          const shareText = `Confira esta solução na Plataforma M:\n${finalShareURL}`;
+          try {
+            await navigator.share({
+              title: shareTitle,
+              text: shareText,
+              url: finalShareURL
+            });
+          } catch (err) {
+            console.log("Usuário cancelou ou erro no compartilhamento nativo:", err);
+          }
+        });
+      }
+
+      // Botão WhatsApp
+      if (btnShareSolutionWhatsApp) {
+        btnShareSolutionWhatsApp.addEventListener('click', () => {
+          if (!finalShareURL) {
+            alert("Link da solução não encontrado.");
+            return;
+          }
+          const shareText = `Confira esta solução no M: ${finalShareURL}`;
+          const wppLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+          window.open(wppLink, '_blank');
+        });
+      }
+
+      // Botão Facebook
+      if (btnShareSolutionFacebook) {
+        btnShareSolutionFacebook.addEventListener('click', () => {
+          if (!finalShareURL) {
+            alert("Link da solução não encontrado.");
+            return;
+          }
+          const fbLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(finalShareURL)}&quote=${encodeURIComponent('Solução do M: ' + problemTitle)}`;
+          window.open(fbLink, '_blank');
+        });
+      }
+
+      // Botão Instagram
+      if (btnShareSolutionInstagram) {
+        btnShareSolutionInstagram.addEventListener('click', () => {
+          if (!finalShareURL) {
+            alert("Link da solução não encontrado.");
+            return;
+          }
+          alert(
+            "No momento, não é possível postar automaticamente no Instagram. " +
+            "Você pode copiar o link e colar no seu Story ou na bio.\n\n" +
+            `Link: ${finalShareURL}`
+          );
+        });
+      }
+
+      // Botão de copiar link
+      if (btnCopySolutionLink) {
+        btnCopySolutionLink.addEventListener('click', () => {
+          if (!finalShareURL) {
+            alert("Link da solução não encontrado.");
+            return;
+          }
+          navigator.clipboard
+            .writeText(finalShareURL)
+            .then(() => {
+              alert("Link copiado para a área de transferência!");
+            })
+            .catch((err) => {
+              console.error("Erro ao copiar link", err);
+              alert("Não foi possível copiar o link. Tente manualmente.");
+            });
         });
       }
     });

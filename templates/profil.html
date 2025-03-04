@@ -1,4 +1,3 @@
-<!-- profil.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -12,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
       rel="stylesheet"
     />
-    <!-- Ícones Material -->
+    <!-- Ícones Material (opcional) -->
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
@@ -330,7 +329,7 @@
 
       .profile-buttons {
         display: flex;
-        width: calc(100% + 4rem); /* soma pra “anular” o padding anterior */
+        width: calc(100% + 4rem); /* soma para “anular” o padding anterior */
         margin-left: -2rem;
         margin-right: -2rem;
       }
@@ -389,6 +388,12 @@
         font-weight: 600;
       }
       .form-group input[type='text'] {
+        width: 100%;
+        padding: 0.5rem;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+      .form-group input[type='email'] {
         width: 100%;
         padding: 0.5rem;
         border-radius: 4px;
@@ -718,19 +723,24 @@
         border: 1px solid #fff;
         position: relative;
       }
+      /* Ajuste para centralizar "Compartilhar Perfil" e colocar o botão de fechar no canto. */
       #shareModalHeader {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         background-color: #000;
         color: #fff;
         padding: 1rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
       }
       #shareModalHeader h2 {
         margin: 0;
         font-size: 1.25rem;
       }
       #closeShareModal {
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
         background: none;
         color: #fff;
         border: none;
@@ -744,7 +754,9 @@
         align-items: center;
       }
       .share-option-btn {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 100%;
         margin: 0.5rem 0;
         padding: 0.6rem;
@@ -754,11 +766,36 @@
         cursor: pointer;
         font-size: 1rem;
       }
+      .share-option-btn svg {
+        margin-right: 8px;
+        fill: currentColor;
+      }
       .share-option-btn.whatsapp {
         background-color: #25D366;
       }
       .share-option-btn.facebook {
-        background-color: #1877F2;
+        background-color: #1877F2; /* Cor oficial do Facebook */
+      }
+      .share-option-btn.instagram {
+        /* Instagram com gradient aproximado */
+        background: linear-gradient(45deg, #f09433, #bc1888);
+      }
+      .share-option-btn.native-share {
+        background-color: #333;
+      }
+      .share-option-btn.copy-link-btn {
+        background-color: #777;
+      }
+
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
     </style>
   </head>
@@ -893,7 +930,7 @@
             </div>
           </div>
 
-          <!-- Exibe badges (agora só "Solucionador de Ouro", quando aplicável) -->
+          <!-- Exibe badges (ex.: "Solucionador de Ouro") -->
           <div class="badges-section">
             {% for badge in user_badges %}
               <span class="badge">{{ badge }}</span>
@@ -1114,7 +1151,53 @@
             <!-- Campo de Nome -->
             <div class="form-group">
               <label for="nome">Nome:</label>
-              <input type="text" name="nome" id="nome" value="{{ user.nome }}" />
+              <input
+                type="text"
+                name="nome"
+                id="nome"
+                value="{{ user.nome }}"
+              />
+            </div>
+
+            <!-- Telefone (WhatsApp) -->
+            <div class="form-group">
+              <label for="whatsapp">Telefone (WhatsApp):</label>
+              <input
+                type="text"
+                name="whatsapp"
+                id="whatsapp"
+                value="{{ user.whatsapp if user.whatsapp else '' }}"
+                pattern="^[+]?[\d\s()-]+$"
+                placeholder="+55 (11) 99999-9999"
+              />
+            </div>
+
+            <!-- E-mail -->
+            <div class="form-group">
+              <label for="email">E-mail:</label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                value="{{ user.email if user.email else '' }}"
+                placeholder="exemplo@provedor.com"
+              />
+            </div>
+
+            <!-- Preferência de Notificação -->
+            <div
+              class="form-group"
+              style="display: flex; align-items: center; gap: 0.5rem;"
+            >
+              <input
+                type="checkbox"
+                id="notify_on_resolve"
+                name="notify_on_resolve"
+                {% if user.notify_on_resolve %}checked{% endif %}
+              />
+              <label for="notify_on_resolve" style="display: inline;">
+                Deseja receber notificação quando seu problema for resolvido?
+              </label>
             </div>
 
             <div class="modal-footer">
@@ -1133,12 +1216,197 @@
           <button id="closeShareModal">&times;</button>
         </div>
         <div id="shareModalBody">
-          <p style="font-size:1rem; margin-bottom:1rem;">Escolha onde deseja compartilhar:</p>
+          <p style="font-size:1rem; margin-bottom:1rem;">Escolha como deseja compartilhar:</p>
+
+          <!-- Botão "Compartilhar via Dispositivo" (Web Share API) -->
+          <button
+            class="share-option-btn native-share"
+            id="btnNativeShare"
+            style="display: none;"
+          >
+            <!-- Ícone genérico "Share" -->
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 512 512"
+              fill="currentColor"
+            >
+              <path
+                d="M503.691 189.836l-192-160C302.126 25.161
+                298.063 24 294.071 24c-4.275 0-8.531 1.242-12.266
+                3.773C272.161 36.881 272 41.719 272 46.312V128C128
+                128 64 173.568 64 320c0 63.551 31.362 85.719 49.703
+                92.137 5.289 1.856 11.183 2.789 16.787 2.789
+                9.189 0 18.264-2.183 26.361-6.531 12.195-6.52
+                19.149-19.364 17.232-33.121C168.98 308.02
+                201.047 270.581 272 256v81.688c0 4.593.161
+                9.431 9.805 18.539C285.54 359.758 289.796
+                361 294.07 361c3.992 0 8.055-1.161
+                11.625-3.77l192-160c3.773-3.156 5.305-7.772
+                5.305-12.23S507.464 192.992 503.691 189.836zM256 334
+                c-43.1 0-78-34.9-78-78s34.9-78 78-78 78 34.9 78 78-34.9 78-78 78z"
+              />
+            </svg>
+            Compartilhar via Dispositivo
+          </button>
+
+          <!-- Botão WhatsApp -->
           <button class="share-option-btn whatsapp" id="btnShareWhatsApp">
+            <svg
+              width="20"
+              height="20"
+              fill="currentColor"
+              viewBox="0 0 448 512"
+            >
+              <path
+                d="M380.9 97.1C339 55.2 284.3 32
+                226.9 32 101.4 32 0 133.4 0
+                258.9c0 45.2 11.9 89.4 34.5
+                128.2L0 480l96.6-33.6c36.6
+                20 78.1 30.7 121.3 30.7h.1c125.5
+                0 226.9-101.4 226.9-226.9
+                0-57.4-22.4-112.1-63.9-153.1zM226.9
+                408.2c-38.7 0-76.2-10.5-108.9-30.4l-7.8-4.6-57
+                19.8 19.1-58.4-5.1-8C51.2
+                299 40.6 270.6 40.6 258.9c0-103.1
+                83.8-186.9 186.9-186.9 50 0 97
+                19.5 132.3 55.1 35.3 35.3
+                54.7 82.2 54.7 132 0 103.1-83.8
+                186.9-186.9 186.9zm101.2-138.5c-5.5-2.7-32.6-16.1-37.7-17.9-5.1-1.9-8.8-2.7-12.5
+                2.7-3.7 5.3-14.3 17.9-17.5
+                21.6-3.2 3.7-6.4 4.2-11.9
+                1.6-5.5-2.7-23.2-8.5-44.2-27.1-16.4-14.6-27.5-32.6-30.6-38.1-3.2-5.5-.3-8.5
+                2.4-11.2 2.4-2.4 5.5-6.4
+                8.2-9.6 2.7-3.2 3.7-5.5
+                5.5-9.1 1.9-3.7.8-6.9-.5-9.6-1.6-2.7-12.5-30.1-17.1-41.2-4.5-10.8-9-9.3-12.5
+                -9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.6
+                1.3-14.6 6.9-5.1 5.5-19.1
+                18.7-19.1 45.7 0 26.9 19.6
+                52.9 22.3 56.6 2.7 3.7 38.5
+                58.8 93.2 82.5 13 5.6 23.1
+                8.9 31 11.4 13 4.1 24.9 3.5
+                34.3 2.1 10.4-1.5 32-13.1
+                36.5-25.8 4.5-12.7
+                4.5-23.7 3.2-25.8-1.3-2.1-5-3.7-10.5-6.4z"
+              />
+            </svg>
             WhatsApp
           </button>
+
+          <!-- Botão Facebook -->
           <button class="share-option-btn facebook" id="btnShareFacebook">
+            <svg
+              width="20"
+              height="20"
+              fill="white"
+              viewBox="0 0 13 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12.033.003H9.209C5.73.003 3.391 2.453 3.391 5.869v2.529H.566A.566.566 0 0 0 0 8.964v3.006c0
+                  .312.254.566.566.566h2.825v7.899c0
+                  .312.254.565.566.565h3.29c.312 0
+                  .566-.253.566-.565v-7.899h2.946a.566.566 0 0 0
+                  .565-.566l.001-3.006a.56.56 0 0 0-.166-.4.568.568 0 0 0-.399-.166H7.813V6.249c0-1.01.24-1.521
+                  1.55-1.521l1.9-.001a.566.566 0 0 0
+                  .566-.566V.568A.566.566 0 0 0 11.262 0h-.01l.781.003z"
+              />
+            </svg>
             Facebook
+          </button>
+
+          <!-- Botão Instagram -->
+          <button class="share-option-btn instagram" id="btnShareInstagram">
+            <svg
+              width="20"
+              height="20"
+              fill="currentColor"
+              viewBox="0 0 448 512"
+            >
+              <path
+                d="M224.1 141c-63.6 0-114.9
+                51.3-114.9 114.9s51.3 114.9 114.9
+                114.9 114.9-51.3 114.9-114.9S287.6
+                141 224.1 141zm0
+                190c-41.7 0-75.1-33.4-75.1-75.1
+                0-41.7 33.4-75.1
+                75.1-75.1 41.7 0 75.1 33.4
+                75.1 75.1 0
+                41.7-33.4 75.1-75.1
+                75.1zm146.4-194.3c0
+                14.9-12 26.9-26.9
+                26.9-14.9 0-26.9-12-26.9-26.9
+                0-14.9 12-26.9
+                26.9-26.9 14.9 0
+                26.9 12 26.9 26.9zm76.1
+                27.2c-1.7-36.2-9.9-68.4-36.2-94.7s-58.5-34.5-94.7
+                -36.2C290.9 32 284 32 224
+                32s-66.9 0-88.5
+                1.7c-36.2 1.7-68.4
+                9.9-94.7 36.2S6.3
+                128.5 4.6 164.7C2.9 186.3 2.9
+                193.2 2.9 256s0
+                69.7 1.7 91.3c1.7
+                36.2 9.9 68.4
+                36.2 94.7s58.5 34.5 94.7
+                36.2c21.6 1.7 28.5
+                1.7 88.5
+                1.7s66.9 0
+                88.5-1.7c36.2-1.7
+                68.4-9.9
+                94.7-36.2s34.5-58.5
+                36.2-94.7c1.7-21.6
+                1.7-28.5 1.7-88.5s0-66.9-1.7
+                -88.5zM398.8
+                388.4c-7.8
+                19.6-22.9
+                34.7-42.5
+                42.5-29.4
+                11.7-99.2
+                9-132.3
+                9s-102.9
+                2.6-132.3-9c-19.6-7.8-34.7-22.9
+                -42.5-42.5-11.7-29.4-9-99.2
+                -9-132.3s-2.6-102.9
+                9-132.3c7.8-19.6
+                22.9-34.7 42.5-42.5
+                29.4-11.7 99.2-9
+                132.3-9s102.9-2.6
+                132.3 9c19.6 7.8
+                34.7 22.9
+                42.5 42.5
+                11.7 29.4
+                9 99.2
+                9 132.3s2.7
+                102.9-9
+                132.3z"
+              />
+            </svg>
+            Instagram
+          </button>
+
+          <!-- Botão de copiar link -->
+          <button class="share-option-btn copy-link-btn" id="btnCopyLink">
+            <!-- Ícone genérico "Copy" -->
+            <svg
+              width="20"
+              height="20"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M16 1H4c-1.103 0-2
+                .897-2 2v14h2V3h12V1z"
+              ></path>
+              <path
+                d="M18 5H8c-1.103
+                0-2 .897-2 2v14c0 1.103.897
+                2 2 2h10c1.103 0
+                2-.897 2-2V7c0-1.103-.897-2-2-2zm0
+                16H8V7h10v14z"
+              ></path>
+            </svg>
+            Copiar Link
           </button>
         </div>
       </div>
@@ -1157,7 +1425,7 @@
       </div>
     </div>
 
-    <!-- SCRIPT INLINE -->
+    <!-- SCRIPTS INLINE -->
     <script>
       // Preloader + Fade-in
       window.addEventListener('load', function () {
@@ -1244,7 +1512,6 @@
             };
             reader.readAsDataURL(file);
           } else {
-            // Se o usuário cancelar a escolha, volta à foto anterior ou placeholder
             {% if user.profile_image_id %}
               profilePhotoPreview.src = "{{ url_for('get_user_photo', file_id=user.profile_image_id) }}";
             {% else %}
@@ -1254,23 +1521,23 @@
         });
       }
 
-      // FUNÇÃO DE COMPARTILHAMENTO
-      // Abrir modal "Share"
+      // FUNÇÃO DE COMPARTILHAMENTO (Modal "Share")
       const openShareModalBtn = document.getElementById('openShareModalBtn');
       const shareModal = document.getElementById('shareModal');
       const closeShareModalBtn = document.getElementById('closeShareModal');
       const btnShareWhatsApp = document.getElementById('btnShareWhatsApp');
       const btnShareFacebook = document.getElementById('btnShareFacebook');
+      const btnShareInstagram = document.getElementById('btnShareInstagram');
+      const btnCopyLink = document.getElementById('btnCopyLink');
+      const btnNativeShare = document.getElementById('btnNativeShare');
 
       let finalShareURL = ""; // será gerado ao clicar em "Compartilhar Perfil"
       let userName = "";
 
       if (openShareModalBtn && shareModal && closeShareModalBtn) {
         openShareModalBtn.addEventListener('click', async () => {
-          // Obtemos nome do usuário (para compor a mensagem):
           userName = openShareModalBtn.dataset.username;
 
-          // Antes de exibir o modal, chamamos a rota que gera/retorna o link de compartilhamento
           try {
             const res = await fetch("{{ url_for('get_profile_share_link') }}", {
               method: 'POST'
@@ -1279,8 +1546,12 @@
               const data = await res.json();
               if (data.share_url) {
                 finalShareURL = data.share_url;
-                // Exibe o modal
                 shareModal.style.display = 'flex';
+
+                // Se o navegador suportar Web Share API, mostramos o botão nativo
+                if (navigator.share) {
+                  btnNativeShare.style.display = 'block';
+                }
               } else {
                 alert("Falha ao gerar link de compartilhamento.");
               }
@@ -1304,15 +1575,36 @@
         });
       }
 
-      // Ações nos botões de compartilhamento (WhatsApp / Facebook)
+      // Botão "Compartilhar via Dispositivo" (Web Share API)
+      if (btnNativeShare) {
+        btnNativeShare.addEventListener('click', async () => {
+          if (!finalShareURL) {
+            alert("Link de perfil não encontrado.");
+            return;
+          }
+          // Monta um texto de compartilhamento
+          const shareTitle = `Perfil do(a) ${userName} na Plataforma M`;
+          const shareText = `Confira o perfil de ${userName} na Plataforma M:\n${finalShareURL}`;
+          try {
+            await navigator.share({
+              title: shareTitle,
+              text: shareText,
+              url: finalShareURL
+            });
+          } catch (err) {
+            console.log("Usuário cancelou ou erro no compartilhamento nativo:", err);
+          }
+        });
+      }
+
+      // Ações nos botões de compartilhamento
       if (btnShareWhatsApp) {
         btnShareWhatsApp.addEventListener('click', () => {
           if (!finalShareURL) {
             alert("Link de perfil não encontrado.");
             return;
           }
-          // Texto para WhatsApp
-          const shareText = `Perfil do M: ${userName}. Confira em: ${finalShareURL}`;
+          const shareText = `Confira o perfil de ${userName} na Plataforma M: ${finalShareURL}`;
           const wppLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
           window.open(wppLink, '_blank');
         });
@@ -1324,9 +1616,46 @@
             alert("Link de perfil não encontrado.");
             return;
           }
-          // No Facebook, basta compartilhar a URL; se a página tiver meta tags de OG, puxará foto e texto
           const fbLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(finalShareURL)}&quote=${encodeURIComponent('Perfil do M: ' + userName)}`;
           window.open(fbLink, '_blank');
+        });
+      }
+
+      if (btnShareInstagram) {
+        btnShareInstagram.addEventListener('click', () => {
+          if (!finalShareURL) {
+            alert("Link de perfil não encontrado.");
+            return;
+          }
+          /*
+            Atualmente, o Instagram não permite postar links diretamente no feed via URL.
+            Normalmente o usuário precisa copiar o link e colar na Bio ou Story.
+          */
+          const message = `Abra o Instagram e compartilhe o link: ${finalShareURL}`;
+          alert(
+            "No momento, não é possível postar automaticamente no Instagram. " +
+            "Você pode copiar o link e colar no seu Story ou na bio.\n\n" +
+            message
+          );
+        });
+      }
+
+      // Botão de "Copiar Link"
+      if (btnCopyLink) {
+        btnCopyLink.addEventListener('click', () => {
+          if (!finalShareURL) {
+            alert("Link de perfil não encontrado.");
+            return;
+          }
+          navigator.clipboard
+            .writeText(finalShareURL)
+            .then(() => {
+              alert("Link copiado para a área de transferência!");
+            })
+            .catch((err) => {
+              console.error("Erro ao copiar link", err);
+              alert("Não foi possível copiar o link. Tente manualmente.");
+            });
         });
       }
     </script>

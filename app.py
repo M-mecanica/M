@@ -19,6 +19,7 @@ import gridfs
 
 # ------------------------------------------------
 # IMPORTAÇÃO ADICIONADA PARA TRABALHO COM IMAGENS
+# (Já estava presente, mas reforçamos aqui)
 # ------------------------------------------------
 from PIL import Image
 import io
@@ -373,6 +374,8 @@ def register():
             "maquinas": maquinas,
             "profile_image_id": None,
             "perfil_token": None
+            # Não adicionamos email/notificação aqui,
+            # pois só pediremos na edição de perfil
         }
         inserted = usuarios_collection.insert_one(novo_usuario)
 
@@ -665,7 +668,6 @@ def unresolved():
             if p.get("creator_id"):
                 c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
             p["creator_name"] = c_user["nome"] if c_user else "Desconhecido"
-            # LINHA ADICIONADA ABAIXO:
             p["creator_profile_image_id"] = c_user.get("profile_image_id") if c_user else None
 
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
@@ -1705,8 +1707,8 @@ def perfil():
         progress_percentage=progress_percentage,
         estimate_str=estimate_str,
         user_badges=user_badges,
-        latest_problems=latest_problems,          # CRIADOS
-        latest_solved_problems=latest_solved_problems,  # RESOLVIDOS
+        latest_problems=latest_problems,
+        latest_solved_problems=latest_solved_problems,
         random_bg=random_bg
     )
 
@@ -1721,14 +1723,31 @@ def edit_profile():
         return "Usuário não encontrado.", 404
 
     if request.method == "POST":
+        # Nome
         novo_nome = request.form.get("nome", "").strip()
+
+        # Telefone (WhatsApp)
+        novo_whatsapp = request.form.get("whatsapp", "").strip()
+
+        # Novo campo E-mail
+        novo_email = request.form.get("email", "").strip()
+
+        # Preferência de notificação
+        notify_resolved = (request.form.get("notify_on_resolve") == "on")
+
+        update_fields = {}
+
+        # Atualiza nome, se enviado
         if novo_nome:
-            usuarios_collection.update_one(
-                {"_id": ObjectId(user_id)},
-                {"$set": {"nome": novo_nome}}
-            )
+            update_fields["nome"] = novo_nome
             session["username"] = novo_nome
 
+        # Armazena telefone e email mesmo que vazios (para limpar caso retire)
+        update_fields["whatsapp"] = novo_whatsapp
+        update_fields["email"] = novo_email
+        update_fields["notify_on_resolve"] = notify_resolved
+
+        # Foto de perfil
         profile_photo = request.files.get("profile_photo")
         if profile_photo and profile_photo.filename.strip():
             image_ids = save_image(profile_photo, fs_m)
@@ -1740,10 +1759,12 @@ def edit_profile():
                         fs_m.delete(ObjectId(old_photo_id))
                     except:
                         pass
-                usuarios_collection.update_one(
-                    {"_id": ObjectId(user_id)},
-                    {"$set": {"profile_image_id": str(new_file_id)}}
-                )
+                update_fields["profile_image_id"] = str(new_file_id)
+
+        usuarios_collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_fields}
+        )
 
         return redirect(url_for("perfil"))
 
@@ -1966,6 +1987,89 @@ def ver_usuario(user_id):
         latest_problems=latest_problems,
         solved_problems=solved_problems
     )
+
+# -----------------------------------------------------------
+# NOVA ROTA: GERAR OVERLAY DE LOGO NA FOTO DE PERFIL
+# -----------------------------------------------------------
+@app.route("/overlay_profile_photo/<user_id>")
+def overlay_profile_photo(user_id):
+    """
+    Gera uma imagem com a foto de perfil do usuário
+    (ou default) e sobrepõe o logo da Plataforma M.
+    Retorna a imagem final como JPEG.
+    """
+    user = usuarios_collection.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        # Se não existir, usa um "avatar_icon" default + logo
+        return _generate_overlay_image(None)
+
+    profile_id = user.get("profile_image_id")
+    if not profile_id:
+        # Sem foto de perfil => usa avatar default
+        return _generate_overlay_image(None)
+
+    try:
+        gridout = fs_m.get(ObjectId(profile_id))
+        user_image_data = gridout.read()
+    except:
+        user_image_data = None
+
+    return _generate_overlay_image(user_image_data)
+
+def _generate_overlay_image(user_image_data):
+    """
+    Função auxiliar para carregar a imagem do usuário ou default,
+    e depois colar (paste) o logo "logo_m.png" no canto.
+    """
+    # Caminho do logo
+    logo_path = os.path.join(app.static_folder, "images", "logo_m.png")
+
+    # Carrega a imagem base (usuário ou default)
+    if user_image_data:
+        try:
+            base_img = Image.open(io.BytesIO(user_image_data)).convert("RGBA")
+        except:
+            base_img = Image.open(os.path.join(app.static_folder, "images", "avatar_icon.webp")).convert("RGBA")
+    else:
+        base_img = Image.open(os.path.join(app.static_folder, "images", "avatar_icon.webp")).convert("RGBA")
+
+    # Redimensiona a base se quiser limitar tamanho
+    max_width, max_height = 800, 800
+    base_img.thumbnail((max_width, max_height))
+
+    # Carrega o logo
+    logo_img = Image.open(logo_path).convert("RGBA")
+
+    # Ajusta tamanho do logo relativo à base (ex: 25% da largura)
+    base_w, base_h = base_img.size
+    logo_max_width = int(base_w * 0.25)
+    # Mantém proporção
+    logo_w, logo_h = logo_img.size
+    if logo_w > logo_max_width:
+        ratio = logo_max_width / float(logo_w)
+        new_height = int(logo_h * ratio)
+        logo_img = logo_img.resize((logo_max_width, new_height), Image.ANTIALIAS)
+
+    # Define posição (canto inferior direito)
+    base_w, base_h = base_img.size
+    logo_w, logo_h = logo_img.size
+    padding = 10
+    pos_x = base_w - logo_w - padding
+    pos_y = base_h - logo_h - padding
+
+    # Cola o logo com alpha
+    base_img.paste(logo_img, (pos_x, pos_y), logo_img)
+
+    # Retorna como JPEG
+    output = io.BytesIO()
+    # Converte para RGB antes de salvar em JPEG
+    final_img = base_img.convert("RGB")
+    final_img.save(output, format="JPEG", quality=90)
+    output.seek(0)
+
+    response = make_response(output.getvalue())
+    response.headers.set('Content-Type', 'image/jpeg')
+    return response
 
 # -----------------------------------------------------------
 # MAIN
