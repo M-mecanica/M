@@ -258,6 +258,35 @@
         font-size: 1.2rem;
       }
 
+      /* Container do "Enviado por" + foto + link */
+      .creator-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin-bottom: 1rem;
+      }
+      .profile-pic {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 0.4rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+      .creator-container a {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: inherit; /* Mantém a cor do texto */
+      }
+      .creator-container a:hover {
+        text-decoration: underline;
+      }
+      .creator-container p {
+        margin: 0;
+        line-height: 36px; /* Alinha verticalmente o texto */
+      }
+
       /* Botão "Resolver" */
       .resolver-btn {
         background-color: #000;
@@ -433,6 +462,45 @@
           <div class="result-container">
             {% for problema in problemas %}
               <div class="problem-item">
+
+                <!-- Início da exibição do criador (foto + "Enviado por") -->
+                <div class="creator-container">
+                  {% if problema.creator_id %}
+                    <a href="{{ url_for('ver_usuario', user_id=problema.creator_id) }}">
+                      {% if problema.creator_profile_image_id %}
+                        <img
+                          src="{{ url_for('get_user_photo', file_id=problema.creator_profile_image_id) }}"
+                          alt="Foto do criador"
+                          class="profile-pic"
+                        />
+                      {% else %}
+                        <img
+                          src="{{ url_for('static', filename='images/avatar_placeholder.png') }}"
+                          alt="Foto de perfil padrão"
+                          class="profile-pic"
+                        />
+                      {% endif %}
+                      <p><strong>Enviado por:</strong> {{ problema.creator_name }}</p>
+                    </a>
+                  {% else %}
+                    {% if problema.creator_profile_image_id %}
+                      <img
+                        src="{{ url_for('get_user_photo', file_id=problema.creator_profile_image_id) }}"
+                        alt="Foto do criador"
+                        class="profile-pic"
+                      />
+                    {% else %}
+                      <img
+                        src="{{ url_for('static', filename='images/avatar_placeholder.png') }}"
+                        alt="Foto de perfil padrão"
+                        class="profile-pic"
+                      />
+                    {% endif %}
+                    <p><strong>Enviado por:</strong> {{ problema.creator_name }}</p>
+                  {% endif %}
+                </div>
+                <!-- Fim da exibição do criador -->
+
                 <h2>{{ problema["titulo"] }}</h2>
                 <p>{{ problema["descricao"] }}</p>
 
@@ -445,8 +513,6 @@
                     />
                   </div>
                 {% endif %}
-
-                <p>Enviado por: {{ problema["creator_name"] }}</p>
 
                 <form
                   action="{{ url_for('resolver_form', problem_id=problema['_id_str']) }}"
@@ -489,7 +555,10 @@
               class="new-problem-btn"
               title="Novo Problema"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+              >
                 <path
                   d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5
                    0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5
@@ -515,7 +584,7 @@
           title="Página Inicial"
         >
           <img
-            src="{{ url_for('static', filename='images/home_icon.png') }}"
+            src="{{ url_for('static', filename='images/home_icon.webp') }}"
             alt="Home Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
@@ -529,7 +598,7 @@
           title="Resolver Problemas"
         >
           <img
-            src="{{ url_for('static', filename='images/resolver_icon.png') }}"
+            src="{{ url_for('static', filename='images/resolver_icon.webp') }}"
             alt="Resolver Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
@@ -543,7 +612,7 @@
           title="Envie seu Problema"
         >
           <img
-            src="{{ url_for('static', filename='images/icone_mais.png') }}"
+            src="{{ url_for('static', filename='images/enviar_icon.webp') }}"
             alt="Envie"
             style="width:30px; height:30px;"
           />
@@ -558,7 +627,7 @@
             title="Entrar"
           >
             <img
-              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
               alt="Perfil Icon"
               style="width:30px;height:30px;margin-bottom:0px;"
             />
@@ -571,7 +640,7 @@
             title="Perfil"
           >
             <img
-              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
               alt="Perfil Icon"
               style="width:30px;height:30px;margin-bottom:0px;"
             />

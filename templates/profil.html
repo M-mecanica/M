@@ -840,7 +840,7 @@
               <div
                 class="avatar"
                 style="
-                  background-image: url('/static/images/avatar_placeholder.png');
+                  background-image: url('/static/images/avatar_icon.webp');
                 "
               ></div>
             {% endif %}
@@ -1003,7 +1003,7 @@
           title="Página Inicial"
         >
           <img
-            src="{{ url_for('static', filename='images/home_icon.png') }}"
+            src="{{ url_for('static', filename='images/home_icon.webp') }}"
             alt="Home Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
@@ -1017,7 +1017,7 @@
           title="Resolver Problemas"
         >
           <img
-            src="{{ url_for('static', filename='images/resolver_icon.png') }}"
+            src="{{ url_for('static', filename='images/resolver_icon.webp') }}"
             alt="Resolver Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
@@ -1031,7 +1031,7 @@
           title="Envie seu Problema"
         >
           <img
-            src="{{ url_for('static', filename='images/icone_mais.png') }}"
+            src="{{ url_for('static', filename='images/enviar_icon.webp') }}"
             alt="Envie"
             style="width:30px; height:30px;"
           />
@@ -1046,7 +1046,7 @@
             title="Entrar"
           >
             <img
-              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
               alt="Perfil Icon"
               style="width:30px;height:30px;margin-bottom:0px;"
             />
@@ -1059,7 +1059,7 @@
             title="Perfil"
           >
             <img
-              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
               alt="Perfil Icon"
               style="width:30px;height:30px;margin-bottom:0px;"
             />
@@ -1096,7 +1096,7 @@
                 {% else %}
                   <img
                     id="profilePhotoPreview"
-                    src="/static/images/avatar_placeholder.png"
+                    src="/static/images/avatar_icon.webp"
                     alt="Prévia da Foto de Perfil"
                     style="max-width: 150px; border-radius: 50%;"
                   />
@@ -1248,7 +1248,7 @@
             {% if user.profile_image_id %}
               profilePhotoPreview.src = "{{ url_for('get_user_photo', file_id=user.profile_image_id) }}";
             {% else %}
-              profilePhotoPreview.src = "/static/images/avatar_placeholder.png";
+              profilePhotoPreview.src = "/static/images/avatar_icon.webp";
             {% endif %}
           }
         });

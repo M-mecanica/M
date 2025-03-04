@@ -588,7 +588,8 @@
                 viewBox="0 0 16 16"
               >
                 <path
-                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0-1h-3v-3A.5.5 0 0 1 8 4z"
+                  d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0-1h-3v-3A.5.5
+                  0 0 1 8 4z"
                 />
               </svg>
               Envie o seu problema
@@ -610,7 +611,7 @@
           title="Página Inicial"
         >
           <img
-            src="{{ url_for('static', filename='images/home_icon.png') }}"
+            src="{{ url_for('static', filename='images/home_icon.webp') }}"
             alt="Home Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
@@ -624,7 +625,7 @@
           title="Resolver Problemas"
         >
           <img
-            src="{{ url_for('static', filename='images/resolver_icon.png') }}"
+            src="{{ url_for('static', filename='images/resolver_icon.webp') }}"
             alt="Resolver Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
@@ -638,7 +639,7 @@
           title="Envie seu Problema"
         >
           <img
-            src="{{ url_for('static', filename='images/icone_mais.png') }}"
+            src="{{ url_for('static', filename='images/enviar_icon.webp') }}"
             alt="Envie"
             style="width:30px; height:30px;"
           />
@@ -653,7 +654,7 @@
             title="Entrar"
           >
             <img
-              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
               alt="Perfil Icon"
               style="width:30px;height:30px;margin-bottom:0px;"
             />
@@ -666,7 +667,7 @@
             title="Perfil"
           >
             <img
-              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
               alt="Perfil Icon"
               style="width:30px;height:30px;margin-bottom:0px;"
             />
@@ -823,7 +824,7 @@
           } else {
             // Fallback para avatar placeholder
             const creatorImg = document.createElement('img');
-            creatorImg.src = '/static/images/avatar_placeholder.png';
+            creatorImg.src = '/static/images/avatar_icon.webp';
             creatorImg.alt = 'Foto de perfil padrão';
             creatorImg.classList.add('profile-pic');
             creatorLink.appendChild(creatorImg);
@@ -848,7 +849,7 @@
           } else {
             // Fallback para avatar placeholder
             const placeholderImg = document.createElement('img');
-            placeholderImg.src = '/static/images/avatar_placeholder.png';
+            placeholderImg.src = '/static/images/avatar_icon.webp';
             placeholderImg.alt = 'Foto de perfil padrão';
             placeholderImg.classList.add('profile-pic');
             creatorContainer.appendChild(placeholderImg);
@@ -913,7 +914,7 @@
               } else {
                 // Fallback solver
                 const solverImg = document.createElement('img');
-                solverImg.src = '/static/images/avatar_placeholder.png';
+                solverImg.src = '/static/images/avatar_icon.webp';
                 solverImg.alt = 'Foto de perfil padrão';
                 solverImg.classList.add('profile-pic');
                 solverLink.appendChild(solverImg);
@@ -935,7 +936,7 @@
               } else {
                 // Fallback solver
                 const solverImg = document.createElement('img');
-                solverImg.src = '/static/images/avatar_placeholder.png';
+                solverImg.src = '/static/images/avatar_icon.webp';
                 solverImg.alt = 'Foto de perfil padrão';
                 solverImg.classList.add('profile-pic');
                 solverContainer.appendChild(solverImg);

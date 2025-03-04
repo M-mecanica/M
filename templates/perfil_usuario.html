@@ -26,7 +26,7 @@
       {% if user.profile_image_id %}
         {{ url_for('get_user_photo', file_id=user.profile_image_id, _external=True) }}
       {% else %}
-        {{ url_for('static', filename='images/avatar_placeholder.png', _external=True) }}
+        {{ url_for('static', filename='images/avatar_icon.webp', _external=True) }}
       {% endif %}
       "
     />
@@ -46,7 +46,7 @@
       {% if user.profile_image_id %}
         {{ url_for('get_user_photo', file_id=user.profile_image_id, _external=True) }}
       {% else %}
-        {{ url_for('static', filename='images/avatar_placeholder.png', _external=True) }}
+        {{ url_for('static', filename='images/avatar_icon.webp', _external=True) }}
       {% endif %}
       "
     />
@@ -156,6 +156,7 @@
           font-size: 1.3rem;
         }
       }
+
       .header-btn {
         background: none;
         border: none;
@@ -181,11 +182,9 @@
         margin-left: 0.5rem;
       }
 
-      /* Botão Voltar esconde no mobile, se desejar */
-      @media (max-width: 768px) {
-        .back-btn {
-          display: none !important;
-        }
+      /* Espaço à direita (caso queira inserir algo futuramente) */
+      .header-right-spacer {
+        width: 50px;
       }
 
       /*********************************************
@@ -443,9 +442,9 @@
     <div id="content">
       <!-- HEADER -->
       <header>
-        <!-- Botão Voltar IGUAL ao da solucao.html (com ID) -->
+        <!-- Botão "Voltar" com o mesmo estilo de solucao.html -->
         <button
-          class="header-btn back-btn"
+          class="header-btn"
           id="btnVoltar"
           aria-label="Voltar"
         >
@@ -464,8 +463,8 @@
         <!-- Título central -->
         <h1>Perfil do Usuário</h1>
 
-        <!-- Espaço à direita (pode adicionar algo se quiser) -->
-        <div style="width: 50px;">&nbsp;</div>
+        <!-- Espaço à direita -->
+        <div class="header-right-spacer"></div>
       </header>
 
       <main>
@@ -483,7 +482,7 @@
               <div
                 class="avatar"
                 style="
-                  background-image: url('/static/images/avatar_placeholder.png');
+                  background-image: url('/static/images/avatar_icon.webp');
                 "
               ></div>
             {% endif %}
@@ -506,7 +505,6 @@
               style="width: {{ progress_percentage }}%;"
             ></div>
           </div>
-          <!-- Texto alterado aqui -->
           <div class="progress-label">
             Alcance {{ remaining_for_next_level }} ponto(s) para o nível {{ level|int + 1 }}
           </div>
@@ -606,7 +604,7 @@
           title="Página Inicial"
         >
           <img
-            src="{{ url_for('static', filename='images/home_icon.png') }}"
+            src="{{ url_for('static', filename='images/home_icon.webp') }}"
             alt="Home Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
@@ -619,7 +617,7 @@
           title="Resolver Problemas"
         >
           <img
-            src="{{ url_for('static', filename='images/resolver_icon.png') }}"
+            src="{{ url_for('static', filename='images/resolver_icon.webp') }}"
             alt="Resolver Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
@@ -632,7 +630,7 @@
           title="Envie seu Problema"
         >
           <img
-            src="{{ url_for('static', filename='images/icone_mais.png') }}"
+            src="{{ url_for('static', filename='images/enviar_icon.webp') }}"
             alt="Envie"
             style="width:30px; height:30px;"
           />
@@ -646,7 +644,7 @@
             title="Entrar"
           >
             <img
-              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
               alt="Perfil Icon"
               style="width:30px;height:30px;margin-bottom:0px;"
             />
@@ -659,7 +657,7 @@
             title="Perfil"
           >
             <img
-              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
               alt="Perfil Icon"
               style="width:30px;height:30px;margin-bottom:0px;"
             />
@@ -699,7 +697,7 @@
         });
       });
 
-      // Botão "Voltar"
+      // Botão "Voltar" - lógica similar à solucao.html
       document.addEventListener('DOMContentLoaded', function() {
         const ref = document.referrer || "";
         const btnVoltar = document.getElementById('btnVoltar');

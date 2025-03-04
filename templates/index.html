@@ -7,7 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
 
     <!-- Fonte básica -->
     <link rel="preconnect" href="https://fonts.gstatic.com" />
@@ -17,18 +21,26 @@
     />
 
     <!-- PWA: Manifest e cor da barra superior (Android) -->
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}" />
+    <link
+      rel="manifest"
+      href="{{ url_for('static', filename='manifest.json') }}"
+    />
     <meta name="theme-color" content="#000000" />
 
     <!-- CSS principal (carregado externamente) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 
-    <!-- Aqui, apenas para o background inline via Jinja -->
+    <!-- Ajuste de estilo adicional para imagem de fundo -->
     <style>
-      /* Mantemos apenas o background inline para capturar a variável random_bg */
+      /****************************************************
+       * BACKGROUND
+       ****************************************************/
       body {
-        background: #f0f0f0 url('{{ url_for("static", filename="images/" ~ random_bg) }}')
-          no-repeat center center fixed;
+        background-color: #f0f0f0;
+        background-image: url('{{ url_for("static", filename="images/" ~ random_bg) }}');
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
         background-size: cover;
         overflow-x: hidden;
       }
@@ -36,6 +48,8 @@
       @media (max-width: 768px) {
         body {
           background-attachment: scroll;
+          background-position: center center;
+          background-size: cover;
         }
       }
 
@@ -55,7 +69,7 @@
       }
 
       /*********************************************
-       * BARRA INFERIOR (mobile) - AGORA IGUAL AO PERFIL
+       * BARRA INFERIOR (mobile)
        *********************************************/
       .mobile-bottom-bar {
         display: none;
@@ -63,7 +77,6 @@
       @media (max-width: 768px) {
         .mobile-bottom-bar {
           display: grid;
-          /* Agora com 4 colunas para incluir o botão Home */
           grid-template-columns: 1fr 1fr 1fr 1fr;
           background-color: #000;
           width: 100%;
@@ -93,6 +106,11 @@
       /* Indicar o botão ativo na barra inferior */
       .bottom-bar-btn.active {
         background-color: #444;
+      }
+
+      /* Reduzindo um pouco a fonte do título do modal */
+      .category-modal-title {
+        font-size: 1.15rem; /* Ajuste sutil para a frase dentro do modal */
       }
     </style>
   </head>
@@ -166,7 +184,7 @@
           </div>
           <button type="submit" class="explore-button">
             <img
-              src="{{ url_for('static', filename='images/fugueti_num_tem_re.png') }}"
+              src="{{ url_for('static', filename='images/fugueti_num_tem_re.webp') }}"
               alt="Foguete"
               style="width:30px;height:30px;"
             />
@@ -254,7 +272,7 @@
         <p>© 2025 Plataforma M</p>
       </footer>
 
-      <!-- BARRA INFERIOR (mobile) - IGUAL AO PERFIL -->
+      <!-- BARRA INFERIOR (mobile) -->
       <div class="mobile-bottom-bar">
         <!-- Home -->
         <a
@@ -263,7 +281,7 @@
           title="Página Inicial"
         >
           <img
-            src="{{ url_for('static', filename='images/home_icon.png') }}"
+            src="{{ url_for('static', filename='images/home_icon.webp') }}"
             alt="Home Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
@@ -277,7 +295,7 @@
           title="Resolver Problemas"
         >
           <img
-            src="{{ url_for('static', filename='images/resolver_icon.png') }}"
+            src="{{ url_for('static', filename='images/resolver_icon.webp') }}"
             alt="Resolver Icon"
             style="width:30px;height:30px;margin-bottom:0px;"
           />
@@ -291,7 +309,7 @@
           title="Envie seu Problema"
         >
           <img
-            src="{{ url_for('static', filename='images/icone_mais.png') }}"
+            src="{{ url_for('static', filename='images/enviar_icon.webp') }}"
             alt="Envie"
             style="width:30px; height:30px;"
           />
@@ -306,7 +324,7 @@
             title="Entrar"
           >
             <img
-              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
               alt="Perfil Icon"
               style="width:30px;height:30px;margin-bottom:0px;"
             />
@@ -319,7 +337,7 @@
             title="Perfil"
           >
             <img
-              src="{{ url_for('static', filename='images/perfil_icon.png') }}"
+              src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
               alt="Perfil Icon"
               style="width:30px;height:30px;margin-bottom:0px;"
             />
@@ -359,10 +377,34 @@
     <!-- MODAL: 3 Passos (categoria -> subcategoria -> marca) -->
     <div id="categoryModal" class="modal">
       <div class="modal-content">
+        <!-- Barra superior do modal (preta) -->
         <div class="modal-header">
-          <h2>Escolha a categoria principal:</h2>
+          <!-- Botão Voltar com seta simples (SVG) -->
+          <button class="back-button" onclick="goBackOneStep()" id="backButton">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              viewBox="0 0 24 24"
+            >
+              <!--
+                Seta simples (um único path):
+                Faz um "V" deitado: M14 18 L8 12 L14 6
+              -->
+              <path d="M14 18l-6-6 6-6"/>
+            </svg>
+          </button>
+
+          <!-- Texto centralizado -->
+          <h2 class="category-modal-title">Selecione o Seu Problema</h2>
+
+          <!-- Botão Fechar -->
           <span class="close" onclick="closeCategoryModal()">&times;</span>
         </div>
+
         <div class="modal-body">
           <!-- Step 1: Lista de Categorias Principais -->
           <div id="mainCategoryStep" style="display: block;">
@@ -371,16 +413,12 @@
 
           <!-- Step 2: Subcategoria -->
           <div id="subCategoryStep" style="display: none;">
-            <p class="modal-text" id="selectedMainCategoryText"></p>
             <div id="subCategoryContainer"></div>
-            <button class="btn-categorias voltar" onclick="goBackToMainCategory()">Voltar</button>
           </div>
 
           <!-- Step 3: Marca -->
           <div id="brandStep" style="display: none;">
-            <p class="modal-text" id="selectedSubCategoryText"></p>
             <div id="brandContainer"></div>
-            <button class="btn-categorias voltar" onclick="goBackToSubCategory()">Voltar</button>
           </div>
         </div>
       </div>

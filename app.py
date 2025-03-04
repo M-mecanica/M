@@ -284,12 +284,11 @@ def root():
 @app.route("/index", methods=["GET", "POST"])
 def index():
     backgrounds = [
-        "fundo1.jpeg",
-        "fundo2.png",
-        "fundo3.png",
-        "fundo4.png",
-        "fundo5.png",
-        "fundo6.jpeg"
+        "fundo1.png",
+        "fundo_2.png",
+        "fundo_3.png",
+        "fundo_4.png",
+        "fundo_5.png"
     ]
     random_bg = random.choice(backgrounds)
     session["random_bg"] = random_bg
@@ -398,7 +397,7 @@ def search():
     subcategory = request.args.get("subcategory", "").strip()
     brand = request.args.get("brand", "").strip()
 
-    random_bg = session.get("random_bg", "fundo1.jpeg")
+    random_bg = session.get("random_bg", "fundo1.png")
 
     return render_template(
         "resultados.html",
@@ -660,11 +659,14 @@ def unresolved():
         p["_id_str"] = str(p["_id"])
         if p.get("creator_custom_name"):
             p["creator_name"] = p["creator_custom_name"]
+            p["creator_profile_image_id"] = None
         else:
             c_user = None
             if p.get("creator_id"):
                 c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
             p["creator_name"] = c_user["nome"] if c_user else "Desconhecido"
+            # LINHA ADICIONADA ABAIXO:
+            p["creator_profile_image_id"] = c_user.get("profile_image_id") if c_user else None
 
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
 
@@ -829,7 +831,7 @@ def exibir_solucao(problem_id):
         "feedback": "SIM"
     })
 
-    random_bg = session.get("random_bg", "fundo1.jpeg")
+    random_bg = session.get("random_bg", "fundo_1.png")
 
     return render_template(
         "solucao.html",
@@ -1664,7 +1666,7 @@ def perfil():
     if not user_obj:
         return "Usuário não encontrado.", 404
 
-    random_bg = session.get("random_bg", "fundo1.jpeg")
+    random_bg = session.get("random_bg", "fundo_1.png")
 
     posted_count = problemas_collection.count_documents({"creator_id": user_id})
     solved_count = problemas_collection.count_documents({"solver_id": user_id, "resolvido": True})
