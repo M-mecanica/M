@@ -9,13 +9,10 @@
     <!--
       ============================================================
       IMPORTANTE PARA COMPARTILHAMENTO EM REDES SOCIAIS (OG/Twitter):
-      Ajustamos as meta tags para exibir a imagem final com overlay
-      do logo, caso deseje. Basta trocar a rota no og:image/twitter:image
-      para overlay_profile_photo ou manter a foto original do usuário.
+      Agora usamos a rota real da foto de perfil (get_user_photo).
       ============================================================
     -->
 
-    <!-- Exemplo usando a rota overlay_profile_photo -->
     <meta
       property="og:title"
       content="Perfil de {{ user.nome }} na Plataforma M"
@@ -28,7 +25,7 @@
       property="og:image"
       content="
       {% if user.profile_image_id %}
-        {{ url_for('overlay_profile_photo', user_id=user._id, _external=True) }}
+        {{ url_for('get_user_photo', file_id=user.profile_image_id, _external=True) }}
       {% else %}
         {{ url_for('static', filename='images/logo_m.png', _external=True) }}
       {% endif %}
@@ -51,7 +48,7 @@
       name="twitter:image"
       content="
       {% if user.profile_image_id %}
-        {{ url_for('overlay_profile_photo', user_id=user._id, _external=True) }}
+        {{ url_for('get_user_photo', file_id=user.profile_image_id, _external=True) }}
       {% else %}
         {{ url_for('static', filename='images/logo_m.png', _external=True) }}
       {% endif %}
