@@ -1,3 +1,4 @@
+<!-- solucao.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -18,7 +19,7 @@
 
   <!--
     Meta tags para compartilhamento no Facebook (Open Graph)
-    Agora adicionamos "Confira a solução do M para:" antes do título e da descrição.
+    Adicionamos "Confira a solução do M para:" antes do título e da descrição.
   -->
   <meta property="og:title" content="Confira a solução do M para: {{ problema['titulo'] }}">
   <meta property="og:description" content="{{ problema['descricao'] }} (via Plataforma M)">
@@ -35,9 +36,9 @@
     }
     body {
       font-family: 'Roboto', sans-serif;
-      font-size: 1rem; /* Mesmo tamanho base de resultados.html */
+      font-size: 1rem;
       color: #333;
-      background-color: #f0f0f0; /* Fundo neutro */
+      background-color: #f0f0f0;
       overflow-x: hidden;
       min-height: 100vh;
       display: flex;
@@ -99,7 +100,7 @@
     }
     header h1 {
       color: #fff;
-      font-size: 1.6rem;
+      font-size: 1.15rem;
       margin: 0;
       text-align: center;
       position: absolute;
@@ -139,12 +140,6 @@
     .header-btn span {
       margin-left: 0.5rem;
     }
-
-    /*
-      Oculta o botão "Perfil" e o botão "Entrar" do header em telas menores
-      que 768px. Dessa forma, apenas a barra inferior mostrará essas opções
-      no mobile.
-    */
     @media (max-width: 768px) {
       .perfil-btn,
       .entrar-btn {
@@ -163,14 +158,13 @@
       flex-direction: column;
       align-items: center;
       padding: 2rem;
-      /* Igual ao resultados.html: define um tamanho base ligeiramente maior */
       font-size: 1.25rem;
     }
     @media (max-width: 768px) {
       main {
         margin-top: 72px;
         padding: 1rem;
-        font-size: 1rem; /* Ajusta para ficar igual ao mobile de resultados.html */
+        font-size: 1rem;
       }
     }
 
@@ -187,7 +181,7 @@
 
     /* Barra inferior (mobile) */
     .mobile-bottom-bar {
-      display: none; /* por padrão, não mostra no desktop */
+      display: none;
     }
     @media (max-width: 768px) {
       .mobile-bottom-bar {
@@ -215,18 +209,12 @@
         margin-bottom: 2px;
       }
       main {
-        /* Garante que o conteúdo não seja coberto pela barra inferior */
         padding-bottom: 60px;
       }
     }
     .bottom-bar-btn.active {
       background-color: #444;
     }
-
-    /* === Estilos específicos da página de solução === */
-
-    /* Removemos a div de imagem de fundo, então a classe .fixed-bg não é mais utilizada.
-       Caso queira mantê-la para referência, deixamos vazia ou removemos. Vamos remover. */
 
     /* Container do problema */
     .problem-container {
@@ -287,12 +275,6 @@
         font-size: 1.2rem;
       }
     }
-
-    /*
-      Ajuste para a imagem do problema em mobile:
-      width: 100%; max-width: 400px; height: auto;
-      Assim ela não sai da tela em celulares.
-    */
     .problem-image {
       display: block;
       margin: 1rem auto;
@@ -323,14 +305,6 @@
     .default-btn:hover {
       background-color: #333;
       transform: scale(1.02);
-    }
-
-    .section-divider {
-      border: none;
-      border-top: 1px solid #ccc;
-      margin: 2rem 0;
-      width: 100%;
-      max-width: 1100px;
     }
 
     .solution-container {
@@ -422,10 +396,6 @@
       text-align: center;
       margin-bottom: 1rem;
     }
-    /*
-      Garantir que as imagens de passo não estourem a tela:
-      width: 100%; max-width: 400px; height: auto;
-    */
     .step-image-block img {
       max-width: 400px;
       width: 100%;
@@ -471,10 +441,6 @@
       text-align: center;
       margin-bottom: 1rem;
     }
-    /*
-      Garantir que as imagens de subpassos não estourem a tela:
-      width: 100%; max-width: 400px; height: auto;
-    */
     .mini-step-image-block img {
       max-width: 400px;
       width: 100%;
@@ -515,9 +481,6 @@
       margin-bottom: 0.5rem;
       font-size: 1rem;
       padding: 0.5rem;
-    }
-    .fail-feedback-form button.default-btn {
-      margin-top: 0.5rem;
     }
     .fail-feedback-thank {
       font-size: 0.95rem;
@@ -619,10 +582,7 @@
       max-height: calc(90vh - 100px);
     }
 
-    /*
-      ============ NOVO: Modal de compartilhamento (copiado de profil.html) ============
-      (estilizado para permitir compartilhar via WhatsApp, Facebook, Instagram, etc.)
-    */
+    /* Modal de compartilhamento */
     #shareSolutionModalContent {
       background-color: #fff;
       width: 95%;
@@ -685,10 +645,9 @@
       background-color: #25D366;
     }
     .share-option-btn.facebook {
-      background-color: #1877F2; /* Cor oficial do Facebook */
+      background-color: #1877F2;
     }
     .share-option-btn.instagram {
-      /* Instagram com gradient aproximado */
       background: linear-gradient(45deg, #f09433, #bc1888);
     }
     .share-option-btn.native-share {
@@ -698,6 +657,142 @@
       background-color: #777;
     }
 
+    /* Seção de Afiliados */
+    .affiliate-section {
+      width: 100%;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background-color: #fafafa;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .affiliate-section h4 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #000;
+    }
+    .affiliate-links-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .affiliate-card {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+    }
+    .affiliate-card img {
+      width: 100%;
+      max-width: 200px;
+      height: auto;
+      margin-bottom: 0.5rem;
+      object-fit: contain;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .affiliate-card h5 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+      font-weight: bold;
+    }
+    .affiliate-card a {
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #fff;
+      background-color: #000;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+    .affiliate-card a:hover {
+      background-color: #333;
+    }
+    .remove-link-btn {
+      margin-top: 0.7rem;
+      font-size: 0.8rem;
+      background-color: #cc0000;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.3rem 0.7rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .remove-link-btn:hover {
+      background-color: #aa0000;
+    }
+
+    /* Modal de adicionar link de afiliado */
+    #addAffiliateLinkModalContent {
+      background-color: #fff;
+      width: 95%;
+      max-width: 600px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      animation: modalFadeIn 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #fff;
+      position: relative;
+    }
+    #addAffiliateLinkModalHeader {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #000;
+      color: #fff;
+      padding: 1rem;
+    }
+    #addAffiliateLinkModalHeader h2 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+    #closeAddAffiliateLinkModal {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      background: none;
+      color: #fff;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    #addAffiliateLinkModalBody {
+      padding: 1rem 2rem;
+    }
+    #addAffiliateLinkModalBody label {
+      display: block;
+      margin: 0.5rem 0 0.2rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    #addAffiliateLinkModalBody input[type="text"],
+    #addAffiliateLinkModalBody input[type="url"],
+    #addAffiliateLinkModalBody input[type="file"] {
+      width: 100%;
+      margin-bottom: 0.8rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    #addAffiliateLinkModalBody .default-btn {
+      display: inline-block;
+      margin: 0.5rem 0;
+    }
   </style>
 </head>
 <body>
@@ -708,13 +803,6 @@
 
   <!-- CONTEÚDO -->
   <div id="content">
-    <!-- REMOVIDO: A imagem de fundo fixa
-    <div
-      class="fixed-bg"
-      style="background-image: url('{{ url_for("static", filename="images/" ~ random_bg) }}');"
-    ></div>
-    -->
-
     <!-- Barra superior fixa -->
     <header>
       <!-- Botão "Voltar" -->
@@ -791,6 +879,7 @@
               <p><strong>Enviado por:</strong> {{ creator_name }}</p>
             </a>
           {% else %}
+            <!-- Criador custom name ou sem ID -->
             {% if creator_profile_image_id %}
               <img
                 src="{{ url_for('get_user_photo', file_id=creator_profile_image_id) }}"
@@ -820,7 +909,7 @@
           />
         {% endif %}
 
-        <!-- Botão UNIFICADO para abrir modal de compartilhamento -->
+        <!-- Botão para abrir modal de compartilhamento -->
         <div style="text-align: center; margin-top: 1rem;">
           <button
             class="default-btn"
@@ -829,7 +918,6 @@
             data-solutionurl="{{ share_url }}"
             data-problemtitle="{{ problema['titulo'] }}"
           >
-            <!-- Ícone "share" -->
             <svg
               width="18"
               height="18"
@@ -858,7 +946,63 @@
         </div>
       </div>
 
-      <hr class="section-divider" />
+      <!-- Seção de afiliados: "Peças e ferramentas que você pode precisar" -->
+      <div class="affiliate-section">
+        <h4>Peças e ferramentas que você pode precisar</h4>
+
+        <div class="affiliate-links-container">
+          {% if affiliate_links and affiliate_links|length > 0 %}
+            {% for link in affiliate_links %}
+              <div class="affiliate-card">
+                {% if link.productImage_main %}
+                  <img
+                    src="{{ url_for('gridfs_image', file_id=link.productImage_main) }}"
+                    alt="Imagem do produto"
+                  />
+                {% endif %}
+                <h5>{{ link.title }}</h5>
+                <a
+                  href="{{ link.affiliate_url }}"
+                  target="_blank"
+                  rel="noopener nofollow"
+                >
+                  Comprar agora
+                </a>
+                {% if session.get("role") == "solucionador" %}
+                  <form
+                    action="{{ url_for('remove_affiliate_link', link_id=link._id_str) }}"
+                    method="POST"
+                  >
+                    <button
+                      type="submit"
+                      class="remove-link-btn"
+                    >
+                      Remover
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <p style="text-align: center; color: #666;">(Nenhum item adicionado.)</p>
+          {% endif %}
+        </div>
+
+        <!-- Botão para abrir modal de adicionar link (somente para solucionadores) -->
+        {% if session.get("role") == "solucionador" %}
+          <div style="text-align:center; margin-top:1.5rem;">
+            <button
+              type="button"
+              class="default-btn"
+              id="btnOpenAddAffiliateLinkModal"
+            >
+              + Adicionar Link de Afiliado
+            </button>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- (Removida a linha de separação aqui) -->
 
       <!-- Container da solução -->
       <div
@@ -907,7 +1051,7 @@
 
         <h3>Solução Completa:</h3>
 
-        <!-- Apenas aparece se o usuário NÃO for solucionador -->
+        <!-- Apenas aparece se o usuário NÃO for solucionador, para mostrar passo-a-passo -->
         <button
           type="button"
           class="default-btn"
@@ -984,37 +1128,6 @@
           </button>
         </div>
       </div>
-
-      <!-- Modal de sugestão de melhorias -->
-      <div id="suggestionModal" class="modal">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2>Sugerir Melhorias</h2>
-            <span class="close" id="btnCloseSuggestionModal">&times;</span>
-          </div>
-          <div class="modal-body">
-            <form
-              action="{{ url_for('suggest_improvement', problem_id=problema['_id']) }}"
-              method="POST"
-            >
-              <textarea
-                name="suggestion"
-                rows="5"
-                placeholder="Descreva sua sugestão..."
-                style="width: 100%; max-width:600px;"
-              ></textarea>
-              <br />
-              <button
-                type="submit"
-                class="default-btn"
-                style="margin-top: 0.5rem;"
-              >
-                Enviar Sugestão
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
     </main>
 
     <footer>
@@ -1023,7 +1136,6 @@
 
     <!-- Barra inferior (mobile) -->
     <div class="mobile-bottom-bar">
-      <!-- Home (novo botão) -->
       <a
         href="{{ url_for('index') }}"
         class="bottom-bar-btn{% if request.endpoint == 'index' or request.endpoint == 'solucao' %} active{% endif %}"
@@ -1037,7 +1149,6 @@
         Home
       </a>
 
-      <!-- Resolver -->
       <a
         href="{{ url_for('unresolved') }}"
         class="bottom-bar-btn{% if request.endpoint == 'unresolved' %} active{% endif %}"
@@ -1051,7 +1162,6 @@
         Resolver
       </a>
 
-      <!-- Envie -->
       <a
         href="{{ url_for('add_problem') }}"
         class="bottom-bar-btn{% if request.endpoint == 'add_problem' %} active{% endif %}"
@@ -1065,7 +1175,6 @@
         Enviar
       </a>
 
-      <!-- Perfil ou Entrar -->
       {% if not session.get('user_id') %}
         <a
           href="{{ url_for('login') }}"
@@ -1104,7 +1213,7 @@
     style="display:none;"
   ></audio>
 
-  <!-- ================ NOVO: Modal para compartilhar solução (copiado de profil.html) ================ -->
+  <!-- Modal para compartilhar solução -->
   <div class="modal" id="shareSolutionModal">
     <div id="shareSolutionModalContent">
       <div id="shareSolutionModalHeader">
@@ -1114,13 +1223,11 @@
       <div id="shareSolutionModalBody">
         <p style="font-size:1rem; margin-bottom:1rem;">Escolha como deseja compartilhar:</p>
 
-        <!-- Botão "Compartilhar via Dispositivo" (Web Share API) -->
         <button
           class="share-option-btn native-share"
           id="btnNativeShareSolution"
           style="display: none;"
         >
-          <!-- Ícone genérico "Share" -->
           <svg
             width="20"
             height="20"
@@ -1146,7 +1253,6 @@
           Compartilhar via Dispositivo
         </button>
 
-        <!-- Botão WhatsApp -->
         <button class="share-option-btn whatsapp" id="btnShareSolutionWhatsApp">
           <svg
             width="20"
@@ -1156,44 +1262,43 @@
           >
             <path
               d="M380.9 97.1C339 55.2 283.2 32 224 32 100.3 32
-                  0 132.3 0 256c0 45.4 11.8 89.3 34.3 128L0 480l100.6 -33.2
-                  c37.9 20.8 81 31.8 123.4 31.8h.1c124 0 224.4-100.3
-                  224.6-224.3.1-59.3-23-115.2 -67.8-159.2zM224.1 400
-                  c-35 0-69.2 -9.3-98.6-26.9l-6.9-4.1 -58.4 19.3
-                  19.6-57.1-4.5-7c-17.6-28 -26.8-60.4-26.8-93.8
-                  0-97.5 79.2-176.8 176.8-176.8
-                  47.2 0 91.6 18.4 124.9 51.7
-                  33.2 33.2 51.5 77.6 51.4 124.7
-                  -.2 97.5-79.4 176.7 -176.8 176.7zm101.7-131.5
-                  c-5.6-2.8-33.2-16.4 -38.4-18.2-5.1-1.9-8.8 -2.8
-                  -12.6 2.8-3.7 5.6-14.4 18.2-17.6 21.9
-                  -3.2 3.7 -6.5 4.2-12.1 1.4
-                  -5.6 -2.8-23.6-8.7-45-27.6
-                  -16.6-14.7-27.8-32.8 -31-38.4
-                  -3.2-5.6-.3-8.6 2.4-11.3
-                  2.5-2.5 5.6-6.5
-                  8.4-9.7
-                  s3.7-5.6 5.5-9.3c1.9-3.7.9-7-0.5 -9.8
-                  -1.4-2.8-12.6-30.4 -17.3-41.8
-                  -4.5-11-9-9.3-12.6-9.5
-                  -3.2-.2-7-.2-10.7-.2
-                  s-9.8 1.4 -15 6.9
-                  c-5.1 5.6-19.7 19.3-19.7 47.1
-                  s20.2 54.5 23 58.2
-                  c2.8 3.7 39.8 60.7 96.4 85.2
-                  13 5.8 23.8 9.3 31.9 11.9
-                  13.4 4.2 25.6 3.6 35.2 2.2
-                  10.7-1.6 33.2-13.5
-                  37.9-25.8
-                  4.7-13.2
-                  4.7-24.5 3.2-26.6
-                  -1.6-2.1-5.1-3.4 -10.7-6.2z"
+                0 132.3 0 256c0 45.4 11.8 89.3 34.3 128L0 480l100.6 -33.2
+                c37.9 20.8 81 31.8 123.4 31.8h.1c124 0 224.4-100.3
+                224.6-224.3.1-59.3-23-115.2 -67.8-159.2zM224.1 400
+                c-35 0-69.2 -9.3-98.6-26.9l-6.9-4.1 -58.4 19.3
+                19.6-57.1-4.5-7c-17.6-28 -26.8-60.4-26.8-93.8
+                0-97.5 79.2-176.8 176.8-176.8
+                47.2 0 91.6 18.4 124.9 51.7
+                33.2 33.2 51.5 77.6 51.4 124.7
+                -.2 97.5-79.4 176.7 -176.8 176.7zm101.7-131.5
+                c-5.6-2.8-33.2-16.4 -38.4-18.2-5.1-1.9-8.8 -2.8
+                -12.6 2.8-3.7 5.6-14.4 18.2-17.6 21.9
+                -3.2 3.7 -6.5 4.2-12.1 1.4
+                -5.6 -2.8-23.6-8.7-45-27.6
+                -16.6-14.7-27.8-32.8 -31-38.4
+                -3.2-5.6-.3-8.6 2.4-11.3
+                2.5-2.5 5.6-6.5
+                8.4-9.7
+                s3.7-5.6 5.5-9.3c1.9-3.7.9-7-0.5 -9.8
+                -1.4-2.8-12.6-30.4 -17.3-41.8
+                -4.5-11-9-9.3-12.6-9.5
+                -3.2-.2-7-.2-10.7-.2
+                s-9.8 1.4 -15 6.9
+                c-5.1 5.6-19.7 19.3-19.7 47.1
+                s20.2 54.5 23 58.2
+                c2.8 3.7 39.8 60.7 96.4 85.2
+                13 5.8 23.8 9.3 31.9 11.9
+                13.4 4.2 25.6 3.6 35.2 2.2
+                10.7-1.6 33.2-13.5
+                37.9-25.8
+                4.7-13.2
+                4.7-24.5 3.2-26.6
+                -1.6-2.1-5.1-3.4 -10.7-6.2z"
             />
           </svg>
           WhatsApp
         </button>
 
-        <!-- Botão Facebook -->
         <button class="share-option-btn facebook" id="btnShareSolutionFacebook">
           <svg
             width="20"
@@ -1204,18 +1309,17 @@
           >
             <path
               d="M12.033.003H9.209C5.73.003 3.391 2.453 3.391 5.869v2.529H.566A.566.566 0 0 0 0 8.964v3.006c0
-                  .312.254.566.566.566h2.825v7.899c0
-                  .312.254.565.566.565h3.29c.312 0
-                  .566-.253.566-.565v-7.899h2.946a.566.566 0 0 0
-                  .565-.566l.001-3.006a.56.56 0 0 0-.166-.4.568.568 0 0 0-.399-.166H7.813V6.249c0-1.01.24-1.521
-                  1.55-1.521l1.9-.001a.566.566 0 0 0
-                  .566-.566V.568A.566.566 0 0 0 11.262 0h-.01l.781.003z"
+                .312.254.566.566.566h2.825v7.899c0
+                .312.254.565.566.565h3.29c.312 0
+                .566-.253.566-.565v-7.899h2.946a.566.566 0 0 0
+                .565-.566l.001-3.006a.56.56 0 0 0-.166-.4.568.568 0 0 0-.399-.166H7.813V6.249c0-1.01.24-1.521
+                1.55-1.521l1.9-.001a.566.566 0 0 0
+                .566-.566V.568A.566.566 0 0 0 11.262 0h-.01l.781.003z"
             />
           </svg>
           Facebook
         </button>
 
-        <!-- Botão Instagram -->
         <button class="share-option-btn instagram" id="btnShareSolutionInstagram">
           <svg
             width="20"
@@ -1285,9 +1389,7 @@
           Instagram
         </button>
 
-        <!-- Botão de copiar link -->
         <button class="share-option-btn copy-link-btn" id="btnCopySolutionLink">
-          <!-- Ícone genérico "Copy" -->
           <svg
             width="20"
             height="20"
@@ -1311,7 +1413,81 @@
       </div>
     </div>
   </div>
-  <!-- ================ FIM do Modal de Compartilhar Solução ================ -->
+
+  <!-- Modal de sugestão de melhorias -->
+  <div id="suggestionModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Sugerir Melhorias</h2>
+        <span class="close" id="btnCloseSuggestionModal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form
+          action="{{ url_for('suggest_improvement', problem_id=problema['_id']) }}"
+          method="POST"
+        >
+          <textarea
+            name="suggestion"
+            rows="5"
+            placeholder="Descreva sua sugestão..."
+            style="width: 100%; max-width:600px;"
+          ></textarea>
+          <br />
+          <button
+            type="submit"
+            class="default-btn"
+            style="margin-top: 0.5rem;"
+          >
+            Enviar Sugestão
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para adicionar link de afiliado (somente solucionador) -->
+  {% if session.get("role") == "solucionador" %}
+    <div class="modal" id="addAffiliateLinkModal">
+      <div id="addAffiliateLinkModalContent">
+        <div id="addAffiliateLinkModalHeader">
+          <h2>Adicionar Link de Afiliado</h2>
+          <button id="closeAddAffiliateLinkModal">&times;</button>
+        </div>
+        <div id="addAffiliateLinkModalBody">
+          <form
+            action="{{ url_for('add_affiliate_link', problem_id=problema['_id']) }}"
+            method="POST"
+            enctype="multipart/form-data"
+          >
+            <label for="titleInput">Título / Nome do Produto</label>
+            <input
+              type="text"
+              id="titleInput"
+              name="title"
+              placeholder="Ex: Chave de fenda..."
+              required
+            />
+
+            <label for="affiliateUrlInput">Link de Afiliado (URL)</label>
+            <input
+              type="url"
+              id="affiliateUrlInput"
+              name="affiliate_url"
+              placeholder="Ex: https://amazon.com/dp/..."
+              required
+            />
+
+            <label for="productImageFile">Imagem do Produto (opcional)</label>
+            <input type="file" id="productImageFile" name="product_image" accept="image/*" />
+
+            <button type="submit" class="default-btn">
+              Adicionar Link
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 
   <script>
     // Preloader + fade-in do conteúdo
@@ -1343,7 +1519,6 @@
       descBlock.textContent = stepData.stepDescription;
       stepDiv.appendChild(descBlock);
 
-      // Exibe stepImage (se existir)
       if (stepData.stepImage && stepData.stepImage.trim() !== "") {
         const imageContainer = document.createElement('div');
         imageContainer.classList.add('step-image-block');
@@ -1388,7 +1563,7 @@
         let currentMiniStepIndex = 0;
         const btnShowMiniStep = document.createElement('button');
         btnShowMiniStep.classList.add('default-btn', 'mini-steps-btn');
-        btnShowMiniStep.textContent = "Mostrar Passo " + stepNumber + ".1";
+        btnShowMiniStep.textContent = `Mostrar Passo ${stepNumber}.1`;
         stepDiv.appendChild(btnShowMiniStep);
 
         btnShowMiniStep.addEventListener('click', () => {
@@ -1560,7 +1735,6 @@
       btnEnviarFeedback.addEventListener('click', () => {
         const feedbackVal = failFeedbackText.value.trim();
         if (!userIsLoggedIn) {
-          // Se não está logado, apenas avança sem enviar ao backend
           failFeedbackForm.style.display = 'none';
           feedbackButtons.style.display = 'none';
           currentStepIndex++;
@@ -1665,23 +1839,19 @@
       });
     });
 
-    // Botão "Voltar" com lógica customizada
+    // Botão "Voltar"
     document.addEventListener('DOMContentLoaded', function() {
       const ref = document.referrer || "";
       const btnVoltar = document.getElementById('btnVoltar');
-
       if (btnVoltar) {
         btnVoltar.addEventListener('click', function() {
-          // Se veio de edit_solution, força ir para resultados ou qualquer lógica que desejar
           if (ref.includes('/edit_solution')) {
             window.location.href = "{{ url_for('search') }}";
           }
           else if (!ref) {
-            // Se não há referrer (acesso direto), vai para a busca
             window.location.href = "{{ url_for('search') }}";
           }
           else {
-            // Caso contrário, tenta voltar na history
             window.history.back();
           }
         });
@@ -1704,14 +1874,9 @@
 
       if (openShareModalBtn && shareModal && closeShareModalBtn) {
         openShareModalBtn.addEventListener('click', () => {
-          // Pegamos os dados do data-attribute
           finalShareURL = openShareModalBtn.dataset.solutionurl;
           problemTitle = openShareModalBtn.dataset.problemtitle;
-
-          // Exibe o modal
           shareModal.style.display = 'flex';
-
-          // Se o navegador suportar Web Share API, mostra o botão nativo
           if (navigator.share) {
             btnNativeShareSolution.style.display = 'block';
           }
@@ -1728,7 +1893,6 @@
         });
       }
 
-      // Botão "Compartilhar via Dispositivo" (Web Share API)
       if (btnNativeShareSolution) {
         btnNativeShareSolution.addEventListener('click', async () => {
           if (!finalShareURL) {
@@ -1749,7 +1913,6 @@
         });
       }
 
-      // Botão WhatsApp
       if (btnShareSolutionWhatsApp) {
         btnShareSolutionWhatsApp.addEventListener('click', () => {
           if (!finalShareURL) {
@@ -1762,7 +1925,6 @@
         });
       }
 
-      // Botão Facebook
       if (btnShareSolutionFacebook) {
         btnShareSolutionFacebook.addEventListener('click', () => {
           if (!finalShareURL) {
@@ -1774,7 +1936,6 @@
         });
       }
 
-      // Botão Instagram
       if (btnShareSolutionInstagram) {
         btnShareSolutionInstagram.addEventListener('click', () => {
           if (!finalShareURL) {
@@ -1789,7 +1950,6 @@
         });
       }
 
-      // Botão de copiar link
       if (btnCopySolutionLink) {
         btnCopySolutionLink.addEventListener('click', () => {
           if (!finalShareURL) {
@@ -1808,6 +1968,31 @@
         });
       }
     });
+
+    // ============ Adicionar Link de Afiliado (modal) ============
+    {% if session.get("role") == "solucionador" %}
+    document.addEventListener('DOMContentLoaded', function() {
+      const addAffiliateLinkModal = document.getElementById('addAffiliateLinkModal');
+      const openAddAffiliateLinkModalBtn = document.getElementById('btnOpenAddAffiliateLinkModal');
+      const closeAddAffiliateLinkModalBtn = document.getElementById('closeAddAffiliateLinkModal');
+
+      if (openAddAffiliateLinkModalBtn && addAffiliateLinkModal) {
+        openAddAffiliateLinkModalBtn.addEventListener('click', () => {
+          addAffiliateLinkModal.style.display = 'flex';
+        });
+      }
+      if (closeAddAffiliateLinkModalBtn) {
+        closeAddAffiliateLinkModalBtn.addEventListener('click', () => {
+          addAffiliateLinkModal.style.display = 'none';
+        });
+      }
+      window.addEventListener("click", (event) => {
+        if (event.target === addAffiliateLinkModal) {
+          addAffiliateLinkModal.style.display = "none";
+        }
+      });
+    });
+    {% endif %}
   </script>
 </body>
 </html>

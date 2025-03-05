@@ -2,34 +2,29 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Editar Problema</title>
-  <!-- Responsividade em dispositivos móveis -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <title>M - Editar Problema</title>
   <!-- Fonte básica -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
+  <!-- Ícones Material -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* =========================================================================
-       RESET BÁSICO
-       ========================================================================= */
+    /* Reset básico */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
-    /* =========================================================================
-       BODY / FONTES / CORES GERAIS
-       ========================================================================= */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      background-color: #f0f0f0;
+      background-color: #f9f9f9;
       color: #333;
       display: flex;
       flex-direction: column;
@@ -37,194 +32,135 @@
       overflow-x: hidden;
     }
 
-    /* =========================================================================
-       HEADER PRETO COM BOTÃO DE VOLTAR
-       ========================================================================= */
-    header {
+    /* Preloader (opcional) */
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       background-color: #000;
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-    }
-    .btn-voltar-inicio {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.2rem;
-      font-size: 2rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
+      z-index: 99999;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .btn-voltar-inicio:hover {
-      background-color: #333;
-      transform: scale(1.02);
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #333;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Conteúdo (para dar fade-in após o preloader) */
+    #content {
+      transition: opacity 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      opacity: 0; /* começa invisível, depois faz fade-in */
+    }
+
+    /* HEADER (similar ao add.html) */
+    header {
+      background-color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 80px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
     }
     header h1 {
       color: #fff;
-      font-size: 1.4rem;
+      font-size: 1.15rem;
+      margin: 0;
       text-align: center;
-      margin: 0 auto;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    @media (max-width: 768px) {
+      header {
+        height: 56px;
+        padding: 0 1rem;
+      }
+      header h1 {
+        font-size: 1.3rem;
+      }
+    }
+    .header-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      outline: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      transition: background-color 0.2s;
+    }
+    .header-btn:hover {
+      background-color: #333;
+    }
+    .header-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+    .header-btn span {
+      margin-left: 0.5rem;
     }
 
-    /* =========================================================================
-       MAIN
-       ========================================================================= */
+    /* Oculta "Perfil" e "Entrar" em telas menores (mostra via mobile-bottom-bar) */
+    @media (max-width: 768px) {
+      .perfil-btn,
+      .entrar-btn {
+        display: none !important;
+      }
+    }
+
+    /* Esconde o botão "Voltar" em telas menores que 768px */
+    @media (max-width: 768px) {
+      #btnVoltar {
+        display: none !important;
+      }
+    }
+
+    /* MAIN */
     main {
+      margin-top: 80px; /* para não ficar atrás do header */
       flex: 1;
-      font-size: 1rem;
-      padding: 2rem;
+      padding: 2rem 1rem;
       width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-
-    /* =========================================================================
-       CONTAINER DO FORMULÁRIO
-       ========================================================================= */
-    .form-container {
-      width: 100%;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      padding: 1rem 1.5rem;
-      margin-bottom: 2rem;
-    }
-    .erro {
-      color: #c00;
-      margin-bottom: 1rem;
-      font-weight: bold;
+    @media (max-width: 768px) {
+      main {
+        margin-top: 56px;
+      }
     }
 
-    /* =========================================================================
-       FORMULÁRIO
-       ========================================================================= */
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-    label {
-      display: block;
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-      color: #333;
-    }
-    input[type="text"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 0.8rem;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      font-family: 'Roboto', sans-serif;
-      box-sizing: border-box;
-      color: #333;
-      outline: none;
-    }
-    input[type="text"]:focus,
-    textarea:focus,
-    select:focus {
-      border-color: #999;
-    }
-    textarea {
-      min-height: 120px;
-      resize: none;
-    }
-
-    .existing-image {
-      display: block;
-      max-width: 100%;
-      margin-top: 0.5rem;
-      border-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    .delete-label {
-      display: inline-block;
-      margin-top: 0.5rem;
-      cursor: pointer;
-    }
-    .delete-label input[type="checkbox"] {
-      margin-right: 0.4rem;
-    }
-
-    /* Botões Salvar/Cancelar */
-    .btn-salvar,
-    .btn-cancelar {
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-    }
-    .btn-salvar {
-      background-color: #000;
-      color: #fff;
-      margin-right: 0.5rem;
-    }
-    .btn-salvar:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-    .btn-cancelar {
-      background-color: #999;
-      color: #fff;
-    }
-    .btn-cancelar:hover {
-      background-color: #666;
-      transform: scale(1.02);
-    }
-
-    /* Botão que abre o modal de seleção de categoria/subcategoria/marca */
-    .btn-categorias-abrir-modal {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
-      display: inline-flex;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .btn-categorias-abrir-modal:hover {
-      background-color: #333;
-      transform: scale(1.02);
-    }
-
-    .category-display {
-      background-color: #f9f9f9;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 0.75rem;
-      font-size: 0.95rem;
-      color: #444;
-      margin-top: -0.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    /* =========================================================================
-       FOOTER
-       ========================================================================= */
+    /* FOOTER (mesmo estilo do add.html) */
     footer {
       background-color: #000;
-      color: #fff;
       text-align: center;
       padding: 1rem 2rem;
     }
@@ -234,9 +170,274 @@
       margin: 0;
     }
 
-    /* =========================================================================
-       MODAL DE CATEGORIAS (3 passos)
-       ========================================================================= */
+    /* Barra inferior (mobile) - mesmo estilo do add.html */
+    .mobile-bottom-bar {
+      display: none; /* no desktop */
+    }
+    @media (max-width: 768px) {
+      .mobile-bottom-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        background-color: #000;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        height: 60px;
+        z-index: 9999;
+      }
+      .mobile-bottom-bar .bottom-bar-btn {
+        text-align: center;
+        color: #fff;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 0.8rem;
+        justify-content: center;
+      }
+      .mobile-bottom-bar .bottom-bar-btn img {
+        margin-bottom: 2px;
+      }
+      main {
+        padding-bottom: 60px;
+      }
+    }
+    .bottom-bar-btn.active {
+      background-color: #444;
+    }
+
+    /* Container do formulário (similar ao add.html) */
+    .form-container {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Mensagem de erro */
+    .erro {
+      color: #d00;
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+
+    /* Formulário (similar ao add.html) */
+    form {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 1.5rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .form-group label {
+      font-weight: 500;
+      color: #555;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .form-group label i.material-icons {
+      font-size: 1.2rem;
+      color: #555;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      padding: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #333;
+      font-size: 1rem;
+      outline: none;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05) inset;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #999;
+    }
+    textarea {
+      resize: none;
+      min-height: 100px;
+    }
+
+    /* Botões gerais (similar ao add.html) */
+    .btn-submit,
+    .btn-cancelar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .btn-submit:hover,
+    .btn-cancelar:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+    .btn-cancelar {
+      background-color: #999;
+    }
+    .btn-cancelar:hover {
+      background-color: #666;
+    }
+    .btn-submit i.material-icons {
+      font-size: 1.2rem;
+    }
+
+    /* Botão para o file input */
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+      margin-bottom: 0.5rem;
+    }
+    .upload-btn:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+    .upload-btn i.material-icons {
+      font-size: 1.2rem;
+    }
+    #problemImage {
+      display: none;
+    }
+
+    /* Pré-visualização da nova imagem (similar ao add.html) */
+    #previewContainer {
+      text-align: center;
+    }
+    #previewImage {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: none;
+      margin-top: 0.5rem;
+    }
+
+    /* Display de Categorias (igual ao add.html) */
+    .cat-display {
+      background-color: #f5f5f5;
+      border-radius: 8px;
+      border: 1px solid #eee;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .cat-display-line {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .cat-info-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .cat-info-label {
+      font-size: 0.8rem;
+      color: #777;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .cat-info-value {
+      font-weight: 600;
+      color: #222;
+      font-size: 1rem;
+      min-height: 1.2em;
+    }
+    .cat-icon-container {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cat-icon {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    /* Botão para abrir modal de categoria */
+    .btn-definir-cat {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .btn-definir-cat:hover {
+      background-color: #333;
+      transform: scale(1.02);
+    }
+
+    /* Checkbox "deletar imagem" */
+    .delete-label {
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+    }
+
+    /* Modal de Categorias (igual ao add.html) */
     .modal {
       display: none;
       position: fixed;
@@ -251,16 +452,14 @@
     }
     .modal-content {
       background-color: #fff;
+      border-radius: 8px;
       width: 95%;
       max-width: 700px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
       animation: modalFadeIn 0.3s ease;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      max-height: 90vh;
-      overflow: hidden;
-      border: 1px solid #fff; /* Borda branca fina */
     }
     @keyframes modalFadeIn {
       from {
@@ -275,21 +474,20 @@
     .modal-header {
       background-color: #000;
       color: #fff;
-      padding: 2rem;
+      padding: 1.2rem 1.5rem;
       position: relative;
-      border-bottom: 1px solid #333;
     }
     .modal-header h2 {
       margin: 0;
-      font-size: 2rem;
+      font-size: 1.4rem;
       font-weight: 500;
     }
     .close {
       color: #fff;
       position: absolute;
-      right: 2rem;
-      top: 2rem;
-      font-size: 2.4rem;
+      right: 1.5rem;
+      top: 1rem;
+      font-size: 1.8rem;
       font-weight: bold;
       cursor: pointer;
       transition: color 0.3s;
@@ -304,36 +502,29 @@
       max-height: calc(90vh - 100px);
     }
     .modal-text {
-      font-size: 1.5rem;
+      font-size: 1.1rem;
       color: #333;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       line-height: 1.4;
-    }
-
-    #editMainCategoryContainer,
-    #editSubCategoryContainer,
-    #editBrandContainer {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
+      font-weight: 400;
     }
     .btn-categorias {
       background-color: #f2f2f2;
       color: #333;
       border: 1px solid #ccc;
       border-radius: 4px;
-      padding: 1.2rem 2rem;
-      font-size: 1.5rem;
+      padding: 1rem 1.5rem;
+      font-size: 1.1rem;
       font-weight: 500;
       cursor: pointer;
       width: 100%;
       max-width: 380px;
-      margin: 0 auto;
+      margin: 0 auto 1rem auto;
       transition: background-color 0.2s, transform 0.2s;
       text-align: left;
       display: flex;
       align-items: center;
+      gap: 1rem;
     }
     .btn-categorias:hover {
       background-color: #e6e6e6;
@@ -342,7 +533,6 @@
     .btn-categorias img {
       width: 60px;
       height: 60px;
-      margin-right: 15px;
     }
     .btn-categorias.voltar {
       background-color: #ddd;
@@ -352,270 +542,417 @@
     .btn-categorias.voltar:hover {
       background-color: #ccc;
     }
-
-    @media (max-width: 768px) {
-      header {
-        padding: 1rem;
-      }
-      header h1 {
-        font-size: 1.2rem;
-      }
-      .btn-voltar-inicio {
-        padding: 0.5rem 1rem;
-      }
-      main {
-        font-size: 1rem;
-        padding: 1rem;
-      }
-      .form-container {
-        padding: 1rem;
-      }
-      .form-group {
-        margin-bottom: 1rem;
-      }
-      .btn-salvar,
-      .btn-cancelar {
-        font-size: 0.9rem;
-        padding: 0.6rem 1rem;
-      }
-      .btn-categorias-abrir-modal {
-        font-size: 0.9rem;
-        padding: 0.6rem 1rem;
-      }
-      .existing-image {
-        max-width: 100%;
-      }
-
-      /* Ajustes do modal */
-      .modal-content {
-        width: 95%;
-      }
-      .modal-header {
-        padding: 1rem;
-      }
-      .modal-header h2 {
-        font-size: 1.4rem;
-      }
-      .close {
-        top: 1rem;
-        right: 1rem;
-        font-size: 1.8rem;
-      }
-      .modal-body {
-        padding: 1rem;
-      }
-      .modal-text {
-        font-size: 1rem;
-      }
-      .btn-categorias {
-        font-size: 1rem;
-        padding: 0.8rem 1rem;
-      }
-    }
   </style>
 </head>
 <body>
-  <header>
-    <a href="{{ url_for('search') }}" class="btn-voltar-inicio" title="Voltar">&#x2B05;</a>
-    <h1>Editar Problema</h1>
-    <div style="width: 2rem;"></div>
-  </header>
+  <!-- PRELOADER (opcional) -->
+  <div id="preloader">
+    <div class="loader"></div>
+  </div>
 
-  <main>
-    <div class="form-container">
-      {% if erro %}
-        <p class="erro">{{ erro }}</p>
+  <!-- CONTEÚDO -->
+  <div id="content">
+    <!-- Barra superior fixa -->
+    <header>
+      <!-- Botão "Voltar" (oculto em telas <= 768px via CSS) -->
+      <button
+        class="header-btn"
+        id="btnVoltar"
+        aria-label="Voltar"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path
+            d="M15 18l-6-6 6-6"
+            stroke="currentColor"
+            stroke-width="2"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+
+      <h1>Editar Problema</h1>
+
+      <!-- Se NÃO estiver logado, mostra "Entrar" -->
+      {% if not session.get('user_id') %}
+        <a class="header-btn entrar-btn" href="{{ url_for('login') }}">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
+          </svg>
+          <span>Entrar</span>
+        </a>
+      {% else %}
+        <!-- Se estiver logado, mostra "Perfil" -->
+        <a class="header-btn perfil-btn" href="{{ url_for('perfil') }}">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
+          </svg>
+          <span>Perfil</span>
+        </a>
       {% endif %}
+    </header>
 
-      <!-- enctype multipart/form-data para upload de arquivo -->
-      <form method="POST" action="" enctype="multipart/form-data">
-
-        <!-- Título -->
-        <div class="form-group">
-          <label for="titulo">Título:</label>
-          <input
-            type="text"
-            name="titulo"
-            id="titulo"
-            value="{{ problema.titulo }}"
-            required
-          >
-        </div>
-
-        <!-- Descrição -->
-        <div class="form-group">
-          <label for="descricao">Descrição:</label>
-          <textarea
-            name="descricao"
-            id="descricao"
-            required
-          >{{ problema.descricao }}</textarea>
-        </div>
-
-        <!-- Tags -->
-        <div class="form-group">
-          <label for="tags">
-            Tags (separe por espaço): <br>
-            <small>(Pontuação será removida automaticamente)</small>
-          </label>
-          <input
-            type="text"
-            name="tags"
-            id="tags"
-            oninput="sanitizeTagsInput()"
-            value="{% if problema.tags %}{{ ' '.join(problema.tags) }}{% endif %}"
-          >
-        </div>
-
-        <!-- Botão para abrir modal de seleção de categoria/subcategoria/marca -->
-        <div class="form-group">
-          <label>Categorias/Marca:</label>
-          <button type="button" class="btn-categorias-abrir-modal" onclick="openCategoryModal()">
-            Definir/Alterar Categoria
-          </button>
-          <div class="category-display">
-            Categoria Principal: <span id="displayCategory">
-              {{ problema.category if problema.category else '---' }}
-            </span><br>
-            Subcategoria: <span id="displaySubCategory">
-              {{ problema.subCategory if problema.subCategory else '---' }}
-            </span><br>
-            Marca: <span id="displayBrand">
-              {{ problema.brand if problema.brand else '---' }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Inputs ocultos para category, subCategory, brand -->
-        <input
-          type="hidden"
-          name="category"
-          id="categoryInput"
-          value="{{ problema.category if problema.category else '' }}"
-        >
-        <input
-          type="hidden"
-          name="subCategory"
-          id="subCategoryInput"
-          value="{{ problema.subCategory if problema.subCategory else '' }}"
-        >
-        <input
-          type="hidden"
-          name="brand"
-          id="brandInput"
-          value="{{ problema.brand if problema.brand else '' }}"
-        >
-
-        <!-- Imagem existente (se houver) -->
-        {% if problema.problemImage %}
-          <div class="form-group">
-            <label>Imagem Atual:</label>
-            <img
-              src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}"
-              alt="Imagem do Problema"
-              class="existing-image"
-            >
-            <label for="deleteExistingImage" class="delete-label">
-              <input
-                type="checkbox"
-                name="deleteExistingImage"
-                id="deleteExistingImage"
-                value="true"
-              >
-              Deletar imagem existente
-            </label>
-          </div>
+    <main>
+      <div class="form-container">
+        {% if erro %}
+          <div class="erro">{{ erro }}</div>
         {% endif %}
 
-        <!-- Nova imagem (opcional) -->
-        <div class="form-group">
-          <label for="problemImage">Nova Imagem (opcional):</label>
-          <input
-            type="file"
-            name="problemImage"
-            id="problemImage"
-            accept="image/*"
-          >
-        </div>
+        <!-- Formulário de edição -->
+        <form method="POST" action="" enctype="multipart/form-data">
 
-        <!-- CRIADOR (Creator) -->
-        <div class="form-group">
-          <label for="creator_id">Enviado por (criador):</label>
-          <select name="creator_id" id="creator_id" onchange="toggleCreatorCustomInput()">
-            <option value="">-- Nenhum --</option>
-            {% for usr in all_users %}
-              <option
-                value="{{ usr._id }}"
-                {% if problema.creator_id == usr._id|string %}
+          <!-- Título -->
+          <div class="form-group">
+            <label for="titulo">
+              <i class="material-icons" aria-hidden="true">label</i>
+              Título do Problema
+            </label>
+            <input
+              type="text"
+              name="titulo"
+              id="titulo"
+              value="{{ problema.titulo }}"
+              placeholder="Ex: Motor do carro não liga"
+              required
+              aria-required="true"
+            />
+          </div>
+
+          <!-- Descrição -->
+          <div class="form-group">
+            <label for="descricao">
+              <i class="material-icons" aria-hidden="true">description</i>
+              Descrição do Problema
+            </label>
+            <textarea
+              id="descricao"
+              name="descricao"
+              rows="5"
+              required
+              aria-required="true"
+            >{{ problema.descricao }}</textarea>
+          </div>
+
+          <!-- Tags -->
+          <div class="form-group">
+            <label for="tags">
+              <i class="material-icons" aria-hidden="true">tag</i>
+              Tags (separe por espaço)
+            </label>
+            <small style="color: #666; font-size: 0.85rem;">
+              (Pontuação será removida automaticamente)
+            </small>
+            <input
+              type="text"
+              name="tags"
+              id="tags"
+              oninput="sanitizeTagsInput()"
+              value="{% if problema.tags %}{{ ' '.join(problema.tags) }}{% endif %}"
+            />
+          </div>
+
+          <!-- Botão para abrir modal de seleção de categoria -->
+          <button type="button" class="btn-definir-cat" onclick="openCategoryModal()">
+            <i class="material-icons" aria-hidden="true">list_alt</i>
+            Definir/Alterar Categoria
+          </button>
+
+          <!-- Exibição das categorias (igual ao add.html) -->
+          <div class="cat-display">
+            <div class="cat-display-line">
+              <div class="cat-icon-container">
+                <img
+                  id="displayCategoryIcon"
+                  class="cat-icon"
+                  src=""
+                  alt=""
+                />
+              </div>
+              <div class="cat-info-text">
+                <div class="cat-info-label">Categoria Principal</div>
+                <div class="cat-info-value" id="displayCategory">
+                  {{ problema.category if problema.category else "" }}
+                </div>
+              </div>
+            </div>
+            <div class="cat-display-line">
+              <div class="cat-icon-container">
+                <img
+                  id="displaySubCategoryIcon"
+                  class="cat-icon"
+                  src=""
+                  alt=""
+                />
+              </div>
+              <div class="cat-info-text">
+                <div class="cat-info-label">Subcategoria</div>
+                <div class="cat-info-value" id="displaySubCategory">
+                  {{ problema.subCategory if problema.subCategory else "" }}
+                </div>
+              </div>
+            </div>
+            <div class="cat-display-line">
+              <div class="cat-icon-container">
+                <img
+                  id="displayBrandIcon"
+                  class="cat-icon"
+                  src=""
+                  alt=""
+                />
+              </div>
+              <div class="cat-info-text">
+                <div class="cat-info-label">Marca</div>
+                <div class="cat-info-value" id="displayBrand">
+                  {{ problema.brand if problema.brand else "" }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inputs ocultos para category, subCategory, brand -->
+          <input
+            type="hidden"
+            name="category"
+            id="categoryInput"
+            value="{{ problema.category if problema.category else '' }}"
+          >
+          <input
+            type="hidden"
+            name="subCategory"
+            id="subCategoryInput"
+            value="{{ problema.subCategory if problema.subCategory else '' }}"
+          >
+          <input
+            type="hidden"
+            name="brand"
+            id="brandInput"
+            value="{{ problema.brand if problema.brand else '' }}"
+          >
+
+          <!-- Imagem existente (se houver) -->
+          {% if problema.problemImage %}
+            <div class="form-group">
+              <label style="gap: 0.5rem;">
+                <i class="material-icons" aria-hidden="true">photo</i>
+                Imagem Atual
+              </label>
+              <div>
+                <img
+                  src="{{ url_for('gridfs_image', file_id=problema.problemImage) }}"
+                  alt="Imagem do Problema"
+                  style="max-width: 100%; border: 1px solid #ccc; border-radius: 4px;"
+                >
+              </div>
+              <label for="deleteExistingImage" class="delete-label">
+                <input
+                  type="checkbox"
+                  name="deleteExistingImage"
+                  id="deleteExistingImage"
+                  value="true"
+                />
+                Deletar imagem existente
+              </label>
+            </div>
+          {% endif %}
+
+          <!-- Botão para adicionar nova imagem -->
+          <div class="form-group">
+            <label class="upload-btn" for="problemImage">
+              <i class="material-icons" aria-hidden="true">add_photo_alternate</i>
+              Nova Imagem (opcional)
+            </label>
+            <input
+              type="file"
+              id="problemImage"
+              name="problemImage"
+              accept="image/*"
+            />
+            <div id="previewContainer">
+              <img id="previewImage" alt="Pré-visualização da nova imagem" />
+            </div>
+          </div>
+
+          <!-- Criador (creator) -->
+          <div class="form-group">
+            <label for="creator_id">
+              <i class="material-icons" aria-hidden="true">person</i>
+              Enviado por (criador)
+            </label>
+            <select name="creator_id" id="creator_id" onchange="toggleCreatorCustomInput()">
+              <option value="">-- Nenhum --</option>
+              {% for usr in all_users %}
+                <option
+                  value="{{ usr._id }}"
+                  {% if problema.creator_id == usr._id|string %}
+                    selected
+                  {% endif %}
+                >
+                  {{ usr.nome }}
+                </option>
+              {% endfor %}
+              <option value="custom"
+                {% if problema.creator_id == None and problema.creator_custom_name %}
                   selected
                 {% endif %}
               >
-                {{ usr.nome }}
+                Outro (digitar nome)
               </option>
-            {% endfor %}
-            <option value="custom"
-              {% if problema.creator_id == None and problema.creator_custom_name %}
-                selected
-              {% endif %}
-            >
-              Outro (digitar nome)
-            </option>
-          </select>
-          <input
-            type="text"
-            name="creator_custom_name"
-            id="creator_custom_name"
-            placeholder="Digite o nome do criador"
-            style="margin-top: 0.5rem; display: none;"
-            value="{{ problema.creator_custom_name if problema.creator_custom_name else '' }}"
-          >
-        </div>
+            </select>
+            <input
+              type="text"
+              name="creator_custom_name"
+              id="creator_custom_name"
+              placeholder="Digite o nome do criador"
+              style="display: none; margin-top: 0.5rem;"
+              value="{{ problema.creator_custom_name if problema.creator_custom_name else '' }}"
+            />
+          </div>
 
-        <!-- SOLVER (Solucionador) -->
-        <div class="form-group">
-          <label for="solver_id">Resolvido por (solucionador):</label>
-          <select name="solver_id" id="solver_id" onchange="toggleSolverCustomInput()">
-            <option value="">-- Nenhum --</option>
-            {% for usr in all_users %}
-              <option
-                value="{{ usr._id }}"
-                {% if problema.solver_id == usr._id|string %}
+          <!-- Solucionador (solver) -->
+          <div class="form-group">
+            <label for="solver_id">
+              <i class="material-icons" aria-hidden="true">engineering</i>
+              Resolvido por (solucionador)
+            </label>
+            <select name="solver_id" id="solver_id" onchange="toggleSolverCustomInput()">
+              <option value="">-- Nenhum --</option>
+              {% for usr in all_users %}
+                <option
+                  value="{{ usr._id }}"
+                  {% if problema.solver_id == usr._id|string %}
+                    selected
+                  {% endif %}
+                >
+                  {{ usr.nome }}
+                </option>
+              {% endfor %}
+              <option value="custom"
+                {% if problema.solver_id == None and problema.solver_custom_name %}
                   selected
                 {% endif %}
               >
-                {{ usr.nome }}
+                Outro (digitar nome)
               </option>
-            {% endfor %}
-            <option value="custom"
-              {% if problema.solver_id == None and problema.solver_custom_name %}
-                selected
-              {% endif %}
-            >
-              Outro (digitar nome)
-            </option>
-          </select>
-          <input
-            type="text"
-            name="solver_custom_name"
-            id="solver_custom_name"
-            placeholder="Digite o nome do solucionador"
-            style="margin-top: 0.5rem; display: none;"
-            value="{{ problema.solver_custom_name if problema.solver_custom_name else '' }}"
-          >
-        </div>
+            </select>
+            <input
+              type="text"
+              name="solver_custom_name"
+              id="solver_custom_name"
+              placeholder="Digite o nome do solucionador"
+              style="display: none; margin-top: 0.5rem;"
+              value="{{ problema.solver_custom_name if problema.solver_custom_name else '' }}"
+            />
+          </div>
 
-        <!-- BOTÕES -->
-        <button type="submit" class="btn-salvar">Salvar</button>
-        <a href="{{ url_for('search') }}" class="btn-cancelar">Cancelar</a>
-      </form>
+          <!-- BOTÕES -->
+          <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn-submit">
+              <i class="material-icons" aria-hidden="true">save</i>
+              Salvar
+            </button>
+            <a href="{{ url_for('search') }}" class="btn-cancelar">
+              <i class="material-icons" aria-hidden="true">cancel</i>
+              Cancelar
+            </a>
+          </div>
+
+        </form>
+      </div>
+    </main>
+
+    <footer>
+      <p>© 2025 Plataforma M</p>
+    </footer>
+
+    <!-- Barra inferior (mobile) -->
+    <div class="mobile-bottom-bar">
+      <!-- Home -->
+      <a
+        href="{{ url_for('index') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'index' %} active{% endif %}"
+        title="Página Inicial"
+      >
+        <img
+          src="{{ url_for('static', filename='images/home_icon.webp') }}"
+          alt="Home Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
+        Home
+      </a>
+
+      <!-- Resolver -->
+      <a
+        href="{{ url_for('unresolved') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'unresolved' %} active{% endif %}"
+        title="Resolver Problemas"
+      >
+        <img
+          src="{{ url_for('static', filename='images/resolver_icon.webp') }}"
+          alt="Resolver Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
+        Resolver
+      </a>
+
+      <!-- Envie (adicionar problema) -->
+      <a
+        href="{{ url_for('add_problem') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'add_problem' %} active{% endif %}"
+        title="Envie seu Problema"
+      >
+        <img
+          src="{{ url_for('static', filename='images/enviar_icon.webp') }}"
+          alt="Envie icon"
+          style="width:30px; height:30px"
+        />
+        Enviar
+      </a>
+
+      <!-- Perfil ou Entrar -->
+      {% if not session.get('user_id') %}
+        <a
+          href="{{ url_for('login') }}"
+          class="bottom-bar-btn{% if request.endpoint in ['login','register'] %} active{% endif %}"
+          title="Entrar"
+        >
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Entrar
+        </a>
+      {% else %}
+        <a
+          href="{{ url_for('perfil') }}"
+          class="bottom-bar-btn{% if request.endpoint == 'perfil' %} active{% endif %}"
+          title="Perfil"
+        >
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Perfil
+        </a>
+      {% endif %}
     </div>
-  </main>
+  </div>
 
-  <footer>
-    <p>© 2025 Plataforma M</p>
-  </footer>
-
-  <!-- MODAL: SELEÇÃO DE CATEGORIA (3 PASSOS) -->
+  <!-- MODAL DE CATEGORIAS (3 passos, mesmo do add.html) -->
   <div id="categoryModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -623,33 +960,61 @@
         <span class="close" onclick="closeCategoryModal()">&times;</span>
       </div>
       <div class="modal-body">
-        <!-- Passo 1: Lista de categorias principais -->
-        <div id="editMainCategoryStep" style="display: block;">
-          <p class="modal-text">Escolha a categoria principal:</p>
-          <div id="editMainCategoryContainer"></div>
+        <!-- Passo 1: Categorias Principais -->
+        <div id="mainCategoryStep" style="display: block;">
+          <p class="modal-text">Selecione a categoria principal:</p>
+          <div id="mainCategoryContainer"></div>
         </div>
 
         <!-- Passo 2: Subcategorias -->
-        <div id="editSubCategoryStep" style="display: none;">
-          <p class="modal-text" id="editSelectedMainCategoryText"></p>
-          <p class="modal-text">Escolha a subcategoria:</p>
-          <div id="editSubCategoryContainer"></div>
-          <button class="btn-categorias voltar" onclick="backToEditMainCategory()">Voltar</button>
+        <div id="subCategoryStep" style="display: none;">
+          <p class="modal-text" id="selectedMainCategoryText"></p>
+          <p class="modal-text">Selecione a subcategoria:</p>
+          <div id="subCategoryContainer"></div>
+          <button class="btn-categorias voltar" onclick="goBackToMainCategory()">Voltar</button>
         </div>
 
         <!-- Passo 3: Marcas -->
-        <div id="editBrandStep" style="display: none;">
-          <p class="modal-text" id="editSelectedSubCategoryText"></p>
+        <div id="brandStep" style="display: none;">
+          <p class="modal-text" id="selectedSubCategoryText"></p>
           <p class="modal-text">Selecione a marca (ou "Sem marca"):</p>
-          <div id="editBrandContainer"></div>
-          <button class="btn-categorias voltar" onclick="backToEditSubCategory()">Voltar</button>
+          <div id="brandContainer"></div>
+          <button class="btn-categorias voltar" onclick="goBackToSubCategory()">Voltar</button>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Mostrar/esconder campo de texto para "Outro" (criador)
+    // Preloader + fade-in do conteúdo
+    window.addEventListener('load', function () {
+      const preloader = document.getElementById('preloader');
+      const content = document.getElementById('content');
+      if (preloader) {
+        preloader.style.display = 'none';
+      }
+      if (content) {
+        content.style.opacity = '1';
+      }
+    });
+
+    // Botão Voltar (mesmo comportamento do add.html)
+    document.addEventListener('DOMContentLoaded', function() {
+      const ref = document.referrer || "";
+      const btnVoltar = document.getElementById('btnVoltar');
+      if (btnVoltar) {
+        btnVoltar.addEventListener('click', function() {
+          if (!ref) {
+            // Se não houver referrer, vai para /search
+            window.location.href = "{{ url_for('search') }}";
+          } else {
+            window.history.back();
+          }
+        });
+      }
+    });
+
+    // Mostrar/esconder campo "Outro" (criador)
     function toggleCreatorCustomInput() {
       const selectEl = document.getElementById('creator_id');
       const customInputEl = document.getElementById('creator_custom_name');
@@ -659,8 +1024,7 @@
         customInputEl.style.display = 'none';
       }
     }
-
-    // Mostrar/esconder campo de texto para "Outro" (solucionador)
+    // Mostrar/esconder campo "Outro" (solucionador)
     function toggleSolverCustomInput() {
       const selectEl = document.getElementById('solver_id');
       const customInputEl = document.getElementById('solver_custom_name');
@@ -670,203 +1034,216 @@
         customInputEl.style.display = 'none';
       }
     }
-
-    // Ao carregar a página, ajusta se estiver setado "custom"
+    // Ajusta ao carregar
     window.addEventListener('DOMContentLoaded', () => {
       toggleCreatorCustomInput();
       toggleSolverCustomInput();
     });
 
-    // =========================================================================
-    // Função para remover acentos E pontuação do campo "tags" na digitação
-    // (apenas client-side; o back-end também faz sanitização)
-    // =========================================================================
+    // Sanitiza campo de tags (remove acentos e pontuação)
     function sanitizeTagsInput() {
       const input = document.getElementById('tags');
-      // Remove acentos
       let text = input.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      // Remove pontuação (qualquer caractere que não seja letra, número, espaço)
       text = text.replace(/[^a-zA-Z0-9\s]/g, "");
-      // Converte para minúsculo
       text = text.toLowerCase();
       input.value = text;
     }
 
+    // Pré-visualização de nova imagem
+    const problemImageInput = document.getElementById('problemImage');
+    const previewImage = document.getElementById('previewImage');
+
+    problemImageInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImage.src = e.target.result;
+          previewImage.style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewImage.src = '';
+        previewImage.style.display = 'none';
+      }
+    });
+
     // =========================================================================
-    // Modal de Edição de Categoria (3 passos)
+    // Modal de categorias (cópia do add.html)
     // =========================================================================
-    const categoryModal = document.getElementById('categoryModal');
+    let selectedCatImg = "";
+    let selectedSubCatImg = "";
+    let selectedBrandImg = "";
 
     function openCategoryModal() {
       document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
-      categoryModal.style.display = 'flex';
+      document.getElementById('categoryModal').style.display = 'flex';
       showMainCategories();
     }
     function closeCategoryModal() {
-      categoryModal.style.display = 'none';
-      resetCategoryModal();
+      document.getElementById('categoryModal').style.display = 'none';
+      resetCategoryModalSteps();
     }
 
-    // Dados de categorias, subcategorias e marcas
     const categoryData = [
       {
         name: "Veículos",
-        img: "carro_icon.png",
+        img: "carro_icon.webp",
         subCategories: [
           {
             name: "Carros",
-            img: "carro_icon.png",
+            img: "carro_icon.webp",
             brands: ["Toyota", "Honda", "Ford", "Fiat", "Volkswagen", "Peugeot", "Chevrolet"]
           },
           {
             name: "Motos",
-            img: "moto_icon.png",
+            img: "moto_icon.webp",
             brands: ["Yamaha", "Honda", "Harley-Davidson", "Suzuki", "BMW"]
           },
           {
             name: "Caminhonetes",
-            img: "caminhonete_icon.png",
+            img: "caminhonete_icon.webp",
             brands: ["Toyota", "Chevrolet", "Ford", "Mitsubishi", "Nissan"]
           },
           {
             name: "Caminhões",
-            img: "caminhao_icon.png",
+            img: "caminhoes_icon.webp",
             brands: ["Mercedes-Benz", "Volvo", "Scania", "Iveco"]
           },
           {
             name: "Ônibus",
-            img: "onibus_icon.png",
+            img: "onibus_icon.webp",
             brands: ["Marcopolo", "Volvo", "Mercedes-Benz"]
           }
         ]
       },
       {
         name: "Máquinas Agrícolas",
-        img: "trator_icon.png",
+        img: "tratores_icon.webp",
         subCategories: [
           {
             name: "Tratores",
-            img: "trator_icon.png",
+            img: "tratores_icon.webp",
             brands: ["John Deere", "Massey Ferguson", "Valtra/Valmet", "New Holland", "Case"]
           },
           {
             name: "Colheitadeiras",
-            img: "colheitadeira_icon.png",
+            img: "colheitadeira_icon.webp",
             brands: ["John Deere", "Case", "New Holland"]
           },
           {
             name: "Plantadeiras e Pulverizadores",
-            img: "plantadeira_icon.png",
+            img: "plantadeiras_e_oulverizadores_icon.png",
             brands: ["Stara", "Jacto", "Kuhn"]
           }
         ]
       },
       {
         name: "Equipamentos Industriais",
-        img: "empilhadeira_icon.png",
+        img: "empilhadeira_icon.webp",
         subCategories: [
           {
             name: "Motores e Geradores",
-            img: "motor_icon.png",
+            img: "motores_geradores_icon.webp",
             brands: ["Cummins", "Perkins", "Caterpillar"]
           },
           {
             name: "Máquinas Pesadas",
-            img: "escavadeira_icon.png",
+            img: "maquinas_pesadas_icon.webp",
             brands: ["Caterpillar", "Komatsu", "Volvo"]
           },
           {
             name: "Empilhadeiras e Guinchos",
-            img: "empilhadeira_icon.png",
+            img: "empilhadeira_icon.webp",
             brands: []
           }
         ]
       },
       {
         name: "Eletrônicos e Tecnologia",
-        img: "celular_icon.png",
+        img: "celular_icon.webp",
         subCategories: [
           {
             name: "Celulares e Tablets",
-            img: "celular_icon.png",
+            img: "celular_icon.webp",
             brands: ["Apple", "Samsung", "Xiaomi", "Motorola"]
           },
           {
             name: "Notebooks e PCs",
-            img: "notebook_icon.png",
+            img: "notebook_icon.webp",
             brands: ["Dell", "Lenovo", "HP", "ASUS", "Acer"]
           },
           {
             name: "Impressoras e Periféricos",
-            img: "impressora_icon.png",
+            img: "impressoras_perifericos_icon.webo",
             brands: []
           },
           {
             name: "Consoles e Videogames",
-            img: "controle_videogame_icon.png",
+            img: "controle_videogame_icon.webp",
             brands: []
           },
           {
             name: "Televisores e Acessórios",
-            img: "tv_icon.png",
+            img: "televisores_e_acessorios_icon.webp",
             brands: ["LG", "Samsung", "Sony", "Philips", "TCL", "Panasonic"]
           }
         ]
       },
       {
         name: "Sistemas Hidráulicos e Pneumáticos",
-        img: "compressor_de_ar_icon.png",
+        img: "compressores_de_ar_icon.webp",
         subCategories: [
           {
             name: "Bombas Hidráulicas e Pneumáticas",
-            img: "bomba_hidraulica_icon.png",
+            img: "bomba_hidraulica_icon.webp",
             brands: []
           },
           {
             name: "Compressores de Ar",
-            img: "compressor_de_ar_icon.png",
+            img: "compressores_de_ar_icon.webp",
             brands: []
           },
           {
             name: "Cilindros Hidráulicos",
-            img: "cilindro_hidraulico_icon.png",
+            img: "cilindro_hidraulico_icon.webp",
             brands: []
           }
         ]
       },
       {
         name: "Eletrodomésticos e Equipamentos Domésticos",
-        img: "microondas_icon.png",
+        img: "microondas_icon.webp",
         subCategories: [
           {
             name: "Geladeiras e Freezers",
-            img: "geladeira_icon.png",
+            img: "geladeira_freezer_icon.webp",
             brands: []
           },
           {
             name: "Máquinas de Lavar e Secadoras",
-            img: "maquina_de_lava_icon.png",
+            img: "maquina_de_lavar_e_secadora_icon.webp",
             brands: []
           },
           {
             name: "Ar-condicionado",
-            img: "ar_condicionado_icon.png",
+            img: "ar_condicionado_icon.webp",
             brands: []
           },
           {
             name: "Cafeteiras e Eletroportáteis",
-            img: "cafeteira_icon.png",
+            img: "cafeteiras_e_eletroportateis_icon.png",
             brands: ["Mondial", "Nespresso", "Dolce Gusto", "Oster", "Cadence", "Britânia"]
           }
         ]
       },
       {
         name: "Ferramentas e Manutenção Geral",
-        img: "ferramentas_icon.png",
+        img: "ferramentas_icon.webp",
         subCategories: [
           {
             name: "Furadeiras, Parafusadeiras e Esmerilhadeiras",
-            img: "furadeira_icon.png",
+            img: "furadeira_parafusadeira_esmerilhadeira_icon.webp",
             brands: []
           },
           {
@@ -878,126 +1255,101 @@
       }
     ];
 
-    let selectedMainCatIndex = null;
-    let selectedSubCatIndex = null;
-
-    // Step 1: Exibir Categorias Principais
     function showMainCategories() {
-      document.getElementById('editMainCategoryStep').style.display = 'block';
-      document.getElementById('editSubCategoryStep').style.display = 'none';
-      document.getElementById('editBrandStep').style.display = 'none';
-
-      const container = document.getElementById('editMainCategoryContainer');
+      const container = document.getElementById('mainCategoryContainer');
+      if (!container) return;
       container.innerHTML = '';
 
       categoryData.forEach((cat, idx) => {
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
         btn.innerHTML = `
-          <img
-            src="/static/images/${cat.img}"
-            alt="${cat.name}"
-            style="width:60px;height:60px;margin-right:15px;"
-          >
+          <img src="/static/images/${cat.img}" alt="${cat.name}" />
           <span>${cat.name}</span>
         `;
         btn.onclick = () => {
-          selectedMainCatIndex = idx;
-          document.getElementById('editMainCategoryStep').style.display = 'none';
-          document.getElementById('editSubCategoryStep').style.display = 'block';
-          document.getElementById('editSelectedMainCategoryText').innerText =
+          document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
+          document.getElementById('mainCategoryStep').style.display = 'none';
+          document.getElementById('subCategoryStep').style.display = 'block';
+          document.getElementById('selectedMainCategoryText').innerText =
             "Categoria selecionada: " + cat.name;
+          selectedCatImg = "/static/images/" + cat.img;
+          window.selectedMainCatIndex = idx;
           showSubCategories(idx);
         };
         container.appendChild(btn);
       });
     }
 
-    // Step 2: Exibir Subcategorias
-    function showSubCategories(mainCatIndex) {
-      const subCatContainer = document.getElementById('editSubCategoryContainer');
+    function showSubCategories(catIndex) {
+      const subCatContainer = document.getElementById('subCategoryContainer');
+      if (!subCatContainer) return;
       subCatContainer.innerHTML = '';
 
-      const subCats = categoryData[mainCatIndex].subCategories;
+      const subCats = categoryData[catIndex].subCategories;
       subCats.forEach((sub, subIdx) => {
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
-
-        if (sub.img) {
-          btn.innerHTML = `
-            <img
-              src="/static/images/${sub.img}"
-              alt="${sub.name}"
-              style="width:60px;height:60px;margin-right:15px;"
-            >
-            <span>${sub.name}</span>
-          `;
-        } else {
-          btn.textContent = sub.name;
-        }
-
+        btn.innerHTML = `
+          <img src="/static/images/${sub.img}" alt="${sub.name}" />
+          <span>${sub.name}</span>
+        `;
         btn.onclick = () => {
-          selectedSubCatIndex = subIdx;
-          document.getElementById('editSubCategoryStep').style.display = 'none';
-          document.getElementById('editBrandStep').style.display = 'block';
-          document.getElementById('editSelectedSubCategoryText').innerText =
+          document.getElementById('subCategoryStep').style.display = 'none';
+          document.getElementById('brandStep').style.display = 'block';
+          document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a marca:";
+          document.getElementById('selectedSubCategoryText').innerText =
             "Subcategoria selecionada: " + sub.name;
-          showBrands(mainCatIndex, subIdx);
+          selectedSubCatImg = "/static/images/" + sub.img;
+          window.selectedSubCatIndex = subIdx;
+          showBrands(catIndex, subIdx);
         };
         subCatContainer.appendChild(btn);
       });
     }
 
-    // Step 3: Exibir Marcas
-    function showBrands(mainCatIndex, subCatIndex) {
-      const brandContainer = document.getElementById('editBrandContainer');
+    function showBrands(catIndex, subCatIndex) {
+      const brandContainer = document.getElementById('brandContainer');
+      if (!brandContainer) return;
       brandContainer.innerHTML = '';
 
-      const subCat = categoryData[mainCatIndex].subCategories[subCatIndex];
+      const subCat = categoryData[catIndex].subCategories[subCatIndex];
       const brands = subCat.brands || [];
 
-      // Se não houver marcas, permitir "Sem marca"
       if (brands.length === 0) {
         const noBrandBtn = document.createElement('button');
         noBrandBtn.className = 'btn-categorias';
         noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
         noBrandBtn.onclick = () => {
-          finalizeCategory(mainCatIndex, subCatIndex, "");
+          finalizeCategory(catIndex, subCatIndex, "", "");
         };
         brandContainer.appendChild(noBrandBtn);
         return;
       }
 
       brands.forEach(brand => {
-        let brandName = "";
-        let brandImg = null;
-
+        let brandName, brandImg;
         if (typeof brand === 'string') {
           brandName = brand;
+          brandImg = "brand_generic_icon.png"; // ícone genérico se quiser
         } else {
-          // Caso seja um objeto { name, img }
           brandName = brand.name;
           brandImg = brand.img;
         }
-
         const btn = document.createElement('button');
         btn.className = 'btn-categorias';
 
-        if (brandImg) {
+        if (brandImg && brandImg !== "brand_generic_icon.png") {
           btn.innerHTML = `
-            <img
-              src="/static/images/${brandImg}"
-              alt="${brandName}"
-              style="width:60px;height:60px;margin-right:15px;"
-            >
+            <img src="/static/images/${brandImg}" alt="${brandName}" />
             <span>${brandName}</span>
           `;
         } else {
-          btn.textContent = brandName;
+          btn.innerHTML = `<span>${brandName}</span>`;
         }
 
         btn.onclick = () => {
-          finalizeCategory(mainCatIndex, subCatIndex, brandName);
+          finalizeCategory(catIndex, subCatIndex, brandName, brandImg);
         };
         brandContainer.appendChild(btn);
       });
@@ -1007,47 +1359,76 @@
       noBrandBtn.className = 'btn-categorias';
       noBrandBtn.textContent = "Sem marca (apenas subcategoria)";
       noBrandBtn.onclick = () => {
-        finalizeCategory(mainCatIndex, subCatIndex, "");
+        finalizeCategory(catIndex, subCatIndex, "", "");
       };
       brandContainer.appendChild(noBrandBtn);
     }
 
-    // Definir valores no formulário
-    function finalizeCategory(catIndex, subIndex, brandName) {
+    function finalizeCategory(catIndex, subIndex, brandName, brandImg) {
       const catName = categoryData[catIndex].name;
       const subCatName = categoryData[catIndex].subCategories[subIndex].name;
 
+      // Preenche inputs
       document.getElementById('categoryInput').value = catName;
       document.getElementById('subCategoryInput').value = subCatName;
       document.getElementById('brandInput').value = brandName;
 
-      // Atualiza exibição
+      // Exibe texto
       document.getElementById('displayCategory').textContent = catName;
       document.getElementById('displaySubCategory').textContent = subCatName;
-      document.getElementById('displayBrand').textContent = brandName || '---';
+      document.getElementById('displayBrand').textContent = brandName || "";
+
+      // Lida com ícones
+      const catIconEl = document.getElementById('displayCategoryIcon');
+      const subCatIconEl = document.getElementById('displaySubCategoryIcon');
+      const brandIconEl = document.getElementById('displayBrandIcon');
+
+      // Categoria principal
+      if (selectedCatImg) {
+        catIconEl.src = selectedCatImg;
+        catIconEl.style.display = "block";
+      } else {
+        catIconEl.src = "";
+        catIconEl.style.display = "none";
+      }
+
+      // Subcategoria
+      if (selectedSubCatImg) {
+        subCatIconEl.src = selectedSubCatImg;
+        subCatIconEl.style.display = "block";
+      } else {
+        subCatIconEl.src = "";
+        subCatIconEl.style.display = "none";
+      }
+
+      // Marca
+      if (brandName && brandImg && brandImg !== "brand_generic_icon.png") {
+        brandIconEl.src = "/static/images/" + brandImg;
+        brandIconEl.style.display = "block";
+      } else {
+        brandIconEl.src = "";
+        brandIconEl.style.display = "none";
+      }
 
       closeCategoryModal();
     }
 
-    // Voltar do Step 2 para Step 1
-    function backToEditMainCategory() {
-      document.getElementById('editSubCategoryStep').style.display = 'none';
-      document.getElementById('editMainCategoryStep').style.display = 'block';
+    function goBackToMainCategory() {
+      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a categoria principal:";
+      document.getElementById('subCategoryStep').style.display = 'none';
+      document.getElementById('mainCategoryStep').style.display = 'block';
     }
 
-    // Voltar do Step 3 para Step 2
-    function backToEditSubCategory() {
-      document.getElementById('editBrandStep').style.display = 'none';
-      document.getElementById('editSubCategoryStep').style.display = 'block';
+    function goBackToSubCategory() {
+      document.querySelector('#categoryModal .modal-header h2').innerText = "Escolha a subcategoria";
+      document.getElementById('brandStep').style.display = 'none';
+      document.getElementById('subCategoryStep').style.display = 'block';
     }
 
-    // Resetar modal
-    function resetCategoryModal() {
-      document.getElementById('editMainCategoryStep').style.display = 'block';
-      document.getElementById('editSubCategoryStep').style.display = 'none';
-      document.getElementById('editBrandStep').style.display = 'none';
-      selectedMainCatIndex = null;
-      selectedSubCatIndex = null;
+    function resetCategoryModalSteps() {
+      document.getElementById('mainCategoryStep').style.display = 'block';
+      document.getElementById('subCategoryStep').style.display = 'none';
+      document.getElementById('brandStep').style.display = 'none';
     }
   </script>
 </body>

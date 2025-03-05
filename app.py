@@ -59,6 +59,9 @@ improvement_suggestions_collection = db_m["improvement_suggestions"]
 step_feedback_collection = db_m["step_feedback"]
 helpful_feedback_collection = db_m["helpful_feedback"]
 
+# Nova coleção para links de afiliados
+affiliate_links_collection = db_m["affiliate_links"]
+
 # GridFS para armazenar imagens na plataforma M
 fs_m = gridfs.GridFS(db_m)
 
@@ -259,26 +262,8 @@ def save_image(file_obj, fs_instance, max_w=1600, max_h=1200, thumb_w=300, thumb
     }
 
 # -----------------------------------------------------------
-# CRIAÇÃO DE ÍNDICE DE TEXTO (apenas se necessário)
-# -----------------------------------------------------------
-@app.before_first_request
-def init_db():
-    existing_indexes = problemas_collection.index_information()
-    if "TextoProblemas" not in existing_indexes:
-        problemas_collection.create_index(
-            [
-                ("titulo", "text"),
-                ("descricao", "text"),
-                ("tags", "text")
-            ],
-            name="TextoProblemas",
-            default_language="portuguese"
-        )
-
-# -----------------------------------------------------------
 # FUNÇÃO PARA VERIFICAR SE USUÁRIO PRECISA SER NOTIFICADO
 # -----------------------------------------------------------
-# <-- INÍCIO DA MUDANÇA
 def user_needs_notification_setup(user_doc):
     """
     Retorna True se o usuário NÃO tiver (email OU whatsapp) OU não habilitou notify_on_resolve.
@@ -290,13 +275,10 @@ def user_needs_notification_setup(user_doc):
     has_email = bool(user_doc.get("email", "").strip())
     notify_enabled = user_doc.get("notify_on_resolve", False)
 
-    # Se ele tem (whatsapp OU email) E notify_on_resolve=True => is completo => NÃO precisa setup
-    # Caso contrário => precisa
     if (has_whatsapp or has_email) and notify_enabled:
         return False
     else:
         return True
-# <-- FIM DA MUDANÇA
 
 # -----------------------------------------------------------
 # ROTAS PRINCIPAIS E DE USUÁRIOS
@@ -308,11 +290,11 @@ def root():
 @app.route("/index", methods=["GET", "POST"])
 def index():
     backgrounds = [
-        "fundo1.png",
-        "fundo_2.png",
-        "fundo_3.png",
-        "fundo_4.png",
-        "fundo_5.png"
+        "fundo1.webṕ",
+        "fundo_2.webp",
+        "fundo_3.webp",
+        "fundo_4_webp",
+        "fundo_5.webp"
     ]
     random_bg = random.choice(backgrounds)
     session["random_bg"] = random_bg
@@ -399,8 +381,6 @@ def register():
             "perfil_token": None,
             "email": None,
             "notify_on_resolve": False
-            # Não adicionamos email/notificação aqui,
-            # pois só pediremos na edição de perfil
         }
         inserted = usuarios_collection.insert_one(novo_usuario)
 
@@ -667,16 +647,12 @@ def add_problem():
             }
             problemas_collection.insert_one(problema)
 
-            # <-- INÍCIO DA MUDANÇA
             # Depois de inserir, checamos se o usuário está sem (whatsapp OU email) e sem notify_on_resolve:
             user_doc = usuarios_collection.find_one({"_id": ObjectId(session["user_id"])})
             if user_doc and user_needs_notification_setup(user_doc):
-                # Redireciona para /perfil com um parâmetro que force a abertura do modal e banner
                 return redirect(url_for("perfil", missing_info="1"))
             else:
-                # Caso contrário, segue fluxo normal
                 return redirect(url_for("unresolved"))
-            # <-- FIM DA MUDANÇA
 
         else:
             return render_template("add.html", erro="Preencha todos os campos.")
@@ -855,6 +831,7 @@ def exibir_solucao(problem_id):
     else:
         problem_image_url = url_for("static", filename="images/default_problem.png", _external=True)
 
+    # Feedback do usuário
     user_helpful_feedback = None
     if user_is_logged_in():
         existing_feedback = helpful_feedback_collection.find_one({
@@ -870,6 +847,21 @@ def exibir_solucao(problem_id):
     })
 
     random_bg = session.get("random_bg", "fundo_1.png")
+
+    # Carrega links de afiliados (caso existam) para exibir antes da solução
+    affiliate_links = list(affiliate_links_collection.find({"problem_id": problem_id}))
+    for link in affiliate_links:
+        link["_id_str"] = str(link["_id"])
+        # Se tiver imagem em GridFS, passaremos IDs:
+        if link.get("productImage_main"):
+            link["productImage_main"] = link["productImage_main"]
+        else:
+            link["productImage_main"] = None
+        # (Thumb não necessariamente usada, mas mantemos)
+        if link.get("productImage_thumb"):
+            link["productImage_thumb"] = link["productImage_thumb"]
+        else:
+            link["productImage_thumb"] = None
 
     return render_template(
         "solucao.html",
@@ -887,7 +879,8 @@ def exibir_solucao(problem_id):
         random_bg=random_bg,
         facebook_share_url=facebook_share_url,
         problem_image_url=problem_image_url,
-        share_url=share_url
+        share_url=share_url,
+        affiliate_links=affiliate_links  # Passamos para o template exibir
     )
 
 @app.route("/delete/<problem_id>", methods=["POST"])
@@ -1731,11 +1724,8 @@ def perfil():
     for p in latest_solved_problems:
         p["_id_str"] = str(p["_id"])
 
-    # <-- INÍCIO DA MUDANÇA
-    # Verifica se veio "missing_info=1" pela URL (ou outro param) para forçar modal e banner
     missing_info = request.args.get("missing_info", "")
     success_updated = request.args.get("success", "")
-    # <-- FIM DA MUDANÇA
 
     return render_template(
         "profil.html",
@@ -1752,10 +1742,8 @@ def perfil():
         latest_problems=latest_problems,
         latest_solved_problems=latest_solved_problems,
         random_bg=random_bg,
-        # <-- INÍCIO DA MUDANÇA
         missing_info=missing_info,
         success_updated=success_updated
-        # <-- FIM DA MUDANÇA
     )
 
 @app.route("/edit_profile", methods=["GET", "POST"])
@@ -1812,16 +1800,11 @@ def edit_profile():
             {"$set": update_fields}
         )
 
-        # <-- INÍCIO DA MUDANÇA
-        # Se agora o usuário preencheu (whatsapp ou email) e habilitou notify_on_resolve,
-        # redirecionamos com ?success=1 para exibir mensagem "Suas preferências foram atualizadas!"
         updated_user = usuarios_collection.find_one({"_id": ObjectId(user_id)})
         if updated_user:
             if not user_needs_notification_setup(updated_user):
-                # Significa que agora ele tem (email ou whatsapp) E notify_on_resolve=True
                 return redirect(url_for("perfil", success="1"))
-        # Caso contrário, só volta pro perfil normal
-        # <-- FIM DA MUDANÇA
+
         return redirect(url_for("perfil"))
 
     return render_template("edit_profile.html", user=user_obj)
@@ -1850,7 +1833,6 @@ def get_profile_share_link():
     user_id = session["user_id"]
     user_doc = usuarios_collection.find_one({"_id": ObjectId(user_id)})
 
-    # Se não tem token, gera
     if not user_doc.get("perfil_token"):
         new_token = secrets.token_urlsafe(16)
         usuarios_collection.update_one(
@@ -1859,15 +1841,11 @@ def get_profile_share_link():
         )
         user_doc["perfil_token"] = new_token
 
-    # O link público passa a ser -> /perfil_usuario/<token>
     share_url = url_for("perfil_usuario", token=user_doc["perfil_token"], _external=True)
     return jsonify({"share_url": share_url})
 
 @app.route("/perfil_usuario/<token>")
 def perfil_usuario(token):
-    """
-    Exibe o perfil público do usuário, usando o template 'perfil_usuario.html'.
-    """
     user_doc = usuarios_collection.find_one({"perfil_token": token})
     if not user_doc:
         return "Perfil não encontrado ou token inválido.", 404
@@ -1997,10 +1975,6 @@ def submit_step_feedback():
 # -----------------------------------------------------------
 @app.route("/ver_usuario/<user_id>", methods=["GET"])
 def ver_usuario(user_id):
-    """
-    Exibe o perfil de um outro usuário qualquer (não o logado),
-    usando o template 'perfil_usuario.html' ou similar.
-    """
     user_doc = usuarios_collection.find_one({"_id": ObjectId(user_id)})
     if not user_doc:
         return "Usuário não encontrado.", 404
@@ -2045,23 +2019,92 @@ def ver_usuario(user_id):
     )
 
 # -----------------------------------------------------------
+# NOVA ROTA: ADICIONAR LINKS DE AFILIADOS
+# -----------------------------------------------------------
+@app.route("/add_affiliate_link/<problem_id>", methods=["POST"])
+def add_affiliate_link(problem_id):
+    """
+    Recebe (title, affiliate_url) e um arquivo opcional (imagem do produto),
+    salva no affiliate_links_collection e redireciona de volta à página de solucao.
+    Somente solucionadores podem inserir.
+    """
+    if not user_is_logged_in():
+        return redirect(url_for("register", next=request.url))
+    if not user_has_role(["solucionador"]):
+        return "Acesso negado (somente solucionadores).", 403
+
+    title = request.form.get("title", "").strip()
+    affiliate_url = request.form.get("affiliate_url", "").strip()
+    image_file = request.files.get("product_image")
+
+    if not title or not affiliate_url:
+        return "Título e link são obrigatórios.", 400
+
+    # Tenta salvar imagem (opcional)
+    image_ids = None
+    if image_file and image_file.filename.strip():
+        image_ids = save_image(image_file, fs_m)
+
+    new_doc = {
+        "problem_id": problem_id,
+        "user_id": session["user_id"],
+        "title": title,
+        "affiliate_url": affiliate_url,
+        "created_at": datetime.datetime.utcnow(),
+    }
+
+    if image_ids:
+        new_doc["productImage_main"] = image_ids["main_id"]
+        new_doc["productImage_thumb"] = image_ids["thumb_id"]
+    else:
+        new_doc["productImage_main"] = None
+        new_doc["productImage_thumb"] = None
+
+    affiliate_links_collection.insert_one(new_doc)
+
+    return redirect(url_for("exibir_solucao", problem_id=problem_id))
+
+# (Opcional) Rota para remover link
+@app.route("/remove_affiliate_link/<link_id>", methods=["POST"])
+def remove_affiliate_link(link_id):
+    if not user_is_logged_in():
+        return redirect(url_for("register", next=request.url))
+    if not user_has_role(["solucionador"]):
+        return "Acesso negado (somente solucionadores).", 403
+
+    link_doc = affiliate_links_collection.find_one({"_id": ObjectId(link_id)})
+    if not link_doc:
+        return "Link não encontrado.", 404
+
+    problem_id = link_doc["problem_id"]
+
+    # Deleta imagens, se existirem
+    if link_doc.get("productImage_main"):
+        try:
+            fs_m.delete(ObjectId(link_doc["productImage_main"]))
+        except:
+            pass
+    if link_doc.get("productImage_thumb"):
+        try:
+            fs_m.delete(ObjectId(link_doc["productImage_thumb"]))
+        except:
+            pass
+
+    affiliate_links_collection.delete_one({"_id": ObjectId(link_id)})
+
+    return redirect(url_for("exibir_solucao", problem_id=problem_id))
+
+# -----------------------------------------------------------
 # NOVA ROTA: GERAR OVERLAY DE LOGO NA FOTO DE PERFIL
 # -----------------------------------------------------------
 @app.route("/overlay_profile_photo/<user_id>")
 def overlay_profile_photo(user_id):
-    """
-    Gera uma imagem com a foto de perfil do usuário
-    (ou default) e sobrepõe o logo da Plataforma M.
-    Retorna a imagem final como JPEG.
-    """
     user = usuarios_collection.find_one({"_id": ObjectId(user_id)})
     if not user:
-        # Se não existir, usa um "avatar_icon" default + logo
         return _generate_overlay_image(None)
 
     profile_id = user.get("profile_image_id")
     if not profile_id:
-        # Sem foto de perfil => usa avatar default
         return _generate_overlay_image(None)
 
     try:
@@ -2073,14 +2116,8 @@ def overlay_profile_photo(user_id):
     return _generate_overlay_image(user_image_data)
 
 def _generate_overlay_image(user_image_data):
-    """
-    Função auxiliar para carregar a imagem do usuário ou default,
-    e depois colar (paste) o logo "logo_m.png" no canto.
-    """
-    # Caminho do logo
     logo_path = os.path.join(app.static_folder, "images", "logo_m.png")
 
-    # Carrega a imagem base (usuário ou default)
     if user_image_data:
         try:
             base_img = Image.open(io.BytesIO(user_image_data)).convert("RGBA")
@@ -2089,36 +2126,28 @@ def _generate_overlay_image(user_image_data):
     else:
         base_img = Image.open(os.path.join(app.static_folder, "images", "avatar_icon.webp")).convert("RGBA")
 
-    # Redimensiona a base se quiser limitar tamanho
     max_width, max_height = 800, 800
     base_img.thumbnail((max_width, max_height))
 
-    # Carrega o logo
     logo_img = Image.open(logo_path).convert("RGBA")
 
-    # Ajusta tamanho do logo relativo à base (ex: 25% da largura)
     base_w, base_h = base_img.size
     logo_max_width = int(base_w * 0.25)
-    # Mantém proporção
     logo_w, logo_h = logo_img.size
     if logo_w > logo_max_width:
         ratio = logo_max_width / float(logo_w)
         new_height = int(logo_h * ratio)
         logo_img = logo_img.resize((logo_max_width, new_height), Image.ANTIALIAS)
 
-    # Define posição (canto inferior direito)
     base_w, base_h = base_img.size
     logo_w, logo_h = logo_img.size
     padding = 10
     pos_x = base_w - logo_w - padding
     pos_y = base_h - logo_h - padding
 
-    # Cola o logo com alpha
     base_img.paste(logo_img, (pos_x, pos_y), logo_img)
 
-    # Retorna como JPEG
     output = io.BytesIO()
-    # Converte para RGB antes de salvar em JPEG
     final_img = base_img.convert("RGB")
     final_img.save(output, format="JPEG", quality=90)
     output.seek(0)
@@ -2126,6 +2155,24 @@ def _generate_overlay_image(user_image_data):
     response = make_response(output.getvalue())
     response.headers.set('Content-Type', 'image/jpeg')
     return response
+
+# -----------------------------------------------------------
+# CRIAÇÃO DE ÍNDICE DE TEXTO (apenas se necessário)
+# -----------------------------------------------------------
+@app.before_first_request
+def init_db():
+    existing_indexes = problemas_collection.index_information()
+    if "TextoProblemas" not in existing_indexes:
+        problemas_collection.create_index(
+            [
+                ("titulo", "text"),
+                ("descricao", "text"),
+                ("tags", "text")
+            ],
+            name="TextoProblemas",
+            default_language="portuguese"
+        )
+    # (Se quiser criar índice em affiliate_links, faça aqui)
 
 # -----------------------------------------------------------
 # MAIN
