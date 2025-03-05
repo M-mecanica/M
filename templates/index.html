@@ -34,19 +34,14 @@
     <style>
       /****************************************************
        * BACKGROUND
-       * Fundo branco + imagem translúcida
        ****************************************************/
       body {
-        /* Fundo branco e imagem translúcida por cima */
-        background: linear-gradient(
-            rgba(255, 255, 255, 0.85),
-            rgba(255, 255, 255, 0.85)
-          ),
-          url('{{ url_for("static", filename="images/" ~ random_bg) }}');
+        background-color: #f0f0f0;
+        background-image: url('{{ url_for("static", filename="images/" ~ random_bg) }}');
         background-repeat: no-repeat;
         background-position: center center;
-        background-size: cover;
         background-attachment: fixed;
+        background-size: cover;
         overflow-x: hidden;
       }
 
@@ -115,7 +110,7 @@
 
       /* Reduzindo um pouco a fonte do título do modal */
       .category-modal-title {
-        font-size: 1.15rem;
+        font-size: 1.15rem; /* Ajuste sutil para a frase dentro do modal */
       }
     </style>
   </head>
@@ -172,36 +167,33 @@
           />
         </div>
 
-        <!-- Retângulo branco com cantos arredondados "subposto" (search-box) -->
-        <div class="search-box">
-          <!-- Barra de Pesquisa -->
-          <form action="{{ url_for('index') }}" method="POST" class="search-container">
-            <div class="input-wrapper">
-              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path
-                  d="M10 2a8 8 0 015.29 13.71l5 5a1 1 0 01-1.42 1.42l-5-5A8 8 0 1110 2zm0 2a6 6 0 100 12 6 6 0 000-12z"
-                />
-              </svg>
-              <input
-                type="text"
-                name="search"
-                placeholder="Pesquise um problema..."
-                autocomplete="off"
+        <!-- Barra de Pesquisa -->
+        <form action="{{ url_for('index') }}" method="POST" class="search-container">
+          <div class="input-wrapper">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path
+                d="M10 2a8 8 0 015.29 13.71l5 5a1 1 0 01-1.42 1.42l-5-5A8 8 0 1110 2zm0 2a6 6 0 100 12 6 6 0 000-12z"
               />
-            </div>
-            <button type="submit" class="explore-button">
-              <img
-                src="{{ url_for('static', filename='images/fugueti_num_tem_re.webp') }}"
-                alt="Foguete"
-                style="width:30px;height:30px;"
-              />
-              Explorar
-            </button>
-          </form>
-        </div>
+            </svg>
+            <input
+              type="text"
+              name="search"
+              placeholder="Pesquise um problema..."
+              autocomplete="off"
+            />
+          </div>
+          <button type="submit" class="explore-button">
+            <img
+              src="{{ url_for('static', filename='images/fugueti_num_tem_re.webp') }}"
+              alt="Foguete"
+              style="width:30px;height:30px;"
+            />
+            Explorar
+          </button>
+        </form>
 
         <!-- Botão para abrir Modal de Categoria/Marca -->
-        <div style="margin-top: 1.5rem;">
+        <div style="margin-bottom: 1rem;">
           <button class="btn-selecione-aqui" onclick="openCategoryModal()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
@@ -398,6 +390,10 @@
               stroke-linejoin="round"
               viewBox="0 0 24 24"
             >
+              <!--
+                Seta simples (um único path):
+                Faz um "V" deitado: M14 18 L8 12 L14 6
+              -->
               <path d="M14 18l-6-6 6-6"/>
             </svg>
           </button>

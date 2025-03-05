@@ -2,16 +2,17 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Editar Solução</title>
-  <!-- Responsividade em dispositivos móveis -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Fonte básica (opcional) -->
+  <title>M - Editar Solução</title>
+  <!-- Fonte básica (igual à add.html) -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
+  <!-- Ícones Material -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     /* =========================================================================
@@ -23,13 +24,10 @@
       box-sizing: border-box;
     }
 
-    /* =========================================================================
-       BODY / FONTES / CORES GERAIS
-       ========================================================================= */
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
-      background-color: #f0f0f0;
+      background-color: #f9f9f9;
       color: #333;
       display: flex;
       flex-direction: column;
@@ -38,63 +36,157 @@
     }
 
     /* =========================================================================
-       HEADER PRETO COM BOTÃO DE VOLTAR (MESMO PADRÃO DO item_search.html)
+       PRELOADER (IGUAL AO add.html)
        ========================================================================= */
-    header {
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       background-color: #000;
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-    }
-    /* Botão "Voltar" (borda arredondada, seta grande 2rem) */
-    .btn-voltar-inicio {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      border-radius: 32px;
-      padding: 0.7rem 1.2rem;
-      font-size: 2rem; /* ÍCONE (SETA) MAIOR */
-      cursor: pointer;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background-color 0.2s, transform 0.2s;
+      z-index: 99999;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .btn-voltar-inicio:hover {
-      background-color: #333;
-      transform: scale(1.02);
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #333;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.7s linear infinite;
     }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* =========================================================================
+       CONTEÚDO (FADE-IN APÓS O PRELOADER)
+       ========================================================================= */
+    #content {
+      transition: opacity 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      opacity: 0; /* começa invisível, depois faz fade-in */
+    }
+
+    /* =========================================================================
+       CABEÇALHO FIXO (IGUAL AO add.html)
+       ========================================================================= */
+    header {
+      background-color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 80px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
     header h1 {
       color: #fff;
-      font-size: 1.4rem;
+      font-size: 1.15rem;
+      margin: 0;
       text-align: center;
-      margin: 0 auto;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    @media (max-width: 768px) {
+      header {
+        height: 56px;
+        padding: 0 1rem;
+      }
+      header h1 {
+        font-size: 1.3rem;
+      }
+    }
+
+    .header-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      outline: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      transition: background-color 0.2s;
+    }
+    .header-btn:hover {
+      background-color: #333;
+    }
+    .header-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+    .header-btn span {
+      margin-left: 0.5rem;
+    }
+
+    /* Oculta "Perfil" e "Entrar" em telas menores (mostra via mobile-bottom-bar) */
+    @media (max-width: 768px) {
+      .perfil-btn,
+      .entrar-btn {
+        display: none !important;
+      }
+    }
+
+    /* Esconde o botão "Voltar" em telas <= 768px (segue o padrão do add.html) */
+    @media (max-width: 768px) {
+      #btnVoltar {
+        display: none !important;
+      }
     }
 
     /* =========================================================================
        MAIN
        ========================================================================= */
     main {
+      margin-top: 80px; /* mesma distância do add.html em telas maiores */
       flex: 1;
-      font-size: 1rem;
       padding: 2rem 1rem;
       width: 100%;
-      max-width: 1200px; /* Padrão de largura do container */
-      margin: 0 auto;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
       display: flex;
       flex-direction: column;
+      align-items: center;
     }
 
-    /* Título do problema (centrado) */
-    .problem-title {
-      text-align: center;
-      font-size: 1.4rem;
-      margin-bottom: 1rem;
-      font-weight: 600;
+    @media (max-width: 768px) {
+      main {
+        margin-top: 56px; /* mesma distância do add.html em telas menores */
+      }
+    }
+
+    /* =========================================================================
+       CONTAINER DO FORMULÁRIO (SEGUINDO O PADRÃO DO add.html)
+       ========================================================================= */
+    .form-container {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
     }
 
     .erro {
@@ -104,30 +196,75 @@
     }
 
     .info {
-      margin-bottom: 1rem;
       color: #555;
+      line-height: 1.4;
     }
 
-    /* Container principal do formulário */
-    .form-container {
-      background-color: #fff;
+    /* =========================================================================
+       FORMULÁRIO
+       ========================================================================= */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    label {
+      font-weight: 500;
+      color: #555;
+      display: block;
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    input[type="text"],
+    textarea {
+      padding: 0.8rem;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      background-color: #fff;
+      color: #333;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
     }
 
-    /* Botões */
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: #999;
+    }
+
+    textarea {
+      resize: none;
+      min-height: 100px;
+    }
+
+    /* =========================================================================
+       BOTÕES (PADRÃO DO add.html + ajustes para remover, etc.)
+       ========================================================================= */
     .btn {
-      display: inline-block;
-      padding: 0.6rem 1.2rem;
-      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
       background-color: #000;
       color: #fff;
-      font-weight: 500;
+      border: none;
+      border-radius: 32px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
       cursor: pointer;
-      border-radius: 32px; /* Arredondado */
-      margin: 0.5rem 0;
+      text-decoration: none;
+      font-weight: 500;
       transition: background-color 0.2s, transform 0.2s;
     }
     .btn:hover {
@@ -137,101 +274,83 @@
 
     .btn-remove {
       background-color: #f44336;
-      margin-left: 1rem;
     }
     .btn-remove:hover {
       background-color: #d32f2f;
     }
 
-    /* Passo */
-    .step-block {
-      background-color: #f9f9f9;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    .step-block h2 {
-      margin-top: 0;
-      font-size: 1.1rem;
-      color: #333;
-      margin-bottom: 0.5rem;
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    label {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-weight: 500;
-      color: #555;
-    }
-    input[type="text"],
-    textarea {
-      width: 100%;
-      padding: 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background-color: #fff;
-      color: #333;
-      font-size: 1rem;
-      outline: none;
-    }
-    input[type="text"]:focus,
-    textarea:focus {
-      border-color: #aaa;
-    }
-
-    /* Subpassos */
-    .subpasso-container {
-      background-color: #fff;
-      padding: 0.8rem;
-      margin-top: 0.5rem;
-      border-radius: 4px;
-      border: 1px solid #eee;
-    }
-    .subpasso-block {
-      border: 1px dashed #ccc;
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
-      border-radius: 4px;
-      background-color: #fafafa;
-    }
-    .subpasso-block h3 {
-      margin-top: 0;
-      color: #444;
-      font-size: 1rem;
-      margin-bottom: 0.3rem;
-    }
-
-    /* Botão de salvar */
     .btn-save {
       background-color: #4caf50;
     }
     .btn-save:hover {
       background-color: #45a049;
     }
-    /* Botão de cancelar */
+
     .btn-cancel {
       background-color: #999;
       color: #fff;
-      margin-left: 1rem;
     }
     .btn-cancel:hover {
       background-color: #666;
     }
 
-    /* Rodapé */
-    footer {
-      background-color: #000;
-      text-align: center;
-      padding: 1rem 2rem;
+    /* =========================================================================
+       PASSO E SUBPASSOS
+       ========================================================================= */
+    .step-block {
+      background-color: #f9f9f9;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
-    footer p {
-      font-size: 0.9rem;
-      color: #fff;
+    .step-block h2 {
+      font-size: 1.1rem;
       margin: 0;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .subpasso-container {
+      background-color: #fff;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .subpasso-container h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem 0;
+      color: #444;
+    }
+
+    .subpasso-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .subpasso-block {
+      background-color: #f9f9f9;
+      border: 1px dashed #ccc;
+      border-radius: 6px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .subpasso-block h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+      color: #444;
     }
 
     /* Preview da nova imagem */
@@ -244,34 +363,77 @@
     }
 
     /* =========================================================================
-       MEDIA QUERIES (VERSÃO MOBILE)
+       RODAPÉ (IGUAL AO add.html)
        ========================================================================= */
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 1rem 2rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #fff;
+      margin: 0;
+    }
+
+    /* =========================================================================
+       BARRA INFERIOR (MOBILE) (IGUAL AO add.html)
+       ========================================================================= */
+    .mobile-bottom-bar {
+      display: none; /* no desktop */
+    }
     @media (max-width: 768px) {
-      header {
-        padding: 1rem;
+      .mobile-bottom-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        background-color: #000;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        height: 60px;
+        z-index: 9999;
       }
-      header h1 {
-        font-size: 1.2rem;
+      .mobile-bottom-bar .bottom-bar-btn {
+        text-align: center;
+        color: #fff;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 0.8rem;
+        justify-content: center;
       }
-      .btn-voltar-inicio {
-        padding: 0.5rem 1rem;
-        /* Mantemos font-size 2rem para a seta grande também no mobile */
+      .mobile-bottom-bar .bottom-bar-btn img {
+        margin-bottom: 2px;
       }
       main {
-        padding: 1rem;
+        padding-bottom: 60px; /* para não ficar escondido atrás da barra */
       }
-      .problem-title {
-        font-size: 1.2rem;
-        margin-bottom: 0.8rem;
-      }
-      .form-container {
-        padding: 1rem;
-      }
+    }
+    .bottom-bar-btn.active {
+      background-color: #444;
+    }
+
+    /* =========================================================================
+       MEDIA QUERIES ADICIONAIS
+       ========================================================================= */
+    @media (max-width: 768px) {
       .step-block {
-        padding: 0.8rem;
+        padding: 1rem;
       }
       .step-block h2 {
         font-size: 1rem;
+      }
+      .subpasso-block {
+        padding: 0.8rem;
+      }
+      .btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+      }
+      .btn-save, .btn-cancel {
+        font-size: 0.85rem;
       }
       label {
         font-size: 0.9rem;
@@ -279,14 +441,6 @@
       input[type="text"],
       textarea {
         font-size: 0.9rem;
-        padding: 0.5rem;
-      }
-      .btn {
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
-      }
-      .btn-save, .btn-cancel {
-        font-size: 0.8rem;
       }
       .info {
         font-size: 0.9rem;
@@ -295,184 +449,348 @@
   </style>
 </head>
 <body>
-  <!-- Cabeçalho com botão de voltar e título -->
-  <header>
-    <a
-      href="{{ url_for('exibir_solucao', problem_id=problema['_id']) }}"
-      class="btn-voltar-inicio"
-      title="Voltar"
-    >
-      &#x2B05;
-    </a>
-    <h1>Editar Solução</h1>
-    <div style="width: 2rem;"></div>
-  </header>
 
-  <main>
-    <h2 class="problem-title">{{ problema["titulo"] }}</h2>
+  <!-- PRELOADER -->
+  <div id="preloader">
+    <div class="loader"></div>
+  </div>
 
-    {% if erro %}
-      <div class="erro">{{ erro }}</div>
-    {% endif %}
+  <!-- CONTEÚDO PRINCIPAL (fade-in) -->
+  <div id="content">
+    <!-- HEADER FIXO -->
+    <header>
+      <!-- Botão "Voltar" (igual add.html, mas direcionando para exibir_solucao se não tiver referrer) -->
+      <button
+        class="header-btn"
+        id="btnVoltar"
+        aria-label="Voltar"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path
+            d="M15 18l-6-6 6-6"
+            stroke="currentColor"
+            stroke-width="2"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
 
-    <p class="info">
-      Ajuste os passos e subpassos conforme necessário. Clique em <strong>Salvar Alterações</strong> ao final.
-      <br>Você também pode enviar uma nova imagem para cada passo/subpasso, além de remover uma imagem existente.
-      <br>Ao selecionar um arquivo, verá uma pré-visualização abaixo.
-    </p>
+      <h1>Editar Solução</h1>
 
-    <div class="form-container">
-      <!-- Importante: multipart/form-data para upload de imagens -->
-      <form method="POST" id="solutionForm" enctype="multipart/form-data">
-        <input type="hidden" id="solution_data" name="solution_data" value="" />
-
-        <div id="stepsContainer">
-          {% for step in passos %}
-            {% set stepIndex = loop.index0 %}
-            <div class="step-block" data-step-index="{{ stepIndex }}">
-              <h2>Passo {{ stepIndex + 1 }}</h2>
-
-              <div class="form-group">
-                <label>Título do Passo:</label>
-                <input type="text" class="step-title" value="{{ step.stepTitle|default('') }}">
-              </div>
-
-              <div class="form-group">
-                <label>Descrição do Passo:</label>
-                <textarea class="step-desc">{{ step.stepDescription|default('') }}</textarea>
-              </div>
-
-              <!-- Imagem do Passo -->
-              <div class="form-group">
-                <label>Imagem do Passo (opcional):</label>
-                <input
-                  type="file"
-                  name="stepImage_{{ stepIndex }}"
-                  accept="image/*"
-                  class="file-input"
-                >
-                <!-- Container de pré-visualização (nova imagem) -->
-                <div class="new-file-preview"></div>
-
-                {% if step.stepImage %}
-                  <div style="margin-top: 8px; border: 1px solid #eee; padding: 8px;">
-                    <p style="margin-bottom: 4px;">Imagem atual:</p>
-                    <img
-                      src="{{ url_for('gridfs_image', file_id=step.stepImage) }}"
-                      alt="Imagem do Passo"
-                      style="max-width: 200px; display: block; margin-bottom: 8px;"
-                    >
-                    <!-- Botão para deletar a imagem existente -->
-                    <button
-                      type="button"
-                      class="btn btn-remove delete-image-btn"
-                      data-target="StepImage_{{ stepIndex }}"
-                    >
-                      Deletar Imagem
-                    </button>
-                    <!-- Campo hidden para identificar se o usuário deseja remover essa imagem -->
-                    <input
-                      type="hidden"
-                      name="deleteExistingStepImage_{{ stepIndex }}"
-                      value="false"
-                    >
-                  </div>
-                {% endif %}
-              </div>
-
-              <!-- SUBPASSOS -->
-              <div class="subpasso-container">
-                <h3>Subpassos</h3>
-                <div class="subpasso-list">
-                  {% for sub in step.miniSteps %}
-                    {% set subIndex = loop.index0 %}
-                    <div class="subpasso-block" data-sub-index="{{ subIndex }}">
-                      <h3>Subpasso {{ subIndex + 1 }}</h3>
-                      <div class="form-group">
-                        <label>Título:</label>
-                        <input
-                          type="text"
-                          class="subpasso-title"
-                          value="{{ sub.miniStepTitle|default('') }}"
-                        >
-                      </div>
-                      <div class="form-group">
-                        <label>Descrição:</label>
-                        <textarea class="subpasso-desc">{{ sub.miniStepDescription|default('') }}</textarea>
-                      </div>
-                      <div class="form-group">
-                        <label>Imagem do Subpasso (opcional):</label>
-                        <input
-                          type="file"
-                          name="subStepImage_{{ stepIndex }}_{{ subIndex }}"
-                          accept="image/*"
-                          class="file-input"
-                        >
-                        <!-- Container de pré-visualização (nova imagem) -->
-                        <div class="new-file-preview"></div>
-
-                        {% if sub.subStepImage %}
-                          <div style="margin-top: 8px; border: 1px solid #eee; padding: 8px;">
-                            <p style="margin-bottom: 4px;">Imagem atual:</p>
-                            <img
-                              src="{{ url_for('gridfs_image', file_id=sub.subStepImage) }}"
-                              alt="Imagem do Subpasso"
-                              style="max-width: 200px; display: block; margin-bottom: 8px;"
-                            >
-                            <!-- Botão para deletar a imagem existente -->
-                            <button
-                              type="button"
-                              class="btn btn-remove delete-image-btn"
-                              data-target="SubStepImage_{{ stepIndex }}_{{ subIndex }}"
-                            >
-                              Deletar Imagem
-                            </button>
-                            <!-- Hidden para excluir imagem existente -->
-                            <input
-                              type="hidden"
-                              name="deleteExistingSubStepImage_{{ stepIndex }}_{{ subIndex }}"
-                              value="false"
-                            >
-                          </div>
-                        {% endif %}
-                      </div>
-                      <button type="button" class="btn btn-remove remove-subpasso">
-                        Remover Subpasso
-                      </button>
-                    </div>
-                  {% endfor %}
-                </div>
-                <button type="button" class="btn add-subpasso">Adicionar Subpasso</button>
-              </div>
-
-              <button type="button" class="btn btn-remove remove-step">Remover Passo</button>
-            </div>
-          {% endfor %}
-        </div>
-
-        <button type="button" class="btn" id="addStepBtn" style="margin-top: 1rem;">
-          Adicionar Passo
-        </button>
-
-        <br><br>
-        <button type="submit" class="btn btn-save" style="margin-right: 1rem;">
-          Salvar Alterações
-        </button>
-        <a
-          href="{{ url_for('exibir_solucao', problem_id=problema['_id']) }}"
-          class="btn btn-cancel"
-        >
-          Cancelar
+      <!-- Se NÃO estiver logado, mostra "Entrar" -->
+      {% if not session.get('user_id') %}
+        <a class="header-btn entrar-btn" href="{{ url_for('login') }}">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
+          </svg>
+          <span>Entrar</span>
         </a>
-      </form>
+      {% else %}
+        <!-- Se estiver logado, mostra "Perfil" -->
+        <a class="header-btn perfil-btn" href="{{ url_for('perfil') }}">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+          >
+            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
+            <path
+              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
+            />
+          </svg>
+          <span>Perfil</span>
+        </a>
+      {% endif %}
+    </header>
+
+    <!-- MAIN -->
+    <main>
+      <!-- Título do Problema -->
+      <h2 style="text-align: center; font-size: 1.4rem; margin-bottom: 1rem; font-weight: 600;">
+        {{ problema["titulo"] }}
+      </h2>
+
+      {% if erro %}
+        <div class="erro">{{ erro }}</div>
+      {% endif %}
+
+      <div class="form-container">
+        <p class="info">
+          Ajuste os passos e subpassos conforme necessário. Clique em <strong>Salvar Alterações</strong> ao final.
+          <br>Você também pode enviar uma nova imagem para cada passo/subpasso, além de remover uma imagem existente.
+          <br>Ao selecionar um arquivo, verá uma pré-visualização abaixo.
+        </p>
+
+        <!-- Formulário para editar a solução -->
+        <!-- Importante: multipart/form-data para upload de imagens -->
+        <form method="POST" id="solutionForm" enctype="multipart/form-data">
+          <!-- Campo hidden para dados em JSON -->
+          <input type="hidden" id="solution_data" name="solution_data" value="" />
+
+          <div id="stepsContainer">
+            {% for step in passos %}
+              {% set stepIndex = loop.index0 %}
+              <div class="step-block" data-step-index="{{ stepIndex }}">
+                <h2>Passo {{ stepIndex + 1 }}</h2>
+
+                <!-- Título do Passo -->
+                <div class="form-group">
+                  <label><i class="material-icons">label</i> Título do Passo:</label>
+                  <input type="text" class="step-title" value="{{ step.stepTitle|default('') }}">
+                </div>
+
+                <!-- Descrição do Passo -->
+                <div class="form-group">
+                  <label><i class="material-icons">description</i> Descrição do Passo:</label>
+                  <textarea class="step-desc">{{ step.stepDescription|default('') }}</textarea>
+                </div>
+
+                <!-- Imagem do Passo -->
+                <div class="form-group">
+                  <label><i class="material-icons">add_photo_alternate</i> Imagem do Passo (opcional):</label>
+                  <input
+                    type="file"
+                    name="stepImage_{{ stepIndex }}"
+                    accept="image/*"
+                    class="file-input"
+                  >
+                  <!-- Container de pré-visualização (nova imagem) -->
+                  <div class="new-file-preview"></div>
+
+                  {% if step.stepImage %}
+                    <div style="margin-top: 8px; border: 1px solid #eee; padding: 8px;">
+                      <p style="margin-bottom: 4px;">Imagem atual:</p>
+                      <img
+                        src="{{ url_for('gridfs_image', file_id=step.stepImage) }}"
+                        alt="Imagem do Passo"
+                        style="max-width: 200px; display: block; margin-bottom: 8px;"
+                      >
+                      <!-- Botão para deletar a imagem existente -->
+                      <button
+                        type="button"
+                        class="btn btn-remove delete-image-btn"
+                        data-target="StepImage_{{ stepIndex }}"
+                      >
+                        Deletar Imagem
+                      </button>
+                      <!-- Campo hidden para identificar se o usuário deseja remover essa imagem -->
+                      <input
+                        type="hidden"
+                        name="deleteExistingStepImage_{{ stepIndex }}"
+                        value="false"
+                      >
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- SUBPASSOS -->
+                <div class="subpasso-container">
+                  <h3>Subpassos</h3>
+                  <div class="subpasso-list">
+                    {% for sub in step.miniSteps %}
+                      {% set subIndex = loop.index0 %}
+                      <div class="subpasso-block" data-sub-index="{{ subIndex }}">
+                        <h3>Subpasso {{ subIndex + 1 }}</h3>
+                        <div class="form-group">
+                          <label><i class="material-icons">label</i> Título:</label>
+                          <input
+                            type="text"
+                            class="subpasso-title"
+                            value="{{ sub.miniStepTitle|default('') }}"
+                          >
+                        </div>
+                        <div class="form-group">
+                          <label><i class="material-icons">description</i> Descrição:</label>
+                          <textarea class="subpasso-desc">{{ sub.miniStepDescription|default('') }}</textarea>
+                        </div>
+                        <div class="form-group">
+                          <label><i class="material-icons">add_photo_alternate</i> Imagem do Subpasso (opcional):</label>
+                          <input
+                            type="file"
+                            name="subStepImage_{{ stepIndex }}_{{ subIndex }}"
+                            accept="image/*"
+                            class="file-input"
+                          >
+                          <!-- Container de pré-visualização (nova imagem) -->
+                          <div class="new-file-preview"></div>
+
+                          {% if sub.subStepImage %}
+                            <div style="margin-top: 8px; border: 1px solid #eee; padding: 8px;">
+                              <p style="margin-bottom: 4px;">Imagem atual:</p>
+                              <img
+                                src="{{ url_for('gridfs_image', file_id=sub.subStepImage) }}"
+                                alt="Imagem do Subpasso"
+                                style="max-width: 200px; display: block; margin-bottom: 8px;"
+                              >
+                              <!-- Botão para deletar a imagem existente -->
+                              <button
+                                type="button"
+                                class="btn btn-remove delete-image-btn"
+                                data-target="SubStepImage_{{ stepIndex }}_{{ subIndex }}"
+                              >
+                                Deletar Imagem
+                              </button>
+                              <!-- Hidden para excluir imagem existente -->
+                              <input
+                                type="hidden"
+                                name="deleteExistingSubStepImage_{{ stepIndex }}_{{ subIndex }}"
+                                value="false"
+                              >
+                            </div>
+                          {% endif %}
+                        </div>
+                        <button type="button" class="btn btn-remove remove-subpasso">
+                          Remover Subpasso
+                        </button>
+                      </div>
+                    {% endfor %}
+                  </div>
+                  <button type="button" class="btn add-subpasso">Adicionar Subpasso</button>
+                </div>
+
+                <button type="button" class="btn btn-remove remove-step">Remover Passo</button>
+              </div>
+            {% endfor %}
+          </div>
+
+          <button type="button" class="btn" id="addStepBtn" style="margin-top: 1rem;">
+            <i class="material-icons">add</i> Adicionar Passo
+          </button>
+
+          <!-- Botões de ação -->
+          <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-save">
+              <i class="material-icons">save</i> Salvar Alterações
+            </button>
+            <a
+              href="{{ url_for('exibir_solucao', problem_id=problema['_id']) }}"
+              class="btn btn-cancel"
+            >
+              <i class="material-icons">close</i> Cancelar
+            </a>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <footer>
+      <p>© 2025 Plataforma M - MVP</p>
+    </footer>
+
+    <!-- Barra inferior (mobile) - manter igual ao add.html, ajustando endpoints -->
+    <div class="mobile-bottom-bar">
+      <!-- Home -->
+      <a
+        href="{{ url_for('index') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'index' %} active{% endif %}"
+        title="Página Inicial"
+      >
+        <img
+          src="{{ url_for('static', filename='images/home_icon.webp') }}"
+          alt="Home Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
+        Home
+      </a>
+
+      <!-- Resolver -->
+      <a
+        href="{{ url_for('unresolved') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'unresolved' %} active{% endif %}"
+        title="Resolver Problemas"
+      >
+        <img
+          src="{{ url_for('static', filename='images/resolver_icon.webp') }}"
+          alt="Resolver Icon"
+          style="width:30px;height:30px;margin-bottom:0px;"
+        />
+        Resolver
+      </a>
+
+      <!-- Enviar Problema -->
+      <a
+        href="{{ url_for('add_problem') }}"
+        class="bottom-bar-btn{% if request.endpoint == 'add_problem' %} active{% endif %}"
+        title="Envie seu Problema"
+      >
+        <img
+          src="{{ url_for('static', filename='images/enviar_icon.webp') }}"
+          alt="Envie icon"
+          style="width:30px; height:30px"
+        />
+        Enviar
+      </a>
+
+      <!-- Perfil ou Entrar -->
+      {% if not session.get('user_id') %}
+        <a
+          href="{{ url_for('login') }}"
+          class="bottom-bar-btn{% if request.endpoint in ['login','register'] %} active{% endif %}"
+          title="Entrar"
+        >
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Entrar
+        </a>
+      {% else %}
+        <a
+          href="{{ url_for('perfil') }}"
+          class="bottom-bar-btn{% if request.endpoint == 'perfil' %} active{% endif %}"
+          title="Perfil"
+        >
+          <img
+            src="{{ url_for('static', filename='images/perfil_icon.webp') }}"
+            alt="Perfil Icon"
+            style="width:30px;height:30px;margin-bottom:0px;"
+          />
+          Perfil
+        </a>
+      {% endif %}
     </div>
-  </main>
+  </div>
 
-  <footer>
-    <p>© 2025 Plataforma M - MVP</p>
-  </footer>
-
+  <!-- =========================================================================
+     SCRIPTS
+     ========================================================================= -->
   <script>
+    // Preloader + fade-in do conteúdo
+    window.addEventListener('load', function () {
+      const preloader = document.getElementById('preloader');
+      const content = document.getElementById('content');
+      if (preloader) {
+        preloader.style.display = 'none';
+      }
+      if (content) {
+        content.style.opacity = '1';
+      }
+    });
+
+    // Botão "Voltar": se não houver referrer, volta para exibir_solucao
+    document.addEventListener('DOMContentLoaded', function() {
+      const ref = document.referrer || "";
+      const btnVoltar = document.getElementById('btnVoltar');
+      if (btnVoltar) {
+        btnVoltar.addEventListener('click', function() {
+          if (!ref) {
+            window.location.href = "{{ url_for('exibir_solucao', problem_id=problema['_id']) }}";
+          } else {
+            window.history.back();
+          }
+        });
+      }
+    });
+
+    // Manipulação dos passos e subpassos
     const stepsContainer = document.getElementById('stepsContainer');
     const solutionDataInput = document.getElementById('solution_data');
     const form = document.getElementById('solutionForm');
@@ -487,24 +805,28 @@
       stepBlock.innerHTML = `
         <h2>Passo ${stepIndex + 1}</h2>
         <div class="form-group">
-          <label>Título do Passo:</label>
+          <label><i class="material-icons">label</i> Título do Passo:</label>
           <input type="text" class="step-title" placeholder="Ex: Identificar problema">
         </div>
         <div class="form-group">
-          <label>Descrição do Passo:</label>
+          <label><i class="material-icons">description</i> Descrição do Passo:</label>
           <textarea class="step-desc" placeholder="Ex: Verificar o local com barulho"></textarea>
         </div>
         <div class="form-group">
-          <label>Imagem do Passo (opcional):</label>
+          <label><i class="material-icons">add_photo_alternate</i> Imagem do Passo (opcional):</label>
           <input type="file" name="stepImage_${stepIndex}" accept="image/*" class="file-input">
           <div class="new-file-preview"></div>
         </div>
         <div class="subpasso-container">
           <h3>Subpassos</h3>
           <div class="subpasso-list"></div>
-          <button type="button" class="btn add-subpasso">Adicionar Subpasso</button>
+          <button type="button" class="btn add-subpasso">
+            <i class="material-icons">add</i> Adicionar Subpasso
+          </button>
         </div>
-        <button type="button" class="btn btn-remove remove-step">Remover Passo</button>
+        <button type="button" class="btn btn-remove remove-step">
+          <i class="material-icons">delete</i> Remover Passo
+        </button>
       `;
       return stepBlock;
     }
@@ -518,19 +840,21 @@
       subBlock.innerHTML = `
         <h3>Subpasso ${subIndex + 1}</h3>
         <div class="form-group">
-          <label>Título:</label>
+          <label><i class="material-icons">label</i> Título:</label>
           <input type="text" class="subpasso-title" placeholder="Ex: Abrir tampa">
         </div>
         <div class="form-group">
-          <label>Descrição:</label>
+          <label><i class="material-icons">description</i> Descrição:</label>
           <textarea class="subpasso-desc" placeholder="Ex: Visualizar o interior"></textarea>
         </div>
         <div class="form-group">
-          <label>Imagem do Subpasso (opcional):</label>
+          <label><i class="material-icons">add_photo_alternate</i> Imagem do Subpasso (opcional):</label>
           <input type="file" name="subStepImage_${stepIndex}_${subIndex}" accept="image/*" class="file-input">
           <div class="new-file-preview"></div>
         </div>
-        <button type="button" class="btn btn-remove remove-subpasso">Remover Subpasso</button>
+        <button type="button" class="btn btn-remove remove-subpasso">
+          <i class="material-icons">delete</i> Remover Subpasso
+        </button>
       `;
       return subBlock;
     }
@@ -545,7 +869,7 @@
     // Delegação de eventos para remover passos/subpassos e adicionar subpassos
     stepsContainer.addEventListener('click', (e) => {
       // Remover Passo
-      if (e.target.classList.contains('remove-step')) {
+      if (e.target.classList.contains('remove-step') || e.target.closest('.remove-step')) {
         const stepBlock = e.target.closest('.step-block');
         if (stepBlock) {
           stepsContainer.removeChild(stepBlock);
@@ -554,7 +878,7 @@
       }
 
       // Adicionar Subpasso
-      if (e.target.classList.contains('add-subpasso')) {
+      if (e.target.classList.contains('add-subpasso') || e.target.closest('.add-subpasso')) {
         const stepBlock = e.target.closest('.step-block');
         const stepIndex = parseInt(stepBlock.getAttribute('data-step-index'));
         const subpassoList = stepBlock.querySelector('.subpasso-list');
@@ -564,7 +888,7 @@
       }
 
       // Remover Subpasso
-      if (e.target.classList.contains('remove-subpasso')) {
+      if (e.target.classList.contains('remove-subpasso') || e.target.closest('.remove-subpasso')) {
         const subBlock = e.target.closest('.subpasso-block');
         const stepBlock = e.target.closest('.step-block');
         if (subBlock && stepBlock) {
@@ -634,7 +958,6 @@
           subPassosData.push({
             miniStepTitle: tituloSub,
             miniStepDescription: descSub
-            // subStepImage será tratado no back-end
           });
         });
 
@@ -642,7 +965,6 @@
           stepTitle: tituloStep,
           stepDescription: descStep,
           miniSteps: subPassosData
-          // stepImage também tratado no back-end
         });
       });
 
@@ -671,13 +993,12 @@
       }
     });
 
-    // Botão de deletar imagem existente (marca o hidden para "true" e remove APENAS a imagem e o botão)
+    // Botão de deletar imagem existente (marca o hidden para "true" e remove somente a imagem e o botão)
     document.addEventListener('click', function(e) {
       if (e.target && e.target.classList.contains('delete-image-btn')) {
         e.preventDefault();
         const targetAttr = e.target.dataset.target;
-        // targetAttr pode ser "StepImage_i" ou "SubStepImage_i_j"
-        // Mapeamos isso para o input hidden "deleteExistingStepImage_i" ou "deleteExistingSubStepImage_i_j"
+        // Ex: StepImage_i ou SubStepImage_i_j
         let prefix = "";
         let stepIndex = null;
         let subIndex = null;
@@ -710,7 +1031,6 @@
           if (imageTag) {
             imageTag.remove();
           }
-          // Remove o próprio botão
           e.target.remove();
 
           // Exibe uma mensagem simples de confirmação

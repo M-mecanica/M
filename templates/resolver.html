@@ -3,23 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Resolver Problema</title>
-
   <!-- Fonte básica -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
-
   <!-- Ícones Material -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-
   <!-- Responsividade -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     /* ===========================
-       RESET E BASE
+       RESET / BASE GERAL
        =========================== */
     * {
       margin: 0;
@@ -29,12 +26,12 @@
     body {
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
+      background-color: #f9f9f9;
       color: #333;
-      background-color: #f0f0f0;
-      overflow-x: hidden;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
     /* ===========================
@@ -69,6 +66,7 @@
       }
     }
 
+    /* Conteúdo (para dar fade-in após o preloader) */
     #content {
       transition: opacity 0.5s ease;
       display: flex;
@@ -78,7 +76,7 @@
     }
 
     /* ===========================
-       HEADER (barra superior fixa)
+       HEADER FIXO
        =========================== */
     header {
       background-color: #000;
@@ -135,7 +133,7 @@
     .header-btn span {
       margin-left: 0.5rem;
     }
-    /* Esconde Perfil/Entrar no mobile (exibimos só na barra inferior) */
+    /* Oculta "Perfil" e "Entrar" no mobile (usamos a bottom bar) */
     @media (max-width: 768px) {
       .perfil-btn,
       .entrar-btn {
@@ -147,20 +145,20 @@
        MAIN
        =========================== */
     main {
+      margin-top: 80px; /* espaço para header fixo */
       flex: 1;
+      padding: 2rem 1rem;
       width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      margin-top: 100px; /* espaço para o header fixo */
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem;
     }
     @media (max-width: 768px) {
       main {
-        margin-top: 72px;
-        padding: 1rem;
+        margin-top: 56px;
       }
     }
 
@@ -175,19 +173,19 @@
     footer p {
       font-size: 0.9rem;
       color: #fff;
+      margin: 0;
     }
 
     /* ===========================
        BARRA INFERIOR (MOBILE)
-       (Mesma estrutura do profil.html, com 4 colunas)
        =========================== */
     .mobile-bottom-bar {
-      display: none; /* por padrão, não mostra no desktop */
+      display: none; /* não mostrar no desktop */
     }
     @media (max-width: 768px) {
       .mobile-bottom-bar {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr; /* 4 colunas */
+        grid-template-columns: 1fr 1fr 1fr 1fr;
         background-color: #000;
         width: 100%;
         position: fixed;
@@ -209,56 +207,73 @@
       .mobile-bottom-bar .bottom-bar-btn img {
         margin-bottom: 2px;
       }
-      /* Garante que o main não seja coberto pela barra inferior */
       main {
         padding-bottom: 60px;
       }
     }
-    /* Indica o botão ativo na barra inferior */
     .bottom-bar-btn.active {
       background-color: #444;
     }
 
     /* ===========================
-       CONTAINERS DE PROBLEMA E SOLUÇÃO
+       CONTAINERS (form-container, estilo do add.html)
        =========================== */
-    .problem-container {
-      width: 100%;
-      margin-top: 1rem;
-      border: 1px solid #ccc;
+    .form-container {
+      background-color: #fff;
+      border: 1px solid #ddd;
       border-radius: 8px;
       padding: 2rem;
-      background-color: #fff;
-      position: relative;
+      width: 100%;
+      max-width: 600px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
     }
-    .creator-info {
-      font-size: 1.1rem;
+
+    /* Mensagem de erro (caso precise) */
+    .erro {
+      color: #d00;
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+
+    /* ===========================
+       ESTILIZAÇÃO DO "PROBLEMA" E DA "SOLUÇÃO"
+       =========================== */
+    /* Texto de quem criou/enviou / quem está resolvendo */
+    .creator-info,
+    .solver-info {
+      font-size: 1rem;
       font-weight: 500;
       color: #555;
       margin-bottom: 0.5rem;
       text-align: center;
     }
+    /* Título e descrição do problema */
     h2 {
-      font-size: 1.8rem;
+      font-size: 1.4rem;
       margin-bottom: 0.5rem;
       color: #000;
       font-weight: 700;
       text-align: center;
     }
     p.description {
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       color: #555;
-      font-size: 1.2rem;
+      font-size: 1rem;
       max-width: 1000px;
       text-align: center;
       margin-left: auto;
       margin-right: auto;
+      line-height: 1.4;
     }
+
     /* Imagem principal do problema */
     .problem-image {
       display: block;
-      margin: 1rem auto;
+      margin: 0 auto;
       width: 100%;
       height: auto;
       max-width: 400px;
@@ -266,68 +281,30 @@
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
-    @media (max-width: 768px) {
-      .problem-image {
-        max-width: 100%;
-      }
-    }
 
+    /* Divisória */
     .section-divider {
       border: none;
       border-top: 1px solid #ccc;
       margin: 2rem 0;
       width: 100%;
-      max-width: 1100px;
+      max-width: 600px;
     }
 
     /* ===========================
-       CONTAINER DA SOLUÇÃO (FORM DE RESOLVER)
+       FORMULÁRIO DE SOLUÇÃO
        =========================== */
-    .solution-container {
-      width: 100%;
-      margin-top: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 2rem;
-      background-color: #fff;
-      position: relative;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .solver-info {
-      font-size: 1.1rem;
-      font-weight: 500;
-      color: #555;
-      margin-bottom: 0.5rem;
-      text-align: center;
-    }
-    .solution-container h3 {
-      margin-bottom: 1rem;
-      font-size: 1.6rem;
-      color: #000;
-      font-weight: 700;
-      text-align: center;
-    }
-
-    /* =============================================
-       ESTILOS ESPECÍFICOS DO FORM DE CRIAÇÃO DE PASSOS
-       ============================================= */
-    .info-text {
-      font-size: 1rem;
-      color: #555;
-      margin-bottom: 1rem;
-      line-height: 1.4;
-      text-align: center;
-      max-width: 900px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
     form {
-      position: relative; /* para posicionar o botão .btn-finish no container */
-      padding-bottom: 4rem; /* espaço para não sobrepor conteúdo */
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 1.5rem;
     }
+
+    /* Container dos passos (render dinâmico) */
     #stepsContainer {
-      margin-top: 1rem;
+      margin-top: 0.5rem;
     }
     .step-block {
       margin-bottom: 1.5rem;
@@ -342,10 +319,11 @@
     .step-block h3 {
       color: #000;
       margin-bottom: 0.5rem;
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       font-weight: 700;
     }
 
+    /* Inputs e textarea de cada passo */
     .input-step-title {
       width: 95%;
       margin-bottom: 0.5rem;
@@ -378,7 +356,7 @@
       font-weight: 700;
     }
     .substep-container {
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
     }
     .substep-container h5 {
       color: #444;
@@ -445,7 +423,7 @@
       font-style: italic;
     }
 
-    /* Botões gerais */
+    /* Botões gerais (adicionar passo, remover, etc.) */
     .btn {
       background-color: #000;
       color: #fff;
@@ -473,28 +451,27 @@
       background-color: #d32f2f;
     }
     .btn-substep {
-      margin-top: 0.5rem;
+      margin-top: 0.75rem;
     }
 
     /* Botão "Enviar Solução" */
     .btn-finish {
       background-color: #4caf50;
-      position: absolute;
-      right: 2rem;
-      bottom: 2rem;
+      position: relative;
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      margin-top: 0;
+      margin-top: 1rem;
+      align-self: flex-end;
     }
     .btn-finish:hover {
       background-color: #45a049;
     }
 
-    /* Responsivo */
+    /* Ajuste responsivo */
     @media (max-width: 768px) {
       .step-block h3 {
-        font-size: 1.15rem;
+        font-size: 1rem;
       }
       .input-step-title,
       .textarea-step-description {
@@ -509,12 +486,11 @@
       }
       .btn-finish {
         font-size: 0.9rem;
-        right: 1rem;
-        bottom: 1rem;
       }
     }
   </style>
 </head>
+
 <body>
   <!-- PRELOADER -->
   <div id="preloader">
@@ -580,8 +556,8 @@
 
     <!-- MAIN -->
     <main>
-      <!-- CONTAINER DO PROBLEMA -->
-      <div class="problem-container">
+      <!-- PRIMEIRO CONTAINER: INFORMAÇÕES DO PROBLEMA -->
+      <div class="form-container">
         <p class="creator-info">Enviado por: {{ creator_name }}</p>
         <h2>{{ problem.titulo }}</h2>
         <p class="description">{{ problem.descricao }}</p>
@@ -595,15 +571,16 @@
         {% endif %}
       </div>
 
+      <!-- DIVISÓRIA -->
       <hr class="section-divider" />
 
-      <!-- CONTAINER DA SOLUÇÃO (FORMULÁRIO PARA CRIAR PASSOS) -->
-      <div class="solution-container" id="resolverContainer">
+      <!-- SEGUNDO CONTAINER: FORMULÁRIO PARA CRIAR/DETALHAR A SOLUÇÃO -->
+      <div class="form-container">
         <p class="solver-info">Você está resolvendo como: {{ solver_name }}</p>
-        <h3>Detalhe a Solução:</h3>
+        <h2 style="text-align:center; font-size:1.3rem;">Detalhe a Solução</h2>
 
-        <p class="info-text">
-          Adicione passos principais (<em>Passo 1, Passo 2</em>, etc.) e subpassos (<em>1.1, 1.2</em>...),
+        <p style="color:#555; text-align:center; line-height:1.4; font-size:1rem;">
+          Adicione passos principais (Passo 1, Passo 2, etc.) e subpassos (1.1, 1.2...),
           inclua descrições e imagens para demonstrar a solução. Ao finalizar, clique em
           <strong>Enviar Solução</strong>.
         </p>
@@ -615,8 +592,10 @@
           method="POST"
           enctype="multipart/form-data"
         >
+          <!-- Campo hidden para o JSON da solução -->
           <input type="hidden" name="solution_data" id="solution_data" value="" />
 
+          <!-- Container que será populado dinamicamente -->
           <div id="stepsContainer"></div>
 
           <!-- Botão para adicionar passo -->
@@ -630,7 +609,7 @@
             Adicionar Passo
           </button>
 
-          <!-- Botão de Enviar Solução -->
+          <!-- Botão "Enviar Solução" -->
           <button
             type="submit"
             class="btn btn-finish"
@@ -648,7 +627,7 @@
       <p>© 2025 Plataforma M - MVP</p>
     </footer>
 
-    <!-- BARRA INFERIOR (aparece no mobile, igual à do profil.html) -->
+    <!-- BARRA INFERIOR (MOBILE) -->
     <div class="mobile-bottom-bar">
       <!-- Home -->
       <a
@@ -739,13 +718,13 @@
     });
 
     // --------------------------------------
-    // Botão "Voltar" -> direciona para /unresolved (ou personalizar)
+    // Botão "Voltar" -> direciona para /unresolved (ou conforme desejar)
     // --------------------------------------
     document.addEventListener('DOMContentLoaded', function() {
       const btnVoltar = document.getElementById('btnVoltar');
       if (btnVoltar) {
         btnVoltar.addEventListener('click', function() {
-          // Por exemplo, ir sempre para a rota "unresolved"
+          // Exemplo: ir sempre para "unresolved"
           window.location.href = "{{ url_for('unresolved') }}";
         });
       }
@@ -970,7 +949,7 @@
       renderSteps();
     });
 
-    // Antes de enviar, coloca o JSON dos passos no campo hidden
+    // Antes de enviar, joga o JSON da solução no campo hidden
     form.addEventListener('submit', function(e) {
       if (!solutionData.steps || solutionData.steps.length === 0) {
         e.preventDefault();

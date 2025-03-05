@@ -89,9 +89,6 @@ STOPWORDS = {
 ITEMS_PER_PAGE = 20
 MZ_WHATSAPP = "5543996436367"
 
-# -----------------------------------------------------------
-# FUNÇÕES AUXILIARES
-# -----------------------------------------------------------
 def user_is_logged_in():
     """Retorna True se há um usuário logado."""
     return "user_id" in session
@@ -261,9 +258,6 @@ def save_image(file_obj, fs_instance, max_w=1600, max_h=1200, thumb_w=300, thumb
         "thumb_id": str(thumb_id)
     }
 
-# -----------------------------------------------------------
-# FUNÇÃO PARA VERIFICAR SE USUÁRIO PRECISA SER NOTIFICADO
-# -----------------------------------------------------------
 def user_needs_notification_setup(user_doc):
     """
     Retorna True se o usuário NÃO tiver (email OU whatsapp) OU não habilitou notify_on_resolve.
@@ -289,11 +283,12 @@ def root():
 
 @app.route("/index", methods=["GET", "POST"])
 def index():
+    # Ajustamos aqui para refletir os nomes corretos dos arquivos .webp
     backgrounds = [
-        "fundo1.webṕ",
+        "fundo1.webp",
         "fundo_2.webp",
         "fundo_3.webp",
-        "fundo_4_webp",
+        "fundo_4.webp",
         "fundo_5.webp"
     ]
     random_bg = random.choice(backgrounds)
@@ -405,7 +400,7 @@ def search():
     subcategory = request.args.get("subcategory", "").strip()
     brand = request.args.get("brand", "").strip()
 
-    random_bg = session.get("random_bg", "fundo1.png")
+    random_bg = session.get("random_bg", "fundo1.webp")
 
     return render_template(
         "resultados.html",
@@ -857,7 +852,6 @@ def exibir_solucao(problem_id):
             link["productImage_main"] = link["productImage_main"]
         else:
             link["productImage_main"] = None
-        # (Thumb não necessariamente usada, mas mantemos)
         if link.get("productImage_thumb"):
             link["productImage_thumb"] = link["productImage_thumb"]
         else:
@@ -880,7 +874,7 @@ def exibir_solucao(problem_id):
         facebook_share_url=facebook_share_url,
         problem_image_url=problem_image_url,
         share_url=share_url,
-        affiliate_links=affiliate_links  # Passamos para o template exibir
+        affiliate_links=affiliate_links
     )
 
 @app.route("/delete/<problem_id>", methods=["POST"])
@@ -1776,7 +1770,6 @@ def edit_profile():
             update_fields["nome"] = novo_nome
             session["username"] = novo_nome
 
-        # Armazena telefone e email mesmo que vazios (para limpar caso retire)
         update_fields["whatsapp"] = novo_whatsapp
         update_fields["email"] = novo_email
         update_fields["notify_on_resolve"] = notify_resolved
@@ -1823,10 +1816,6 @@ def get_user_photo(file_id):
 
 @app.route("/get_profile_share_link", methods=["POST"])
 def get_profile_share_link():
-    """
-    Gera (ou recupera) o token de perfil do usuário logado e retorna o link
-    para a rota `perfil_usuario` (página pública do perfil).
-    """
     if not user_is_logged_in():
         return jsonify({"error": "Não autorizado"}), 401
 
@@ -2023,11 +2012,6 @@ def ver_usuario(user_id):
 # -----------------------------------------------------------
 @app.route("/add_affiliate_link/<problem_id>", methods=["POST"])
 def add_affiliate_link(problem_id):
-    """
-    Recebe (title, affiliate_url) e um arquivo opcional (imagem do produto),
-    salva no affiliate_links_collection e redireciona de volta à página de solucao.
-    Somente solucionadores podem inserir.
-    """
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
@@ -2040,7 +2024,6 @@ def add_affiliate_link(problem_id):
     if not title or not affiliate_url:
         return "Título e link são obrigatórios.", 400
 
-    # Tenta salvar imagem (opcional)
     image_ids = None
     if image_file and image_file.filename.strip():
         image_ids = save_image(image_file, fs_m)
@@ -2061,10 +2044,8 @@ def add_affiliate_link(problem_id):
         new_doc["productImage_thumb"] = None
 
     affiliate_links_collection.insert_one(new_doc)
-
     return redirect(url_for("exibir_solucao", problem_id=problem_id))
 
-# (Opcional) Rota para remover link
 @app.route("/remove_affiliate_link/<link_id>", methods=["POST"])
 def remove_affiliate_link(link_id):
     if not user_is_logged_in():
@@ -2091,7 +2072,6 @@ def remove_affiliate_link(link_id):
             pass
 
     affiliate_links_collection.delete_one({"_id": ObjectId(link_id)})
-
     return redirect(url_for("exibir_solucao", problem_id=problem_id))
 
 # -----------------------------------------------------------
@@ -2172,7 +2152,6 @@ def init_db():
             name="TextoProblemas",
             default_language="portuguese"
         )
-    # (Se quiser criar índice em affiliate_links, faça aqui)
 
 # -----------------------------------------------------------
 # MAIN
