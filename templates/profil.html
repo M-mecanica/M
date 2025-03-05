@@ -337,7 +337,6 @@
         flex: 1;
         margin: 0;
       }
-
       @media (max-width: 768px) {
         .profile-buttons {
           width: 100%;
@@ -590,7 +589,7 @@
       }
 
       /***********************************************
-       * MODAL COMPARTILHAR PERFIL
+       * MODAL COMPARTILHAR PERFIL (sem o botão nativo)
        ***********************************************/
       .share-option-btn {
         display: flex;
@@ -618,15 +617,12 @@
       .share-option-btn.instagram {
         background: linear-gradient(45deg, #f09433, #bc1888);
       }
-      .share-option-btn.native-share {
-        background-color: #333;
-      }
       .share-option-btn.copy-link-btn {
         background-color: #777;
       }
 
       /***********************************************
-       * MODAL CONFIGURAÇÕES (mesmo estilo)
+       * MODAL CONFIGURAÇÕES
        ***********************************************/
       .logout-btn {
         background-color: #e53935;
@@ -1204,38 +1200,6 @@
         <div class="modal-body">
           <p style="font-size:1rem; margin-bottom:1rem;">Escolha como deseja compartilhar:</p>
 
-          <!-- Botão "Compartilhar via Dispositivo" (Web Share API) -->
-          <button
-            class="share-option-btn native-share"
-            id="btnNativeShare"
-            style="display: none;"
-          >
-            <!-- Ícone genérico "Share" -->
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 512 512"
-              fill="currentColor"
-            >
-              <path
-                d="M503.691 189.836l-192-160C302.126 25.161
-                298.063 24 294.071 24c-4.275 0-8.531 1.242-12.266
-                3.773C272.161 36.881 272 41.719 272 46.312V128C128
-                128 64 173.568 64 320c0 63.551 31.362 85.719 49.703
-                92.137 5.289 1.856 11.183 2.789 16.787 2.789
-                9.189 0 18.264-2.183 26.361-6.531 12.195-6.52
-                19.149-19.364 17.232-33.121C168.98 308.02
-                201.047 270.581 272 256v81.688c0 4.593.161
-                9.431 9.805 18.539C285.54 359.758 289.796
-                361 294.07 361c3.992 0 8.055-1.161
-                11.625-3.77l192-160c3.773-3.156 5.305-7.772
-                5.305-12.23S507.464 192.992 503.691 189.836zM256 334
-                c-43.1 0-78-34.9-78-78s34.9-78 78-78 78 34.9 78 78-34.9 78-78 78z"
-              />
-            </svg>
-            Compartilhar via Dispositivo
-          </button>
-
           <!-- Botão WhatsApp -->
           <button class="share-option-btn whatsapp" id="btnShareWhatsApp">
             <svg
@@ -1549,15 +1513,15 @@
         });
       }
 
-      // FUNÇÃO DE COMPARTILHAMENTO (Modal "Share")
+      // LÓGICA DE COMPARTILHAMENTO
       const openShareModalBtn = document.getElementById('openShareModalBtn');
       const shareModal = document.getElementById('shareModal');
       const closeShareModalBtn = document.getElementById('closeShareModal');
+
       const btnShareWhatsApp = document.getElementById('btnShareWhatsApp');
       const btnShareFacebook = document.getElementById('btnShareFacebook');
       const btnShareInstagram = document.getElementById('btnShareInstagram');
       const btnCopyLink = document.getElementById('btnCopyLink');
-      const btnNativeShare = document.getElementById('btnNativeShare');
 
       let finalShareURL = "";
       let userName = "";
@@ -1574,11 +1538,26 @@
               const data = await res.json();
               if (data.share_url) {
                 finalShareURL = data.share_url;
-                shareModal.style.display = 'flex';
 
-                // Se o navegador suportar Web Share API, mostramos o botão nativo
+                // 1) Tenta compartilhamento nativo se disponível
                 if (navigator.share) {
-                  btnNativeShare.style.display = 'block';
+                  const shareTitle = `Perfil do(a) ${userName} na Plataforma M`;
+                  const shareText = `Confira o perfil de ${userName} na Plataforma M:\n${finalShareURL}`;
+                  try {
+                    await navigator.share({
+                      title: shareTitle,
+                      text: shareText,
+                      url: finalShareURL
+                    });
+                    // Se o usuário compartilhou ou cancelou, não abre o modal
+                    return;
+                  } catch (err2) {
+                    // Se deu erro ou cancelou, abre o modal como fallback
+                    shareModal.style.display = 'flex';
+                  }
+                } else {
+                  // 2) Se não tiver navigator.share, abre o modal
+                  shareModal.style.display = 'flex';
                 }
               } else {
                 alert("Falha ao gerar link de compartilhamento.");
@@ -1599,27 +1578,6 @@
         window.addEventListener('click', (event) => {
           if (event.target === shareModal) {
             shareModal.style.display = 'none';
-          }
-        });
-      }
-
-      // Botão "Compartilhar via Dispositivo" (Web Share API)
-      if (btnNativeShare) {
-        btnNativeShare.addEventListener('click', async () => {
-          if (!finalShareURL) {
-            alert("Link de perfil não encontrado.");
-            return;
-          }
-          const shareTitle = `Perfil do(a) ${userName} na Plataforma M`;
-          const shareText = `Confira o perfil de ${userName} na Plataforma M:\n${finalShareURL}`;
-          try {
-            await navigator.share({
-              title: shareTitle,
-              text: shareText,
-              url: finalShareURL
-            });
-          } catch (err) {
-            console.log("Usuário cancelou ou erro no compartilhamento nativo:", err);
           }
         });
       }
@@ -1656,12 +1614,10 @@
             alert("Link de perfil não encontrado.");
             return;
           }
-          // Instagram não permite compartilhar link diretamente via URL.
-          const message = `Abra o Instagram e compartilhe o link: ${finalShareURL}`;
           alert(
-            "No momento, não é possível postar automaticamente no Instagram. " +
-            "Você pode copiar o link e colar no seu Story ou na bio.\n\n" +
-            message
+            "Não é possível postar diretamente no Instagram.\n" +
+            "Copie e cole o link em seu Story ou bio.\n\n" +
+            finalShareURL
           );
         });
       }

@@ -225,17 +225,8 @@
 
     /* === Estilos específicos da página de solução === */
 
-    .fixed-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: cover;
-      z-index: -1;
-    }
+    /* Removemos a div de imagem de fundo, então a classe .fixed-bg não é mais utilizada.
+       Caso queira mantê-la para referência, deixamos vazia ou removemos. Vamos remover. */
 
     /* Container do problema */
     .problem-container {
@@ -717,11 +708,12 @@
 
   <!-- CONTEÚDO -->
   <div id="content">
-    <!-- Caso queira imagem fixa ao fundo -->
+    <!-- REMOVIDO: A imagem de fundo fixa
     <div
       class="fixed-bg"
       style="background-image: url('{{ url_for("static", filename="images/" ~ random_bg) }}');"
     ></div>
+    -->
 
     <!-- Barra superior fixa -->
     <header>
@@ -1338,7 +1330,7 @@
     const userIsLoggedIn = {{ 'true' if session.get("user_id") else 'false' }};
 
     // --------------------------------------------------------------------------------
-    // Lógica de exibição da solução passo-a-passo (igual ao original):
+    // Lógica de exibição da solução passo-a-passo
     // --------------------------------------------------------------------------------
     function revealStepSimple(stepDiv, stepNumber, stepData) {
       const titleBlock = document.createElement('div');
@@ -1696,7 +1688,7 @@
       }
     });
 
-    // ============ SCRIPT PARA COMPARTILHAMENTO (copiado/adaptado do profil.html) ============
+    // ============ SCRIPT PARA COMPARTILHAMENTO ============
     document.addEventListener('DOMContentLoaded', function() {
       const openShareModalBtn = document.getElementById('openShareSolutionModalBtn');
       const shareModal = document.getElementById('shareSolutionModal');
