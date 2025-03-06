@@ -209,6 +209,7 @@
 
     /* PÁGINA DE ENVIO DE PROBLEMA */
     .form-container {
+      position: relative; /* Necessário para posicionar a lixeira no topo direito */
       background-color: #fff;
       border: 1px solid #ddd;
       border-radius: 8px;
@@ -219,6 +220,29 @@
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+    }
+
+    /* Botão lixeira (recarregar a página) */
+    .trash-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4rem;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+    .trash-btn:hover {
+      background-color: #eee;
+    }
+    .trash-btn i.material-icons {
+      font-size: 1.3rem;
     }
 
     /* Mensagem de erro */
@@ -320,10 +344,7 @@
       margin-top: 0.5rem;
     }
 
-    /*
-     * Ajuste para manter um "quadrado em branco"
-     * até que a imagem seja realmente exibida:
-     */
+    /* Categoria: ícones no display final */
     .cat-icon-container {
       width: 40px;
       height: 40px;
@@ -342,7 +363,10 @@
       display: none;
     }
 
-    /* Seção de apresentação das categorias */
+    /* Exibição das categorias (inicialmente oculta) */
+    #catDisplayContainer {
+      display: none; /* IMPORTANTE: começa escondido */
+    }
     .cat-display {
       background-color: #f5f5f5;
       border-radius: 8px;
@@ -552,6 +576,16 @@
     <main>
       <div class="form-container">
 
+        <!-- Botão lixeira (para "zerar" as informações recarregando a página) -->
+        <button
+          class="trash-btn"
+          type="button"
+          onclick="location.reload()"
+          aria-label="Limpar e reiniciar a página"
+        >
+          <i class="material-icons" aria-hidden="true">delete</i>
+        </button>
+
         {% if erro %}
           <div class="erro">{{ erro }}</div>
         {% endif %}
@@ -606,8 +640,8 @@
             Definir Categoria
           </button>
 
-          <!-- Exibição das categorias (com containers para manter quadrado em branco) -->
-          <div class="cat-display">
+          <!-- Exibição das categorias (inicialmente oculto) -->
+          <div id="catDisplayContainer" class="cat-display">
             <div class="cat-display-line">
               <div class="cat-icon-container">
                 <img
@@ -1162,6 +1196,9 @@
         brandIconEl.src = "";
         brandIconEl.style.display = "none";
       }
+
+      // Mostra o container de exibição das categorias
+      document.getElementById("catDisplayContainer").style.display = "block";
 
       closeCategoryModal();
     }

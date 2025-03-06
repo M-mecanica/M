@@ -3,16 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <title>M - Resolver Problema</title>
-  <!-- Fonte básica -->
+
+  <!-- Fonte básica (Roboto) -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
     rel="stylesheet"
   />
+
   <!-- Ícones Material -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+  />
+
   <!-- Responsividade -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     /* ===========================
@@ -130,10 +136,12 @@
       height: 24px;
       fill: currentColor;
     }
+    .header-btn i.material-icons {
+      font-size: 24px;
+    }
     .header-btn span {
       margin-left: 0.5rem;
     }
-    /* Oculta "Perfil" e "Entrar" no mobile (usamos a bottom bar) */
     @media (max-width: 768px) {
       .perfil-btn,
       .entrar-btn {
@@ -145,7 +153,7 @@
        MAIN
        =========================== */
     main {
-      margin-top: 80px; /* espaço para header fixo */
+      margin-top: 80px; /* espaço para header fixo em desktop */
       flex: 1;
       padding: 2rem 1rem;
       width: 100%;
@@ -158,7 +166,7 @@
     }
     @media (max-width: 768px) {
       main {
-        margin-top: 56px;
+        margin-top: 56px; /* espaço para header fixo em mobile */
       }
     }
 
@@ -216,7 +224,7 @@
     }
 
     /* ===========================
-       CONTAINERS (form-container, estilo do add.html)
+       CONTAINERS (form-container)
        =========================== */
     .form-container {
       background-color: #fff;
@@ -225,14 +233,13 @@
       padding: 2rem;
       width: 100%;
       max-width: 600px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
       margin-bottom: 2rem;
     }
 
-    /* Mensagem de erro (caso precise) */
     .erro {
       color: #d00;
       margin-bottom: 1rem;
@@ -240,18 +247,15 @@
     }
 
     /* ===========================
-       ESTILIZAÇÃO DO "PROBLEMA" E DA "SOLUÇÃO"
+       ESTILIZAÇÃO DO PROBLEMA
        =========================== */
-    /* Texto de quem criou/enviou / quem está resolvendo */
-    .creator-info,
-    .solver-info {
+    .creator-info {
       font-size: 1rem;
       font-weight: 500;
       color: #555;
       margin-bottom: 0.5rem;
       text-align: center;
     }
-    /* Título e descrição do problema */
     h2 {
       font-size: 1.4rem;
       margin-bottom: 0.5rem;
@@ -269,8 +273,6 @@
       margin-right: auto;
       line-height: 1.4;
     }
-
-    /* Imagem principal do problema */
     .problem-image {
       display: block;
       margin: 0 auto;
@@ -279,20 +281,11 @@
       max-width: 400px;
       object-fit: contain;
       border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-
-    /* Divisória */
-    .section-divider {
-      border: none;
-      border-top: 1px solid #ccc;
-      margin: 2rem 0;
-      width: 100%;
-      max-width: 600px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     /* ===========================
-       FORMULÁRIO DE SOLUÇÃO
+       FORM DE SOLUÇÃO
        =========================== */
     form {
       position: relative;
@@ -301,8 +294,6 @@
       width: 100%;
       gap: 1.5rem;
     }
-
-    /* Container dos passos (render dinâmico) */
     #stepsContainer {
       margin-top: 0.5rem;
     }
@@ -321,9 +312,10 @@
       margin-bottom: 0.5rem;
       font-size: 1.15rem;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-
-    /* Inputs e textarea de cada passo */
     .input-step-title {
       width: 95%;
       margin-bottom: 0.5rem;
@@ -354,6 +346,9 @@
       margin-bottom: 0.3rem;
       font-size: 1.1rem;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     .substep-container {
       margin-bottom: 1.25rem;
@@ -363,6 +358,9 @@
       margin-bottom: 0.3rem;
       font-size: 1rem;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     .input-substep-title {
       width: 90%;
@@ -443,6 +441,9 @@
       background-color: #333;
       transform: scale(1.02);
     }
+    .btn i.material-icons {
+      font-size: 20px;
+    }
     .btn-remove {
       background-color: #f44336;
       margin-top: 0.5rem;
@@ -457,10 +458,6 @@
     /* Botão "Enviar Solução" */
     .btn-finish {
       background-color: #4caf50;
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
       margin-top: 1rem;
       align-self: flex-end;
     }
@@ -501,7 +498,7 @@
   <div id="content">
     <!-- HEADER FIXO -->
     <header>
-      <!-- Botão "Voltar" -->
+      <!-- Botão "Voltar" (mantendo como no resolver atual) -->
       <button
         type="button"
         class="header-btn"
@@ -521,34 +518,20 @@
         </svg>
       </button>
 
+      <!-- TÍTULO DO HEADER -->
       <h1>Resolver Problema</h1>
 
+      <!-- Entrar/Perfil -->
       {% if not session.get('user_id') %}
         <!-- Se NÃO estiver logado, mostra "Entrar" -->
         <a class="header-btn entrar-btn" href="{{ url_for('login') }}">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
-            <path
-              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
-            />
-          </svg>
+          <i class="material-icons" aria-hidden="true">account_circle</i>
           <span>Entrar</span>
         </a>
       {% else %}
         <!-- Se estiver logado, mostra "Perfil" -->
         <a class="header-btn perfil-btn" href="{{ url_for('perfil') }}">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
-            <path
-              d="M8 8c-2.33 0-4 1.67-4 4v1h8v-1c0-2.33-1.67-4-4-4z"
-            />
-          </svg>
+          <i class="material-icons" aria-hidden="true">account_circle</i>
           <span>Perfil</span>
         </a>
       {% endif %}
@@ -571,12 +554,8 @@
         {% endif %}
       </div>
 
-      <!-- DIVISÓRIA -->
-      <hr class="section-divider" />
-
       <!-- SEGUNDO CONTAINER: FORMULÁRIO PARA CRIAR/DETALHAR A SOLUÇÃO -->
       <div class="form-container">
-        <p class="solver-info">Você está resolvendo como: {{ solver_name }}</p>
         <h2 style="text-align:center; font-size:1.3rem;">Detalhe a Solução</h2>
 
         <p style="color:#555; text-align:center; line-height:1.4; font-size:1rem;">
@@ -605,7 +584,7 @@
             id="btnAddStep"
             style="margin-top: 1rem;"
           >
-            <span class="material-icons">add</span>
+            <i class="material-icons" aria-hidden="true">add</i>
             Adicionar Passo
           </button>
 
@@ -615,7 +594,7 @@
             class="btn btn-finish"
             id="btnSubmitSolution"
           >
-            <span class="material-icons">send</span>
+            <i class="material-icons" aria-hidden="true">send</i>
             Enviar Solução
           </button>
         </form>
@@ -706,7 +685,7 @@
     // --------------------------------------
     // Preloader + fade-in do conteúdo
     // --------------------------------------
-    window.addEventListener('load', function () {
+    window.addEventListener('load', function() {
       const preloader = document.getElementById('preloader');
       const content = document.getElementById('content');
       if (preloader) {
@@ -731,7 +710,7 @@
     });
 
     // --------------------------------------
-    // Lógica do formulário de solução (passos)
+    // Lógica do formulário de solução (passos e subpassos)
     // --------------------------------------
     let solutionData = {
       steps: []
@@ -749,9 +728,12 @@
         const stepBlock = document.createElement('div');
         stepBlock.className = 'step-block';
 
-        // Título do passo
+        // Título do passo (Heading + ícone)
         const stepTitleHeading = document.createElement('h3');
-        stepTitleHeading.textContent = `Passo ${stepIndex + 1}`;
+        stepTitleHeading.innerHTML = `
+          <i class="material-icons" aria-hidden="true">flag</i>
+          Passo ${stepIndex + 1}
+        `;
         stepBlock.appendChild(stepTitleHeading);
 
         // Input título do passo
@@ -797,7 +779,7 @@
         btnUploadStep.className = 'btn-upload';
         btnUploadStep.setAttribute('for', `fileInputStep_${stepIndex}`);
         btnUploadStep.innerHTML = `
-          <span class="material-icons">image</span>
+          <i class="material-icons" aria-hidden="true">image</i>
           Selecionar Imagem
         `;
         uploadArea.appendChild(btnUploadStep);
@@ -819,8 +801,11 @@
         // Botão remover passo
         const btnRemoveStep = document.createElement('button');
         btnRemoveStep.type = 'button';
-        btnRemoveStep.textContent = 'Remover Passo';
         btnRemoveStep.className = 'btn btn-remove';
+        btnRemoveStep.innerHTML = `
+          <i class="material-icons" aria-hidden="true">delete</i>
+          Remover Passo
+        `;
         btnRemoveStep.onclick = () => {
           solutionData.steps.splice(stepIndex, 1);
           renderSteps();
@@ -832,7 +817,10 @@
         subPassosWrapper.classList.add('passo-xx-block');
 
         const subTitleEl = document.createElement('h4');
-        subTitleEl.textContent = `Subpassos do Passo ${stepIndex + 1}`;
+        subTitleEl.innerHTML = `
+          <i class="material-icons" aria-hidden="true">arrow_right</i>
+          Subpassos do Passo ${stepIndex + 1}
+        `;
         subPassosWrapper.appendChild(subTitleEl);
 
         step.miniSteps.forEach((sub, subIndex) => {
@@ -840,7 +828,10 @@
           subDiv.className = 'substep-container';
 
           const subStepNumberEl = document.createElement('h5');
-          subStepNumberEl.textContent = `Passo ${stepIndex + 1}.${subIndex + 1}`;
+          subStepNumberEl.innerHTML = `
+            <i class="material-icons" aria-hidden="true">subdirectory_arrow_right</i>
+            Passo ${stepIndex + 1}.${subIndex + 1}
+          `;
           subDiv.appendChild(subStepNumberEl);
 
           // Título do subpasso
@@ -886,7 +877,7 @@
           btnUploadSub.className = 'btn-upload';
           btnUploadSub.setAttribute('for', `fileInputSub_${stepIndex}_${subIndex}`);
           btnUploadSub.innerHTML = `
-            <span class="material-icons">image</span>
+            <i class="material-icons" aria-hidden="true">image</i>
             Selecionar Imagem
           `;
           uploadAreaSub.appendChild(btnUploadSub);
@@ -908,9 +899,12 @@
           // Botão remover subpasso
           const btnRemoveSub = document.createElement('button');
           btnRemoveSub.type = 'button';
-          btnRemoveSub.textContent = `Remover ${stepIndex + 1}.${subIndex + 1}`;
           btnRemoveSub.className = 'btn btn-remove';
           btnRemoveSub.style.marginLeft = '8px';
+          btnRemoveSub.innerHTML = `
+            <i class="material-icons" aria-hidden="true">delete</i>
+            Remover ${stepIndex + 1}.${subIndex + 1}
+          `;
           btnRemoveSub.onclick = () => {
             solutionData.steps[stepIndex].miniSteps.splice(subIndex, 1);
             renderSteps();
@@ -924,7 +918,10 @@
         const btnAddSub = document.createElement('button');
         btnAddSub.type = 'button';
         btnAddSub.className = 'btn btn-substep';
-        btnAddSub.textContent = `+ Subpasso ${stepIndex + 1}.${step.miniSteps.length + 1}`;
+        btnAddSub.innerHTML = `
+          <i class="material-icons" aria-hidden="true">add</i>
+          Subpasso ${stepIndex + 1}.${step.miniSteps.length + 1}
+        `;
         btnAddSub.onclick = () => {
           solutionData.steps[stepIndex].miniSteps.push({
             miniStepTitle: '',
