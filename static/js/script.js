@@ -9,6 +9,9 @@ window.addEventListener('load', function() {
     content.style.opacity = '1';
   }
 
+  // Chama a função de pré-carregar todas as imagens
+  preloadCategoryImages();
+
   // PWA: Registro do Service Worker (ajuste a rota conforme necessário)
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
@@ -57,7 +60,7 @@ function openCategoryModal() {
   // Botão "Voltar" não deve aparecer no passo 1
   const backBtn = document.getElementById('backButton');
   if (backBtn) {
-    backBtn.style.display = 'none'; // esconde no início
+    backBtn.style.display = 'none';
   }
 }
 
@@ -113,7 +116,7 @@ function resetCategoryModalSteps() {
   window.selectedSubCatIndex = undefined;
 }
 
-// Exemplo de dados de categorias, subcategorias e marcas
+// -------------- DADOS DAS CATEGORIAS --------------
 const categoryData = [
   {
     name: "Veículos",
@@ -122,17 +125,21 @@ const categoryData = [
       {
         name: "Carros",
         img: "carro_icon.webp",
-        brands: ["Toyota", "Honda", "Ford", "Fiat", "Volkswagen", "Peugeot", "Chevrolet"]
+        brands: [
+          "Toyota", "Honda", "Ford", "Fiat", "Volkswagen", "Peugeot", "Chevrolet",
+          "Renault", "BMW", "Volvo", "Audi", "Citroen", "Jeep",
+          "Caoa Chery", "Mercedes-Benz", "Mini", "Mitsubishi", "Nissan", "Land Rover"
+        ]
       },
       {
         name: "Motos",
         img: "motos_icon.webp",
-        brands: ["Yamaha", "Honda", "Harley-Davidson", "Suzuki", "BMW"]
+        brands: ["Yamaha", "Honda", "Harley-Davidson", "Suzuki", "BMW", "Kawasaki"]
       },
       {
         name: "Caminhonetes",
         img: "caminhonete_icon.webp",
-        brands: ["Toyota", "Chevrolet", "Ford", "Mitsubishi", "Nissan"]
+        brands: ["Toyota", "Chevrolet", "Ford", "Mitsubishi", "Nissan", "Dodge"]
       },
       {
         name: "Caminhões",
@@ -153,7 +160,7 @@ const categoryData = [
       {
         name: "Tratores",
         img: "tratores_icon.webp",
-        brands: ["John Deere", "Massey Ferguson", "Valtra/Valmet", "New Holland", "Case"]
+        brands: ["John Deere", "Massey Ferguson", "Valtra", "New Holland", "Case"]
       },
       {
         name: "Colheitadeiras",
@@ -195,7 +202,10 @@ const categoryData = [
       {
         name: "Celulares e Tablets",
         img: "celular_icon.webp",
-        brands: ["Apple", "Samsung", "Xiaomi", "Motorola"]
+        brands: [
+          "Apple", "Samsung", "Xiaomi", "Motorola",
+          "Realme", "LG", "ASUS ZENPHONE", "poco"
+        ]
       },
       {
         name: "Notebooks e PCs",
@@ -247,22 +257,32 @@ const categoryData = [
       {
         name: "Geladeiras e Freezers",
         img: "geladeira_freezer_icon.webp",
-        brands: []
+        brands: ["Electrolux", "midea", "consul", "panasonic", "Brastemp", "Samsung"]
       },
       {
-        name: "Máquinas de Lavar e Secadoras",
+        name: "Máquinas de Lavar",
+        img: "maquina_de_lavar_e_secadora_icon.webp",
+        directAccess: true
+      },
+      {
+        name: "Secadoras",
         img: "maquina_de_lavar_e_secadora_icon.webp",
         brands: []
       },
       {
         name: "Ar-condicionado",
         img: "ar_condicionado_icon.webp",
-        brands: []
+        brands: ["consul", "electrolux", "LG", "Samsung", "Midea", "Philco", "TCL"]
       },
       {
         name: "Cafeteiras e Eletroportáteis",
         img: "cafeteiras_e_eletroportateis_icon.webp",
-        brands: ["Mondial", "Nespresso", "Dolce Gusto", "Oster", "Cadence", "Britânia"]
+        brands: ["Mondial", "Nespresso", "Dolce Gusto", "Oster", "Cadence", "Britania"]
+      },
+      {
+        name: "Microondas",
+        img: "microondas_icon.webp",
+        brands: ["Electrolux", "Brastemp", "Panasonic", "Philco", "Consul", "Mondial", "Fischer"]
       }
     ]
   },
@@ -271,12 +291,22 @@ const categoryData = [
     img: "ferramentas_icon.webp",
     subCategories: [
       {
-        name: "Furadeiras, Parafusadeiras e Esmerilhadeiras",
+        name: "Furadeiras",
+        img: "furadeira_parafusadeira_esmerilhadeira_icon.webp",
+        directAccess: true
+      },
+      {
+        name: "Parafusadeiras e Esmerilhadeiras",
         img: "furadeira_parafusadeira_esmerilhadeira_icon.webp",
         brands: []
       },
       {
-        name: "Equipamentos de Solda e Corte",
+        name: "Equipamentos de Solda",
+        img: "equipamentos_solda_e_corte_icon.webp",
+        directAccess: true
+      },
+      {
+        name: "Máquinas de Corte",
         img: "equipamentos_solda_e_corte_icon.webp",
         brands: []
       }
@@ -284,12 +314,63 @@ const categoryData = [
   }
 ];
 
-// Exibir categorias principais
+// Função auxiliar para transformar o nome de marca em nome de arquivo
+function brandToImageFileName(brandName) {
+  return brandName
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "_")  // substitui tudo que não for a-z ou 0-9 por "_"
+    + "_icon.webp";
+}
+
+/**
+ * Pré-carrega todas as imagens usadas nas categorias,
+ * subcategorias e marcas. Dessa forma, quando o modal
+ * for aberto, as imagens já estarão em cache.
+ */
+function preloadCategoryImages() {
+  const imagesToPreload = [];
+
+  categoryData.forEach(cat => {
+    // Imagem da categoria principal
+    if (cat.img) {
+      imagesToPreload.push(`/static/images/${cat.img}`);
+    }
+
+    // Subcategorias
+    if (Array.isArray(cat.subCategories)) {
+      cat.subCategories.forEach(sub => {
+        if (sub.img) {
+          imagesToPreload.push(`/static/images/${sub.img}`);
+        }
+
+        // Marcas
+        if (Array.isArray(sub.brands)) {
+          sub.brands.forEach(brand => {
+            const brandImg = brandToImageFileName(brand);
+            imagesToPreload.push(`/static/images/${brandImg}`);
+          });
+        }
+      });
+    }
+  });
+
+  // Dispara o pré-carregamento propriamente dito
+  imagesToPreload.forEach(src => {
+    const img = new Image();
+    img.src = src;
+    // Não é preciso inserir no DOM; basta atribuir o src para forçar cachear
+  });
+}
+
+// -------------- FUNÇÕES DE EXIBIÇÃO --------------
+
+// Exibir categorias principais (Passo 1)
 function showMainCategories() {
   const container = document.getElementById('mainCategoryContainer');
   if (!container) return;
   container.innerHTML = '';
 
+  // Mantemos a ordem original de categoryData
   categoryData.forEach((cat, idx) => {
     const btn = document.createElement('button');
     btn.className = 'btn-categorias';
@@ -316,14 +397,19 @@ function showMainCategories() {
   });
 }
 
-// Exibir subcategorias
+// Exibir subcategorias (Passo 2) em ordem alfabética
 function showSubCategories(catIndex) {
   const subCatContainer = document.getElementById('subCategoryContainer');
   if (!subCatContainer) return;
   subCatContainer.innerHTML = '';
 
-  const subCats = categoryData[catIndex].subCategories;
-  subCats.forEach((sub, subIdx) => {
+  const originalSubCats = categoryData[catIndex].subCategories;
+  // Ordenamos as subcategorias por nome
+  const subCatsSorted = [...originalSubCats].sort((a, b) =>
+    a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
+  );
+
+  subCatsSorted.forEach((sub) => {
     const btn = document.createElement('button');
     btn.className = 'btn-categorias';
 
@@ -338,34 +424,59 @@ function showSubCategories(catIndex) {
     }
 
     btn.onclick = () => {
-      currentStep = 3;
-      window.selectedSubCatIndex = subIdx;
-      document.getElementById('mainCategoryStep').style.display = 'none';
-      document.getElementById('subCategoryStep').style.display = 'none';
-      document.getElementById('brandStep').style.display = 'block';
-      showBrands(catIndex, subIdx);
+      // Se tiver directAccess, vai direto para a busca
+      if (sub.directAccess) {
+        const catName = categoryData[catIndex].name;
+        const subCatName = sub.name;
+        window.location.href = `/search?category=${encodeURIComponent(catName)}&subcategory=${encodeURIComponent(subCatName)}`;
+        closeCategoryModal();
+        return;
+      }
 
-      // Passo 3 -> Botão "Voltar" continua visível
-      const backBtn = document.getElementById('backButton');
-      if (backBtn) {
-        backBtn.style.display = 'inline-block';
+      // Caso não seja directAccess, verificar se há marcas
+      if (!sub.brands || sub.brands.length === 0) {
+        // Redireciona direto para a listagem dessa subcategoria
+        const catName = categoryData[catIndex].name;
+        const subCatName = sub.name;
+        window.location.href = `/search?category=${encodeURIComponent(catName)}&subcategory=${encodeURIComponent(subCatName)}`;
+        closeCategoryModal();
+      } else {
+        // Se houver marcas, vamos para o passo 3
+        const originalIndex = originalSubCats.findIndex(s => s.name === sub.name);
+        currentStep = 3;
+        window.selectedSubCatIndex = originalIndex;
+
+        document.getElementById('mainCategoryStep').style.display = 'none';
+        document.getElementById('subCategoryStep').style.display = 'none';
+        document.getElementById('brandStep').style.display = 'block';
+        showBrands(catIndex, originalIndex);
+
+        // Passo 3 -> Botão "Voltar" continua visível
+        const backBtn = document.getElementById('backButton');
+        if (backBtn) {
+          backBtn.style.display = 'inline-block';
+        }
       }
     };
+
     subCatContainer.appendChild(btn);
   });
 }
 
-// Exibir marcas
+// Exibir marcas (Passo 3) em ordem alfabética
 function showBrands(catIndex, subCatIndex) {
   const brandContainer = document.getElementById('brandContainer');
   if (!brandContainer) return;
   brandContainer.innerHTML = '';
 
   const subCat = categoryData[catIndex].subCategories[subCatIndex];
-  const brands = subCat.brands || [];
+  // Ordena as marcas
+  const brandsSorted = (subCat.brands || []).slice().sort((a, b) =>
+    a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
+  );
 
-  // Se não houver marcas definidas, mostrar um botão para ver todos problemas
-  if (brands.length === 0) {
+  if (brandsSorted.length === 0) {
+    // Caso não haja marcas
     const btnVerProblemas = document.createElement('button');
     btnVerProblemas.className = 'btn-categorias';
     btnVerProblemas.textContent = "Ver problemas desta subcategoria";
@@ -379,30 +490,17 @@ function showBrands(catIndex, subCatIndex) {
     return;
   }
 
-  // Se houver marcas, exibir cada marca como botão
-  brands.forEach(brand => {
-    let brandName = "";
-    let brandImg = null;
-    if (typeof brand === 'string') {
-      brandName = brand;
-    } else {
-      brandName = brand.name;
-      brandImg = brand.img;
-    }
+  // Se houver marcas, exibir cada uma
+  brandsSorted.forEach(brandName => {
+    const brandImg = brandToImageFileName(brandName);
 
     const btn = document.createElement('button');
     btn.className = 'btn-categorias';
-
-    if (brandImg) {
-      btn.innerHTML = `
-        <img src="/static/images/${brandImg}" alt="${brandName}"
-             style="width:60px;height:60px;margin-right:15px;">
-        <span>${brandName}</span>
-      `;
-    } else {
-      btn.textContent = brandName;
-    }
-
+    btn.innerHTML = `
+      <img src="/static/images/${brandImg}" alt="${brandName}"
+           style="width:60px;height:60px;margin-right:15px;">
+      <span>${brandName}</span>
+    `;
     btn.onclick = () => {
       const catName = categoryData[catIndex].name;
       const subCatName = subCat.name;
@@ -412,10 +510,11 @@ function showBrands(catIndex, subCatIndex) {
     brandContainer.appendChild(btn);
   });
 
-  // Botão "Ver todos problemas desta subcategoria"
+  // Botão "Ver todos"
   const btnVerTodos = document.createElement('button');
   btnVerTodos.className = 'btn-categorias';
-  btnVerTodos.textContent = "Ver todos problemas desta subcategoria";
+  // Alterado aqui, conforme solicitado:
+  btnVerTodos.textContent = "Ver todos";
   btnVerTodos.onclick = () => {
     const catName = categoryData[catIndex].name;
     const subCatName = subCat.name;
