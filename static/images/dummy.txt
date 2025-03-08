@@ -1,0 +1,1 @@
+Esse arquivo existe apenas para criar a pasta static/images.
