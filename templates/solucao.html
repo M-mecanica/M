@@ -706,20 +706,27 @@
       color: #333;
       font-weight: bold;
     }
+
+    /*
+      Ajuste para deixar o botão azul, texto branco em negrito,
+      e trocar o texto de "Comprar agora" para "Visualizar".
+    */
     .affiliate-card a {
       display: inline-block;
       margin-top: 0.5rem;
       font-size: 0.9rem;
       color: #fff;
-      background-color: #000;
+      background-color: #007bff; /* Azul */
       padding: 0.5rem 1rem;
       border-radius: 20px;
       text-decoration: none;
+      font-weight: bold;
       transition: background-color 0.2s;
     }
     .affiliate-card a:hover {
-      background-color: #333;
+      background-color: #0056b3; /* Azul mais escuro no hover */
     }
+
     .remove-link-btn {
       margin-top: 0.7rem;
       font-size: 0.8rem;
@@ -950,10 +957,10 @@
       <div class="affiliate-section">
         <h4>Peças e ferramentas que você pode precisar</h4>
 
-        <div class="affiliate-links-container">
+        <div class="affiliate-links-container" id="affiliateLinksContainer">
           {% if affiliate_links and affiliate_links|length > 0 %}
             {% for link in affiliate_links %}
-              <div class="affiliate-card">
+              <div class="affiliate-card" data-linkid="{{ link._id_str }}">
                 {% if link.productImage_main %}
                   <img
                     src="{{ url_for('gridfs_image', file_id=link.productImage_main) }}"
@@ -966,25 +973,22 @@
                   target="_blank"
                   rel="noopener nofollow"
                 >
-                  Comprar agora
+                  Visualizar
                 </a>
                 {% if session.get("role") == "solucionador" %}
-                  <form
-                    action="{{ url_for('remove_affiliate_link', link_id=link._id_str) }}"
-                    method="POST"
+                  <!-- Removemos o form, agora usamos JS -->
+                  <button
+                    type="button"
+                    class="remove-link-btn"
+                    data-link-id="{{ link._id_str }}"
                   >
-                    <button
-                      type="submit"
-                      class="remove-link-btn"
-                    >
-                      Remover
-                    </button>
-                  </form>
+                    Remover
+                  </button>
                 {% endif %}
               </div>
             {% endfor %}
           {% else %}
-            <p style="text-align: center; color: #666;">(Nenhum item adicionado.)</p>
+            <p id="noItemsMsg" style="text-align: center; color: #666;">(Nenhum item adicionado.)</p>
           {% endif %}
         </div>
 
@@ -1001,8 +1005,6 @@
           </div>
         {% endif %}
       </div>
-
-      <!-- (Removida a linha de separação aqui) -->
 
       <!-- Container da solução -->
       <div
@@ -1454,36 +1456,40 @@
           <button id="closeAddAffiliateLinkModal">&times;</button>
         </div>
         <div id="addAffiliateLinkModalBody">
-          <form
-            action="{{ url_for('add_affiliate_link', problem_id=problema['_id']) }}"
-            method="POST"
-            enctype="multipart/form-data"
+          <!-- Removemos o action/method, faremos via JS fetch -->
+          <label for="titleInput">Título / Nome do Produto</label>
+          <input
+            type="text"
+            id="titleInput"
+            name="title"
+            placeholder="Ex: Chave de fenda..."
+            required
+          />
+
+          <label for="affiliateUrlInput">Link de Afiliado (URL)</label>
+          <input
+            type="url"
+            id="affiliateUrlInput"
+            name="affiliate_url"
+            placeholder="Ex: https://amazon.com/dp/..."
+            required
+          />
+
+          <label for="productImageFile">Imagem do Produto (opcional)</label>
+          <input
+            type="file"
+            id="productImageFile"
+            name="product_image"
+            accept="image/*"
+          />
+
+          <button
+            type="button"
+            class="default-btn"
+            id="addAffiliateLinkSubmitBtn"
           >
-            <label for="titleInput">Título / Nome do Produto</label>
-            <input
-              type="text"
-              id="titleInput"
-              name="title"
-              placeholder="Ex: Chave de fenda..."
-              required
-            />
-
-            <label for="affiliateUrlInput">Link de Afiliado (URL)</label>
-            <input
-              type="url"
-              id="affiliateUrlInput"
-              name="affiliate_url"
-              placeholder="Ex: https://amazon.com/dp/..."
-              required
-            />
-
-            <label for="productImageFile">Imagem do Produto (opcional)</label>
-            <input type="file" id="productImageFile" name="product_image" accept="image/*" />
-
-            <button type="submit" class="default-btn">
-              Adicionar Link
-            </button>
-          </form>
+            Adicionar Link
+          </button>
         </div>
       </div>
     </div>
@@ -1839,12 +1845,13 @@
       });
     });
 
-    // Botão "Voltar"
+    // Botão "Voltar" - evita double reloading pois não temos mais um redirecionamento
     document.addEventListener('DOMContentLoaded', function() {
       const ref = document.referrer || "";
       const btnVoltar = document.getElementById('btnVoltar');
       if (btnVoltar) {
         btnVoltar.addEventListener('click', function() {
+          // Lógica simples: se não há referrer ou é a edição, vá para /search
           if (ref.includes('/edit_solution')) {
             window.location.href = "{{ url_for('search') }}";
           }
@@ -1852,6 +1859,7 @@
             window.location.href = "{{ url_for('search') }}";
           }
           else {
+            // Tenta voltar no histórico
             window.history.back();
           }
         });
@@ -1969,13 +1977,24 @@
       }
     });
 
-    // ============ Adicionar Link de Afiliado (modal) ============
+    // ============ Adicionar/Remover Link de Afiliado via AJAX (sem redirect) ============
     {% if session.get("role") == "solucionador" %}
     document.addEventListener('DOMContentLoaded', function() {
       const addAffiliateLinkModal = document.getElementById('addAffiliateLinkModal');
       const openAddAffiliateLinkModalBtn = document.getElementById('btnOpenAddAffiliateLinkModal');
       const closeAddAffiliateLinkModalBtn = document.getElementById('closeAddAffiliateLinkModal');
+      const addAffiliateLinkSubmitBtn = document.getElementById('addAffiliateLinkSubmitBtn');
 
+      const productImageFile = document.getElementById('productImageFile');
+      const titleInput = document.getElementById('titleInput');
+      const affiliateUrlInput = document.getElementById('affiliateUrlInput');
+
+      const affiliateLinksContainer = document.getElementById('affiliateLinksContainer');
+      const noItemsMsg = document.getElementById('noItemsMsg');
+
+      const problemId = "{{ problema['_id'] }}";
+
+      // Abrir/Fechar modal
       if (openAddAffiliateLinkModalBtn && addAffiliateLinkModal) {
         openAddAffiliateLinkModalBtn.addEventListener('click', () => {
           addAffiliateLinkModal.style.display = 'flex';
@@ -1991,6 +2010,126 @@
           addAffiliateLinkModal.style.display = "none";
         }
       });
+
+      // Clica em "Adicionar Link" -> faz fetch
+      if (addAffiliateLinkSubmitBtn) {
+        addAffiliateLinkSubmitBtn.addEventListener('click', async () => {
+          const titleVal = titleInput.value.trim();
+          const urlVal = affiliateUrlInput.value.trim();
+          if (!titleVal || !urlVal) {
+            alert("Título e Link de afiliado são obrigatórios.");
+            return;
+          }
+          const formData = new FormData();
+          formData.append('title', titleVal);
+          formData.append('affiliate_url', urlVal);
+          if (productImageFile.files.length > 0) {
+            formData.append('product_image', productImageFile.files[0]);
+          }
+
+          try {
+            const response = await fetch(`/api/add_affiliate_link/${problemId}`, {
+              method: 'POST',
+              body: formData
+            });
+            if (!response.ok) {
+              const textErr = await response.text();
+              throw new Error(textErr);
+            }
+            const data = await response.json();
+            // data terá a lista atualizada
+            updateAffiliateLinksUI(data.links);
+
+            // Fecha modal e limpa campos
+            addAffiliateLinkModal.style.display = 'none';
+            titleInput.value = '';
+            affiliateUrlInput.value = '';
+            productImageFile.value = '';
+          } catch (err) {
+            console.error("Erro ao adicionar link:", err);
+            alert("Erro ao adicionar link.");
+          }
+        });
+      }
+
+      // Lidar com remoção via delegação de evento
+      affiliateLinksContainer.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('remove-link-btn')) {
+          e.preventDefault();
+          const linkId = e.target.getAttribute('data-link-id');
+          if (!linkId) return;
+          if (!confirm("Deseja realmente remover este link?")) return;
+
+          try {
+            const response = await fetch(`/api/remove_affiliate_link/${linkId}`, {
+              method: 'DELETE'
+            });
+            if (!response.ok) {
+              const textErr = await response.text();
+              throw new Error(textErr);
+            }
+            const data = await response.json();
+            // data.links -> lista atualizada
+            updateAffiliateLinksUI(data.links);
+          } catch (err) {
+            console.error("Erro ao remover link:", err);
+            alert("Erro ao remover link.");
+          }
+        }
+      });
+
+      function updateAffiliateLinksUI(links) {
+        // Limpa container
+        affiliateLinksContainer.innerHTML = '';
+
+        if (!links || links.length === 0) {
+          if (noItemsMsg) {
+            noItemsMsg.style.display = 'block';
+          }
+          return;
+        }
+
+        if (noItemsMsg) {
+          noItemsMsg.style.display = 'none';
+        }
+
+        links.forEach(link => {
+          const card = document.createElement('div');
+          card.classList.add('affiliate-card');
+          card.setAttribute('data-linkid', link._id_str);
+
+          if (link.productImage_main) {
+            const imgEl = document.createElement('img');
+            imgEl.src = `/gridfs_image/${link.productImage_main}`;
+            imgEl.alt = "Imagem do produto";
+            card.appendChild(imgEl);
+          }
+
+          const titleEl = document.createElement('h5');
+          titleEl.textContent = link.title;
+          card.appendChild(titleEl);
+
+          const viewLink = document.createElement('a');
+          viewLink.href = link.affiliate_url;
+          viewLink.target = "_blank";
+          viewLink.rel = "noopener nofollow";
+          viewLink.textContent = "Visualizar";
+          card.appendChild(viewLink);
+
+          // Botão remover (somente se role=solucionador)
+          {% if session.get("role") == "solucionador" %}
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.classList.add('remove-link-btn');
+          removeBtn.setAttribute('data-link-id', link._id_str);
+          removeBtn.textContent = 'Remover';
+          card.appendChild(removeBtn);
+          {% endif %}
+
+          affiliateLinksContainer.appendChild(card);
+        });
+      }
+
     });
     {% endif %}
   </script>

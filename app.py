@@ -17,23 +17,19 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import gridfs
 
-# ------------------------------------------------
-# IMPORTAÇÃO ADICIONADA PARA TRABALHO COM IMAGENS
-# (Já estava presente, mas reforçamos aqui)
-# ------------------------------------------------
+# PIL para manipular imagens
 from PIL import Image
 import io
 
 app = Flask(__name__)
 
-# -----------------------------------------------------------
-# CONFIGURAÇÃO BÁSICA
-# -----------------------------------------------------------
+# Chave secreta para sessão
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "CHAVE_SECRETA_PARA_SESSAO_INSEGURA")
 
 # Evita cache de páginas, útil para conteúdo dinâmico
 @app.after_request
 def add_header(response):
+    # Se for a rota 'search', não mexemos no cache
     if request.endpoint == 'search':
         pass
     else:
@@ -45,9 +41,7 @@ def add_header(response):
 # -----------------------------------------------------------
 # CONEXÃO COM O MONGO - BANCO M (Plataforma)
 # -----------------------------------------------------------
-client_m = MongoClient(
-    "mongodb+srv://msolucoesmecanicasinteligentes:solucao@cluster0.7ljuh.mongodb.net/"
-)
+client_m = MongoClient("mongodb+srv://msolucoesmecanicasinteligentes:solucao@cluster0.7ljuh.mongodb.net/")
 db_m = client_m["m_plataforma"]
 
 problemas_collection = db_m["problemas"]
@@ -62,15 +56,13 @@ helpful_feedback_collection = db_m["helpful_feedback"]
 # Nova coleção para links de afiliados
 affiliate_links_collection = db_m["affiliate_links"]
 
-# GridFS para armazenar imagens na plataforma M
+# GridFS para armazenar imagens (Plataforma M)
 fs_m = gridfs.GridFS(db_m)
 
 # -----------------------------------------------------------
 # CONEXÃO COM O MONGO - BANCO MachineZONE (para itens)
 # -----------------------------------------------------------
-client_mz = MongoClient(
-    "mongodb+srv://adaltonmuzilomendes:rolamento@cluster0.atmeh.mongodb.net/"
-)
+client_mz = MongoClient("mongodb+srv://adaltonmuzilomendes:rolamento@cluster0.atmeh.mongodb.net/")
 db_mz = client_mz["MachineZONE"]
 itens_collection = db_mz["itens"]
 
@@ -78,14 +70,13 @@ itens_collection = db_mz["itens"]
 fs_mz = gridfs.GridFS(db_mz)
 
 # -----------------------------------------------------------
-# CONFIGURAÇÃO E CONSTANTES
+# CONFIGURAÇÕES
 # -----------------------------------------------------------
 STOPWORDS = {
     "a", "o", "de", "da", "do", "das", "dos", "em", "que", "com",
     "para", "por", "se", "e", "é", "na", "no", "nas", "nos", "as",
     "os", "um", "uma", "uns", "umas"
 }
-
 ITEMS_PER_PAGE = 20
 MZ_WHATSAPP = "5543996436367"
 
@@ -140,15 +131,7 @@ def compute_largest_sub_phrase_length(search_tokens, item_phrases):
 
 def calculate_user_level(posted_count, solved_count):
     """
-    Novo sistema de níveis:
-    ---------------------------------------------------
-    Nível  Nome                       Pontos   Estimativa
-     1    🔧 Iniciante Curioso        0        Imediato
-     2    🔩 Explorador de Engrenagens 10       2 a 4 problemas postados ou 2 resolvidos
-     3    🛠 Desbravador Técnico      25       Cerca de 5 resoluções ou 10 postagens
-     4    ⚙️ Mestre das Soluções      50       Cerca de 10 resoluções e algumas postagens
-     5    🏆 Lenda da Mecânica        100      Cerca de 20 resoluções e engajamento geral
-    ---------------------------------------------------
+    Calcula o nível do usuário baseado em problemas postados e resolvidos.
     Pontos = (Problemas postados * 2) + (Problemas resolvidos * 5)
     """
     points = posted_count * 2 + solved_count * 5
@@ -181,7 +164,7 @@ def calculate_user_level(posted_count, solved_count):
 
     remaining_for_next_level = max(0, next_threshold - points)
 
-    # Cálculo do progresso dentro do nível atual
+    # Calcula progresso no nível
     if level == 1:
         base_min, base_max = 0, 10
     elif level == 2:
@@ -204,9 +187,8 @@ def calculate_user_level(posted_count, solved_count):
 
 def save_image(file_obj, fs_instance, max_w=1600, max_h=1200, thumb_w=300, thumb_h=300):
     """
-    Armazena a imagem em duas versões (principal comprimida e thumbnail) no GridFS.
-    Retorna um dicionário com os IDs em string {"main_id": "...", "thumb_id": "..."}
-    ou None se não houver imagem válida.
+    Armazena a imagem em duas versões no GridFS (principal comprimida e thumbnail).
+    Retorna {"main_id": "...", "thumb_id": "..."} ou None.
     """
     if not file_obj or file_obj.filename.strip() == "":
         return None
@@ -216,19 +198,16 @@ def save_image(file_obj, fs_instance, max_w=1600, max_h=1200, thumb_w=300, thumb
         return None
 
     try:
-        # Abre a imagem original com Pillow
         img = Image.open(io.BytesIO(file_data))
     except:
-        return None  # não é uma imagem válida
+        return None
 
-    # Converte para RGB
     if img.mode != 'RGB':
         img = img.convert('RGB')
 
-    # 1) Versão principal: redimensiona até (max_w x max_h)
+    # Redimensiona para versao principal
     img.thumbnail((max_w, max_h))
     main_io = io.BytesIO()
-    # Salva em JPEG com qualidade ~80
     img.save(main_io, format='JPEG', quality=80)
     main_io.seek(0)
 
@@ -238,7 +217,7 @@ def save_image(file_obj, fs_instance, max_w=1600, max_h=1200, thumb_w=300, thumb
         contentType='image/jpeg'
     )
 
-    # 2) Versão thumbnail
+    # Versão thumb
     img_thumb = Image.open(io.BytesIO(file_data))
     if img_thumb.mode != 'RGB':
         img_thumb = img_thumb.convert('RGB')
@@ -260,22 +239,15 @@ def save_image(file_obj, fs_instance, max_w=1600, max_h=1200, thumb_w=300, thumb
 
 def user_needs_notification_setup(user_doc):
     """
-    Retorna True se o usuário NÃO tiver (email OU whatsapp) OU não habilitou notify_on_resolve.
-    Interpretando a regra:
-    Se NÃO satisfaz => ( (tem whatsApp OU tem email) E notify_on_resolve= True ),
-    então needs_notification_setup = True.
+    Retorna True se o usuário não tiver email/whatsapp OU não habilitou notify_on_resolve.
     """
     has_whatsapp = bool(user_doc.get("whatsapp", "").strip())
     has_email = bool(user_doc.get("email", "").strip())
     notify_enabled = user_doc.get("notify_on_resolve", False)
-
-    if (has_whatsapp or has_email) and notify_enabled:
-        return False
-    else:
-        return True
+    return not ((has_whatsapp or has_email) and notify_enabled)
 
 # -----------------------------------------------------------
-# ROTAS PRINCIPAIS E DE USUÁRIOS
+# ROTAS PRINCIPAIS
 # -----------------------------------------------------------
 @app.route("/")
 def root():
@@ -283,14 +255,7 @@ def root():
 
 @app.route("/index", methods=["GET", "POST"])
 def index():
-    # Ajustamos aqui para refletir os nomes corretos dos arquivos .webp
-    backgrounds = [
-        "fundo1.webp",
-        "fundo_2.webp",
-        "fundo_3.webp",
-        "fundo_4.webp",
-        "fundo_5.webp"
-    ]
+    backgrounds = ["fundo1.webp", "fundo_2.webp", "fundo_3.webp", "fundo_4.webp", "fundo_5.webp"]
     random_bg = random.choice(backgrounds)
     session["random_bg"] = random_bg
 
@@ -319,7 +284,7 @@ def login():
                 else:
                     return render_template("login.html", erro="Usuário ou senha inválidos.")
             else:
-                # Fallback (sem hash) -> migra para hash
+                # Fallback se ainda tiver "senha" sem hash
                 if usuario.get("senha") == senha:
                     new_hash = generate_password_hash(senha)
                     usuarios_collection.update_one(
@@ -334,7 +299,6 @@ def login():
                     return render_template("login.html", erro="Usuário ou senha inválidos.")
         else:
             return render_template("login.html", erro="Usuário ou senha inválidos.")
-
     return render_template("login.html", erro=None)
 
 @app.route("/logout")
@@ -391,7 +355,7 @@ def register():
     return render_template("register.html", erro=None, next_url=next_url)
 
 # -----------------------------------------------------------
-# ROTAS LIGADAS A PROBLEMAS
+# BUSCA DE PROBLEMAS (PÁGINA DE RESULTADOS)
 # -----------------------------------------------------------
 @app.route("/search", methods=["GET"])
 def search():
@@ -413,6 +377,7 @@ def search():
 
 @app.route("/load_problems", methods=["GET"])
 def load_problems():
+    """Carrega problemas (resolvidos) para a página de resultados (scroll infinito)."""
     search_query = request.args.get("q", "").strip()
     page = int(request.args.get("page", 1))
 
@@ -420,9 +385,8 @@ def load_problems():
     subcategory = request.args.get("subcategory", "").strip()
     brand = request.args.get("brand", "").strip()
 
-    # Força somente problemas resolvidos
+    # Exemplo de FILTROS (somente resolvidos)
     filters = {"resolvido": True}
-
     if category:
         filters["category"] = category
     if subcategory:
@@ -430,7 +394,9 @@ def load_problems():
     if brand:
         filters["brand"] = brand
 
+    # Mecanismo de busca
     if search_query:
+        # Log da busca
         if user_is_logged_in():
             problem_history_collection.insert_one({
                 "user_id": session["user_id"],
@@ -449,8 +415,8 @@ def load_problems():
         search_tokens = [t for t in normalize_string(search_query).split() if t and t not in STOPWORDS]
         if search_tokens:
             skip = (page - 1) * ITEMS_PER_PAGE
-            match_stage = {"$and": [{"tags": {"$all": search_tokens}}]}
 
+            match_stage = {"$and": [{"tags": {"$all": search_tokens}}]}
             for key, val in filters.items():
                 match_stage["$and"].append({key: val})
 
@@ -473,7 +439,7 @@ def load_problems():
                     creator_name = p["creator_custom_name"]
                     creator_profile_image_id = None
                 else:
-                    creator_name = "Não definido"
+                    creator_name = "Desconhecido"
                     creator_profile_image_id = None
                     if p.get("creator_id"):
                         c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
@@ -518,7 +484,7 @@ def load_problems():
             return jsonify({"problems": [], "has_more": False, "total_count": 0})
 
     else:
-        # Busca vazia -> problemas aleatórios (somente resolvidos)
+        # Busca vazia => carrega problemas aleatórios resolvidos
         if page == 1:
             session["displayed_problem_ids"] = []
         displayed_ids = session.get("displayed_problem_ids", [])
@@ -554,7 +520,7 @@ def load_problems():
                     creator_name = p["creator_custom_name"]
                     creator_profile_image_id = None
                 else:
-                    creator_name = "Não definido"
+                    creator_name = "Desconhecido"
                     creator_profile_image_id = None
                     if p.get("creator_id"):
                         c_user = usuarios_collection.find_one({"_id": ObjectId(p["creator_id"])})
@@ -597,6 +563,9 @@ def load_problems():
                 "total_count": remaining_count
             })
 
+# -----------------------------------------------------------
+# ADICIONAR PROBLEMA (usuário comum)
+# -----------------------------------------------------------
 @app.route("/add", methods=["GET", "POST"])
 def add_problem():
     if not user_is_logged_in():
@@ -642,18 +611,20 @@ def add_problem():
             }
             problemas_collection.insert_one(problema)
 
-            # Depois de inserir, checamos se o usuário está sem (whatsapp OU email) e sem notify_on_resolve:
+            # Verifica se o usuário precisa configurar notificação
             user_doc = usuarios_collection.find_one({"_id": ObjectId(session["user_id"])})
             if user_doc and user_needs_notification_setup(user_doc):
                 return redirect(url_for("perfil", missing_info="1"))
             else:
                 return redirect(url_for("unresolved"))
-
         else:
             return render_template("add.html", erro="Preencha todos os campos.")
 
     return render_template("add.html", erro=None)
 
+# -----------------------------------------------------------
+# LISTAR PROBLEMAS NÃO RESOLVIDOS
+# -----------------------------------------------------------
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
     if not user_is_logged_in():
@@ -679,6 +650,9 @@ def unresolved():
 
     return render_template("nao_resolvidos.html", problemas=problemas_nao_resolvidos)
 
+# -----------------------------------------------------------
+# FORMULÁRIO PARA RESOLVER PROBLEMA
+# -----------------------------------------------------------
 @app.route("/resolver_form/<problem_id>", methods=["GET"])
 def resolver_form(problem_id):
     if not user_is_logged_in():
@@ -699,6 +673,9 @@ def resolver_form(problem_id):
 
     return render_template("resolver.html", problem=problem, creator_name=creator_name)
 
+# -----------------------------------------------------------
+# SALVAR SOLUÇÃO (RESOLVER)
+# -----------------------------------------------------------
 @app.route("/resolver/<problem_id>", methods=["POST"])
 def resolver_problema(problem_id):
     if not user_is_logged_in():
@@ -712,9 +689,9 @@ def resolver_problema(problem_id):
 
     steps = solution_data.get("steps")
     if not steps or len(steps) == 0:
-        return "Não é possível enviar uma solução vazia. Volte e adicione pelo menos um passo.", 400
+        return "Não é possível enviar uma solução vazia.", 400
 
-    # Upload de imagens dos passos e subpassos
+    # Upload imagens dos passos
     for i, step in enumerate(steps):
         step_file = request.files.get(f"stepImage_{i}")
         if step_file and step_file.filename.strip():
@@ -744,6 +721,9 @@ def resolver_problema(problem_id):
     )
     return redirect(url_for("unresolved"))
 
+# -----------------------------------------------------------
+# EXIBIR SOLUÇÃO
+# -----------------------------------------------------------
 @app.route("/solucao/<problem_id>", methods=["GET"])
 def exibir_solucao(problem_id):
     problema = problemas_collection.find_one({"_id": ObjectId(problem_id)})
@@ -752,7 +732,7 @@ def exibir_solucao(problem_id):
     if not problema.get("resolvido"):
         return "Ainda não resolvido.", 400
 
-    # Gera token para compartilhamento, se não existir
+    # Gera token de compartilhamento se não existir
     if "share_token" not in problema:
         new_token = secrets.token_urlsafe(16)
         problemas_collection.update_one(
@@ -761,7 +741,6 @@ def exibir_solucao(problem_id):
         )
         problema["share_token"] = new_token
 
-    # Verifica login ou token
     token_param = request.args.get("token", "")
     if not user_is_logged_in() and token_param != problema["share_token"]:
         return redirect(url_for("register", next=request.url))
@@ -807,26 +786,13 @@ def exibir_solucao(problem_id):
     solucao = problema.get("solucao", {})
     share_url = url_for("exibir_solucao", problem_id=problem_id, token=problema["share_token"], _external=True)
 
-    # Texto para WhatsApp
-    share_text = f"{share_url}"
-    share_msg_encoded = quote(share_text, safe='')
-
-    # Texto e link para Facebook
-    fb_text = f"{problema['descricao']}"
-    facebook_share_url = (
-        "https://www.facebook.com/sharer/sharer.php?u="
-        + quote(share_url, safe='')
-        + "&quote="
-        + quote(fb_text, safe='')
-    )
-
-    # URL da imagem (para usar em Open Graph ou algo similar)
+    # OpenGraph image
     if problema.get("problemImage_main"):
         problem_image_url = url_for("gridfs_image", file_id=problema["problemImage_main"], _external=True)
     else:
         problem_image_url = url_for("static", filename="images/default_problem.png", _external=True)
 
-    # Feedback do usuário
+    # Feedback (like/dislike) do usuário
     user_helpful_feedback = None
     if user_is_logged_in():
         existing_feedback = helpful_feedback_collection.find_one({
@@ -843,11 +809,10 @@ def exibir_solucao(problem_id):
 
     random_bg = session.get("random_bg", "fundo_1.png")
 
-    # Carrega links de afiliados (caso existam) para exibir antes da solução
+    # Carrega links de afiliados
     affiliate_links = list(affiliate_links_collection.find({"problem_id": problem_id}))
     for link in affiliate_links:
         link["_id_str"] = str(link["_id"])
-        # Se tiver imagem em GridFS, passaremos IDs:
         if link.get("productImage_main"):
             link["productImage_main"] = link["productImage_main"]
         else:
@@ -861,7 +826,7 @@ def exibir_solucao(problem_id):
         "solucao.html",
         problema=problema,
         solucao=solucao,
-        share_msg_encoded=share_msg_encoded,
+        share_msg_encoded="",
         creator_name=creator_name,
         solver_name=solver_name,
         creator_id=creator_id,
@@ -871,12 +836,15 @@ def exibir_solucao(problem_id):
         user_helpful_feedback=user_helpful_feedback,
         like_count=like_count,
         random_bg=random_bg,
-        facebook_share_url=facebook_share_url,
+        facebook_share_url="#",
         problem_image_url=problem_image_url,
         share_url=share_url,
         affiliate_links=affiliate_links
     )
 
+# -----------------------------------------------------------
+# DELETAR PROBLEMA
+# -----------------------------------------------------------
 @app.route("/delete/<problem_id>", methods=["POST"])
 def delete_problem(problem_id):
     if not user_is_logged_in():
@@ -908,6 +876,9 @@ def delete_problem(problem_id):
     else:
         return redirect(url_for("unresolved"))
 
+# -----------------------------------------------------------
+# EDITAR PROBLEMA
+# -----------------------------------------------------------
 @app.route("/edit_problem/<problem_id>", methods=["GET", "POST"])
 def edit_problem(problem_id):
     if not user_is_logged_in():
@@ -1050,7 +1021,7 @@ def edit_your_problem(problem_id):
 
     can_edit = (session["user_id"] == problema.get("creator_id")) or user_has_role(["solucionador"])
     if not can_edit:
-        return "Acesso negado. Somente o criador ou um solucionador podem editar.", 403
+        return "Acesso negado.", 403
 
     if request.method == "POST":
         titulo_novo = request.form.get("titulo", "").strip()
@@ -1211,12 +1182,7 @@ def edit_solution(problem_id):
         try:
             new_solution_data = json.loads(new_solution_json)
         except json.JSONDecodeError:
-            return render_template(
-                "edit_solution.html",
-                problema=problema,
-                passos=problema.get("solucao", {}).get("steps", []),
-                erro="Erro ao interpretar os dados."
-            )
+            return render_template("edit_solution.html", problema=problema, passos=problema.get("solucao", {}).get("steps", []), erro="Erro ao interpretar os dados.")
 
         old_solution_data = problema.get("solucao", {})
         old_steps = old_solution_data.get("steps", [])
@@ -1287,7 +1253,7 @@ def edit_solution(problem_id):
     return render_template("edit_solution.html", problema=problema, passos=passos, erro=None)
 
 # -----------------------------------------------------------
-# GRIDFS - EXIBIÇÃO DE IMAGENS (PROBLEMAS)
+# GRIDFS - EXIBIR IMAGENS
 # -----------------------------------------------------------
 @app.route("/gridfs_image/<file_id>", methods=["GET"])
 def gridfs_image(file_id):
@@ -1301,9 +1267,6 @@ def gridfs_image(file_id):
     except:
         return "Imagem não encontrada.", 404
 
-# -----------------------------------------------------------
-# GRIDFS - IMAGENS (ITENS) - MachineZONE
-# -----------------------------------------------------------
 @app.route("/gridfs_item_image/<file_id>", methods=["GET"])
 def gridfs_item_image(file_id):
     try:
@@ -1317,7 +1280,7 @@ def gridfs_item_image(file_id):
         return "Imagem do item não encontrada.", 404
 
 # -----------------------------------------------------------
-# HISTÓRICOS
+# HISTÓRICOS DE BUSCA E SUGESTÕES
 # -----------------------------------------------------------
 @app.route("/history_search", methods=["GET"])
 def history_search():
@@ -1403,9 +1366,7 @@ def user_history(user_id):
 
     viewed_history = list(problem_view_history_collection.find({"user_id": user_id}))
     viewed_problem_ids = [vh["problem_id"] for vh in viewed_history]
-    viewed_problems = list(
-        problemas_collection.find({"_id": {"$in": [ObjectId(pid) for pid in viewed_problem_ids]}})
-    )
+    viewed_problems = list(problemas_collection.find({"_id": {"$in": [ObjectId(pid) for pid in viewed_problem_ids]}}))
     for vp in viewed_problems:
         vp["_id_str"] = str(vp["_id"])
 
@@ -1424,7 +1385,7 @@ def user_history(user_id):
     )
 
 # -----------------------------------------------------------
-# PESQUISA DE ITENS (MachineZONE) + Upload
+# PESQUISA DE ITENS (MachineZONE)
 # -----------------------------------------------------------
 @app.route("/item_search", methods=["GET"])
 def item_search():
@@ -1533,6 +1494,7 @@ def load_items():
             'total_items': total_items
         })
     else:
+        # Busca vazia => itens aleatórios
         if page == 1:
             session["displayed_item_ids"] = []
         displayed_ids = session.get("displayed_item_ids", [])
@@ -1679,7 +1641,7 @@ def add_item():
     return render_template("add_item.html")
 
 # -----------------------------------------------------------
-# PERFIL + COMPARTILHAMENTO
+# PERFIL
 # -----------------------------------------------------------
 @app.route("/perfil", methods=["GET"])
 def perfil():
@@ -1696,23 +1658,19 @@ def perfil():
     posted_count = problemas_collection.count_documents({"creator_id": user_id})
     solved_count = problemas_collection.count_documents({"solver_id": user_id, "resolvido": True})
 
-    # Cálculo de nível
     level, level_name, points, remaining_for_next_level, progress_percentage, estimate_str = calculate_user_level(
         posted_count, solved_count
     )
 
-    # Insígnias (exemplo simples)
     user_badges = []
     if solved_count >= 5:
         user_badges.append("Solucionador de Ouro")
 
-    # Buscar últimos problemas criados
     latest_problems_cursor = problemas_collection.find({"creator_id": user_id}).sort("_id", -1).limit(3)
     latest_problems = list(latest_problems_cursor)
     for p in latest_problems:
         p["_id_str"] = str(p["_id"])
 
-    # Buscar últimos problemas resolvidos
     latest_solved_cursor = problemas_collection.find({"solver_id": user_id, "resolvido": True}).sort("_id", -1).limit(3)
     latest_solved_problems = list(latest_solved_cursor)
     for p in latest_solved_problems:
@@ -1751,21 +1709,12 @@ def edit_profile():
         return "Usuário não encontrado.", 404
 
     if request.method == "POST":
-        # Nome
         novo_nome = request.form.get("nome", "").strip()
-
-        # Telefone (WhatsApp)
         novo_whatsapp = request.form.get("whatsapp", "").strip()
-
-        # Novo campo E-mail
         novo_email = request.form.get("email", "").strip()
-
-        # Preferência de notificação
         notify_resolved = (request.form.get("notify_on_resolve") == "on")
 
         update_fields = {}
-
-        # Atualiza nome, se enviado
         if novo_nome:
             update_fields["nome"] = novo_nome
             session["username"] = novo_nome
@@ -1774,7 +1723,6 @@ def edit_profile():
         update_fields["email"] = novo_email
         update_fields["notify_on_resolve"] = notify_resolved
 
-        # Foto de perfil
         profile_photo = request.files.get("profile_photo")
         if profile_photo and profile_photo.filename.strip():
             image_ids = save_image(profile_photo, fs_m)
@@ -1856,9 +1804,7 @@ def perfil_usuario(token):
     for p in latest_problems:
         p["_id_str"] = str(p["_id"])
 
-    solved_problems_cursor = problemas_collection.find(
-        {"solver_id": user_id_str, "resolvido": True}
-    ).sort("_id", -1).limit(3)
+    solved_problems_cursor = problemas_collection.find({"solver_id": user_id_str, "resolvido": True}).sort("_id", -1).limit(3)
     solved_problems = list(solved_problems_cursor)
     for sp in solved_problems:
         sp["_id_str"] = str(sp["_id"])
@@ -1880,7 +1826,7 @@ def perfil_usuario(token):
     )
 
 # -----------------------------------------------------------
-# FEEDBACK "SIM/NAO" (LIKE/DISLIKE)
+# LIKE/DISLIKE ("Essa solução te ajudou?")
 # -----------------------------------------------------------
 @app.route("/toggle_helpful", methods=["POST"])
 def toggle_helpful():
@@ -1960,7 +1906,7 @@ def submit_step_feedback():
     return jsonify({"message": "Feedback registrado com sucesso!"})
 
 # -----------------------------------------------------------
-# ROTA PARA EXIBIR PERFIL DE OUTRO USUÁRIO (INTERNAMENTE)
+# VER PERFIL DE OUTRO USUÁRIO
 # -----------------------------------------------------------
 @app.route("/ver_usuario/<user_id>", methods=["GET"])
 def ver_usuario(user_id):
@@ -1984,9 +1930,7 @@ def ver_usuario(user_id):
     for p in latest_problems:
         p["_id_str"] = str(p["_id"])
 
-    solved_problems_cursor = problemas_collection.find(
-        {"solver_id": user_id, "resolvido": True}
-    ).sort("_id", -1).limit(3)
+    solved_problems_cursor = problemas_collection.find({"solver_id": user_id, "resolvido": True}).sort("_id", -1).limit(3)
     solved_problems = list(solved_problems_cursor)
     for sp in solved_problems:
         sp["_id_str"] = str(sp["_id"])
@@ -2008,10 +1952,12 @@ def ver_usuario(user_id):
     )
 
 # -----------------------------------------------------------
-# NOVA ROTA: ADICIONAR LINKS DE AFILIADOS
+# ROTAS ORIGINAIS PARA ADD/REMOVE LINK (POST + REDIRECT)
+# (Podem ser removidas se não quiser mais redirecionamento)
 # -----------------------------------------------------------
 @app.route("/add_affiliate_link/<problem_id>", methods=["POST"])
 def add_affiliate_link(problem_id):
+    """Versão original que faz redirect ao final."""
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
@@ -2044,10 +1990,12 @@ def add_affiliate_link(problem_id):
         new_doc["productImage_thumb"] = None
 
     affiliate_links_collection.insert_one(new_doc)
+
     return redirect(url_for("exibir_solucao", problem_id=problem_id))
 
 @app.route("/remove_affiliate_link/<link_id>", methods=["POST"])
 def remove_affiliate_link(link_id):
+    """Versão original que faz redirect ao final."""
     if not user_is_logged_in():
         return redirect(url_for("register", next=request.url))
     if not user_has_role(["solucionador"]):
@@ -2059,7 +2007,6 @@ def remove_affiliate_link(link_id):
 
     problem_id = link_doc["problem_id"]
 
-    # Deleta imagens, se existirem
     if link_doc.get("productImage_main"):
         try:
             fs_m.delete(ObjectId(link_doc["productImage_main"]))
@@ -2075,7 +2022,95 @@ def remove_affiliate_link(link_id):
     return redirect(url_for("exibir_solucao", problem_id=problem_id))
 
 # -----------------------------------------------------------
-# NOVA ROTA: GERAR OVERLAY DE LOGO NA FOTO DE PERFIL
+# NOVAS ROTAS API (AJAX) PARA ADD/REMOVE LINK
+# -----------------------------------------------------------
+@app.route("/api/add_affiliate_link/<problem_id>", methods=["POST"])
+def api_add_affiliate_link(problem_id):
+    """Adicionar link de afiliado via AJAX (retorna JSON, sem redirect)."""
+    if not user_is_logged_in():
+        return "Não autorizado (faça login).", 401
+    if not user_has_role(["solucionador"]):
+        return "Acesso negado (somente solucionadores).", 403
+
+    title = request.form.get("title", "").strip()
+    affiliate_url = request.form.get("affiliate_url", "").strip()
+    file_obj = request.files.get("product_image")
+
+    if not title or not affiliate_url:
+        return "Título e link são obrigatórios.", 400
+
+    problem = problemas_collection.find_one({"_id": ObjectId(problem_id)})
+    if not problem:
+        return "Problema inexistente.", 404
+
+    image_ids = None
+    if file_obj and file_obj.filename.strip():
+        image_ids = save_image(file_obj, fs_m)
+
+    new_doc = {
+        "problem_id": problem_id,
+        "user_id": session["user_id"],
+        "title": title,
+        "affiliate_url": affiliate_url,
+        "created_at": datetime.datetime.utcnow(),
+    }
+    if image_ids:
+        new_doc["productImage_main"] = image_ids["main_id"]
+        new_doc["productImage_thumb"] = image_ids["thumb_id"]
+    else:
+        new_doc["productImage_main"] = None
+        new_doc["productImage_thumb"] = None
+
+    affiliate_links_collection.insert_one(new_doc)
+
+    return jsonify({"links": _get_affiliate_links_for_problem(problem_id)})
+
+@app.route("/api/remove_affiliate_link/<link_id>", methods=["DELETE"])
+def api_remove_affiliate_link(link_id):
+    """Remover link de afiliado via AJAX (retorna JSON, sem redirect)."""
+    if not user_is_logged_in():
+        return "Não autorizado (faça login).", 401
+    if not user_has_role(["solucionador"]):
+        return "Acesso negado (somente solucionadores).", 403
+
+    link_doc = affiliate_links_collection.find_one({"_id": ObjectId(link_id)})
+    if not link_doc:
+        return "Link não encontrado.", 404
+
+    problem_id = link_doc["problem_id"]
+
+    if link_doc.get("productImage_main"):
+        try:
+            fs_m.delete(ObjectId(link_doc["productImage_main"]))
+        except:
+            pass
+    if link_doc.get("productImage_thumb"):
+        try:
+            fs_m.delete(ObjectId(link_doc["productImage_thumb"]))
+        except:
+            pass
+
+    affiliate_links_collection.delete_one({"_id": ObjectId(link_id)})
+
+    return jsonify({"links": _get_affiliate_links_for_problem(problem_id)})
+
+def _get_affiliate_links_for_problem(problem_id):
+    """Função auxiliar que retorna a lista atualizada de links de um problema."""
+    links = list(affiliate_links_collection.find({"problem_id": problem_id}))
+    result = []
+    for link in links:
+        link_dict = {
+            "_id_str": str(link["_id"]),
+            "title": link["title"],
+            "affiliate_url": link["affiliate_url"],
+            "productImage_main": link.get("productImage_main"),
+            "productImage_thumb": link.get("productImage_thumb"),
+        }
+        result.append(link_dict)
+    return result
+
+# -----------------------------------------------------------
+# Overlay de imagem de perfil + Logo
 # -----------------------------------------------------------
 @app.route("/overlay_profile_photo/<user_id>")
 def overlay_profile_photo(user_id):
@@ -2137,7 +2172,7 @@ def _generate_overlay_image(user_image_data):
     return response
 
 # -----------------------------------------------------------
-# CRIAÇÃO DE ÍNDICE DE TEXTO (apenas se necessário)
+# CRIAR ÍNDICE DE TEXTO (apenas na primeira requisição)
 # -----------------------------------------------------------
 @app.before_first_request
 def init_db():
